@@ -162,7 +162,7 @@ index 57b22a0..cb3e0f1 100644
 
     expect(summarizeFindings(findings)).toMatchObject({
       decision: "fail",
-      findingCount: 1,
+      findingCount: 2,
       highCount: 1
     });
   });

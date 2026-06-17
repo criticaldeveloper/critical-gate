@@ -50,7 +50,8 @@ Exit codes:
 
 The command currently emits real changed-file, role, and churn data. It also reports early
 detector findings for unjustified package dependency additions, test weakening, unexplained config
-changes, hardcoded secrets or environment-specific paths, and silent public export changes.
+changes, hardcoded secrets or environment-specific paths, silent public export changes, and
+unexpected scope for small tasks. Reports include an initial Diff Cost Score.
 
 ## Documentation Map
 

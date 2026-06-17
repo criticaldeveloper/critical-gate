@@ -40,7 +40,11 @@ function isTestFile(file: DiffFile): boolean {
 function extractSignals(file: DiffFile): TestWeakeningSignal[] {
   return file.hunks.flatMap((hunk) =>
     hunk.lines.flatMap((line) => {
-      if (line.kind === "delete" && isAssertionLine(line)) {
+      const addedAssertionInHunk = hunk.lines.some(
+        (candidate) => candidate.kind === "add" && isAssertionLine(candidate)
+      );
+
+      if (line.kind === "delete" && isAssertionLine(line) && !addedAssertionInHunk) {
         return [
           {
             id: "removed-assertion",

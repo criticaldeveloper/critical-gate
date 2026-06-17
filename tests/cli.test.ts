@@ -256,7 +256,7 @@ describe("cli", () => {
     expect(stdout[0]).toContain("Test assertion removed");
   });
 
-  it("reports config changes without failing on medium severity", () => {
+  it("fails when a small task unexpectedly changes config", () => {
     const { io, stdout } = createTestIo();
     const configDiffIo = {
       ...io,
@@ -292,8 +292,9 @@ describe("cli", () => {
 
     expect(
       main(["check", "--task", "Add signup validation", "--format", "markdown"], configDiffIo)
-    ).toBe(ExitCode.Pass);
+    ).toBe(ExitCode.FindingsFailed);
     expect(stdout[0]).toContain("Config changed without visible explanation");
+    expect(stdout[0]).toContain("Unexpected file changed for small task");
   });
 
   it("fails when secret detector reports a blocker", () => {

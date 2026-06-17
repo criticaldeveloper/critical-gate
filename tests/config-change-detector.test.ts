@@ -113,7 +113,7 @@ index 57b22a0..cb3e0f1 100644
 });
 
 describe("detector runner with config changes", () => {
-  it("keeps medium-only config findings as a passing gate decision", () => {
+  it("combines config and scope findings for unexpected small-task config edits", () => {
     const diff = parse(`diff --git a/eslint.config.js b/eslint.config.js
 index 57b22a0..cb3e0f1 100644
 --- a/eslint.config.js
@@ -126,8 +126,9 @@ index 57b22a0..cb3e0f1 100644
     const findings = runDetectors(task, diff);
 
     expect(summarizeFindings(findings)).toMatchObject({
-      decision: "pass",
-      findingCount: 1,
+      decision: "fail",
+      findingCount: 2,
+      highCount: 1,
       mediumCount: 1
     });
   });

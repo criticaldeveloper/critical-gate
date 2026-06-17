@@ -114,6 +114,21 @@ index 57b22a0..cb3e0f1 100644
 
     expect(testWeakeningDetector.run({ task, diff })).toEqual([]);
   });
+
+  it("does not emit when a removed assertion is replaced in the same hunk", () => {
+    const diff = {
+      files: parseUnifiedDiff(`diff --git a/tests/signup.test.ts b/tests/signup.test.ts
+index 57b22a0..cb3e0f1 100644
+--- a/tests/signup.test.ts
++++ b/tests/signup.test.ts
+@@ -1,3 +1,3 @@
+-expect(result.ok).toBe(true);
++expect(result.ok).toBe(false);
+`)
+    };
+
+    expect(testWeakeningDetector.run({ task, diff })).toEqual([]);
+  });
 });
 
 describe("detector runner with test weakening", () => {

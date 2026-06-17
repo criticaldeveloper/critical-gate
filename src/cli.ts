@@ -205,7 +205,7 @@ function createGateResult(
       }
     },
     findings,
-    summary: summarizeFindings(findings),
+    summary: summarizeFindings(findings, task, diff),
     metadata: {
       cliVersion: CLI_VERSION,
       strict: options.strict

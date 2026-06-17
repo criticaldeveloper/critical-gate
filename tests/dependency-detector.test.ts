@@ -103,10 +103,10 @@ describe("detector runner", () => {
 
     expect(summarizeFindings(findings)).toMatchObject({
       decision: "fail",
-      findingCount: 2,
+      findingCount: 4,
       blockerCount: 1,
-      highCount: 1,
-      mediumCount: 0
+      highCount: 2,
+      mediumCount: 1
     });
   });
 });

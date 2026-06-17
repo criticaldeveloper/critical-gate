@@ -1,9 +1,11 @@
 import type { Finding, GateResult, TaskIntent } from "../schema/index.js";
 
+import { calculateDiffCostScore } from "../intent/index.js";
 import { apiSurfaceDetector } from "./api-surface-detector.js";
 import { configChangeDetector } from "./config-change-detector.js";
 import { dependencyDetector } from "./dependency-detector.js";
 import { secretPathDetector } from "./secret-path-detector.js";
+import { scopeDetector } from "./scope-detector.js";
 import { testWeakeningDetector } from "./test-weakening-detector.js";
 import type { Detector } from "./types.js";
 
@@ -12,7 +14,8 @@ const defaultDetectors: Detector[] = [
   testWeakeningDetector,
   configChangeDetector,
   secretPathDetector,
-  apiSurfaceDetector
+  apiSurfaceDetector,
+  scopeDetector
 ];
 
 export function runDetectors(
@@ -23,7 +26,11 @@ export function runDetectors(
   return detectors.flatMap((detector) => detector.run({ task, diff }));
 }
 
-export function summarizeFindings(findings: Finding[]): GateResult["summary"] {
+export function summarizeFindings(
+  findings: Finding[],
+  task?: TaskIntent,
+  diff?: GateResult["diff"]
+): GateResult["summary"] {
   const blockerCount = countSeverity(findings, "blocker");
   const highCount = countSeverity(findings, "high");
 
@@ -35,7 +42,8 @@ export function summarizeFindings(findings: Finding[]): GateResult["summary"] {
     mediumCount: countSeverity(findings, "medium"),
     lowCount: countSeverity(findings, "low"),
     infoCount: countSeverity(findings, "info"),
-    diffCostScore: 0
+    diffCostScore:
+      task !== undefined && diff !== undefined ? calculateDiffCostScore(task, diff.files) : 0
   };
 }
 
