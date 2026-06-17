@@ -1,9 +1,10 @@
 import type { Finding, GateResult, TaskIntent } from "../schema/index.js";
 
 import { dependencyDetector } from "./dependency-detector.js";
+import { testWeakeningDetector } from "./test-weakening-detector.js";
 import type { Detector } from "./types.js";
 
-const defaultDetectors: Detector[] = [dependencyDetector];
+const defaultDetectors: Detector[] = [dependencyDetector, testWeakeningDetector];
 
 export function runDetectors(
   task: TaskIntent,

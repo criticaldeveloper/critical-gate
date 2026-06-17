@@ -215,4 +215,44 @@ describe("cli", () => {
     ).toBe(ExitCode.FindingsFailed);
     expect(stdout[0]).toContain("Unjustified production dependency added");
   });
+
+  it("fails when test weakening detector reports a high severity finding", () => {
+    const { io, stdout } = createTestIo();
+    const testDiffIo = {
+      ...io,
+      readDiff: () => ({
+        ...testDiffResult,
+        files: [
+          {
+            path: "tests/signup.test.ts",
+            status: "modified" as const,
+            role: "test" as const,
+            additions: 0,
+            deletions: 1,
+            language: "typescript",
+            hunks: [
+              {
+                oldStart: 1,
+                oldLines: 3,
+                newStart: 1,
+                newLines: 2,
+                lines: [
+                  {
+                    kind: "delete" as const,
+                    content: "expect(result.ok).toBe(true);",
+                    oldLineNumber: 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+    };
+
+    expect(
+      main(["check", "--task", "Update signup validation", "--format", "repair"], testDiffIo)
+    ).toBe(ExitCode.FindingsFailed);
+    expect(stdout[0]).toContain("Test assertion removed");
+  });
 });
