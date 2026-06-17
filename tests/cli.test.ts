@@ -169,4 +169,50 @@ describe("cli", () => {
 
     expect(stdout).toEqual(["Critical Gate passed. No repair actions required.\n"]);
   });
+
+  it("fails when dependency detector reports a blocker", () => {
+    const { io, stdout } = createTestIo();
+    const packageDiffIo = {
+      ...io,
+      readDiff: () => ({
+        ...testDiffResult,
+        files: [
+          {
+            path: "package.json",
+            status: "modified" as const,
+            role: "manifest" as const,
+            additions: 1,
+            deletions: 0,
+            language: "json",
+            hunks: [
+              {
+                oldStart: 10,
+                oldLines: 4,
+                newStart: 10,
+                newLines: 5,
+                lines: [
+                  {
+                    kind: "context" as const,
+                    content: '  "dependencies": {',
+                    oldLineNumber: 10,
+                    newLineNumber: 10
+                  },
+                  {
+                    kind: "add" as const,
+                    content: '    "axios": "^1.7.0",',
+                    newLineNumber: 11
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+    };
+
+    expect(
+      main(["check", "--task", "Add signup validation", "--format", "repair"], packageDiffIo)
+    ).toBe(ExitCode.FindingsFailed);
+    expect(stdout[0]).toContain("Unjustified production dependency added");
+  });
 });

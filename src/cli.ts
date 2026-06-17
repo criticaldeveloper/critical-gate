@@ -8,6 +8,8 @@ import {
   GATE_RESULT_SCHEMA_VERSION,
   readGitDiff,
   renderReport,
+  runDetectors,
+  summarizeFindings,
   type GateResult,
   type GitDiffResult,
   type ReportFormat
@@ -178,18 +180,22 @@ function createGateResult(
   generatedAt: Date,
   diffResult: GitDiffResult
 ): GateResult {
+  const task = {
+    source: "cli" as const,
+    text: options.task
+  };
+  const diff = {
+    baseRef: diffResult.baseRef,
+    headRef: diffResult.headRef,
+    files: diffResult.files
+  };
+  const findings = runDetectors(task, diff);
+
   return {
     schemaVersion: GATE_RESULT_SCHEMA_VERSION,
     generatedAt: generatedAt.toISOString(),
-    task: {
-      source: "cli",
-      text: options.task
-    },
-    diff: {
-      baseRef: diffResult.baseRef,
-      headRef: diffResult.headRef,
-      files: diffResult.files
-    },
+    task,
+    diff,
     context: {
       root: diffResult.root,
       packageManager: "pnpm",
@@ -198,17 +204,8 @@ function createGateResult(
         headRef: diffResult.headRef
       }
     },
-    findings: [],
-    summary: {
-      decision: "pass",
-      findingCount: 0,
-      blockerCount: 0,
-      highCount: 0,
-      mediumCount: 0,
-      lowCount: 0,
-      infoCount: 0,
-      diffCostScore: 0
-    },
+    findings,
+    summary: summarizeFindings(findings),
     metadata: {
       cliVersion: CLI_VERSION,
       strict: options.strict

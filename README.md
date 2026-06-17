@@ -48,8 +48,8 @@ Exit codes:
 - `2`: usage or configuration error.
 - `3`: internal error.
 
-The command currently emits a passing report with real changed-file, role, and churn data.
-Findings remain empty until detector tasks are implemented.
+The command currently emits real changed-file, role, and churn data. It also reports the
+first detector finding type: unjustified package dependency additions.
 
 ## Documentation Map
 
