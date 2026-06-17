@@ -42,7 +42,7 @@ describe("cli", () => {
     const { io, stdout, stderr } = createTestIo();
 
     expect(main(["--help"], io)).toBe(ExitCode.Pass);
-    expect(stdout.join("\n")).toContain("critical-gate check --task <text>");
+    expect(stdout.join("\n")).toContain("--format json|markdown|sarif|repair");
     expect(stderr).toEqual([]);
   });
 
@@ -71,10 +71,10 @@ describe("cli", () => {
   it("rejects invalid formats", () => {
     const { io, stderr } = createTestIo();
 
-    expect(main(["check", "--task", "Add validation", "--format", "sarif"], io)).toBe(
+    expect(main(["check", "--task", "Add validation", "--format", "xml"], io)).toBe(
       ExitCode.UsageError
     );
-    expect(stderr[0]).toBe("Invalid --format value. Expected json or markdown.");
+    expect(stderr[0]).toBe("Invalid --format value. Expected json, markdown, sarif, or repair.");
   });
 
   it("emits markdown by default", () => {
@@ -136,5 +136,37 @@ describe("cli", () => {
 
     expect(stdout).toEqual([]);
     expect(writes.get("report.md")).toContain("Task: Add signup validation");
+  });
+
+  it("emits SARIF output", () => {
+    const { io, stdout } = createTestIo();
+
+    expect(main(["check", "--task", "Add signup validation", "--format", "sarif"], io)).toBe(
+      ExitCode.Pass
+    );
+
+    expect(JSON.parse(stdout[0] ?? "")).toMatchObject({
+      version: "2.1.0",
+      runs: [
+        {
+          tool: {
+            driver: {
+              name: "Critical Gate"
+            }
+          },
+          results: []
+        }
+      ]
+    });
+  });
+
+  it("emits compact repair output", () => {
+    const { io, stdout } = createTestIo();
+
+    expect(main(["check", "--task", "Add signup validation", "--format", "repair"], io)).toBe(
+      ExitCode.Pass
+    );
+
+    expect(stdout).toEqual(["Critical Gate passed. No repair actions required.\n"]);
   });
 });

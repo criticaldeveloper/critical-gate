@@ -1,0 +1,26 @@
+import type { GateResult } from "../schema/index.js";
+
+import { renderJsonReport } from "./json-reporter.js";
+import { renderMarkdownReport } from "./markdown-reporter.js";
+import { renderRepairReport } from "./repair-reporter.js";
+import { renderSarifReport } from "./sarif-reporter.js";
+
+export type ReportFormat = "json" | "markdown" | "sarif" | "repair";
+
+export function renderReport(result: GateResult, format: ReportFormat): string {
+  switch (format) {
+    case "json":
+      return renderJsonReport(result);
+    case "markdown":
+      return renderMarkdownReport(result);
+    case "sarif":
+      return renderSarifReport(result);
+    case "repair":
+      return renderRepairReport(result);
+  }
+}
+
+export { renderJsonReport } from "./json-reporter.js";
+export { renderMarkdownReport } from "./markdown-reporter.js";
+export { renderRepairReport } from "./repair-reporter.js";
+export { renderSarifReport } from "./sarif-reporter.js";

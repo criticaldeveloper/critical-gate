@@ -37,6 +37,8 @@ The current scaffold exposes the first `check` command contract:
 pnpm build
 node dist/cli.js check --task "Add signup validation" --base main --format markdown
 node dist/cli.js check --task "Add signup validation" --format json --output report.json
+node dist/cli.js check --task "Add signup validation" --format sarif --output critical-gate.sarif
+node dist/cli.js check --task "Add signup validation" --format repair
 ```
 
 Exit codes:

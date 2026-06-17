@@ -7,8 +7,10 @@ import { fileURLToPath } from "node:url";
 import {
   GATE_RESULT_SCHEMA_VERSION,
   readGitDiff,
+  renderReport,
   type GateResult,
-  type GitDiffResult
+  type GitDiffResult,
+  type ReportFormat
 } from "./index.js";
 
 export const CLI_VERSION = "0.1.0";
@@ -22,12 +24,10 @@ export const ExitCode = {
 
 export type ExitCode = (typeof ExitCode)[keyof typeof ExitCode];
 
-type OutputFormat = "json" | "markdown";
-
 interface CheckOptions {
   task: string;
   base?: string;
-  format: OutputFormat;
+  format: ReportFormat;
   strict: boolean;
   output?: string;
 }
@@ -92,7 +92,7 @@ function runCli(argv: string[], io: CliIo): ExitCode {
 
   const diff = io.readDiff(parsed.options.base);
   const result = createGateResult(parsed.options, io.now(), diff);
-  const rendered = renderGateResult(result, parsed.options.format);
+  const rendered = renderReport(result, parsed.options.format);
 
   if (parsed.options.output !== undefined) {
     io.writeFile(parsed.options.output, rendered);
@@ -139,8 +139,11 @@ function parseCheckArgs(args: string[]):
       } else if (arg === "--base") {
         options.base = value;
       } else if (arg === "--format") {
-        if (value !== "json" && value !== "markdown") {
-          return { ok: false, error: "Invalid --format value. Expected json or markdown." };
+        if (!isReportFormat(value)) {
+          return {
+            ok: false,
+            error: "Invalid --format value. Expected json, markdown, sarif, or repair."
+          };
         }
 
         options.format = value;
@@ -213,37 +216,12 @@ function createGateResult(
   };
 }
 
-function renderGateResult(result: GateResult, format: OutputFormat): string {
-  if (format === "json") {
-    return `${JSON.stringify(result, null, 2)}\n`;
-  }
-
-  const baseRef = result.diff.baseRef ?? "working tree";
-  const changedFiles = result.diff.files.length;
-  const additions = result.diff.files.reduce((total, file) => total + file.additions, 0);
-  const deletions = result.diff.files.reduce((total, file) => total + file.deletions, 0);
-
-  return [
-    "# Critical Gate Report",
-    "",
-    `Decision: ${result.summary.decision}`,
-    `Task: ${result.task.text}`,
-    `Base: ${baseRef}`,
-    `Changed Files: ${changedFiles}`,
-    `Additions: ${additions}`,
-    `Deletions: ${deletions}`,
-    `Findings: ${result.summary.findingCount}`,
-    `Diff Cost Score: ${result.summary.diffCostScore ?? 0}`,
-    ""
-  ].join("\n");
-}
-
 function getHelpText(): string {
   return [
     "critical-gate",
     "",
     "Usage:",
-    "  critical-gate check --task <text> [--base <ref>] [--format json|markdown] [--strict] [--output <path>]",
+    "  critical-gate check --task <text> [--base <ref>] [--format json|markdown|sarif|repair] [--strict] [--output <path>]",
     "  critical-gate --version",
     "  critical-gate --help",
     ""
@@ -259,11 +237,15 @@ function getCheckHelpText(): string {
     "",
     "Options:",
     "  --base <ref>        Git baseline reference",
-    "  --format <format>   json or markdown",
+    "  --format <format>   json, markdown, sarif, or repair",
     "  --strict            Fail on strict-mode findings once detectors exist",
     "  --output <path>     Write report to a file instead of stdout",
     ""
   ].join("\n");
+}
+
+function isReportFormat(value: string): value is ReportFormat {
+  return value === "json" || value === "markdown" || value === "sarif" || value === "repair";
 }
 
 const isDirectRun =

@@ -1,0 +1,52 @@
+import type { Finding, GateResult } from "../schema/index.js";
+
+const maxRepairFindings = 5;
+
+export function renderRepairReport(result: GateResult): string {
+  if (result.findings.length === 0) {
+    return "Critical Gate passed. No repair actions required.\n";
+  }
+
+  const findings = [...result.findings]
+    .sort((left, right) => severityRank(right.severity) - severityRank(left.severity))
+    .slice(0, maxRepairFindings);
+
+  const lines = [
+    "Critical Gate found findings that need repair:",
+    "",
+    ...findings.flatMap((finding, index) => renderRepairFinding(finding, index + 1)),
+    "Rerun Critical Gate after applying focused repairs."
+  ];
+
+  return `${lines.join("\n").trimEnd()}\n`;
+}
+
+function renderRepairFinding(finding: Finding, index: number): string[] {
+  const evidence = finding.evidence[0];
+  const location =
+    evidence?.path === undefined
+      ? ""
+      : ` Evidence: ${evidence.path}${evidence.startLine === undefined ? "" : `:${evidence.startLine}`}.`;
+
+  return [
+    `${index}. ${finding.severity.toUpperCase()}: ${finding.title}`,
+    `${finding.message}${location}`,
+    `Repair: ${finding.repair}`,
+    ""
+  ];
+}
+
+function severityRank(severity: Finding["severity"]): number {
+  switch (severity) {
+    case "blocker":
+      return 5;
+    case "high":
+      return 4;
+    case "medium":
+      return 3;
+    case "low":
+      return 2;
+    case "info":
+      return 1;
+  }
+}
