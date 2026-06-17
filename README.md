@@ -29,6 +29,25 @@ And emits:
 - SARIF-compatible results.
 - Exit codes suitable for CI and Codex hooks.
 
+## Current CLI
+
+The current scaffold exposes the first `check` command contract:
+
+```bash
+pnpm build
+node dist/cli.js check --task "Add signup validation" --base main --format markdown
+node dist/cli.js check --task "Add signup validation" --format json --output report.json
+```
+
+Exit codes:
+
+- `0`: pass.
+- `1`: findings failed the configured threshold.
+- `2`: usage or configuration error.
+- `3`: internal error.
+
+The command currently emits an empty passing report. Diff reading and detectors are added in later roadmap tasks.
+
 ## Documentation Map
 
 - `AGENTS.md`: durable instructions for Codex and other AI agents working in this repo.
