@@ -4,6 +4,7 @@ import { calculateDiffCostScore } from "../intent/index.js";
 import { apiSurfaceDetector } from "./api-surface-detector.js";
 import { configChangeDetector } from "./config-change-detector.js";
 import { dependencyDetector } from "./dependency-detector.js";
+import { rewriteDetector } from "./rewrite-detector.js";
 import { secretPathDetector } from "./secret-path-detector.js";
 import { scopeDetector } from "./scope-detector.js";
 import { testWeakeningDetector } from "./test-weakening-detector.js";
@@ -15,7 +16,8 @@ const defaultDetectors: Detector[] = [
   configChangeDetector,
   secretPathDetector,
   apiSurfaceDetector,
-  scopeDetector
+  scopeDetector,
+  rewriteDetector
 ];
 
 export function runDetectors(

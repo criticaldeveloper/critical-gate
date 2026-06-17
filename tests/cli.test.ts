@@ -418,4 +418,49 @@ describe("cli", () => {
     ).toBe(ExitCode.FindingsFailed);
     expect(stdout[0]).toContain("Public export removed");
   });
+
+  it("fails when rewrite detector reports a small-task rewrite", () => {
+    const { io, stdout } = createTestIo();
+    const rewriteDiffIo = {
+      ...io,
+      readDiff: () => ({
+        ...testDiffResult,
+        files: [
+          {
+            path: "src/signup.ts",
+            status: "modified" as const,
+            role: "source" as const,
+            additions: 45,
+            deletions: 42,
+            language: "typescript",
+            hunks: [
+              {
+                oldStart: 1,
+                oldLines: 42,
+                newStart: 1,
+                newLines: 45,
+                lines: [
+                  {
+                    kind: "delete" as const,
+                    content: "const oldValue = true;",
+                    oldLineNumber: 1
+                  },
+                  {
+                    kind: "add" as const,
+                    content: "const newValue = true;",
+                    newLineNumber: 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+    };
+
+    expect(
+      main(["check", "--task", "Fix signup validation", "--format", "repair"], rewriteDiffIo)
+    ).toBe(ExitCode.FindingsFailed);
+    expect(stdout[0]).toContain("Large balanced rewrite detected");
+  });
 });
