@@ -162,3 +162,7 @@ Bad model input:
 - Unbounded dependency trees.
 
 Model usage should be optional, cacheable, and disabled by default in CI until deterministic quality is strong.
+
+The optional implementation boundary lives in `src/llm`. It exposes a compact model artifact,
+redaction helpers, prompt construction, provider interface, cache, and budget controls without
+bundling a model provider.

@@ -60,6 +60,7 @@ Before implementing, read:
 4. `docs/detectors.md`
 5. `docs/implementation-roadmap.md`
 6. `docs/task-backlog.md`
+7. `docs/llm-layer.md` when changing model-assisted explanation behavior
 
 When changing code later:
 

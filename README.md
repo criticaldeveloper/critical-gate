@@ -77,9 +77,10 @@ small tasks. Reports include an initial Diff Cost Score.
 - `docs/evaluation-strategy.md`: how to measure precision, recall, noise, and usefulness.
 - `docs/codex-integration.md`: how this should integrate with Codex instructions, hooks, and automation.
 - `docs/github-integration.md`: GitHub Action, SARIF upload, checks summary, and threshold guidance.
+- `docs/llm-layer.md`: optional model explanation boundary, artifact, redaction, cache, and budgets.
 
 ## Current State
 
 This repository now contains the first CLI implementation, deterministic detectors, Codex hook
-integration, and GitHub Action integration. Continue with the roadmap and backlog before extending
-the next surface.
+integration, GitHub Action integration, and an optional LLM explanation boundary. Continue with the
+roadmap and backlog before extending the next surface.

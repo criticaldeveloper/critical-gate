@@ -154,6 +154,7 @@ Deliverables:
 Exit criteria:
 
 - Optional LLM mode improves explanation quality without becoming the detector of record.
+- The model artifact excludes hunks, full file contents, and repository-wide context.
 
 ## Phase 9: Editor Surface
 
