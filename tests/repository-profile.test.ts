@@ -1,0 +1,65 @@
+import { buildRepositoryProfile, parseNameOnlyLog } from "../src/index.js";
+
+describe("repository profile", () => {
+  it("parses git name-only log output into commits", () => {
+    expect(parseNameOnlyLog("__COMMIT__\nsrc/a.ts\nsrc/b.ts\n__COMMIT__\nsrc/a.ts\n")).toEqual([
+      ["src/a.ts", "src/b.ts"],
+      ["src/a.ts"]
+    ]);
+  });
+
+  it("builds a co-change profile from git history", () => {
+    const profile = buildRepositoryProfile({
+      root: "C:/repo",
+      minConfidenceCommitCount: 1,
+      runner: {
+        execFile: (_file, args) => {
+          expect(args[0]).toBe("log");
+          return [
+            "__COMMIT__",
+            "src/signup.ts",
+            "tests/signup.test.ts",
+            "__COMMIT__",
+            "src/signup.ts",
+            "src/signup-form.ts",
+            "__COMMIT__",
+            "src/logger.ts",
+            "tests/logger.test.ts"
+          ].join("\n");
+        }
+      }
+    });
+
+    expect(profile).toEqual({
+      commitCount: 3,
+      minConfidenceCommitCount: 1,
+      coChanges: expect.arrayContaining([
+        {
+          path: "src/signup.ts",
+          count: 2,
+          relatedPaths: [
+            { path: "src/signup-form.ts", count: 1 },
+            { path: "tests/signup.test.ts", count: 1 }
+          ]
+        }
+      ])
+    });
+  });
+
+  it("returns an empty low-confidence profile when git history is unavailable", () => {
+    const profile = buildRepositoryProfile({
+      root: "C:/repo",
+      runner: {
+        execFile: () => {
+          throw new Error("no history");
+        }
+      }
+    });
+
+    expect(profile).toEqual({
+      commitCount: 0,
+      minConfidenceCommitCount: 20,
+      coChanges: []
+    });
+  });
+});

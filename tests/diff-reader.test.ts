@@ -129,6 +129,10 @@ describe("readGitDiff", () => {
           return readFileSync(fixturePath, "utf8");
         }
 
+        if (args[0] === "log") {
+          return "__COMMIT__\nsrc/signup.ts\ntests/signup.test.ts\n";
+        }
+
         throw new Error(`Unexpected git args: ${args.join(" ")}`);
       }
     };
@@ -139,6 +143,9 @@ describe("readGitDiff", () => {
     expect(result.baseRef).toBe("main");
     expect(result.headRef).toBe("feature/diff-reader");
     expect(result.files).toHaveLength(5);
+    expect(result.repositoryProfile).toMatchObject({
+      commitCount: 1
+    });
     expect(calls).toContainEqual(["diff", "--no-ext-diff", "--no-color", "main...HEAD", "--"]);
   });
 
@@ -162,6 +169,10 @@ describe("readGitDiff", () => {
 
         if (args.join(" ") === "ls-files --others --exclude-standard") {
           return "src/new-detector.ts\n";
+        }
+
+        if (args[0] === "log") {
+          return "__COMMIT__\nsrc/signup.ts\ntests/signup.test.ts\n";
         }
 
         throw new Error(`Unexpected git args: ${args.join(" ")}`);

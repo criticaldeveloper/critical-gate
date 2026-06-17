@@ -119,12 +119,47 @@ export const gateResultJsonSchema = {
         configFiles: stringArraySchema,
         testFrameworks: stringArraySchema,
         publicEntrypoints: stringArraySchema,
+        repositoryProfile: { $ref: "#/$defs/repositoryProfile" },
         git: {
           type: "object",
           additionalProperties: false,
           properties: {
             baseRef: { type: "string" },
             headRef: { type: "string" }
+          }
+        }
+      }
+    },
+    repositoryProfile: {
+      type: "object",
+      additionalProperties: false,
+      required: ["commitCount", "minConfidenceCommitCount", "coChanges"],
+      properties: {
+        commitCount: { type: "integer", minimum: 0 },
+        minConfidenceCommitCount: { type: "integer", minimum: 0 },
+        coChanges: {
+          type: "array",
+          items: { $ref: "#/$defs/repositoryCoChange" }
+        }
+      }
+    },
+    repositoryCoChange: {
+      type: "object",
+      additionalProperties: false,
+      required: ["path", "count", "relatedPaths"],
+      properties: {
+        path: { type: "string", minLength: 1 },
+        count: { type: "integer", minimum: 0 },
+        relatedPaths: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: ["path", "count"],
+            properties: {
+              path: { type: "string", minLength: 1 },
+              count: { type: "integer", minimum: 0 }
+            }
           }
         }
       }

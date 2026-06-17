@@ -5,6 +5,7 @@ import { apiSurfaceDetector } from "./api-surface-detector.js";
 import { configChangeDetector } from "./config-change-detector.js";
 import { dependencyDetector } from "./dependency-detector.js";
 import { rewriteDetector } from "./rewrite-detector.js";
+import { repositoryIntelligenceDetector } from "./repository-intelligence-detector.js";
 import { secretPathDetector } from "./secret-path-detector.js";
 import { scopeDetector } from "./scope-detector.js";
 import { testWeakeningDetector } from "./test-weakening-detector.js";
@@ -17,15 +18,17 @@ const defaultDetectors: Detector[] = [
   secretPathDetector,
   apiSurfaceDetector,
   scopeDetector,
-  rewriteDetector
+  rewriteDetector,
+  repositoryIntelligenceDetector
 ];
 
 export function runDetectors(
   task: TaskIntent,
   diff: GateResult["diff"],
+  context?: GateResult["context"],
   detectors = defaultDetectors
 ): Finding[] {
-  return detectors.flatMap((detector) => detector.run({ task, diff }));
+  return detectors.flatMap((detector) => detector.run({ task, diff, context }));
 }
 
 export function summarizeFindings(

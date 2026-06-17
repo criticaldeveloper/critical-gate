@@ -58,10 +58,26 @@ export interface RepoContext {
   configFiles?: string[];
   testFrameworks?: string[];
   publicEntrypoints?: string[];
+  repositoryProfile?: RepositoryProfile;
   git?: {
     baseRef?: string;
     headRef?: string;
   };
+}
+
+export interface RepositoryProfile {
+  commitCount: number;
+  minConfidenceCommitCount: number;
+  coChanges: RepositoryCoChange[];
+}
+
+export interface RepositoryCoChange {
+  path: string;
+  count: number;
+  relatedPaths: Array<{
+    path: string;
+    count: number;
+  }>;
 }
 
 export type FindingSeverity = "blocker" | "high" | "medium" | "low" | "info";

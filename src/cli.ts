@@ -189,21 +189,23 @@ function createGateResult(
     headRef: diffResult.headRef,
     files: diffResult.files
   };
-  const findings = runDetectors(task, diff);
+  const context: GateResult["context"] = {
+    root: diffResult.root,
+    packageManager: "pnpm",
+    repositoryProfile: diffResult.repositoryProfile,
+    git: {
+      baseRef: diffResult.baseRef,
+      headRef: diffResult.headRef
+    }
+  };
+  const findings = runDetectors(task, diff, context);
 
   return {
     schemaVersion: GATE_RESULT_SCHEMA_VERSION,
     generatedAt: generatedAt.toISOString(),
     task,
     diff,
-    context: {
-      root: diffResult.root,
-      packageManager: "pnpm",
-      git: {
-        baseRef: diffResult.baseRef,
-        headRef: diffResult.headRef
-      }
-    },
+    context,
     findings,
     summary: summarizeFindings(findings, task, diff),
     metadata: {

@@ -12,6 +12,8 @@ export type {
   FindingTag,
   GateResult,
   GateSummary,
+  RepositoryCoChange,
+  RepositoryProfile,
   RepoContext,
   TaskIntent,
   TaskIntentSource
