@@ -1,0 +1,47 @@
+diff --git a/src/signup.ts b/src/signup.ts
+index 0b7c123..3a91b1a 100644
+--- a/src/signup.ts
++++ b/src/signup.ts
+@@ -1,5 +1,6 @@
+ export function validateSignup(input: SignupInput) {
+   validateName(input.name);
++  validateEmail(input.email);
+   return true;
+ }
+diff --git a/package.json b/package.json
+index 57b22a0..cb3e0f1 100644
+--- a/package.json
++++ b/package.json
+@@ -9,6 +9,7 @@
+   "dependencies": {
++    "axios": "^1.7.0",
+     "zod": "^3.23.0"
+   }
+ }
+diff --git a/tests/signup.test.ts b/tests/signup.test.ts
+deleted file mode 100644
+index 4aa44aa..0000000
+--- a/tests/signup.test.ts
++++ /dev/null
+@@ -1,3 +0,0 @@
+-import { validateSignup } from "../src/signup";
+-
+-expect(validateSignup({ name: "Ada" })).toBe(true);
+diff --git a/src/old-name.ts b/src/new-name.ts
+similarity index 88%
+rename from src/old-name.ts
+rename to src/new-name.ts
+index a11b22c..d33e44f 100644
+--- a/src/old-name.ts
++++ b/src/new-name.ts
+@@ -1,3 +1,3 @@
+-export const oldName = true;
++export const newName = true;
+diff --git a/docs/usage.md b/docs/usage.md
+new file mode 100644
+index 0000000..6bb83df
+--- /dev/null
++++ b/docs/usage.md
+@@ -0,0 +1,2 @@
++# Usage
++Document the validation flow.

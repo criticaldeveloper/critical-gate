@@ -1,4 +1,22 @@
 import { ExitCode, main } from "../src/cli.js";
+import type { GitDiffResult } from "../src/index.js";
+
+const testDiffResult: GitDiffResult = {
+  root: "C:/dev/critical-gate",
+  baseRef: "main",
+  headRef: "feature/cli-foundation",
+  files: [
+    {
+      path: "src/signup.ts",
+      status: "modified",
+      role: "source",
+      additions: 2,
+      deletions: 1,
+      language: "typescript",
+      hunks: []
+    }
+  ]
+};
 
 function createTestIo() {
   const writes = new Map<string, string>();
@@ -10,7 +28,8 @@ function createTestIo() {
       stdout: (message: string) => stdout.push(message),
       stderr: (message: string) => stderr.push(message),
       writeFile: (path: string, content: string) => writes.set(path, content),
-      now: () => new Date("2026-06-17T21:20:00.000Z")
+      now: () => new Date("2026-06-17T21:20:00.000Z"),
+      readDiff: () => testDiffResult
     },
     stdout,
     stderr,
@@ -67,6 +86,9 @@ describe("cli", () => {
     expect(stdout.join("\n")).toContain("# Critical Gate Report");
     expect(stdout.join("\n")).toContain("Task: Add signup validation");
     expect(stdout.join("\n")).toContain("Base: main");
+    expect(stdout.join("\n")).toContain("Changed Files: 1");
+    expect(stdout.join("\n")).toContain("Additions: 2");
+    expect(stdout.join("\n")).toContain("Deletions: 1");
     expect(stderr).toEqual([]);
   });
 
@@ -85,6 +107,17 @@ describe("cli", () => {
       task: {
         source: "cli",
         text: "Add signup validation"
+      },
+      diff: {
+        baseRef: "main",
+        headRef: "feature/cli-foundation",
+        files: [
+          {
+            path: "src/signup.ts",
+            additions: 2,
+            deletions: 1
+          }
+        ]
       },
       findings: [],
       summary: {

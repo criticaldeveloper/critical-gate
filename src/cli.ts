@@ -4,7 +4,12 @@ import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { GATE_RESULT_SCHEMA_VERSION, type GateResult } from "./index.js";
+import {
+  GATE_RESULT_SCHEMA_VERSION,
+  readGitDiff,
+  type GateResult,
+  type GitDiffResult
+} from "./index.js";
 
 export const CLI_VERSION = "0.1.0";
 
@@ -32,13 +37,15 @@ interface CliIo {
   stderr: (message: string) => void;
   writeFile: (path: string, content: string) => void;
   now: () => Date;
+  readDiff: (baseRef?: string) => GitDiffResult;
 }
 
 const defaultIo: CliIo = {
   stdout: (message) => console.log(message),
   stderr: (message) => console.error(message),
   writeFile: (path, content) => writeFileSync(path, content, "utf8"),
-  now: () => new Date()
+  now: () => new Date(),
+  readDiff: (baseRef) => readGitDiff({ baseRef })
 };
 
 export function main(argv = process.argv.slice(2), io = defaultIo): ExitCode {
@@ -83,7 +90,8 @@ function runCli(argv: string[], io: CliIo): ExitCode {
     return ExitCode.UsageError;
   }
 
-  const result = createEmptyGateResult(parsed.options, io.now());
+  const diff = io.readDiff(parsed.options.base);
+  const result = createGateResult(parsed.options, io.now(), diff);
   const rendered = renderGateResult(result, parsed.options.format);
 
   if (parsed.options.output !== undefined) {
@@ -162,7 +170,11 @@ function parseCheckArgs(args: string[]):
   };
 }
 
-function createEmptyGateResult(options: CheckOptions, generatedAt: Date): GateResult {
+function createGateResult(
+  options: CheckOptions,
+  generatedAt: Date,
+  diffResult: GitDiffResult
+): GateResult {
   return {
     schemaVersion: GATE_RESULT_SCHEMA_VERSION,
     generatedAt: generatedAt.toISOString(),
@@ -171,13 +183,16 @@ function createEmptyGateResult(options: CheckOptions, generatedAt: Date): GateRe
       text: options.task
     },
     diff: {
-      baseRef: options.base,
-      files: []
+      baseRef: diffResult.baseRef,
+      headRef: diffResult.headRef,
+      files: diffResult.files
     },
     context: {
+      root: diffResult.root,
       packageManager: "pnpm",
       git: {
-        baseRef: options.base
+        baseRef: diffResult.baseRef,
+        headRef: diffResult.headRef
       }
     },
     findings: [],
@@ -204,6 +219,9 @@ function renderGateResult(result: GateResult, format: OutputFormat): string {
   }
 
   const baseRef = result.diff.baseRef ?? "working tree";
+  const changedFiles = result.diff.files.length;
+  const additions = result.diff.files.reduce((total, file) => total + file.additions, 0);
+  const deletions = result.diff.files.reduce((total, file) => total + file.deletions, 0);
 
   return [
     "# Critical Gate Report",
@@ -211,6 +229,9 @@ function renderGateResult(result: GateResult, format: OutputFormat): string {
     `Decision: ${result.summary.decision}`,
     `Task: ${result.task.text}`,
     `Base: ${baseRef}`,
+    `Changed Files: ${changedFiles}`,
+    `Additions: ${additions}`,
+    `Deletions: ${deletions}`,
     `Findings: ${result.summary.findingCount}`,
     `Diff Cost Score: ${result.summary.diffCostScore ?? 0}`,
     ""

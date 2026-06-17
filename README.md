@@ -46,7 +46,8 @@ Exit codes:
 - `2`: usage or configuration error.
 - `3`: internal error.
 
-The command currently emits an empty passing report. Diff reading and detectors are added in later roadmap tasks.
+The command currently emits a passing report with real changed-file, role, and churn data.
+Findings remain empty until detector tasks are implemented.
 
 ## Documentation Map
 
