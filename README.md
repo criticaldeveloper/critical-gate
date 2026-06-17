@@ -49,8 +49,8 @@ Exit codes:
 - `3`: internal error.
 
 The command currently emits real changed-file, role, and churn data. It also reports early
-detector findings for unjustified package dependency additions, test weakening, and unexplained
-config changes.
+detector findings for unjustified package dependency additions, test weakening, unexplained config
+changes, and hardcoded secrets or environment-specific paths.
 
 ## Documentation Map
 

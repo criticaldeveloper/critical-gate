@@ -295,4 +295,46 @@ describe("cli", () => {
     ).toBe(ExitCode.Pass);
     expect(stdout[0]).toContain("Config changed without visible explanation");
   });
+
+  it("fails when secret detector reports a blocker", () => {
+    const { io, stdout } = createTestIo();
+    const fakeSecret = ["super", "secretvalue12345"].join("");
+    const secretDiffIo = {
+      ...io,
+      readDiff: () => ({
+        ...testDiffResult,
+        files: [
+          {
+            path: "src/config.ts",
+            status: "modified" as const,
+            role: "source" as const,
+            additions: 1,
+            deletions: 0,
+            language: "typescript",
+            hunks: [
+              {
+                oldStart: 1,
+                oldLines: 1,
+                newStart: 1,
+                newLines: 2,
+                lines: [
+                  {
+                    kind: "add" as const,
+                    content: `export const API_SECRET = "${fakeSecret}";`,
+                    newLineNumber: 2
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+    };
+
+    expect(
+      main(["check", "--task", "Add signup validation", "--format", "repair"], secretDiffIo)
+    ).toBe(ExitCode.FindingsFailed);
+    expect(stdout[0]).toContain("Possible hardcoded secret added");
+    expect(stdout[0]).not.toContain(fakeSecret);
+  });
 });
