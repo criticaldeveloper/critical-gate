@@ -1,5 +1,6 @@
 import type { Finding, GateResult, TaskIntent } from "../schema/index.js";
 
+import { apiSurfaceDetector } from "./api-surface-detector.js";
 import { configChangeDetector } from "./config-change-detector.js";
 import { dependencyDetector } from "./dependency-detector.js";
 import { secretPathDetector } from "./secret-path-detector.js";
@@ -10,7 +11,8 @@ const defaultDetectors: Detector[] = [
   dependencyDetector,
   testWeakeningDetector,
   configChangeDetector,
-  secretPathDetector
+  secretPathDetector,
+  apiSurfaceDetector
 ];
 
 export function runDetectors(

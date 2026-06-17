@@ -337,4 +337,84 @@ describe("cli", () => {
     expect(stdout[0]).toContain("Possible hardcoded secret added");
     expect(stdout[0]).not.toContain(fakeSecret);
   });
+
+  it("reports added public exports without failing on medium severity", () => {
+    const { io, stdout } = createTestIo();
+    const apiDiffIo = {
+      ...io,
+      readDiff: () => ({
+        ...testDiffResult,
+        files: [
+          {
+            path: "src/index.ts",
+            status: "modified" as const,
+            role: "source" as const,
+            additions: 1,
+            deletions: 0,
+            language: "typescript",
+            hunks: [
+              {
+                oldStart: 1,
+                oldLines: 1,
+                newStart: 1,
+                newLines: 2,
+                lines: [
+                  {
+                    kind: "add" as const,
+                    content: "export function validateSignup() {}",
+                    newLineNumber: 2
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+    };
+
+    expect(
+      main(["check", "--task", "Add signup validation", "--format", "markdown"], apiDiffIo)
+    ).toBe(ExitCode.Pass);
+    expect(stdout[0]).toContain("Public export added");
+  });
+
+  it("fails when API surface detector reports a removed export", () => {
+    const { io, stdout } = createTestIo();
+    const apiDiffIo = {
+      ...io,
+      readDiff: () => ({
+        ...testDiffResult,
+        files: [
+          {
+            path: "src/index.ts",
+            status: "modified" as const,
+            role: "source" as const,
+            additions: 0,
+            deletions: 1,
+            language: "typescript",
+            hunks: [
+              {
+                oldStart: 1,
+                oldLines: 2,
+                newStart: 1,
+                newLines: 1,
+                lines: [
+                  {
+                    kind: "delete" as const,
+                    content: "export type SignupOptions = {};",
+                    oldLineNumber: 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+    };
+
+    expect(
+      main(["check", "--task", "Update signup validation", "--format", "repair"], apiDiffIo)
+    ).toBe(ExitCode.FindingsFailed);
+    expect(stdout[0]).toContain("Public export removed");
+  });
 });
