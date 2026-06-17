@@ -1,0 +1,11 @@
+Critical Gate found findings that need repair:
+
+1. BLOCKER: Unjustified production dependency added
+axios@^1.7.0 was added to dependencies without visible task justification. Evidence: package.json:10.
+Repair: Remove axios unless it is required, or update the task/PR context with a clear justification and alternatives considered.
+
+2. HIGH: Unexpected file changed for small task
+package.json changed during a small task but does not align with expected scope. Evidence: package.json:10.
+Repair: Remove unrelated edits or split them into a separate task with explicit justification.
+
+Rerun Critical Gate after applying focused repairs.

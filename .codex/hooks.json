@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ROOT=$(git rev-parse --show-toplevel) && pnpm --dir \"$ROOT\" --silent build && node \"$ROOT/dist/cli.js\" hook --base main",
+            "commandWindows": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$root = git rev-parse --show-toplevel; pnpm --dir $root --silent build; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; node (Join-Path $root 'dist/cli.js') hook --base main\"",
+            "timeout": 60,
+            "statusMessage": "Running Critical Gate"
+          }
+        ]
+      }
+    ]
+  }
+}

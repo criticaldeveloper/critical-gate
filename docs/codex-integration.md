@@ -34,7 +34,11 @@ critical-gate check --task "Add signup validation" --base origin/main --format m
 
 Use a Codex `Stop` hook after the CLI exists and findings are precise enough.
 
-Future example:
+This repository includes an example project hook at `.codex/hooks.json`. Codex discovers hooks
+from active config layers, and repo-local hooks must be reviewed and trusted before they run.
+Use `/hooks` in Codex CLI to review or trust the hook after changes.
+
+Example shape:
 
 ```json
 {
@@ -44,7 +48,7 @@ Future example:
         "hooks": [
           {
             "type": "command",
-            "command": "node ./bin/critical-gate.js hook --base origin/main",
+            "command": "ROOT=$(git rev-parse --show-toplevel) && pnpm --dir \"$ROOT\" --silent build && node \"$ROOT/dist/cli.js\" hook --base main",
             "timeout": 60,
             "statusMessage": "Running Critical Gate"
           }
@@ -61,6 +65,17 @@ The hook command should:
 - Return pass when the diff is acceptable.
 - Return compact repair guidance when blockers exist.
 - Avoid dumping long reports into the agent loop.
+- Avoid mutating files directly.
+
+Current local command:
+
+```bash
+pnpm build
+node dist/cli.js hook --base main
+```
+
+The hook output intentionally uses the compact repair reporter. If findings fail the gate, the
+command exits non-zero and prints the highest-priority repair actions.
 
 ### Codex Exec And CI
 

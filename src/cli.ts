@@ -42,6 +42,8 @@ interface CliIo {
   readDiff: (baseRef?: string) => GitDiffResult;
 }
 
+type CommandName = "check" | "hook";
+
 const defaultIo: CliIo = {
   stdout: (message) => console.log(message),
   stderr: (message) => console.error(message),
@@ -66,25 +68,25 @@ function runCli(argv: string[], io: CliIo): ExitCode {
     return ExitCode.Pass;
   }
 
-  if (argv.includes("--help") || argv.includes("-h")) {
+  if (argv[0] === "--help" || argv[0] === "-h") {
     io.stdout(getHelpText());
     return ExitCode.Pass;
   }
 
   const [command = "check", ...args] = argv;
 
-  if (command !== "check") {
+  if (!isCommandName(command)) {
     io.stderr(`Unknown command: ${command}`);
     io.stderr("Run critical-gate --help for usage.");
     return ExitCode.UsageError;
   }
 
   if (args.includes("--help") || args.includes("-h")) {
-    io.stdout(getCheckHelpText());
+    io.stdout(command === "hook" ? getHookHelpText() : getCheckHelpText());
     return ExitCode.Pass;
   }
 
-  const parsed = parseCheckArgs(args);
+  const parsed = parseCheckArgs(args, command);
 
   if (!parsed.ok) {
     io.stderr(parsed.error);
@@ -94,7 +96,13 @@ function runCli(argv: string[], io: CliIo): ExitCode {
 
   const diff = io.readDiff(parsed.options.base);
   const result = createGateResult(parsed.options, io.now(), diff);
-  const rendered = renderReport(result, parsed.options.format);
+  const rendered =
+    command === "hook"
+      ? renderReport(
+          result.summary.decision === "pass" ? { ...result, findings: [] } : result,
+          "repair"
+        )
+      : renderReport(result, parsed.options.format);
 
   if (parsed.options.output !== undefined) {
     io.writeFile(parsed.options.output, rendered);
@@ -105,7 +113,10 @@ function runCli(argv: string[], io: CliIo): ExitCode {
   return result.summary.decision === "fail" ? ExitCode.FindingsFailed : ExitCode.Pass;
 }
 
-function parseCheckArgs(args: string[]):
+function parseCheckArgs(
+  args: string[],
+  command: CommandName
+):
   | {
       ok: true;
       options: CheckOptions;
@@ -160,6 +171,14 @@ function parseCheckArgs(args: string[]):
   }
 
   if (options.task === undefined || options.task.trim().length === 0) {
+    if (command === "hook") {
+      options.task = "Codex completed feature implementation";
+    } else {
+      return { ok: false, error: "Missing required --task value." };
+    }
+  }
+
+  if (options.task.trim().length === 0) {
     return { ok: false, error: "Missing required --task value." };
   }
 
@@ -222,6 +241,7 @@ function getHelpText(): string {
     "",
     "Usage:",
     "  critical-gate check --task <text> [--base <ref>] [--format json|markdown|sarif|repair] [--strict] [--output <path>]",
+    "  critical-gate hook [--task <text>] [--base <ref>] [--output <path>]",
     "  critical-gate --version",
     "  critical-gate --help",
     ""
@@ -242,6 +262,22 @@ function getCheckHelpText(): string {
     "  --output <path>     Write report to a file instead of stdout",
     ""
   ].join("\n");
+}
+
+function getHookHelpText(): string {
+  return [
+    "critical-gate hook",
+    "",
+    "Options:",
+    "  --task <text>       Optional task intent; defaults to Codex completed feature implementation",
+    "  --base <ref>        Git baseline reference",
+    "  --output <path>     Write compact repair report to a file instead of stdout",
+    ""
+  ].join("\n");
+}
+
+function isCommandName(value: string): value is CommandName {
+  return value === "check" || value === "hook";
 }
 
 function isReportFormat(value: string): value is ReportFormat {

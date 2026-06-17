@@ -170,6 +170,65 @@ describe("cli", () => {
     expect(stdout).toEqual(["Critical Gate passed. No repair actions required.\n"]);
   });
 
+  it("prints hook help", () => {
+    const { io, stdout, stderr } = createTestIo();
+
+    expect(main(["hook", "--help"], io)).toBe(ExitCode.Pass);
+    expect(stdout.join("\n")).toContain("critical-gate hook");
+    expect(stdout.join("\n")).toContain("defaults to Codex completed feature implementation");
+    expect(stderr).toEqual([]);
+  });
+
+  it("runs hook mode with default task text", () => {
+    const { io, stdout } = createTestIo();
+
+    expect(main(["hook"], io)).toBe(ExitCode.Pass);
+    expect(stdout).toEqual(["Critical Gate passed. No repair actions required.\n"]);
+  });
+
+  it("suppresses medium-only findings in hook mode", () => {
+    const { io, stdout } = createTestIo();
+    const utilityDiffIo = {
+      ...io,
+      readDiff: () => ({
+        ...testDiffResult,
+        utilityIndex: {
+          utilities: [{ path: "src/utils/date.ts", exportedNames: ["formatDate"] }]
+        },
+        files: [
+          {
+            path: "src/helpers/date-utils.ts",
+            status: "added" as const,
+            role: "source" as const,
+            additions: 1,
+            deletions: 0,
+            language: "typescript",
+            hunks: [
+              {
+                oldStart: 0,
+                oldLines: 0,
+                newStart: 1,
+                newLines: 1,
+                lines: [
+                  {
+                    kind: "add" as const,
+                    content: "export function formatDateForSignup() {}",
+                    newLineNumber: 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+    };
+
+    expect(main(["hook", "--task", "Add signup date formatting"], utilityDiffIo)).toBe(
+      ExitCode.Pass
+    );
+    expect(stdout).toEqual(["Critical Gate passed. No repair actions required.\n"]);
+  });
+
   it("fails when dependency detector reports a blocker", () => {
     const { io, stdout } = createTestIo();
     const packageDiffIo = {
@@ -213,6 +272,53 @@ describe("cli", () => {
     expect(
       main(["check", "--task", "Add signup validation", "--format", "repair"], packageDiffIo)
     ).toBe(ExitCode.FindingsFailed);
+    expect(stdout[0]).toContain("Unjustified production dependency added");
+  });
+
+  it("fails hook mode with compact repair output", () => {
+    const { io, stdout } = createTestIo();
+    const packageDiffIo = {
+      ...io,
+      readDiff: () => ({
+        ...testDiffResult,
+        files: [
+          {
+            path: "package.json",
+            status: "modified" as const,
+            role: "manifest" as const,
+            additions: 1,
+            deletions: 0,
+            language: "json",
+            hunks: [
+              {
+                oldStart: 10,
+                oldLines: 4,
+                newStart: 10,
+                newLines: 5,
+                lines: [
+                  {
+                    kind: "context" as const,
+                    content: '  "dependencies": {',
+                    oldLineNumber: 10,
+                    newLineNumber: 10
+                  },
+                  {
+                    kind: "add" as const,
+                    content: '    "axios": "^1.7.0",',
+                    newLineNumber: 11
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+    };
+
+    expect(main(["hook", "--task", "Add signup validation"], packageDiffIo)).toBe(
+      ExitCode.FindingsFailed
+    );
+    expect(stdout[0]).toContain("Critical Gate found findings that need repair:");
     expect(stdout[0]).toContain("Unjustified production dependency added");
   });
 

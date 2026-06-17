@@ -39,6 +39,7 @@ node dist/cli.js check --task "Add signup validation" --base main --format markd
 node dist/cli.js check --task "Add signup validation" --format json --output report.json
 node dist/cli.js check --task "Add signup validation" --format sarif --output critical-gate.sarif
 node dist/cli.js check --task "Add signup validation" --format repair
+node dist/cli.js hook --base main
 ```
 
 Exit codes:
