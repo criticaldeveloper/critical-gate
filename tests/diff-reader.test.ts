@@ -133,7 +133,18 @@ describe("readGitDiff", () => {
           return "__COMMIT__\nsrc/signup.ts\ntests/signup.test.ts\n";
         }
 
+        if (args.join(" ") === "ls-files") {
+          return "src/utils/date.ts\n";
+        }
+
         throw new Error(`Unexpected git args: ${args.join(" ")}`);
+      },
+      readFile: (path) => {
+        if (path.replaceAll("\\", "/").endsWith("src/utils/date.ts")) {
+          return "export function formatDate() {}";
+        }
+
+        return "";
       }
     };
 
@@ -145,6 +156,9 @@ describe("readGitDiff", () => {
     expect(result.files).toHaveLength(5);
     expect(result.repositoryProfile).toMatchObject({
       commitCount: 1
+    });
+    expect(result.utilityIndex).toEqual({
+      utilities: [{ path: "src/utils/date.ts", exportedNames: ["formatDate"] }]
     });
     expect(calls).toContainEqual(["diff", "--no-ext-diff", "--no-color", "main...HEAD", "--"]);
   });
@@ -173,6 +187,10 @@ describe("readGitDiff", () => {
 
         if (args[0] === "log") {
           return "__COMMIT__\nsrc/signup.ts\ntests/signup.test.ts\n";
+        }
+
+        if (args.join(" ") === "ls-files") {
+          return "";
         }
 
         throw new Error(`Unexpected git args: ${args.join(" ")}`);

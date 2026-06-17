@@ -463,4 +463,47 @@ describe("cli", () => {
     ).toBe(ExitCode.FindingsFailed);
     expect(stdout[0]).toContain("Large balanced rewrite detected");
   });
+
+  it("reports utility reinvention without failing by default", () => {
+    const { io, stdout } = createTestIo();
+    const utilityDiffIo = {
+      ...io,
+      readDiff: () => ({
+        ...testDiffResult,
+        utilityIndex: {
+          utilities: [{ path: "src/utils/date.ts", exportedNames: ["formatDate"] }]
+        },
+        files: [
+          {
+            path: "src/helpers/date-utils.ts",
+            status: "added" as const,
+            role: "source" as const,
+            additions: 1,
+            deletions: 0,
+            language: "typescript",
+            hunks: [
+              {
+                oldStart: 0,
+                oldLines: 0,
+                newStart: 1,
+                newLines: 1,
+                lines: [
+                  {
+                    kind: "add" as const,
+                    content: "export function formatDateForSignup() {}",
+                    newLineNumber: 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+    };
+
+    expect(
+      main(["check", "--task", "Add signup date formatting", "--format", "markdown"], utilityDiffIo)
+    ).toBe(ExitCode.Pass);
+    expect(stdout[0]).toContain("New utility may duplicate existing helper");
+  });
 });

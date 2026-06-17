@@ -15,6 +15,8 @@ export type {
   RepositoryCoChange,
   RepositoryProfile,
   RepoContext,
+  UtilityEntry,
+  UtilityIndex,
   TaskIntent,
   TaskIntentSource
 } from "./types.js";

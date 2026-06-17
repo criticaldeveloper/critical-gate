@@ -7,4 +7,5 @@ export { runDetectors, summarizeFindings } from "./runner.js";
 export { scanAddedLinesForSecretsAndPaths, secretPathDetector } from "./secret-path-detector.js";
 export { scopeDetector } from "./scope-detector.js";
 export { testWeakeningDetector } from "./test-weakening-detector.js";
+export { utilityReinventionDetector } from "./utility-reinvention-detector.js";
 export type { Detector, DetectorContext } from "./types.js";

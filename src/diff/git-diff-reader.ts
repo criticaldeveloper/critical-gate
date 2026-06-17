@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 import type { DiffFile } from "../schema/index.js";
 
-import { buildRepositoryProfile } from "../repository/index.js";
+import { buildRepositoryProfile, buildUtilityIndex } from "../repository/index.js";
 import { classifyPath, detectLanguage } from "./path-classifier.js";
 import { parseUnifiedDiff } from "./parse-unified-diff.js";
 
@@ -25,6 +25,7 @@ export interface GitDiffResult {
   headRef?: string;
   files: DiffFile[];
   repositoryProfile?: ReturnType<typeof buildRepositoryProfile>;
+  utilityIndex?: ReturnType<typeof buildUtilityIndex>;
 }
 
 const defaultRunner: GitCommandRunner = {
@@ -51,13 +52,15 @@ export function readGitDiff(options: ReadGitDiffOptions = {}): GitDiffResult {
   const trackedFiles = parseUnifiedDiff(diffText);
   const untrackedFiles = baseRef === undefined ? readUntrackedFiles(root, runner) : [];
   const repositoryProfile = buildRepositoryProfile({ root, runner });
+  const utilityIndex = buildUtilityIndex({ root, runner });
 
   return {
     root,
     baseRef,
     headRef,
     files: [...trackedFiles, ...untrackedFiles],
-    repositoryProfile
+    repositoryProfile,
+    utilityIndex
   };
 }
 

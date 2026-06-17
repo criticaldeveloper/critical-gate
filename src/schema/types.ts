@@ -59,6 +59,7 @@ export interface RepoContext {
   testFrameworks?: string[];
   publicEntrypoints?: string[];
   repositoryProfile?: RepositoryProfile;
+  utilityIndex?: UtilityIndex;
   git?: {
     baseRef?: string;
     headRef?: string;
@@ -80,6 +81,15 @@ export interface RepositoryCoChange {
   }>;
 }
 
+export interface UtilityIndex {
+  utilities: UtilityEntry[];
+}
+
+export interface UtilityEntry {
+  path: string;
+  exportedNames: string[];
+}
+
 export type FindingSeverity = "blocker" | "high" | "medium" | "low" | "info";
 
 export type FindingTag =
@@ -91,6 +101,7 @@ export type FindingTag =
   | "config"
   | "rewrite"
   | "convention"
+  | "utility"
   | "dead-code"
   | "duplicate-code";
 

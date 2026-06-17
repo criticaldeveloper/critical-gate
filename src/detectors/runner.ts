@@ -9,6 +9,7 @@ import { repositoryIntelligenceDetector } from "./repository-intelligence-detect
 import { secretPathDetector } from "./secret-path-detector.js";
 import { scopeDetector } from "./scope-detector.js";
 import { testWeakeningDetector } from "./test-weakening-detector.js";
+import { utilityReinventionDetector } from "./utility-reinvention-detector.js";
 import type { Detector } from "./types.js";
 
 const defaultDetectors: Detector[] = [
@@ -19,7 +20,8 @@ const defaultDetectors: Detector[] = [
   apiSurfaceDetector,
   scopeDetector,
   rewriteDetector,
-  repositoryIntelligenceDetector
+  repositoryIntelligenceDetector,
+  utilityReinventionDetector
 ];
 
 export function runDetectors(

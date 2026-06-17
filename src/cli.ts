@@ -193,6 +193,7 @@ function createGateResult(
     root: diffResult.root,
     packageManager: "pnpm",
     repositoryProfile: diffResult.repositoryProfile,
+    utilityIndex: diffResult.utilityIndex,
     git: {
       baseRef: diffResult.baseRef,
       headRef: diffResult.headRef

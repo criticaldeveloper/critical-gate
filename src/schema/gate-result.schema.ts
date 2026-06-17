@@ -120,6 +120,7 @@ export const gateResultJsonSchema = {
         testFrameworks: stringArraySchema,
         publicEntrypoints: stringArraySchema,
         repositoryProfile: { $ref: "#/$defs/repositoryProfile" },
+        utilityIndex: { $ref: "#/$defs/utilityIndex" },
         git: {
           type: "object",
           additionalProperties: false,
@@ -164,6 +165,26 @@ export const gateResultJsonSchema = {
         }
       }
     },
+    utilityIndex: {
+      type: "object",
+      additionalProperties: false,
+      required: ["utilities"],
+      properties: {
+        utilities: {
+          type: "array",
+          items: { $ref: "#/$defs/utilityEntry" }
+        }
+      }
+    },
+    utilityEntry: {
+      type: "object",
+      additionalProperties: false,
+      required: ["path", "exportedNames"],
+      properties: {
+        path: { type: "string", minLength: 1 },
+        exportedNames: stringArraySchema
+      }
+    },
     finding: {
       type: "object",
       additionalProperties: false,
@@ -205,6 +226,7 @@ export const gateResultJsonSchema = {
               "config",
               "rewrite",
               "convention",
+              "utility",
               "dead-code",
               "duplicate-code"
             ]
