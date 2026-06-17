@@ -1,0 +1,42 @@
+{
+  "name": "critical-gate",
+  "version": "0.1.0",
+  "description": "Repository-aware diff integrity gate for AI-generated code changes.",
+  "type": "module",
+  "packageManager": "pnpm@11.1.2",
+  "bin": {
+    "critical-gate": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "test": "vitest run",
+    "verify": "pnpm format && pnpm lint && pnpm typecheck && pnpm test"
+  },
+  "keywords": [
+    "ai",
+    "codex",
+    "diff",
+    "quality-gate",
+    "code-review"
+  ],
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.29.0",
+    "@types/node": "^24.0.3",
+    "eslint": "^9.29.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.34.1",
+    "vitest": "^4.1.9"
+  }
+}
