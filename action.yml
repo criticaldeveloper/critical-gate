@@ -1,0 +1,95 @@
+name: Critical Gate
+description: Run Critical Gate against the current GitHub Actions diff.
+author: Critical Gate
+
+inputs:
+  task:
+    description: Task intent, issue summary, PR title, or prompt that explains the change.
+    required: true
+  base:
+    description: Git baseline ref or SHA to compare against.
+    required: false
+    default: origin/main
+  format:
+    description: "Report format to emit: json, markdown, sarif, or repair."
+    required: false
+    default: sarif
+  output:
+    description: Report file path, relative to the checked-out repository.
+    required: false
+    default: critical-gate.sarif
+  strict:
+    description: Pass --strict through to the CLI.
+    required: false
+    default: "false"
+  install:
+    description: Install the action package dependencies with pnpm before running.
+    required: false
+    default: "true"
+  build:
+    description: Build the action package before running.
+    required: false
+    default: "true"
+
+outputs:
+  report-path:
+    description: Path to the generated Critical Gate report.
+    value: ${{ steps.meta.outputs.report-path }}
+
+runs:
+  using: composite
+  steps:
+    - id: meta
+      shell: bash
+      run: echo "report-path=${{ inputs.output }}" >> "$GITHUB_OUTPUT"
+
+    - name: Prepare Critical Gate
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        corepack enable
+
+        if [ "${{ inputs.install }}" = "true" ]; then
+          pnpm --dir "$GITHUB_ACTION_PATH" install --frozen-lockfile
+        fi
+
+        if [ "${{ inputs.build }}" = "true" ] || [ ! -f "$GITHUB_ACTION_PATH/dist/cli.js" ]; then
+          pnpm --dir "$GITHUB_ACTION_PATH" build
+        fi
+
+    - name: Run Critical Gate
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      env:
+        CRITICAL_GATE_TASK: ${{ inputs.task }}
+        CRITICAL_GATE_BASE: ${{ inputs.base }}
+        CRITICAL_GATE_FORMAT: ${{ inputs.format }}
+        CRITICAL_GATE_OUTPUT: ${{ inputs.output }}
+        CRITICAL_GATE_STRICT: ${{ inputs.strict }}
+      run: |
+        set -euo pipefail
+
+        if [ -z "$CRITICAL_GATE_TASK" ]; then
+          echo "::error::critical-gate requires a non-empty task input."
+          exit 2
+        fi
+
+        mkdir -p "$(dirname "$CRITICAL_GATE_OUTPUT")"
+
+        args=(
+          check
+          --task "$CRITICAL_GATE_TASK"
+          --format "$CRITICAL_GATE_FORMAT"
+          --output "$CRITICAL_GATE_OUTPUT"
+        )
+
+        if [ -n "$CRITICAL_GATE_BASE" ]; then
+          args+=(--base "$CRITICAL_GATE_BASE")
+        fi
+
+        if [ "$CRITICAL_GATE_STRICT" = "true" ]; then
+          args+=(--strict)
+        fi
+
+        node "$GITHUB_ACTION_PATH/dist/cli.js" "${args[@]}"

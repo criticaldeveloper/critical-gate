@@ -42,6 +42,17 @@ node dist/cli.js check --task "Add signup validation" --format repair
 node dist/cli.js hook --base main
 ```
 
+GitHub Actions can use the root composite action:
+
+```yaml
+- uses: ./
+  with:
+    task: ${{ github.event.pull_request.title }}
+    base: ${{ github.event.pull_request.base.sha }}
+    format: sarif
+    output: critical-gate.sarif
+```
+
 Exit codes:
 
 - `0`: pass.
@@ -65,9 +76,10 @@ small tasks. Reports include an initial Diff Cost Score.
 - `docs/task-backlog.md`: concrete implementation tasks in dependency order.
 - `docs/evaluation-strategy.md`: how to measure precision, recall, noise, and usefulness.
 - `docs/codex-integration.md`: how this should integrate with Codex instructions, hooks, and automation.
+- `docs/github-integration.md`: GitHub Action, SARIF upload, checks summary, and threshold guidance.
 
 ## Current State
 
-This repository currently contains the research report and project documentation. No production implementation exists yet.
-
-Start with the roadmap and backlog before writing code.
+This repository now contains the first CLI implementation, deterministic detectors, Codex hook
+integration, and GitHub Action integration. Continue with the roadmap and backlog before extending
+the next surface.

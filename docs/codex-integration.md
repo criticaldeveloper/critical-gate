@@ -81,7 +81,8 @@ command exits non-zero and prints the highest-priority repair actions.
 
 Use noninteractive execution for scripts and CI workflows when Codex needs to consume or repair findings.
 
-The gate should emit machine-readable JSON so downstream Codex runs or CI jobs can decide what to do.
+The gate should emit machine-readable JSON or SARIF so downstream Codex runs or CI jobs can decide
+what to do. GitHub-specific setup lives in `docs/github-integration.md`.
 
 ## Repair Prompt Shape
 

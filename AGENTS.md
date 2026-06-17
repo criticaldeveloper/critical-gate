@@ -38,7 +38,7 @@ LLMs are optional interpreters. They should not be the primary detector and shou
 - Core input model: task intent, git diff, and minimal structured repository context.
 - Core output formats: normalized JSON, Markdown summary, and SARIF-compatible results.
 - First surface: CLI.
-- Second surface: GitHub Action or CI wrapper.
+- Second surface: Codex hook mode and GitHub Action or CI wrapper.
 - Later surface: VS Code diagnostics extension.
 
 ## Do Not Build Yet
