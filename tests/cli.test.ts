@@ -255,4 +255,44 @@ describe("cli", () => {
     ).toBe(ExitCode.FindingsFailed);
     expect(stdout[0]).toContain("Test assertion removed");
   });
+
+  it("reports config changes without failing on medium severity", () => {
+    const { io, stdout } = createTestIo();
+    const configDiffIo = {
+      ...io,
+      readDiff: () => ({
+        ...testDiffResult,
+        files: [
+          {
+            path: "tsconfig.json",
+            status: "modified" as const,
+            role: "config" as const,
+            additions: 1,
+            deletions: 0,
+            language: "json",
+            hunks: [
+              {
+                oldStart: 1,
+                oldLines: 4,
+                newStart: 1,
+                newLines: 5,
+                lines: [
+                  {
+                    kind: "add" as const,
+                    content: '    "skipLibCheck": true,',
+                    newLineNumber: 2
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+    };
+
+    expect(
+      main(["check", "--task", "Add signup validation", "--format", "markdown"], configDiffIo)
+    ).toBe(ExitCode.Pass);
+    expect(stdout[0]).toContain("Config changed without visible explanation");
+  });
 });
