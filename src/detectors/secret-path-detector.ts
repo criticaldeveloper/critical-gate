@@ -83,6 +83,10 @@ function detectProviderToken(file: DiffFile, line: DiffLine): SecretPathSignal |
 }
 
 function detectAbsolutePath(file: DiffFile, line: DiffLine): SecretPathSignal | undefined {
+  if (isExampleOrTestFile(file)) {
+    return undefined;
+  }
+
   const matched =
     windowsAbsolutePathPattern.test(line.content) || posixAbsolutePathPattern.test(line.content);
 
@@ -105,6 +109,10 @@ function detectAbsolutePath(file: DiffFile, line: DiffLine): SecretPathSignal | 
 }
 
 function detectInternalUrl(file: DiffFile, line: DiffLine): SecretPathSignal | undefined {
+  if (isExampleOrTestFile(file)) {
+    return undefined;
+  }
+
   if (!internalUrlPattern.test(line.content)) {
     return undefined;
   }
@@ -120,6 +128,10 @@ function detectInternalUrl(file: DiffFile, line: DiffLine): SecretPathSignal | u
     lineNumber: line.newLineNumber,
     redactedContent: redactLine(line.content)
   };
+}
+
+function isExampleOrTestFile(file: DiffFile): boolean {
+  return file.role === "docs" || file.role === "test";
 }
 
 function redactLine(content: string): string {

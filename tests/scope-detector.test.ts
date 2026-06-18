@@ -99,6 +99,62 @@ index 57b22a0..cb3e0f1 100644
       })
     ).toEqual([]);
   });
+
+  it("does not emit for version-only release manifest changes", () => {
+    const diff = parse(`diff --git a/package.json b/package.json
+index 57b22a0..cb3e0f1 100644
+--- a/package.json
++++ b/package.json
+@@ -1,5 +1,5 @@
+ {
+   "name": "example",
+-  "version": "1.2.2",
++  "version": "1.2.3",
+   "type": "module"
+ }
+`);
+
+    expect(
+      scopeDetector.run({
+        task: {
+          source: "cli",
+          text: "1.2.3"
+        },
+        diff
+      })
+    ).toEqual([]);
+  });
+
+  it("still emits for non-version manifest changes during release tasks", () => {
+    const diff = parse(`diff --git a/package.json b/package.json
+index 57b22a0..cb3e0f1 100644
+--- a/package.json
++++ b/package.json
+@@ -1,5 +1,6 @@
+ {
+   "name": "example",
+   "version": "1.2.3",
++  "dependencies": {"left-pad": "^1.3.0"},
+   "type": "module"
+ }
+`);
+
+    expect(
+      scopeDetector.run({
+        task: {
+          source: "cli",
+          text: "Release 1.2.3"
+        },
+        diff
+      })
+    ).toEqual([
+      expect.objectContaining({
+        detector: "scope",
+        severity: "high",
+        message: "package.json changed during a small task but does not align with expected scope."
+      })
+    ]);
+  });
 });
 
 describe("detector runner with scope findings", () => {

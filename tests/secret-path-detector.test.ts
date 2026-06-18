@@ -123,6 +123,52 @@ index 57b22a0..cb3e0f1 100644
     expect(findings[0]?.evidence[0]?.message).not.toContain("service.internal");
   });
 
+  it("ignores local URL examples in documentation", () => {
+    const diff = parse(`diff --git a/readme.md b/readme.md
+index 57b22a0..cb3e0f1 100644
+--- a/readme.md
++++ b/readme.md
+@@ -1 +1,2 @@
++const baseUrl = process.env.BASE_URL ?? 'http://localhost:3000';
+`);
+
+    expect(secretPathDetector.run({ task, diff })).toEqual([]);
+  });
+
+  it("ignores local URL examples in tests", () => {
+    const diff = parse(`diff --git a/tests/config.test.ts b/tests/config.test.ts
+index 57b22a0..cb3e0f1 100644
+--- a/tests/config.test.ts
++++ b/tests/config.test.ts
+@@ -1 +1,2 @@
++expect(getBaseUrl()).toBe('http://localhost:3000');
+`);
+
+    expect(secretPathDetector.run({ task, diff })).toEqual([]);
+  });
+
+  it("still emits blocker token findings in documentation", () => {
+    const fakeToken = ["ghp_", "abcdefghijklmnopqrstuvwxyz123456"].join("");
+    const diff = parse(`diff --git a/readme.md b/readme.md
+index 57b22a0..cb3e0f1 100644
+--- a/readme.md
++++ b/readme.md
+@@ -1 +1,2 @@
++GITHUB_TOKEN=${fakeToken}
+`);
+
+    expect(secretPathDetector.run({ task, diff })).toEqual([
+      expect.objectContaining({
+        severity: "blocker",
+        title: "Possible hardcoded secret added"
+      }),
+      expect.objectContaining({
+        severity: "blocker",
+        title: "Provider token pattern added"
+      })
+    ]);
+  });
+
   it("ignores deleted secret-like lines", () => {
     const fakeSecret = ["super", "secretvalue12345"].join("");
     const diff = parse(`diff --git a/src/config.ts b/src/config.ts
