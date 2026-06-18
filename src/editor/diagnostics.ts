@@ -15,6 +15,7 @@ export interface EditorDiagnostic {
   source: "critical-gate";
   code: string;
   detector: string;
+  findingTitle: string;
   message: string;
   range: EditorDiagnosticRange;
   repair: string;
@@ -51,6 +52,7 @@ export function toEditorDiagnostic(
     source: "critical-gate",
     code: finding.id,
     detector: finding.detector,
+    findingTitle: finding.title,
     message: `${finding.title}: ${finding.message}\nRepair: ${finding.repair}`,
     range: {
       startLine: Math.max(0, (evidence.startLine ?? 1) - 1),

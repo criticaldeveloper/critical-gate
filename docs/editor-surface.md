@@ -45,6 +45,15 @@ Editor diagnostics are intentionally quiet:
 Diagnostics are created only when finding evidence has a file path. The diagnostic message includes
 the finding title, explanation, and repair text.
 
+## Quick Actions
+
+The VS Code scaffold registers quick fixes for Critical Gate diagnostics:
+
+- `Critical Gate: Open evidence` opens the evidence file and selects the reported line range.
+- `Critical Gate: Copy repair text` copies the finding repair guidance to the clipboard.
+
+The diagnostic code link also opens the evidence location when VS Code renders it as a command URI.
+
 ## Local Build
 
 Build the root CLI before running the extension:
@@ -65,6 +74,5 @@ Before packaging this as a marketplace extension:
 1. Add an extension test harness with VS Code's extension test runner.
 2. Reuse the core editor mapper directly from a packaged module instead of keeping the scaffold
    self-contained.
-3. Add commands that open evidence files and copy repair text.
-4. Tune refresh behavior so diagnostics run on demand or after explicit save, not continuously.
-5. Add packaging metadata and a VSIX release workflow.
+3. Tune refresh behavior so diagnostics run on demand or after explicit save, not continuously.
+4. Add packaging metadata and a VSIX release workflow.

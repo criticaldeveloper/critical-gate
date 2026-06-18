@@ -6,6 +6,7 @@ import * as vscode from "vscode";
 
 const execFileAsync = promisify(execFile);
 const diagnosticSource = "critical-gate";
+const diagnosticPayloads = new Map<string, CriticalGateDiagnosticPayload>();
 
 interface GateResult {
   findings: Finding[];
@@ -31,6 +32,16 @@ interface FindingEvidence {
   endLine?: number;
 }
 
+interface CriticalGateDiagnosticPayload {
+  findingId: string;
+  detector: string;
+  title: string;
+  repair: string;
+  evidencePath: string;
+  startLine?: number;
+  endLine?: number;
+}
+
 export function activate(context: vscode.ExtensionContext): void {
   const diagnostics = vscode.languages.createDiagnosticCollection(diagnosticSource);
   const runCommand = vscode.commands.registerCommand("criticalGate.runCheck", async () => {
@@ -39,8 +50,35 @@ export function activate(context: vscode.ExtensionContext): void {
   const clearCommand = vscode.commands.registerCommand("criticalGate.clearDiagnostics", () => {
     diagnostics.clear();
   });
+  const openEvidenceCommand = vscode.commands.registerCommand(
+    "criticalGate.openEvidence",
+    async (payload: CriticalGateDiagnosticPayload) => {
+      await openEvidence(payload);
+    }
+  );
+  const copyRepairCommand = vscode.commands.registerCommand(
+    "criticalGate.copyRepair",
+    async (payload: CriticalGateDiagnosticPayload) => {
+      await vscode.env.clipboard.writeText(payload.repair);
+      vscode.window.showInformationMessage("Critical Gate repair text copied.");
+    }
+  );
+  const codeActions = vscode.languages.registerCodeActionsProvider(
+    { scheme: "file" },
+    new CriticalGateCodeActionProvider(),
+    {
+      providedCodeActionKinds: [vscode.CodeActionKind.QuickFix]
+    }
+  );
 
-  context.subscriptions.push(diagnostics, runCommand, clearCommand);
+  context.subscriptions.push(
+    diagnostics,
+    runCommand,
+    clearCommand,
+    openEvidenceCommand,
+    copyRepairCommand,
+    codeActions
+  );
 }
 
 export function deactivate(): void {
@@ -132,12 +170,13 @@ function applyDiagnostics(
   result: GateResult
 ): void {
   diagnostics.clear();
+  diagnosticPayloads.clear();
 
   const grouped = new Map<string, vscode.Diagnostic[]>();
 
   for (const finding of result.findings) {
     for (const evidence of finding.evidence) {
-      if (evidence.path === undefined) {
+      if (!hasEvidencePath(evidence)) {
         continue;
       }
 
@@ -152,14 +191,25 @@ function applyDiagnostics(
   }
 }
 
-function toDiagnostic(finding: Finding, evidence: FindingEvidence): vscode.Diagnostic {
+function toDiagnostic(
+  finding: Finding,
+  evidence: FindingEvidence & { path: string }
+): vscode.Diagnostic {
   const diagnostic = new vscode.Diagnostic(
     toRange(evidence),
     `${finding.title}: ${finding.message}\nRepair: ${finding.repair}`,
     toDiagnosticSeverity(finding.severity)
   );
   diagnostic.source = diagnosticSource;
-  diagnostic.code = `${finding.detector}/${finding.id}`;
+  const payload = toDiagnosticPayload(finding, evidence);
+  const code = toDiagnosticCode(payload);
+  diagnosticPayloads.set(code, payload);
+  diagnostic.code = {
+    value: code,
+    target: vscode.Uri.parse(
+      `command:criticalGate.openEvidence?${encodeURIComponent(JSON.stringify([payload]))}`
+    )
+  };
 
   return diagnostic;
 }
@@ -189,6 +239,107 @@ function toDiagnosticSeverity(severity: Finding["severity"]): vscode.DiagnosticS
 
 function resolveWorkspacePath(folder: vscode.WorkspaceFolder, configuredPath: string): string {
   return isAbsolute(configuredPath) ? configuredPath : join(folder.uri.fsPath, configuredPath);
+}
+
+function hasEvidencePath(
+  evidence: FindingEvidence
+): evidence is FindingEvidence & { path: string } {
+  return evidence.path !== undefined && evidence.path.length > 0;
+}
+
+function toDiagnosticPayload(
+  finding: Finding,
+  evidence: FindingEvidence & { path: string }
+): CriticalGateDiagnosticPayload {
+  return {
+    findingId: finding.id,
+    detector: finding.detector,
+    title: finding.title,
+    repair: finding.repair,
+    evidencePath: evidence.path,
+    startLine: evidence.startLine,
+    endLine: evidence.endLine
+  };
+}
+
+async function openEvidence(payload: CriticalGateDiagnosticPayload): Promise<void> {
+  const folder = vscode.workspace.workspaceFolders?.[0];
+
+  if (folder === undefined) {
+    vscode.window.showWarningMessage("Critical Gate requires an open workspace folder.");
+    return;
+  }
+
+  const uri = vscode.Uri.file(join(folder.uri.fsPath, payload.evidencePath));
+  const document = await vscode.workspace.openTextDocument(uri);
+  const editor = await vscode.window.showTextDocument(document);
+  const range = toRange(payload);
+
+  editor.selection = new vscode.Selection(range.start, range.end);
+  editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
+}
+
+class CriticalGateCodeActionProvider implements vscode.CodeActionProvider {
+  provideCodeActions(
+    _document: vscode.TextDocument,
+    _range: vscode.Range | vscode.Selection,
+    context: vscode.CodeActionContext
+  ): vscode.CodeAction[] {
+    return context.diagnostics.filter(isCriticalGateDiagnostic).flatMap((diagnostic) => {
+      const payload = getDiagnosticPayload(diagnostic);
+
+      if (payload === undefined) {
+        return [];
+      }
+
+      const openEvidence = new vscode.CodeAction(
+        "Critical Gate: Open evidence",
+        vscode.CodeActionKind.QuickFix
+      );
+      openEvidence.command = {
+        command: "criticalGate.openEvidence",
+        title: "Critical Gate: Open evidence",
+        arguments: [payload]
+      };
+      openEvidence.diagnostics = [diagnostic];
+
+      const copyRepair = new vscode.CodeAction(
+        "Critical Gate: Copy repair text",
+        vscode.CodeActionKind.QuickFix
+      );
+      copyRepair.command = {
+        command: "criticalGate.copyRepair",
+        title: "Critical Gate: Copy repair text",
+        arguments: [payload]
+      };
+      copyRepair.diagnostics = [diagnostic];
+
+      return [openEvidence, copyRepair];
+    });
+  }
+}
+
+function isCriticalGateDiagnostic(diagnostic: vscode.Diagnostic): boolean {
+  return diagnostic.source === diagnosticSource;
+}
+
+function getDiagnosticPayload(
+  diagnostic: vscode.Diagnostic
+): CriticalGateDiagnosticPayload | undefined {
+  if (typeof diagnostic.code !== "object" || diagnostic.code === null) {
+    return undefined;
+  }
+
+  return diagnosticPayloads.get(String(diagnostic.code.value));
+}
+
+function toDiagnosticCode(payload: CriticalGateDiagnosticPayload): string {
+  return [
+    payload.detector,
+    payload.findingId,
+    payload.evidencePath,
+    String(payload.startLine ?? 1)
+  ].join("/");
 }
 
 function isCliFindingFailure(error: unknown): error is { code: number; stdout: string } {

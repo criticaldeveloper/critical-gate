@@ -26,6 +26,14 @@
       {
         "command": "criticalGate.clearDiagnostics",
         "title": "Critical Gate: Clear Diagnostics"
+      },
+      {
+        "command": "criticalGate.openEvidence",
+        "title": "Critical Gate: Open Evidence"
+      },
+      {
+        "command": "criticalGate.copyRepair",
+        "title": "Critical Gate: Copy Repair Text"
       }
     ],
     "configuration": {

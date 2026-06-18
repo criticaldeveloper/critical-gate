@@ -55,6 +55,7 @@ describe("editor diagnostics", () => {
       source: "critical-gate",
       code: "test-weakening-001",
       detector: "test-weakening",
+      findingTitle: "Assertion removed",
       range: {
         startLine: 23,
         startColumn: 0,
