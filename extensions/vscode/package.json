@@ -52,14 +52,40 @@
   },
   "main": "./dist/extensions/vscode/src/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "criticalGate",
+          "title": "Critical Gate",
+          "icon": "resources/activity-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "criticalGate": [
+        {
+          "id": "criticalGate.dashboard",
+          "name": "Gate Runs",
+          "type": "webview"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "criticalGate.runCheck",
         "title": "Critical Gate: Run Check"
       },
       {
+        "command": "criticalGate.showReport",
+        "title": "Critical Gate: Show Report"
+      },
+      {
         "command": "criticalGate.clearDiagnostics",
         "title": "Critical Gate: Clear Diagnostics"
+      },
+      {
+        "command": "criticalGate.openSettings",
+        "title": "Critical Gate: Open Settings"
       },
       {
         "command": "criticalGate.openEvidence",

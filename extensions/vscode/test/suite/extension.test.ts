@@ -15,7 +15,9 @@ async function activatesCommandContributions(): Promise<void> {
   const commands = await vscode.commands.getCommands(true);
 
   assert.ok(commands.includes("criticalGate.runCheck"));
+  assert.ok(commands.includes("criticalGate.showReport"));
   assert.ok(commands.includes("criticalGate.clearDiagnostics"));
+  assert.ok(commands.includes("criticalGate.openSettings"));
   assert.ok(commands.includes("criticalGate.openEvidence"));
   assert.ok(commands.includes("criticalGate.copyRepair"));
 }

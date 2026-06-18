@@ -9,13 +9,19 @@ Installation steps live in `docs/installation.md`.
 The prototype has two layers:
 
 - `src/editor`: dependency-free mapping from Critical Gate findings to editor diagnostic data.
-- `extensions/vscode`: VS Code extension scaffold that runs the built CLI and publishes diagnostics
-  to the Problems panel.
+- `extensions/vscode`: VS Code extension scaffold that runs the built CLI, publishes diagnostics to
+  the Problems panel, and renders an Activity Bar dashboard for local gate runs.
 
 The extension command is:
 
 ```text
 Critical Gate: Run Check
+```
+
+The Activity Bar view is:
+
+```text
+Critical Gate > Gate Runs
 ```
 
 It runs:
@@ -60,6 +66,16 @@ The VS Code scaffold registers quick fixes for Critical Gate diagnostics:
 - `Critical Gate: Copy repair text` copies the finding repair guidance to the clipboard.
 
 The diagnostic code link also opens the evidence location when VS Code renders it as a command URI.
+
+## Run Dashboard
+
+The Activity Bar dashboard shows the latest run decision, changed-file count, finding count, Diff
+Cost Score, finding cards, changed files, and recent run history. It also provides actions to run
+the gate, open the full report output channel, clear diagnostics, open settings, open finding
+evidence, and copy repair text.
+
+The dashboard consumes the same `GateResult` JSON as diagnostics. It does not introduce editor-only
+detectors or reinterpret the repository independently from the CLI.
 
 ## Local Build
 

@@ -8,7 +8,11 @@ dependencies, and expected blast radius.
 
 ## Features
 
+- Use the Critical Gate Activity Bar view to run checks, inspect the latest run, review changed
+  files, and revisit recent gate runs.
 - Run Critical Gate from the Command Palette with `Critical Gate: Run Check`.
+- Show the full run report in the `Critical Gate` output channel.
+- See pass/fail state in the VS Code status bar.
 - Show findings in the Problems panel with file, line, severity, and detector context.
 - Open evidence locations from diagnostics.
 - Copy repair guidance for Codex or another coding agent.
@@ -36,5 +40,5 @@ By default, the extension runs `dist/cli.js` from the workspace root. Change
 
 ## Status
 
-This is an alpha diagnostics surface for Critical Gate. Expect the CLI and finding schema to evolve
-before the first stable release.
+This extension is a local diagnostics and run-visibility surface for Critical Gate. The CLI remains
+the source of truth for detector behavior and output schemas.
