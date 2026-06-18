@@ -2,7 +2,7 @@
   "name": "critical-gate",
   "displayName": "Critical Gate",
   "description": "Repository-aware diff integrity diagnostics for AI-generated code changes.",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "publisher": "criticaldeveloper",
   "license": "MIT",
   "repository": {
@@ -14,7 +14,6 @@
     "url": "https://github.com/criticaldeveloper/critical-gate/issues"
   },
   "type": "module",
-  "preview": true,
   "galleryBanner": {
     "color": "#0B1220",
     "theme": "dark"
