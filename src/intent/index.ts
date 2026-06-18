@@ -15,3 +15,8 @@ export {
   type IntentVerb,
   type TargetArea
 } from "./intent-model.js";
+export {
+  classifyObservedDiffActions,
+  type ObservedChangeClassEvidence,
+  type ObservedDiffActions
+} from "./observed-actions.js";
