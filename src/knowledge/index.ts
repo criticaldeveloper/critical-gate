@@ -20,6 +20,11 @@ export {
   type BuildSolutionIndexOptions,
   type SolutionIndexRunner
 } from "./solution-index.js";
+export {
+  createLazyKnowledgeProvider,
+  type CreateLazyKnowledgeProviderOptions,
+  type KnowledgeProviderRunner
+} from "./provider.js";
 export { createEmptySymbolIndex, createSymbolIndex } from "./symbol-index.js";
 export type {
   CompanionRule,
@@ -30,6 +35,7 @@ export type {
   HistoryIndex,
   KnowledgeCacheKey,
   KnowledgeIndexKind,
+  KnowledgeProvider,
   KnowledgeRequest,
   RepositoryKnowledge,
   SolutionClass,

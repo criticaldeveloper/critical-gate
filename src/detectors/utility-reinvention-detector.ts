@@ -8,7 +8,10 @@ const utilityPathPattern = /(^|\/)(utils?|helpers?|lib|shared)\//i;
 export const utilityReinventionDetector: Detector = {
   name: "utility-reinvention",
   run: ({ diff, context }) => {
-    const existingUtilities = context?.utilityIndex?.utilities ?? [];
+    const existingUtilities =
+      context?.utilityIndex?.utilities ??
+      context?.knowledge?.getSolutionIndex().utilityIndex?.utilities ??
+      [];
 
     if (existingUtilities.length === 0) {
       return [];

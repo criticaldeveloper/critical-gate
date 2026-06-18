@@ -2,9 +2,10 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import type { DiffFile } from "../schema/index.js";
+import type { KnowledgeProvider } from "../knowledge/index.js";
+import type { DiffFile, RepositoryProfile, UtilityIndex } from "../schema/index.js";
 
-import { buildRepositoryProfile, buildUtilityIndex } from "../repository/index.js";
+import { createLazyKnowledgeProvider } from "../knowledge/index.js";
 import { classifyPath, detectLanguage } from "./path-classifier.js";
 import { parseUnifiedDiff } from "./parse-unified-diff.js";
 
@@ -24,8 +25,9 @@ export interface GitDiffResult {
   baseRef?: string;
   headRef?: string;
   files: DiffFile[];
-  repositoryProfile?: ReturnType<typeof buildRepositoryProfile>;
-  utilityIndex?: ReturnType<typeof buildUtilityIndex>;
+  knowledge?: KnowledgeProvider;
+  repositoryProfile?: RepositoryProfile;
+  utilityIndex?: UtilityIndex;
 }
 
 const defaultRunner: GitCommandRunner = {
@@ -51,16 +53,13 @@ export function readGitDiff(options: ReadGitDiffOptions = {}): GitDiffResult {
   const diffText = runner.execFile("git", diffArgs, { cwd: root });
   const trackedFiles = parseUnifiedDiff(diffText);
   const untrackedFiles = baseRef === undefined ? readUntrackedFiles(root, runner) : [];
-  const repositoryProfile = buildRepositoryProfile({ root, runner });
-  const utilityIndex = buildUtilityIndex({ root, runner });
 
   return {
     root,
     baseRef,
     headRef,
     files: [...trackedFiles, ...untrackedFiles],
-    repositoryProfile,
-    utilityIndex
+    knowledge: createLazyKnowledgeProvider({ root, runner })
   };
 }
 

@@ -218,7 +218,16 @@ function createGateResult(
       headRef: diffResult.headRef
     }
   };
-  const findings = runDetectors(task, diff, context);
+  const detectorContext = {
+    ...context,
+    knowledge: diffResult.knowledge
+  };
+  const findings = runDetectors(task, diff, detectorContext);
+  const loadedHistoryIndex = diffResult.knowledge?.getLoadedHistoryIndex?.();
+  const loadedSolutionIndex = diffResult.knowledge?.getLoadedSolutionIndex?.();
+
+  context.repositoryProfile ??= loadedHistoryIndex?.profile;
+  context.utilityIndex ??= loadedSolutionIndex?.utilityIndex;
 
   return {
     schemaVersion: GATE_RESULT_SCHEMA_VERSION,

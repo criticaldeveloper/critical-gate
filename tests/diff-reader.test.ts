@@ -154,13 +154,20 @@ describe("readGitDiff", () => {
     expect(result.baseRef).toBe("main");
     expect(result.headRef).toBe("feature/diff-reader");
     expect(result.files).toHaveLength(5);
-    expect(result.repositoryProfile).toMatchObject({
+    expect(result.repositoryProfile).toBeUndefined();
+    expect(result.utilityIndex).toBeUndefined();
+    expect(calls).toContainEqual(["diff", "--no-ext-diff", "--no-color", "main...HEAD", "--"]);
+    expect(calls).not.toContainEqual(["ls-files"]);
+    expect(calls.some((args) => args[0] === "log")).toBe(false);
+
+    expect(result.knowledge?.getHistoryIndex().profile).toMatchObject({
       commitCount: 1
     });
-    expect(result.utilityIndex).toEqual({
+    expect(result.knowledge?.getSolutionIndex().utilityIndex).toEqual({
       utilities: [{ path: "src/utils/date.ts", exportedNames: ["formatDate"] }]
     });
-    expect(calls).toContainEqual(["diff", "--no-ext-diff", "--no-color", "main...HEAD", "--"]);
+    expect(calls).toContainEqual(["ls-files"]);
+    expect(calls.some((args) => args[0] === "log")).toBe(true);
   });
 
   it("uses HEAD and includes untracked files for working-tree checks", () => {
@@ -183,14 +190,6 @@ describe("readGitDiff", () => {
 
         if (args.join(" ") === "ls-files --others --exclude-standard") {
           return "src/new-detector.ts\n";
-        }
-
-        if (args[0] === "log") {
-          return "__COMMIT__\nsrc/signup.ts\ntests/signup.test.ts\n";
-        }
-
-        if (args.join(" ") === "ls-files") {
-          return "";
         }
 
         throw new Error(`Unexpected git args: ${args.join(" ")}`);

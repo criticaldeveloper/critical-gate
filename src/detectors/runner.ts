@@ -10,7 +10,7 @@ import { secretPathDetector } from "./secret-path-detector.js";
 import { scopeDetector } from "./scope-detector.js";
 import { testWeakeningDetector } from "./test-weakening-detector.js";
 import { utilityReinventionDetector } from "./utility-reinvention-detector.js";
-import type { Detector } from "./types.js";
+import type { Detector, DetectorRepoContext } from "./types.js";
 
 const defaultDetectors: Detector[] = [
   dependencyDetector,
@@ -27,7 +27,7 @@ const defaultDetectors: Detector[] = [
 export function runDetectors(
   task: TaskIntent,
   diff: GateResult["diff"],
-  context?: GateResult["context"],
+  context?: DetectorRepoContext,
   detectors = defaultDetectors
 ): Finding[] {
   return detectors.flatMap((detector) => detector.run({ task, diff, context }));

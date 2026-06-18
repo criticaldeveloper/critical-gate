@@ -5,7 +5,7 @@ import type { Detector } from "./types.js";
 export const repositoryIntelligenceDetector: Detector = {
   name: "repository-intelligence",
   run: ({ diff, context }) => {
-    const profile = context?.repositoryProfile;
+    const profile = context?.repositoryProfile ?? context?.knowledge?.getHistoryIndex().profile;
 
     if (profile === undefined || profile.commitCount < profile.minConfidenceCommitCount) {
       return [];

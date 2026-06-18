@@ -32,6 +32,13 @@ export interface RepositoryKnowledge {
   solutions: SolutionIndex;
 }
 
+export interface KnowledgeProvider {
+  getHistoryIndex: () => HistoryIndex;
+  getSolutionIndex: () => SolutionIndex;
+  getLoadedHistoryIndex?: () => HistoryIndex | undefined;
+  getLoadedSolutionIndex?: () => SolutionIndex | undefined;
+}
+
 export interface FileGraph {
   nodes: FileGraphNode[];
   edges: FileGraphEdge[];
