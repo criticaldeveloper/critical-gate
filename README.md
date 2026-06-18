@@ -91,3 +91,7 @@ under `extensions/vscode`.
 
 The current release target is `0.1.0-alpha.0`: suitable for internal alpha dogfooding, not yet a
 public stable release.
+
+## License
+
+Critical Gate is open source under the MIT License.

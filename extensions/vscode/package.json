@@ -4,7 +4,7 @@
   "description": "VS Code diagnostics prototype for Critical Gate findings.",
   "version": "0.1.0-alpha.0",
   "publisher": "critical-gate",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "type": "module",
   "keywords": [
     "ai",

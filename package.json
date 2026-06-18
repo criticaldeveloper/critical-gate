@@ -30,7 +30,7 @@
     "quality-gate",
     "code-review"
   ],
-  "license": "UNLICENSED",
+  "license": "MIT",
   "engines": {
     "node": ">=20"
   },

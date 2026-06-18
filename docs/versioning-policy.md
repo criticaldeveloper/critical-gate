@@ -14,7 +14,7 @@ This means:
 - Not a stable public API promise.
 - Finding behavior, CLI options, output fields, and extension settings may still change.
 - Release artifacts should be produced and tested, but Marketplace or package-registry publishing
-  should wait until license, repository metadata, and external dogfooding are settled.
+  should wait until repository metadata and external dogfooding are settled.
 
 ## Versioned Artifacts
 
@@ -91,7 +91,6 @@ Do not tag directly from a dirty working tree.
 
 Before a public `0.1.0` release, complete:
 
-- Decide and document the license.
 - Add real repository, issue, and homepage metadata.
 - Run all GitHub workflows remotely.
 - Dogfood on at least one separate repository and document noisy findings.

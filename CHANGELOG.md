@@ -33,11 +33,12 @@ Initial internal alpha candidate for Critical Gate.
   on-demand refresh, optional on-save refresh, extension-host tests, and VSIX artifact packaging.
 - AI-agent documentation covering architecture, detectors, roadmap, Codex integration, GitHub
   integration, editor surface, evaluation strategy, and release policy.
+- MIT License for root package and VS Code extension package.
 
 ### Release Status
 
 - Intended audience: internal alpha users and dogfooding repositories.
 - Distribution: local CLI build, local Codex hook, GitHub Action from this repository, and VSIX
   artifact from `pnpm package:vscode` or the VS Code extension workflow.
-- Not yet public-release ready: no public license, no remote repository metadata, no Marketplace
-  publishing credentials, and no dogfood precision report from an external repository.
+- Not yet public-release ready: no remote repository metadata, no Marketplace publishing
+  credentials, and no dogfood precision report from an external repository.
