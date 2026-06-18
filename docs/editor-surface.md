@@ -27,7 +27,7 @@ Critical Gate > Gate Runs
 It runs:
 
 ```bash
-node dist/cli.js check --task "<task>" --format json
+node <bundled-analyzer>/dist/cli.js check --task "<task>" --format json
 ```
 
 When `criticalGate.base` is configured, the command also passes `--base <ref>`.
@@ -38,7 +38,7 @@ The VS Code scaffold contributes these settings:
 
 - `criticalGate.task`: task intent passed to the CLI. If empty, the extension asks before running.
 - `criticalGate.base`: optional git base ref or SHA.
-- `criticalGate.cliPath`: path to the built CLI, defaulting to `dist/cli.js` in the workspace.
+- `criticalGate.cliPath`: optional path to a custom built CLI. Empty uses the bundled analyzer.
 - `criticalGate.refreshMode`: `manual` by default, or `onSave` to refresh after explicit saves.
 - `criticalGate.refreshDebounceMs`: debounce delay for on-save refreshes, defaulting to 1200 ms.
 

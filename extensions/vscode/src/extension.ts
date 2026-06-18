@@ -36,6 +36,7 @@ interface RunRecord {
 }
 
 interface RefreshState {
+  extensionUri: vscode.Uri;
   diagnostics: vscode.DiagnosticCollection;
   output: vscode.OutputChannel;
   statusBar: vscode.StatusBarItem;
@@ -58,6 +59,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
   const dashboard = new CriticalGateDashboardProvider(context.extensionUri);
   const refreshState: RefreshState = {
+    extensionUri: context.extensionUri,
     diagnostics,
     output,
     statusBar,
@@ -174,7 +176,7 @@ async function runCriticalGate(state: RefreshState, reason: RunReason): Promise<
     state.statusBar.tooltip = "Critical Gate is running.";
     state.dashboard.update(toDashboardState(state));
 
-    const result = await runCli(folder, task);
+    const result = await runCli(folder, task, state.extensionUri);
     const report = renderReport(result);
     state.lastResult = result;
     state.lastReport = report;
@@ -243,9 +245,13 @@ async function resolveTask(): Promise<string | undefined> {
   });
 }
 
-async function runCli(folder: vscode.WorkspaceFolder, task: string): Promise<GateResult> {
+async function runCli(
+  folder: vscode.WorkspaceFolder,
+  task: string,
+  extensionUri: vscode.Uri
+): Promise<GateResult> {
   const config = vscode.workspace.getConfiguration("criticalGate");
-  const cliPath = resolveWorkspacePath(folder, config.get<string>("cliPath", "dist/cli.js"));
+  const cliPath = resolveCliPath(folder, extensionUri, config.get<string>("cliPath", "").trim());
   const base = config.get<string>("base", "").trim();
   const args = [cliPath, "check", "--task", task, "--format", "json"];
 
@@ -331,7 +337,15 @@ function toDiagnosticSeverity(severity: EditorDiagnostic["severity"]): vscode.Di
   return vscode.DiagnosticSeverity.Hint;
 }
 
-function resolveWorkspacePath(folder: vscode.WorkspaceFolder, configuredPath: string): string {
+function resolveCliPath(
+  folder: vscode.WorkspaceFolder,
+  extensionUri: vscode.Uri,
+  configuredPath: string
+): string {
+  if (configuredPath.length === 0) {
+    return vscode.Uri.joinPath(extensionUri, "analyzer", "dist", "cli.js").fsPath;
+  }
+
   return isAbsolute(configuredPath) ? configuredPath : join(folder.uri.fsPath, configuredPath);
 }
 

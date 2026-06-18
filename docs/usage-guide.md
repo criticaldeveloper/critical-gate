@@ -168,7 +168,7 @@ Install the latest local VSIX:
 code --install-extension C:\dev\critical-gate\artifacts\vscode\critical-gate-vscode.vsix --force
 ```
 
-Open a repository that has the Critical Gate CLI built, then use:
+Open any local git repository, then use:
 
 - Activity Bar: `Critical Gate > Gate Runs`.
 - Command Palette: `Critical Gate: Run Check`.
@@ -189,7 +189,7 @@ Useful settings:
 
 - `criticalGate.task`: preset task intent so runs do not prompt.
 - `criticalGate.base`: base ref or SHA.
-- `criticalGate.cliPath`: path to `dist/cli.js`.
+- `criticalGate.cliPath`: optional custom CLI path. Leave empty to use the bundled analyzer.
 - `criticalGate.refreshMode`: `manual` or `onSave`.
 - `criticalGate.refreshDebounceMs`: debounce for save-triggered runs.
 
@@ -260,7 +260,8 @@ Build the CLI in the opened workspace:
 pnpm build
 ```
 
-If the CLI is not at `dist/cli.js`, set `criticalGate.cliPath`.
+Marketplace installs use the bundled analyzer by default. Set `criticalGate.cliPath` only when
+testing a custom local CLI build.
 
 ### The dashboard asks for task intent every run
 

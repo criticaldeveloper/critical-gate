@@ -1,8 +1,8 @@
 # Installation
 
 Critical Gate currently supports source-based CLI and action installation, local Codex hook setup,
-and a packaged VS Code extension VSIX. The root CLI package remains on the alpha release line while
-the VS Code extension uses Marketplace-compatible numeric versions.
+and a self-contained VS Code extension VSIX. The root CLI package remains on the alpha release line
+while the VS Code extension uses Marketplace-compatible numeric versions.
 
 ## Requirements
 
@@ -196,15 +196,8 @@ Or in VS Code:
 
 After installing:
 
-1. Build the CLI in the workspace where Critical Gate is installed:
-
-   ```bash
-   pnpm build
-   ```
-
-2. Configure `criticalGate.cliPath` if the CLI is not at `dist/cli.js` relative to the workspace.
-
-3. Open the `Critical Gate` Activity Bar view or run `Critical Gate: Run Check`.
+1. Open a local git repository in VS Code.
+2. Open the `Critical Gate` Activity Bar view or run `Critical Gate: Run Check`.
 
 The extension provides a `Gate Runs` dashboard, Problems diagnostics, a `Critical Gate` output
 channel report, evidence navigation, repair-copy actions, and status bar pass/fail state.
@@ -213,6 +206,7 @@ Optional settings:
 
 - `criticalGate.task`: task intent to avoid prompting.
 - `criticalGate.base`: git base ref or SHA.
+- `criticalGate.cliPath`: optional custom CLI path. Leave empty to use the bundled analyzer.
 - `criticalGate.refreshMode`: `manual` or `onSave`.
 - `criticalGate.refreshDebounceMs`: on-save debounce delay.
 

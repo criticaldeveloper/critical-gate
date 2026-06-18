@@ -2,6 +2,14 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 1.1.0 - 2026-06-18
+
+Self-contained Marketplace package.
+
+- Bundle the Critical Gate analyzer inside the VSIX.
+- Run the bundled analyzer by default so users do not need a local Critical Gate source checkout.
+- Keep `criticalGate.cliPath` as an advanced override for testing a custom CLI build.
+
 ## 1.0.1 - 2026-06-18
 
 Patch Marketplace package for the renamed `critical-gate-vscode` extension ID.

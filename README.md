@@ -184,8 +184,8 @@ The extension adds:
 - Status bar pass/fail state.
 - Full Markdown-style report in the `Critical Gate` output channel.
 
-By default, the extension runs `dist/cli.js` from the opened workspace. Configure
-`criticalGate.cliPath` if the CLI lives somewhere else.
+The Marketplace extension bundles the analyzer, so users do not need to clone this repository to use
+the VS Code surface. Configure `criticalGate.cliPath` only when testing a custom local CLI build.
 
 ## Usage Guide
 

@@ -1,6 +1,7 @@
 node_modules/
 dist/
 extensions/vscode/dist/
+extensions/vscode/analyzer/
 .vscode-test/
 artifacts/
 coverage/

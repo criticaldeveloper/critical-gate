@@ -25,6 +25,7 @@ async function activatesCommandContributions(): Promise<void> {
 async function contributesManualRefreshDefaults(): Promise<void> {
   const config = vscode.workspace.getConfiguration("criticalGate");
 
+  assert.equal(config.get("cliPath"), "");
   assert.equal(config.get("refreshMode"), "manual");
   assert.equal(config.get("refreshDebounceMs"), 1200);
 }

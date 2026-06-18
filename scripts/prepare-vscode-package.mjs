@@ -5,4 +5,5 @@ import { fileURLToPath } from "node:url";
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 
 rmSync(join(root, "extensions", "vscode", "dist"), { recursive: true, force: true });
+rmSync(join(root, "extensions", "vscode", "analyzer"), { recursive: true, force: true });
 mkdirSync(join(root, "artifacts", "vscode"), { recursive: true });

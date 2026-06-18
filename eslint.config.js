@@ -7,6 +7,7 @@ export default tseslint.config(
       "dist/**",
       ".vscode-test/**",
       "extensions/vscode/dist/**",
+      "extensions/vscode/analyzer/**",
       "extensions/vscode/test/**",
       "coverage/**",
       "node_modules/**"

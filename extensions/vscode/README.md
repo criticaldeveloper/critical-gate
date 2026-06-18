@@ -20,21 +20,17 @@ dependencies, and expected blast radius.
 
 ## Requirements
 
-Critical Gate must be available in the opened workspace. For source checkouts, build the CLI first:
+The extension bundles the Critical Gate analyzer, so Marketplace users do not need to clone or build
+the `critical-gate` repository.
 
-```bash
-pnpm install --frozen-lockfile
-pnpm build
-```
-
-By default, the extension runs `dist/cli.js` from the workspace root. Change
-`criticalGate.cliPath` if your workspace uses another path.
+The opened workspace must be a local git repository. Configure `criticalGate.cliPath` only when you
+want to test a custom local Critical Gate CLI build.
 
 ## Settings
 
 - `criticalGate.task`: task intent passed to Critical Gate.
 - `criticalGate.base`: optional git base ref or SHA.
-- `criticalGate.cliPath`: path to the built Critical Gate CLI.
+- `criticalGate.cliPath`: optional path to a custom Critical Gate CLI. Empty uses the bundled analyzer.
 - `criticalGate.refreshMode`: `manual` or `onSave`.
 - `criticalGate.refreshDebounceMs`: debounce for save-triggered checks.
 
