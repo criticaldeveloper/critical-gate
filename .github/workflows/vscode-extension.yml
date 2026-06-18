@@ -1,6 +1,7 @@
 name: VS Code Extension
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - ".github/workflows/vscode-extension.yml"

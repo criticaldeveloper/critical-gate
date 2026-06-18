@@ -84,7 +84,7 @@ runs:
           --output "$CRITICAL_GATE_OUTPUT"
         )
 
-        if [ -n "$CRITICAL_GATE_BASE" ]; then
+        if [ -n "$CRITICAL_GATE_BASE" ] && [[ ! "$CRITICAL_GATE_BASE" =~ ^0+$ ]]; then
           args+=(--base "$CRITICAL_GATE_BASE")
         fi
 

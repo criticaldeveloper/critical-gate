@@ -1,6 +1,7 @@
 name: Critical Gate
 
 on:
+  workflow_dispatch:
   pull_request:
   push:
     branches:
@@ -16,6 +17,9 @@ jobs:
   critical-gate:
     name: Diff integrity gate
     runs-on: ubuntu-latest
+    env:
+      CRITICAL_GATE_TASK: ${{ github.event.pull_request.title || github.event.head_commit.message || github.workflow }}
+      CRITICAL_GATE_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
 
     steps:
       - name: Checkout
@@ -28,10 +32,42 @@ jobs:
         uses: ./
         continue-on-error: true
         with:
-          task: ${{ github.event.pull_request.title || github.event.head_commit.message || github.workflow }}
-          base: ${{ github.event.pull_request.base.sha || 'origin/main' }}
+          task: ${{ env.CRITICAL_GATE_TASK }}
+          base: ${{ env.CRITICAL_GATE_BASE }}
           format: sarif
           output: critical-gate.sarif
+
+      - name: Write Critical Gate summary
+        if: always()
+        shell: bash
+        run: |
+          set +e
+
+          args=(
+            check
+            --task "$CRITICAL_GATE_TASK"
+            --format markdown
+            --output critical-gate.md
+          )
+
+          if [ -n "$CRITICAL_GATE_BASE" ] && [[ ! "$CRITICAL_GATE_BASE" =~ ^0+$ ]]; then
+            args+=(--base "$CRITICAL_GATE_BASE")
+          fi
+
+          node dist/cli.js "${args[@]}"
+          status=$?
+
+          {
+            echo "## Critical Gate"
+            echo
+            echo "- Task: \`$CRITICAL_GATE_TASK\`"
+            echo "- Base: \`$CRITICAL_GATE_BASE\`"
+            echo "- CLI exit code: \`$status\`"
+            echo
+            cat critical-gate.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          exit 0
 
       - name: Upload SARIF
         if: always() && hashFiles('critical-gate.sarif') != ''
