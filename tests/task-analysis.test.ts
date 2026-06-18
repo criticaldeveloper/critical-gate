@@ -66,7 +66,7 @@ describe("task analysis", () => {
       text: "Document GitHub Action workflow setup"
     });
 
-    expect(model.allowedChangeClasses).toEqual(["ci", "docs", "source"]);
+    expect(model.allowedChangeClasses).toEqual(["ci", "docs"]);
     expect(model.forbiddenChangeClasses).not.toContain("ci");
   });
 
@@ -77,7 +77,7 @@ describe("task analysis", () => {
     });
 
     expect(model.verbs).toEqual(["bump"]);
-    expect(model.allowedChangeClasses).toEqual(["dependency", "docs", "source"]);
+    expect(model.allowedChangeClasses).toEqual(["dependency", "docs"]);
   });
 
   it("calculates higher diff cost for broad small-task diffs", () => {

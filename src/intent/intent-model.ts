@@ -97,7 +97,7 @@ function inferIntentVerbs(normalizedText: string): IntentVerb[] {
 }
 
 function inferAllowedChangeClasses(normalizedText: string): ChangeClass[] {
-  const classes = new Set<ChangeClass>(["source"]);
+  const classes = new Set<ChangeClass>();
 
   for (const entry of classTerms) {
     if (entry.terms.some((term) => hasTerm(normalizedText, term))) {
@@ -110,7 +110,17 @@ function inferAllowedChangeClasses(normalizedText: string): ChangeClass[] {
     classes.add("dependency");
   }
 
+  if (classes.size === 0 || hasCodeBearingClass(classes)) {
+    classes.add("source");
+  }
+
   return [...classes].sort();
+}
+
+function hasCodeBearingClass(classes: Set<ChangeClass>): boolean {
+  return ["api-surface", "data-model", "i18n", "telemetry", "ui"].some((changeClass) =>
+    classes.has(changeClass as ChangeClass)
+  );
 }
 
 function hasTerm(normalizedText: string, term: string): boolean {
