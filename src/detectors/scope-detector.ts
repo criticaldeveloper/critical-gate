@@ -75,6 +75,10 @@ function isUnexpectedForSmallTask(file: DiffFile, keywords: string[], taskText: 
     return false;
   }
 
+  if (file.status === "deleted" && !isDeletionAcknowledged(file, taskText, keywords)) {
+    return true;
+  }
+
   return keywords.length > 0 && !hasPathKeywordAlignment(file.path, keywords);
 }
 
@@ -104,6 +108,13 @@ function isRoleAlignedConfigOrManifestChange(
 function hasAnyTaskTerm(taskText: string, terms: string[]): boolean {
   const normalizedTask = taskText.toLowerCase();
   return terms.some((term) => normalizedTask.includes(term));
+}
+
+function isDeletionAcknowledged(file: DiffFile, taskText: string, keywords: string[]): boolean {
+  return (
+    hasAnyTaskTerm(taskText, ["delete", "deleted", "remove", "removed", "drop", "cleanup"]) &&
+    hasPathKeywordAlignment(file.path, keywords)
+  );
 }
 
 function isVersionOnlyReleaseManifestChange(file: DiffFile, taskText: string): boolean {
@@ -138,10 +149,13 @@ function toFinding(file: DiffFile, keywords: string[]): Finding {
   return {
     id: `scope:${file.path}`,
     detector: "scope",
-    severity: file.role === "source" ? "medium" : "high",
-    confidence: file.role === "source" ? 0.7 : 0.84,
-    title: "Unexpected file changed for small task",
-    message: `${file.path} changed during a small task but does not align with expected scope.`,
+    severity: file.role === "source" && file.status !== "deleted" ? "medium" : "high",
+    confidence: file.role === "source" && file.status !== "deleted" ? 0.7 : 0.84,
+    title:
+      file.status === "deleted"
+        ? "Unexpected file deleted for small task"
+        : "Unexpected file changed for small task",
+    message: `${file.path} ${file.status === "deleted" ? "was deleted" : "changed"} during a small task but does not align with expected scope.`,
     evidence: [
       {
         kind: "file",

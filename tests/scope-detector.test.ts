@@ -59,6 +59,59 @@ index 57b22a0..cb3e0f1 100644
     ]);
   });
 
+  it("emits high severity for deleted stylesheet files that do not match a small task", () => {
+    const diff = parse(`diff --git a/src/styles/typography.scss b/src/styles/typography.scss
+deleted file mode 100644
+index 57b22a0..0000000
+--- a/src/styles/typography.scss
++++ /dev/null
+@@ -1,3 +0,0 @@
+-.heading {
+-  font-weight: 600;
+-}
+`);
+
+    const findings = scopeDetector.run({
+      task: {
+        source: "cli",
+        text: "Fixed fonts"
+      },
+      diff
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        severity: "high",
+        title: "Unexpected file deleted for small task",
+        message:
+          "src/styles/typography.scss was deleted during a small task but does not align with expected scope."
+      })
+    ]);
+  });
+
+  it("does not emit for acknowledged deleted stylesheet files", () => {
+    const diff = parse(`diff --git a/src/styles/typography.scss b/src/styles/typography.scss
+deleted file mode 100644
+index 57b22a0..0000000
+--- a/src/styles/typography.scss
++++ /dev/null
+@@ -1,3 +0,0 @@
+-.heading {
+-  font-weight: 600;
+-}
+`);
+
+    expect(
+      scopeDetector.run({
+        task: {
+          source: "cli",
+          text: "Remove typography stylesheet"
+        },
+        diff
+      })
+    ).toEqual([]);
+  });
+
   it("does not emit for task-aligned source and test files", () => {
     const diff = parse(`diff --git a/src/signup.ts b/src/signup.ts
 index 57b22a0..cb3e0f1 100644

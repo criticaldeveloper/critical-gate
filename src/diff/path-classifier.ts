@@ -55,7 +55,7 @@ export function classifyPath(path: string): DiffFileRole {
     return "docs";
   }
 
-  if (/\.[cm]?[jt]sx?$/.test(normalizedPath)) {
+  if (/\.[cm]?[jt]sx?$/.test(normalizedPath) || /\.(css|scss|sass|less)$/.test(normalizedPath)) {
     return "source";
   }
 
@@ -81,6 +81,14 @@ export function detectLanguage(path: string): string | undefined {
       return "json";
     case "md":
       return "markdown";
+    case "css":
+      return "css";
+    case "scss":
+      return "scss";
+    case "sass":
+      return "sass";
+    case "less":
+      return "less";
     case "yml":
     case "yaml":
       return "yaml";
