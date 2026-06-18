@@ -17,6 +17,11 @@ const sourcePathPattern = /\.(?:[cm]?[jt]sx?)$/;
 const exportDeclarationPattern =
   /^\s*export\s+(?:async\s+)?(?:declare\s+)?(?:function|class|interface|type|enum|const|let|var)\s+([A-Za-z_$][\w$]*)/gm;
 const namedExportPattern = /^\s*export\s*\{([^}]+)\}/gm;
+const importTokenPattern = /^\s*(?:import|export)\s+(?:[^'"]+\s+from\s+)?["']([^"']+)["']/gm;
+const exportedFunctionPattern =
+  /^\s*export\s+(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(([^)]*)\)\s*(?::\s*([^{]+))?/m;
+const exportedConstFunctionPattern =
+  /^\s*export\s+const\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:\(([^)]*)\)|([A-Za-z_$][\w$]*))\s*(?::\s*([^=]+))?\s*=>/m;
 
 const solutionPathPatterns: Array<{ class: SolutionClass; pattern: RegExp }> = [
   { class: "utility", pattern: /(^|\/)(utils?|helpers?|lib|shared)\//i },
@@ -116,15 +121,22 @@ function toSolutionEntries(path: string, options: BuildSolutionIndexOptions): So
 
   const sourceText = options.runner.readFile?.(join(options.root, path)) ?? "";
   const exportedNames = extractExportedNames(sourceText);
+  const importTokens = extractImportTokens(sourceText);
 
-  return exportedNames.map((exportedName) => ({
-    path,
-    class: solutionClass,
-    normalizedName: normalizeName(exportedName),
-    exportedName,
-    importTokens: [],
-    domainTokens: pathToDomainTokens(path, exportedName)
-  }));
+  return exportedNames.map((exportedName) => {
+    const metadata = getExportMetadata(sourceText, exportedName);
+
+    return {
+      path,
+      class: solutionClass,
+      normalizedName: normalizeName(exportedName),
+      exportedName,
+      arity: metadata.arity,
+      returnType: metadata.returnType,
+      importTokens,
+      domainTokens: pathToDomainTokens(path, exportedName)
+    };
+  });
 }
 
 function classifySolutionPath(path: string): SolutionClass | undefined {
@@ -133,6 +145,80 @@ function classifySolutionPath(path: string): SolutionClass | undefined {
 
 function normalizeName(name: string): string {
   return name.toLowerCase().replaceAll(/[^a-z0-9]/g, "");
+}
+
+function extractImportTokens(sourceText: string): string[] {
+  const tokens = new Set<string>();
+
+  for (const match of sourceText.matchAll(importTokenPattern)) {
+    const specifier = match[1];
+
+    if (specifier === undefined) {
+      continue;
+    }
+
+    for (const token of specifier.split(/[/.\\_-]+/).map(normalizeName)) {
+      if (token.length > 0) {
+        tokens.add(token);
+      }
+    }
+  }
+
+  return [...tokens].sort();
+}
+
+function getExportMetadata(
+  sourceText: string,
+  exportedName: string
+): { arity?: number; returnType?: string } {
+  const functionMatch = findNamedMatch(sourceText, exportedFunctionPattern, exportedName);
+
+  if (functionMatch !== undefined) {
+    return {
+      arity: countParameters(functionMatch[2] ?? ""),
+      returnType: normalizeReturnType(functionMatch[3])
+    };
+  }
+
+  const constFunctionMatch = findNamedMatch(sourceText, exportedConstFunctionPattern, exportedName);
+
+  if (constFunctionMatch !== undefined) {
+    return {
+      arity: countParameters(constFunctionMatch[2] ?? constFunctionMatch[3] ?? ""),
+      returnType: normalizeReturnType(constFunctionMatch[4])
+    };
+  }
+
+  return {};
+}
+
+function findNamedMatch(
+  sourceText: string,
+  pattern: RegExp,
+  exportedName: string
+): RegExpExecArray | undefined {
+  for (const match of sourceText.matchAll(new RegExp(pattern.source, "gm"))) {
+    if (match[1] === exportedName) {
+      return match;
+    }
+  }
+
+  return undefined;
+}
+
+function countParameters(parameterText: string): number {
+  const trimmed = parameterText.trim();
+
+  if (trimmed.length === 0) {
+    return 0;
+  }
+
+  return trimmed.split(",").filter((parameter) => parameter.trim().length > 0).length;
+}
+
+function normalizeReturnType(returnType: string | undefined): string | undefined {
+  const normalized = returnType?.trim().replace(/\s+/g, " ");
+  return normalized === undefined || normalized.length === 0 ? undefined : normalized;
 }
 
 function pathToDomainTokens(path: string, exportedName: string): string[] {

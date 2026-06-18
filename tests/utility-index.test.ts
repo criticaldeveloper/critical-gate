@@ -64,7 +64,7 @@ export { internal as exposedInternal, parseDate as parseAgain };
           }
 
           if (normalizedPath.endsWith("src/hooks/use-user.ts")) {
-            return "export function useUser() {}";
+            return 'import { useState } from "react";\nexport function useUser(id: string): User';
           }
 
           if (normalizedPath.endsWith("src/services/user-service.ts")) {
@@ -72,7 +72,7 @@ export { internal as exposedInternal, parseDate as parseAgain };
           }
 
           if (normalizedPath.endsWith("src/validators/email.ts")) {
-            return "export const validateEmail = () => true;";
+            return 'import { z } from "zod";\nexport const validateEmail = (value: string): boolean => true;';
           }
 
           return "";
@@ -86,7 +86,10 @@ export { internal as exposedInternal, parseDate as parseAgain };
           path: "src/hooks/use-user.ts",
           class: "hook",
           normalizedName: "useuser",
-          exportedName: "useUser"
+          exportedName: "useUser",
+          arity: 1,
+          returnType: "User",
+          importTokens: ["react"]
         }),
         expect.objectContaining({
           path: "src/services/user-service.ts",
@@ -98,7 +101,10 @@ export { internal as exposedInternal, parseDate as parseAgain };
           path: "src/validators/email.ts",
           class: "validator",
           normalizedName: "validateemail",
-          exportedName: "validateEmail"
+          exportedName: "validateEmail",
+          arity: 1,
+          returnType: "boolean",
+          importTokens: ["zod"]
         })
       ])
     );
