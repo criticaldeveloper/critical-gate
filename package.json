@@ -13,12 +13,14 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "build:vscode": "tsc -p extensions/vscode/tsconfig.json",
+    "build:vscode-tests": "tsc -p extensions/vscode/tsconfig.test.json",
+    "test:vscode": "pnpm build && pnpm build:vscode && pnpm build:vscode-tests && node scripts/run-vscode-tests.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "test": "vitest run",
-    "verify": "pnpm format && pnpm lint && pnpm typecheck && pnpm build:vscode && pnpm test"
+    "verify": "pnpm format && pnpm lint && pnpm typecheck && pnpm build:vscode && pnpm build:vscode-tests && pnpm test"
   },
   "keywords": [
     "ai",
@@ -35,6 +37,7 @@
     "@eslint/js": "^9.29.0",
     "@types/node": "^24.0.3",
     "@types/vscode": "^1.120.0",
+    "@vscode/test-electron": "^3.0.0",
     "ajv": "^8.20.0",
     "eslint": "^9.29.0",
     "prettier": "^3.5.3",

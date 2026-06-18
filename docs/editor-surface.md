@@ -61,18 +61,28 @@ Build the root CLI before running the extension:
 ```bash
 pnpm build
 pnpm build:vscode
+pnpm build:vscode-tests
 ```
 
 The prototype extension build output lives under `extensions/vscode/dist/` and is ignored by git.
 The root dev dependency `@types/vscode` is required so `pnpm build:vscode` can typecheck the
 extension scaffold without bundling VS Code itself.
 
+Run the extension-host test harness explicitly when a VS Code runtime is available:
+
+```bash
+pnpm test:vscode
+```
+
+The harness uses `@vscode/test-electron`, launches the fixture workspace in
+`fixtures/vscode-workspace`, activates the command contributions, and checks the evidence/repair
+commands.
+
 ## Later Work
 
 Before packaging this as a marketplace extension:
 
-1. Add an extension test harness with VS Code's extension test runner.
-2. Reuse the core editor mapper directly from a packaged module instead of keeping the scaffold
+1. Reuse the core editor mapper directly from a packaged module instead of keeping the scaffold
    self-contained.
-3. Tune refresh behavior so diagnostics run on demand or after explicit save, not continuously.
-4. Add packaging metadata and a VSIX release workflow.
+2. Tune refresh behavior so diagnostics run on demand or after explicit save, not continuously.
+3. Add packaging metadata and a VSIX release workflow.

@@ -3,7 +3,14 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    ignores: ["dist/**", "extensions/vscode/dist/**", "coverage/**", "node_modules/**"]
+    ignores: [
+      "dist/**",
+      ".vscode-test/**",
+      "extensions/vscode/dist/**",
+      "extensions/vscode/test/**",
+      "coverage/**",
+      "node_modules/**"
+    ]
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
