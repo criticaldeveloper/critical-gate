@@ -1,51 +1,6 @@
 import type { DiffFile, TaskIntent } from "../schema/index.js";
-
-export type TaskComplexity = "small" | "medium" | "large";
-
-const smallTaskTerms = [
-  "fix",
-  "bug",
-  "rename",
-  "typo",
-  "copy",
-  "validation",
-  "message",
-  "label",
-  "small"
-];
-
-const largeTaskTerms = [
-  "refactor",
-  "rewrite",
-  "migrate",
-  "detector",
-  "feature",
-  "architecture",
-  "redesign",
-  "implement project",
-  "new feature",
-  "multi",
-  "all"
-];
-
-const stopWords = new Set([
-  "the",
-  "and",
-  "for",
-  "with",
-  "from",
-  "into",
-  "this",
-  "that",
-  "add",
-  "fix",
-  "update",
-  "change",
-  "implement",
-  "new",
-  "task",
-  "issue"
-]);
+import { buildIntentModel } from "./intent-model.js";
+import { estimateTaskComplexity, extractTaskKeywords, type TaskComplexity } from "./intent-core.js";
 
 export interface TaskAnalysis {
   complexity: TaskComplexity;
@@ -60,32 +15,12 @@ export interface DiffMetrics {
 }
 
 export function analyzeTaskIntent(task: TaskIntent): TaskAnalysis {
-  const normalizedText = task.text.toLowerCase();
+  const model = buildIntentModel(task);
 
   return {
-    complexity: estimateTaskComplexity(normalizedText),
-    keywords: extractTaskKeywords(normalizedText)
+    complexity: model.complexity,
+    keywords: model.targetTokens
   };
-}
-
-export function estimateTaskComplexity(normalizedTaskText: string): TaskComplexity {
-  if (largeTaskTerms.some((term) => normalizedTaskText.includes(term))) {
-    return "large";
-  }
-
-  const words = normalizedTaskText.split(/\s+/).filter(Boolean);
-
-  if (words.length <= 8 || smallTaskTerms.some((term) => normalizedTaskText.includes(term))) {
-    return "small";
-  }
-
-  return "medium";
-}
-
-export function extractTaskKeywords(normalizedTaskText: string): string[] {
-  return [...new Set(normalizedTaskText.match(/[a-z0-9]+/g) ?? [])]
-    .filter((word) => word.length >= 3)
-    .filter((word) => !stopWords.has(word));
 }
 
 export function getDiffMetrics(files: DiffFile[]): DiffMetrics {
@@ -99,6 +34,9 @@ export function getDiffMetrics(files: DiffFile[]): DiffMetrics {
     churn: additions + deletions
   };
 }
+
+export { estimateTaskComplexity, extractTaskKeywords };
+export type { TaskComplexity };
 
 export function calculateDiffCostScore(task: TaskIntent, files: DiffFile[]): number {
   const analysis = analyzeTaskIntent(task);

@@ -1,5 +1,6 @@
 import {
   analyzeTaskIntent,
+  buildIntentModel,
   calculateDiffCostScore,
   estimateTaskComplexity,
   extractTaskKeywords
@@ -38,6 +39,45 @@ describe("task analysis", () => {
       complexity: "small",
       keywords: ["signup", "validation"]
     });
+  });
+
+  it("builds a structured intent model for a small source task", () => {
+    const task: TaskIntent = {
+      source: "cli",
+      text: "Fix signup validation"
+    };
+
+    expect(buildIntentModel(task)).toEqual({
+      complexity: "small",
+      verbs: ["fix"],
+      targetTokens: ["signup", "validation"],
+      allowedChangeClasses: ["source"],
+      forbiddenChangeClasses: ["config", "dependency", "api-surface", "ci", "build"],
+      targetAreas: [
+        { token: "signup", kind: "domain" },
+        { token: "validation", kind: "domain" }
+      ]
+    });
+  });
+
+  it("allows docs and ci classes when the task asks for workflow documentation", () => {
+    const model = buildIntentModel({
+      source: "cli",
+      text: "Document GitHub Action workflow setup"
+    });
+
+    expect(model.allowedChangeClasses).toEqual(["ci", "docs", "source"]);
+    expect(model.forbiddenChangeClasses).not.toContain("ci");
+  });
+
+  it("allows release version package changes", () => {
+    const model = buildIntentModel({
+      source: "cli",
+      text: "Bump version for release"
+    });
+
+    expect(model.verbs).toEqual(["bump"]);
+    expect(model.allowedChangeClasses).toEqual(["dependency", "docs", "source"]);
   });
 
   it("calculates higher diff cost for broad small-task diffs", () => {

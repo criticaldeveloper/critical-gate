@@ -8,3 +8,10 @@ export {
   type TaskAnalysis,
   type TaskComplexity
 } from "./task-analysis.js";
+export {
+  buildIntentModel,
+  type ChangeClass,
+  type IntentModel,
+  type IntentVerb,
+  type TargetArea
+} from "./intent-model.js";
