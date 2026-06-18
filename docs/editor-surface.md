@@ -67,6 +67,8 @@ pnpm build:vscode-tests
 The prototype extension build output lives under `extensions/vscode/dist/` and is ignored by git.
 The root dev dependency `@types/vscode` is required so `pnpm build:vscode` can typecheck the
 extension scaffold without bundling VS Code itself.
+The VS Code build intentionally compiles the shared core editor mapper into the extension `dist`
+tree, so the extension `main` points at `dist/extensions/vscode/src/extension.js`.
 
 Run the extension-host test harness explicitly when a VS Code runtime is available:
 
@@ -82,7 +84,5 @@ commands.
 
 Before packaging this as a marketplace extension:
 
-1. Reuse the core editor mapper directly from a packaged module instead of keeping the scaffold
-   self-contained.
-2. Tune refresh behavior so diagnostics run on demand or after explicit save, not continuously.
-3. Add packaging metadata and a VSIX release workflow.
+1. Tune refresh behavior so diagnostics run on demand or after explicit save, not continuously.
+2. Add packaging metadata and a VSIX release workflow.

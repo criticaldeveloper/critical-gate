@@ -56,6 +56,11 @@ describe("editor diagnostics", () => {
       code: "test-weakening-001",
       detector: "test-weakening",
       findingTitle: "Assertion removed",
+      evidence: {
+        path: "tests/signup.test.ts",
+        startLine: 24,
+        endLine: 24
+      },
       range: {
         startLine: 23,
         startColumn: 0,

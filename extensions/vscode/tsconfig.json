@@ -5,8 +5,8 @@
     "declarationMap": true,
     "noEmit": false,
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": "../..",
     "types": ["node", "vscode"]
   },
-  "include": ["src"]
+  "include": ["src", "../../src/editor", "../../src/schema"]
 }

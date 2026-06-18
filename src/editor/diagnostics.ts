@@ -20,6 +20,11 @@ export interface EditorDiagnostic {
   range: EditorDiagnosticRange;
   repair: string;
   tags: string[];
+  evidence: {
+    path: string;
+    startLine?: number;
+    endLine?: number;
+  };
 }
 
 export function findingsToEditorDiagnostics(findings: Finding[]): EditorDiagnostic[] {
@@ -61,7 +66,12 @@ export function toEditorDiagnostic(
       endColumn: Number.MAX_SAFE_INTEGER
     },
     repair: finding.repair,
-    tags: finding.tags
+    tags: finding.tags,
+    evidence: {
+      path: evidence.path,
+      startLine: evidence.startLine,
+      endLine: evidence.endLine
+    }
   };
 }
 

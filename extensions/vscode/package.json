@@ -16,7 +16,7 @@
   "activationEvents": [
     "onCommand:criticalGate.runCheck"
   ],
-  "main": "./dist/extension.js",
+  "main": "./dist/extensions/vscode/src/extension.js",
   "contributes": {
     "commands": [
       {

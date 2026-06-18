@@ -4,33 +4,16 @@ import { promisify } from "node:util";
 
 import * as vscode from "vscode";
 
+import {
+  findingsToEditorDiagnostics,
+  groupEditorDiagnosticsByPath,
+  type EditorDiagnostic
+} from "../../../src/editor/index.js";
+import type { GateResult } from "../../../src/schema/index.js";
+
 const execFileAsync = promisify(execFile);
 const diagnosticSource = "critical-gate";
 const diagnosticPayloads = new Map<string, CriticalGateDiagnosticPayload>();
-
-interface GateResult {
-  findings: Finding[];
-  summary: {
-    decision: "pass" | "fail";
-    findingCount: number;
-  };
-}
-
-interface Finding {
-  id: string;
-  detector: string;
-  severity: "blocker" | "high" | "medium" | "low" | "info";
-  title: string;
-  message: string;
-  repair: string;
-  evidence: FindingEvidence[];
-}
-
-interface FindingEvidence {
-  path?: string;
-  startLine?: number;
-  endLine?: number;
-}
 
 interface CriticalGateDiagnosticPayload {
   findingId: string;
@@ -171,37 +154,24 @@ function applyDiagnostics(
 ): void {
   diagnostics.clear();
   diagnosticPayloads.clear();
-
-  const grouped = new Map<string, vscode.Diagnostic[]>();
-
-  for (const finding of result.findings) {
-    for (const evidence of finding.evidence) {
-      if (!hasEvidencePath(evidence)) {
-        continue;
-      }
-
-      const existing = grouped.get(evidence.path) ?? [];
-      existing.push(toDiagnostic(finding, evidence));
-      grouped.set(evidence.path, existing);
-    }
-  }
+  const grouped = groupEditorDiagnosticsByPath(findingsToEditorDiagnostics(result.findings));
 
   for (const [path, pathDiagnostics] of grouped) {
-    diagnostics.set(vscode.Uri.file(join(folder.uri.fsPath, path)), pathDiagnostics);
+    diagnostics.set(
+      vscode.Uri.file(join(folder.uri.fsPath, path)),
+      pathDiagnostics.map(toVsCodeDiagnostic)
+    );
   }
 }
 
-function toDiagnostic(
-  finding: Finding,
-  evidence: FindingEvidence & { path: string }
-): vscode.Diagnostic {
+function toVsCodeDiagnostic(editorDiagnostic: EditorDiagnostic): vscode.Diagnostic {
   const diagnostic = new vscode.Diagnostic(
-    toRange(evidence),
-    `${finding.title}: ${finding.message}\nRepair: ${finding.repair}`,
-    toDiagnosticSeverity(finding.severity)
+    toRange(editorDiagnostic.range),
+    editorDiagnostic.message,
+    toDiagnosticSeverity(editorDiagnostic.severity)
   );
-  diagnostic.source = diagnosticSource;
-  const payload = toDiagnosticPayload(finding, evidence);
+  diagnostic.source = editorDiagnostic.source;
+  const payload = toDiagnosticPayload(editorDiagnostic);
   const code = toDiagnosticCode(payload);
   diagnosticPayloads.set(code, payload);
   diagnostic.code = {
@@ -214,23 +184,20 @@ function toDiagnostic(
   return diagnostic;
 }
 
-function toRange(evidence: FindingEvidence): vscode.Range {
-  const startLine = Math.max(0, (evidence.startLine ?? 1) - 1);
-  const endLine = Math.max(0, (evidence.endLine ?? evidence.startLine ?? 1) - 1);
-
-  return new vscode.Range(startLine, 0, endLine, Number.MAX_SAFE_INTEGER);
+function toRange(range: EditorDiagnostic["range"]): vscode.Range {
+  return new vscode.Range(range.startLine, range.startColumn, range.endLine, range.endColumn);
 }
 
-function toDiagnosticSeverity(severity: Finding["severity"]): vscode.DiagnosticSeverity {
-  if (severity === "blocker" || severity === "high") {
+function toDiagnosticSeverity(severity: EditorDiagnostic["severity"]): vscode.DiagnosticSeverity {
+  if (severity === "error") {
     return vscode.DiagnosticSeverity.Error;
   }
 
-  if (severity === "medium") {
+  if (severity === "warning") {
     return vscode.DiagnosticSeverity.Warning;
   }
 
-  if (severity === "low") {
+  if (severity === "information") {
     return vscode.DiagnosticSeverity.Information;
   }
 
@@ -241,24 +208,15 @@ function resolveWorkspacePath(folder: vscode.WorkspaceFolder, configuredPath: st
   return isAbsolute(configuredPath) ? configuredPath : join(folder.uri.fsPath, configuredPath);
 }
 
-function hasEvidencePath(
-  evidence: FindingEvidence
-): evidence is FindingEvidence & { path: string } {
-  return evidence.path !== undefined && evidence.path.length > 0;
-}
-
-function toDiagnosticPayload(
-  finding: Finding,
-  evidence: FindingEvidence & { path: string }
-): CriticalGateDiagnosticPayload {
+function toDiagnosticPayload(editorDiagnostic: EditorDiagnostic): CriticalGateDiagnosticPayload {
   return {
-    findingId: finding.id,
-    detector: finding.detector,
-    title: finding.title,
-    repair: finding.repair,
-    evidencePath: evidence.path,
-    startLine: evidence.startLine,
-    endLine: evidence.endLine
+    findingId: editorDiagnostic.code,
+    detector: editorDiagnostic.detector,
+    title: editorDiagnostic.findingTitle,
+    repair: editorDiagnostic.repair,
+    evidencePath: editorDiagnostic.evidence.path,
+    startLine: editorDiagnostic.evidence.startLine,
+    endLine: editorDiagnostic.evidence.endLine
   };
 }
 
@@ -273,7 +231,9 @@ async function openEvidence(payload: CriticalGateDiagnosticPayload): Promise<voi
   const uri = vscode.Uri.file(join(folder.uri.fsPath, payload.evidencePath));
   const document = await vscode.workspace.openTextDocument(uri);
   const editor = await vscode.window.showTextDocument(document);
-  const range = toRange(payload);
+  const startLine = Math.max(0, (payload.startLine ?? 1) - 1);
+  const endLine = Math.max(0, (payload.endLine ?? payload.startLine ?? 1) - 1);
+  const range = new vscode.Range(startLine, 0, endLine, Number.MAX_SAFE_INTEGER);
 
   editor.selection = new vscode.Selection(range.start, range.end);
   editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
