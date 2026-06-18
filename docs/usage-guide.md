@@ -280,3 +280,13 @@ with:
 
 Keep the Critical Gate step as `continue-on-error: true` so SARIF uploads, then add a final step that
 fails when the gate step outcome is failure.
+
+### Repository knowledge looks stale
+
+Critical Gate caches repository history and solution indexes under `.critical-gate/cache/` for
+faster warm runs. The cache is keyed by refs and repository fingerprints, but you can bypass it while
+debugging:
+
+```bash
+CRITICAL_GATE_DISABLE_CACHE=true node dist/cli.js check --task "Fix signup validation"
+```

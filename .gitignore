@@ -5,6 +5,7 @@ extensions/vscode/analyzer/
 .vscode-test/
 artifacts/
 coverage/
+.critical-gate/cache/
 .turbo/
 .vite/
 *.tsbuildinfo

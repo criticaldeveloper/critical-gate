@@ -1,7 +1,12 @@
 export {
+  KNOWLEDGE_CACHE_DIR,
   KNOWLEDGE_CACHE_SCHEMA_VERSION,
+  buildKnowledgeCacheKey,
+  createFileKnowledgeCache,
   createMemoryKnowledgeCache,
   serializeKnowledgeCacheKey,
+  type KnowledgeCacheEntry,
+  type KnowledgeCacheKeyOptions,
   type KnowledgeCache
 } from "./cache.js";
 export { createEmptyFileGraph, createFileGraph } from "./graph.js";

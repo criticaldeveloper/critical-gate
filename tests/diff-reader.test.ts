@@ -112,6 +112,8 @@ describe("classifyPath", () => {
 
 describe("readGitDiff", () => {
   it("collects root, branch, and parsed base diff through the git runner", () => {
+    const originalDisableCache = process.env.CRITICAL_GATE_DISABLE_CACHE;
+    process.env.CRITICAL_GATE_DISABLE_CACHE = "true";
     const calls: string[][] = [];
     const runner: GitCommandRunner = {
       execFile: (_file, args) => {
@@ -148,26 +150,34 @@ describe("readGitDiff", () => {
       }
     };
 
-    const result = readGitDiff({ baseRef: "main", runner });
+    try {
+      const result = readGitDiff({ baseRef: "main", runner });
 
-    expect(result.root).toBe("C:/dev/critical-gate");
-    expect(result.baseRef).toBe("main");
-    expect(result.headRef).toBe("feature/diff-reader");
-    expect(result.files).toHaveLength(5);
-    expect(result.repositoryProfile).toBeUndefined();
-    expect(result.utilityIndex).toBeUndefined();
-    expect(calls).toContainEqual(["diff", "--no-ext-diff", "--no-color", "main...HEAD", "--"]);
-    expect(calls).not.toContainEqual(["ls-files"]);
-    expect(calls.some((args) => args[0] === "log")).toBe(false);
+      expect(result.root).toBe("C:/dev/critical-gate");
+      expect(result.baseRef).toBe("main");
+      expect(result.headRef).toBe("feature/diff-reader");
+      expect(result.files).toHaveLength(5);
+      expect(result.repositoryProfile).toBeUndefined();
+      expect(result.utilityIndex).toBeUndefined();
+      expect(calls).toContainEqual(["diff", "--no-ext-diff", "--no-color", "main...HEAD", "--"]);
+      expect(calls).not.toContainEqual(["ls-files"]);
+      expect(calls.some((args) => args[0] === "log")).toBe(false);
 
-    expect(result.knowledge?.getHistoryIndex().profile).toMatchObject({
-      commitCount: 1
-    });
-    expect(result.knowledge?.getSolutionIndex().utilityIndex).toEqual({
-      utilities: [{ path: "src/utils/date.ts", exportedNames: ["formatDate"] }]
-    });
-    expect(calls).toContainEqual(["ls-files"]);
-    expect(calls.some((args) => args[0] === "log")).toBe(true);
+      expect(result.knowledge?.getHistoryIndex().profile).toMatchObject({
+        commitCount: 1
+      });
+      expect(result.knowledge?.getSolutionIndex().utilityIndex).toEqual({
+        utilities: [{ path: "src/utils/date.ts", exportedNames: ["formatDate"] }]
+      });
+      expect(calls).toContainEqual(["ls-files"]);
+      expect(calls.some((args) => args[0] === "log")).toBe(true);
+    } finally {
+      if (originalDisableCache === undefined) {
+        delete process.env.CRITICAL_GATE_DISABLE_CACHE;
+      } else {
+        process.env.CRITICAL_GATE_DISABLE_CACHE = originalDisableCache;
+      }
+    }
   });
 
   it("uses HEAD and includes untracked files for working-tree checks", () => {

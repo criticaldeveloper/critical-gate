@@ -59,7 +59,7 @@ export function readGitDiff(options: ReadGitDiffOptions = {}): GitDiffResult {
     baseRef,
     headRef,
     files: [...trackedFiles, ...untrackedFiles],
-    knowledge: createLazyKnowledgeProvider({ root, runner })
+    knowledge: createLazyKnowledgeProvider({ root, runner, baseRef, headRef })
   };
 }
 
