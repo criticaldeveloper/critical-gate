@@ -6,7 +6,7 @@ distribution can be added after remote repository metadata and release infrastru
 
 ## Requirements
 
-- Node.js 20 or newer.
+- Node.js 22.13 or newer. CI uses Node.js 24.
 - pnpm 11.1.2, via Corepack or a local pnpm install.
 - Git, with enough history for `--base` comparisons.
 - VS Code only when installing or testing the editor extension.

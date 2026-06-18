@@ -4,6 +4,28 @@ import type { DiffFile, Finding } from "../schema/index.js";
 import type { Detector } from "./types.js";
 
 const broadTaskTerms = ["repo", "project", "all", "setup", "scaffold", "architecture", "refactor"];
+const configTaskTerms = [
+  "build",
+  "ci",
+  "config",
+  "configuration",
+  "github action",
+  "github actions",
+  "lint",
+  "test runner",
+  "workflow"
+];
+const manifestTaskTerms = [
+  "dependency",
+  "dependencies",
+  "engine",
+  "engines",
+  "manifest",
+  "node",
+  "package",
+  "pnpm",
+  "runtime"
+];
 const releaseTaskPattern =
   /(?:^|\b)(?:v?\d+\.\d+\.\d+(?:[-+][a-z0-9.-]+)?|release|version|bump|publish)(?:\b|$)/i;
 
@@ -36,6 +58,10 @@ function isUnexpectedForSmallTask(file: DiffFile, keywords: string[], taskText: 
     return false;
   }
 
+  if (isRoleAlignedConfigOrManifestChange(file, taskText, keywords)) {
+    return false;
+  }
+
   if (file.role === "config" || file.role === "manifest" || file.role === "lockfile") {
     return true;
   }
@@ -50,6 +76,29 @@ function isUnexpectedForSmallTask(file: DiffFile, keywords: string[], taskText: 
 function hasPathKeywordAlignment(path: string, keywords: string[]): boolean {
   const normalizedPath = path.toLowerCase();
   return keywords.some((keyword) => normalizedPath.includes(keyword));
+}
+
+function isRoleAlignedConfigOrManifestChange(
+  file: DiffFile,
+  taskText: string,
+  keywords: string[]
+): boolean {
+  if (file.role === "config") {
+    return (
+      hasAnyTaskTerm(taskText, configTaskTerms) || hasPathKeywordAlignment(file.path, keywords)
+    );
+  }
+
+  if (file.role === "manifest" || file.role === "lockfile") {
+    return hasAnyTaskTerm(taskText, manifestTaskTerms);
+  }
+
+  return false;
+}
+
+function hasAnyTaskTerm(taskText: string, terms: string[]): boolean {
+  const normalizedTask = taskText.toLowerCase();
+  return terms.some((term) => normalizedTask.includes(term));
 }
 
 function isVersionOnlyReleaseManifestChange(file: DiffFile, taskText: string): boolean {

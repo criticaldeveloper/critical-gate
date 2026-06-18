@@ -100,6 +100,51 @@ index 57b22a0..cb3e0f1 100644
     ).toEqual([]);
   });
 
+  it("does not emit for workflow changes when the task mentions CI", () => {
+    const diff = parse(`diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 57b22a0..cb3e0f1 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -1,2 +1,2 @@
+-node-version: 20
++node-version: 24
+`);
+
+    expect(
+      scopeDetector.run({
+        task: {
+          source: "cli",
+          text: "Fix CI Node version for pnpm"
+        },
+        diff
+      })
+    ).toEqual([]);
+  });
+
+  it("does not emit for package engine changes when the task mentions Node", () => {
+    const diff = parse(`diff --git a/package.json b/package.json
+index 57b22a0..cb3e0f1 100644
+--- a/package.json
++++ b/package.json
+@@ -1,5 +1,5 @@
+ {
+   "name": "example",
+-  "engines": {"node": ">=20"}
++  "engines": {"node": ">=22.13"}
+ }
+`);
+
+    expect(
+      scopeDetector.run({
+        task: {
+          source: "cli",
+          text: "Fix Node runtime support for pnpm"
+        },
+        diff
+      })
+    ).toEqual([]);
+  });
+
   it("does not emit for version-only release manifest changes", () => {
     const diff = parse(`diff --git a/package.json b/package.json
 index 57b22a0..cb3e0f1 100644
