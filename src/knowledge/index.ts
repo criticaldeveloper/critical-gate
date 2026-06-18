@@ -13,6 +13,13 @@ export {
   type BuildHistoryIndexOptions,
   type HistoryCommandRunner
 } from "./history-index.js";
+export {
+  buildSolutionIndex,
+  extractExportedNames,
+  solutionIndexToUtilityIndex,
+  type BuildSolutionIndexOptions,
+  type SolutionIndexRunner
+} from "./solution-index.js";
 export { createEmptySymbolIndex, createSymbolIndex } from "./symbol-index.js";
 export type {
   CompanionRule,
