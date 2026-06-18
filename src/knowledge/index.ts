@@ -5,7 +5,14 @@ export {
   type KnowledgeCache
 } from "./cache.js";
 export { createEmptyFileGraph, createFileGraph } from "./graph.js";
-export { createEmptyHistoryIndex } from "./history-index.js";
+export {
+  buildHistoryIndex,
+  buildRepositoryProfileFromHistoryIndex,
+  createEmptyHistoryIndex,
+  parseNameOnlyLog,
+  type BuildHistoryIndexOptions,
+  type HistoryCommandRunner
+} from "./history-index.js";
 export { createEmptySymbolIndex, createSymbolIndex } from "./symbol-index.js";
 export type {
   CompanionRule,

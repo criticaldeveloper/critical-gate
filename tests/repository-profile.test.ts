@@ -1,4 +1,4 @@
-import { buildRepositoryProfile, parseNameOnlyLog } from "../src/index.js";
+import { buildHistoryIndex, buildRepositoryProfile, parseNameOnlyLog } from "../src/index.js";
 
 describe("repository profile", () => {
   it("parses git name-only log output into commits", () => {
@@ -44,6 +44,43 @@ describe("repository profile", () => {
         }
       ])
     });
+  });
+
+  it("builds a history index with compatibility profile and directed companion rules", () => {
+    const index = buildHistoryIndex({
+      root: "C:/repo",
+      minConfidenceCommitCount: 1,
+      runner: {
+        execFile: () =>
+          [
+            "__COMMIT__",
+            "src/signup.ts",
+            "tests/signup.test.ts",
+            "__COMMIT__",
+            "src/signup.ts",
+            "tests/signup.test.ts",
+            "__COMMIT__",
+            "src/signup.ts",
+            "docs/signup.md"
+          ].join("\n")
+      }
+    });
+
+    expect(index.profile).toMatchObject({
+      commitCount: 3,
+      minConfidenceCommitCount: 1
+    });
+    expect(index.coChanges).toEqual(index.profile?.coChanges);
+    expect(index.companionRules).toEqual(
+      expect.arrayContaining([
+        {
+          sourcePath: "src/signup.ts",
+          expectedPath: "tests/signup.test.ts",
+          support: 2,
+          confidence: 2 / 3
+        }
+      ])
+    );
   });
 
   it("returns an empty low-confidence profile when git history is unavailable", () => {
