@@ -1,5 +1,6 @@
 import type { DiffFile, DiffLine } from "../schema/index.js";
-import type { ChangeClass } from "./intent-model.js";
+import type { IntentVerificationSummary, TaskIntent } from "../schema/index.js";
+import { buildIntentModel, type ChangeClass } from "./intent-model.js";
 
 export interface ObservedChangeClassEvidence {
   changeClass: ChangeClass;
@@ -31,6 +32,47 @@ export function classifyObservedDiffActions(files: DiffFile[]): ObservedDiffActi
     classes: [...new Set(evidence.map((entry) => entry.changeClass))].sort(),
     evidence
   };
+}
+
+export function summarizeIntentVerification(
+  task: TaskIntent,
+  files: DiffFile[]
+): IntentVerificationSummary {
+  const intent = buildIntentModel(task);
+  const observed = classifyObservedDiffActions(files);
+  const unexpectedClasses = observed.classes.filter(
+    (changeClass) => !intent.allowedChangeClasses.includes(changeClass)
+  );
+  const matchedClasses = observed.classes.filter((changeClass) =>
+    intent.allowedChangeClasses.includes(changeClass)
+  );
+
+  return {
+    requestedClasses: intent.allowedChangeClasses,
+    observedClasses: observed.classes,
+    unexpectedClasses,
+    coverage: getCoverage(observed.classes, unexpectedClasses, matchedClasses),
+    explanationCodes: [
+      ...matchedClasses.map((changeClass) => `matched:${changeClass}`),
+      ...unexpectedClasses.map((changeClass) => `unexpected:${changeClass}`)
+    ]
+  };
+}
+
+function getCoverage(
+  observedClasses: ChangeClass[],
+  unexpectedClasses: ChangeClass[],
+  matchedClasses: ChangeClass[]
+): IntentVerificationSummary["coverage"] {
+  if (observedClasses.length === 0 || matchedClasses.length === 0) {
+    return "none";
+  }
+
+  if (unexpectedClasses.length === 0) {
+    return "matched";
+  }
+
+  return "partial";
 }
 
 function classifyFileActions(file: DiffFile): ObservedChangeClassEvidence[] {

@@ -138,6 +138,14 @@ export interface GateSummary {
   diffCostScore?: number;
 }
 
+export interface IntentVerificationSummary {
+  requestedClasses: string[];
+  observedClasses: string[];
+  unexpectedClasses: string[];
+  coverage: "none" | "partial" | "matched";
+  explanationCodes: string[];
+}
+
 export interface GateResult {
   schemaVersion: typeof GATE_RESULT_SCHEMA_VERSION;
   generatedAt: string;
@@ -150,5 +158,6 @@ export interface GateResult {
   context?: RepoContext;
   findings: Finding[];
   summary: GateSummary;
+  intentVerification?: IntentVerificationSummary;
   metadata?: Record<string, unknown>;
 }

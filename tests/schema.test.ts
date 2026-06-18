@@ -94,6 +94,13 @@ describe("gate result schema", () => {
         infoCount: 0,
         diffCostScore: 32
       },
+      intentVerification: {
+        requestedClasses: ["source"],
+        observedClasses: ["source", "tests"],
+        unexpectedClasses: ["tests"],
+        coverage: "partial",
+        explanationCodes: ["matched:source", "unexpected:tests"]
+      },
       metadata: {
         cliVersion: "0.1.0"
       }

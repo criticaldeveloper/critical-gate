@@ -23,6 +23,7 @@ export const gateResultJsonSchema = {
       items: { $ref: "#/$defs/finding" }
     },
     summary: { $ref: "#/$defs/gateSummary" },
+    intentVerification: { $ref: "#/$defs/intentVerificationSummary" },
     metadata: {
       type: "object",
       additionalProperties: true
@@ -276,6 +277,26 @@ export const gateResultJsonSchema = {
         lowCount: { type: "integer", minimum: 0 },
         infoCount: { type: "integer", minimum: 0 },
         diffCostScore: { type: "number", minimum: 0, maximum: 100 }
+      }
+    },
+    intentVerificationSummary: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "requestedClasses",
+        "observedClasses",
+        "unexpectedClasses",
+        "coverage",
+        "explanationCodes"
+      ],
+      properties: {
+        requestedClasses: stringArraySchema,
+        observedClasses: stringArraySchema,
+        unexpectedClasses: stringArraySchema,
+        coverage: {
+          enum: ["none", "partial", "matched"]
+        },
+        explanationCodes: stringArraySchema
       }
     }
   }

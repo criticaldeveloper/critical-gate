@@ -10,6 +10,7 @@ import {
   renderReport,
   runDetectors,
   summarizeFindings,
+  summarizeIntentVerification,
   type GateResult,
   type GitDiffResult,
   type ReportFormat
@@ -237,6 +238,7 @@ function createGateResult(
     context,
     findings,
     summary: summarizeFindings(findings, task, diff),
+    intentVerification: summarizeIntentVerification(task, diff.files),
     metadata: {
       cliVersion: CLI_VERSION,
       strict: options.strict

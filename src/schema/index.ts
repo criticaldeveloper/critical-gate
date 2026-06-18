@@ -12,6 +12,7 @@ export type {
   FindingTag,
   GateResult,
   GateSummary,
+  IntentVerificationSummary,
   RepositoryCoChange,
   RepositoryProfile,
   RepoContext,

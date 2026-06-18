@@ -17,6 +17,7 @@ export {
 } from "./intent-model.js";
 export {
   classifyObservedDiffActions,
+  summarizeIntentVerification,
   type ObservedChangeClassEvidence,
   type ObservedDiffActions
 } from "./observed-actions.js";

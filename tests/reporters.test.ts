@@ -68,6 +68,13 @@ const result: GateResult = {
     lowCount: 0,
     infoCount: 0,
     diffCostScore: 42
+  },
+  intentVerification: {
+    requestedClasses: ["source"],
+    observedClasses: ["source", "tests"],
+    unexpectedClasses: ["tests"],
+    coverage: "partial",
+    explanationCodes: ["matched:source", "unexpected:tests"]
   }
 };
 
@@ -86,6 +93,9 @@ describe("reporters", () => {
 
     expect(report).toContain("# Critical Gate Report");
     expect(report).toContain("Changed Files: 2");
+    expect(report).toContain("## Intent Verification");
+    expect(report).toContain("Requested Classes: source");
+    expect(report).toContain("Unexpected Classes: tests");
     expect(report).toContain("- modified src/signup.ts (source, +3/-1)");
     expect(report).toContain("### Assertion removed from signup test");
     expect(report).toContain("Repair: Restore the removed behavioral assertion.");

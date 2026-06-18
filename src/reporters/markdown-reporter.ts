@@ -17,6 +17,18 @@ export function renderMarkdownReport(result: GateResult): string {
     ""
   ];
 
+  if (result.intentVerification !== undefined) {
+    lines.push(
+      "## Intent Verification",
+      "",
+      `Requested Classes: ${formatClasses(result.intentVerification.requestedClasses)}`,
+      `Observed Classes: ${formatClasses(result.intentVerification.observedClasses)}`,
+      `Unexpected Classes: ${formatClasses(result.intentVerification.unexpectedClasses)}`,
+      `Coverage: ${result.intentVerification.coverage}`,
+      ""
+    );
+  }
+
   if (result.diff.files.length > 0) {
     lines.push("## Changed Files", "");
     for (const file of result.diff.files) {
@@ -35,6 +47,10 @@ export function renderMarkdownReport(result: GateResult): string {
   }
 
   return `${lines.join("\n").trimEnd()}\n`;
+}
+
+function formatClasses(classes: string[]): string {
+  return classes.length === 0 ? "none" : classes.join(", ");
 }
 
 function renderFinding(finding: Finding): string {
