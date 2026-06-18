@@ -1,12 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" preserveAspectRatio="xMidYMid meet">
-  <g transform="translate(0,1024) scale(0.1,-0.1)" fill="#ffffff" stroke="none">
-    <path d="M7040 6936 c0 -2 8 -10 18 -17 15 -13 16 -12 3 4 -13 16 -21 21 -21 13z"/>
-    <path d="M4300 6339 c0 -5 5 -7 10 -4 6 3 10 8 10 11 0 2 -4 4 -10 4 -5 0 -10 -5 -10 -11z"/>
-    <path d="M5144 5151 c-114 -52 -142 -218 -49 -299 18 -16 38 -31 44 -33 9 -3 -35 -190 -75 -321 -5 -17 7 -18 161 -18 l167 0 -7 33 c-4 17 -24 91 -44 163 l-37 132 33 26 c67 54 89 117 69 197 -16 59 -46 95 -101 120 -51 24 -109 24 -161 0z"/>
-    <path d="M4135 3500 c10 -11 20 -20 23 -20 3 0 -3 9 -13 20 -10 11 -20 20 -23 20 -3 0 3 -9 13 -20z"/>
-    <path d="M3452 3270 c0 -14 2 -19 5 -12 2 6 2 18 0 25 -3 6 -5 1 -5 -13z"/>
-    <path d="M3453 3005 c0 -22 2 -30 4 -17 2 12 2 30 0 40 -3 9 -5 -1 -4 -23z"/>
-    <path d="M3451 2784 c0 -11 3 -14 6 -6 3 7 2 16 -1 19 -3 4 -6 -2 -5 -13z"/>
-    <path d="M3452 2740 c0 -14 2 -19 5 -12 2 6 2 18 0 25 -3 6 -5 1 -5 -13z"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" color="#c5c5c5">
+  <path
+    d="M18.7 5.2A8.4 8.4 0 0 0 4.4 11c0 2 .7 3.8 1.9 5.2"
+    stroke="currentColor"
+    stroke-width="1.8"
+    stroke-linecap="round"
+  />
+  <path
+    d="M5.3 18.8A8.4 8.4 0 0 0 19.6 13c0-2-.7-3.8-1.9-5.2"
+    stroke="currentColor"
+    stroke-width="1.8"
+    stroke-linecap="round"
+  />
+  <path d="M17.6 3.7v3.9h3.9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M6.4 20.3v-3.9H2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M7.7 11.1h8.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+  <path d="M8.7 8.9v6.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+  <path d="M12 8.1v7.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+  <path d="M15.3 8.9v6.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+  <path d="M7.5 15.1h9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+  <path d="M11.1 12.1a.9.9 0 1 1 1.8 0c0 .3-.1.5-.4.7l.5 1.5h-2l.5-1.5a.9.9 0 0 1-.4-.7Z" fill="currentColor" />
 </svg>

@@ -1,12 +1,12 @@
 # Editor Surface
 
-The editor surface starts as a VS Code diagnostics prototype. It should display mature Critical Gate
-findings close to the changed files without replacing the CLI, Codex hook, or CI enforcement path.
+The editor surface is a VS Code extension that displays mature Critical Gate findings close to the
+changed files without replacing the CLI, Codex hook, or CI enforcement path.
 Installation steps live in `docs/installation.md`.
 
-## Current Prototype
+## Current Extension
 
-The prototype has two layers:
+The extension has two layers:
 
 - `src/editor`: dependency-free mapping from Critical Gate findings to editor diagnostic data.
 - `extensions/vscode`: VS Code extension scaffold that runs the built CLI, publishes diagnostics to
@@ -87,9 +87,9 @@ pnpm build:vscode
 pnpm build:vscode-tests
 ```
 
-The prototype extension build output lives under `extensions/vscode/dist/` and is ignored by git.
-The root dev dependency `@types/vscode` is required so `pnpm build:vscode` can typecheck the
-extension scaffold without bundling VS Code itself.
+The extension build output lives under `extensions/vscode/dist/` and is ignored by git. The root dev
+dependency `@types/vscode` is required so `pnpm build:vscode` can typecheck the extension without
+bundling VS Code itself.
 The VS Code build intentionally compiles the shared core editor mapper into the extension `dist`
 tree, so the extension `main` points at `dist/extensions/vscode/src/extension.js`.
 

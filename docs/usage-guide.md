@@ -1,0 +1,281 @@
+# Usage Guide
+
+This guide explains how to use Critical Gate in local development, CI, Codex repair loops, and VS
+Code.
+
+## Mental Model
+
+Critical Gate answers one question:
+
+```text
+Does this diff satisfy the task without taking unsafe or unjustified liberties?
+```
+
+It does not try to review every line like a human reviewer. It focuses on evidence-backed integrity
+signals:
+
+- What files changed?
+- Do those files match the task intent?
+- Did the diff change tests, public exports, dependencies, config, secrets, or conventions?
+- Is the amount of churn reasonable for the task?
+- Can a finding be repaired with specific, local guidance?
+
+## Local CLI Workflow
+
+Build the CLI:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm build
+```
+
+Run a Markdown report against the target branch:
+
+```bash
+node dist/cli.js check \
+  --task "Add email validation to signup form" \
+  --base main \
+  --format markdown
+```
+
+Write JSON for automation:
+
+```bash
+node dist/cli.js check \
+  --task "Add email validation to signup form" \
+  --base main \
+  --format json \
+  --output critical-gate.json
+```
+
+Write SARIF for code scanning:
+
+```bash
+node dist/cli.js check \
+  --task "Add email validation to signup form" \
+  --base main \
+  --format sarif \
+  --output critical-gate.sarif
+```
+
+Write compact repair guidance for agents:
+
+```bash
+node dist/cli.js check \
+  --task "Add email validation to signup form" \
+  --base main \
+  --format repair
+```
+
+## Choosing Good Task Intent
+
+Task intent is part of the input contract. The gate uses it to estimate expected scope and identify
+surprising changes.
+
+Good examples:
+
+```text
+Add email validation to signup form without changing authentication flow.
+Fix the VS Code Activity Bar icon so it renders visibly in dark themes.
+Document CLI, GitHub Action, Codex hook, and VSIX installation.
+```
+
+Weak examples:
+
+```text
+Update code.
+Fix stuff.
+Improve project.
+```
+
+When running in CI, prefer PR titles plus short PR-body context. If a PR intentionally changes
+configuration, dependencies, or public API, include that in the task text so the gate can distinguish
+expected blast radius from drift.
+
+## Understanding Reports
+
+A report includes:
+
+- **Decision**: `pass` or `fail`.
+- **Changed files**: file role, status, additions, and deletions.
+- **Findings**: severity, detector, confidence, message, evidence, and repair guidance.
+- **Diff Cost Score**: a rough signal for blast radius and churn.
+
+Severity levels:
+
+- `blocker`: should fail by default.
+- `high`: should fail by default or require explicit acknowledgement.
+- `medium`: should be reviewed, tuned, or justified.
+- `low`: informational unless combined with other risks.
+- `info`: context for humans and dashboards.
+
+## Common Examples
+
+### Small Feature With Expected Source And Test Changes
+
+```bash
+node dist/cli.js check \
+  --task "Add username length validation to signup form and cover it with tests" \
+  --base origin/main \
+  --format markdown
+```
+
+Expected result: source and test changes are normal. A dependency addition or CI config edit would be
+surprising unless the task explains it.
+
+### Dependency Addition
+
+```bash
+node dist/cli.js check \
+  --task "Add CSV export using the existing file writer utilities" \
+  --base origin/main \
+  --format markdown
+```
+
+If the diff adds a new CSV library without justification, Critical Gate should flag it. Repair
+guidance should point toward removing the dependency, using existing utilities, or documenting why
+the new package is necessary.
+
+### Test Weakening
+
+```bash
+node dist/cli.js check \
+  --task "Refactor signup validation internals without changing behavior" \
+  --base origin/main \
+  --format markdown
+```
+
+If assertions disappear, tests become skipped, or matchers become less specific, the gate should
+report test-integrity findings.
+
+### Public API Change
+
+```bash
+node dist/cli.js check \
+  --task "Expose a new parseReport helper and document the API change" \
+  --base origin/main \
+  --format markdown
+```
+
+Public exports are acceptable when the task and docs acknowledge them. Silent removals or signature
+changes should be flagged.
+
+## VS Code Workflow
+
+Install the latest local VSIX:
+
+```powershell
+code --install-extension C:\dev\critical-gate\artifacts\vscode\critical-gate-vscode.vsix --force
+```
+
+Open a repository that has the Critical Gate CLI built, then use:
+
+- Activity Bar: `Critical Gate > Gate Runs`.
+- Command Palette: `Critical Gate: Run Check`.
+- Output panel: `Critical Gate`.
+- Problems panel: file diagnostics from findings.
+
+The dashboard shows:
+
+- Latest decision.
+- Files checked.
+- Finding count.
+- Diff Cost Score.
+- Finding cards with evidence and repair actions.
+- Changed files.
+- Recent run history.
+
+Useful settings:
+
+- `criticalGate.task`: preset task intent so runs do not prompt.
+- `criticalGate.base`: base ref or SHA.
+- `criticalGate.cliPath`: path to `dist/cli.js`.
+- `criticalGate.refreshMode`: `manual` or `onSave`.
+- `criticalGate.refreshDebounceMs`: debounce for save-triggered runs.
+
+## Codex Hook Workflow
+
+The hook mode is designed for repair loops:
+
+```bash
+node dist/cli.js hook --base main
+```
+
+When findings fail the gate, the hook emits compact repair guidance instead of a long review. Codex
+or another agent can use that guidance to make a scoped repair and rerun the gate.
+
+Review `.codex/hooks.json` before trusting it in Codex CLI.
+
+## GitHub Action Workflow
+
+For pull requests, run Critical Gate with SARIF upload and fail only after uploading results:
+
+```yaml
+- id: critical-gate
+  uses: ./
+  continue-on-error: true
+  with:
+    task: ${{ github.event.pull_request.title }}
+    base: ${{ github.event.pull_request.base.sha }}
+    format: sarif
+    output: critical-gate.sarif
+
+- uses: github/codeql-action/upload-sarif@v4
+  if: always() && hashFiles('critical-gate.sarif') != ''
+  with:
+    sarif_file: critical-gate.sarif
+
+- if: steps.critical-gate.outcome == 'failure'
+  run: exit 1
+```
+
+Use `fetch-depth: 0` on checkout so base diffs and repository history are available.
+
+## Rollout Advice
+
+Start with the default threshold and focus on high-confidence findings. Review medium findings for a
+few weeks before making them blocking. Tune task text and repository docs when the gate lacks
+context.
+
+Good rollout sequence:
+
+1. Run locally on AI-generated diffs.
+2. Add the VS Code extension for developer feedback.
+3. Add GitHub Action SARIF upload without strict mode.
+4. Review findings for noise and false positives.
+5. Add Codex hook enforcement where repair loops are useful.
+
+## Troubleshooting
+
+### The CLI reports no changed files
+
+Make sure the diff is committed or present relative to the selected base, and that `--base` points at
+the branch or SHA you expect.
+
+### The VS Code extension cannot run
+
+Build the CLI in the opened workspace:
+
+```bash
+pnpm build
+```
+
+If the CLI is not at `dist/cli.js`, set `criticalGate.cliPath`.
+
+### The dashboard asks for task intent every run
+
+Set `criticalGate.task` in workspace settings.
+
+### GitHub Action has shallow history
+
+Use:
+
+```yaml
+with:
+  fetch-depth: 0
+```
+
+### SARIF uploads but the job still passes
+
+Keep the Critical Gate step as `continue-on-error: true` so SARIF uploads, then add a final step that
+fails when the gate step outcome is failure.

@@ -29,9 +29,10 @@ Initial alpha candidate for Critical Gate.
 - GitHub composite action and SARIF upload workflow examples.
 - Optional LLM explanation boundary with compact model artifacts, redaction, provider interface,
   cache, and budget controls.
-- VS Code diagnostics prototype with Problems panel diagnostics, evidence/repair quick actions,
-  on-demand refresh, optional on-save refresh, extension-host tests, and VSIX artifact packaging.
-- VS Code Marketplace pre-release metadata, icon, publisher identity, and publishing scripts.
+- VS Code extension with Activity Bar dashboard, Problems panel diagnostics, evidence/repair quick
+  actions, output-channel reports, status bar state, on-demand refresh, optional on-save refresh,
+  extension-host tests, and VSIX artifact packaging.
+- VS Code Marketplace metadata, icon assets, publisher identity, and publishing scripts.
 - External dogfood pass against `sindresorhus/ky` with false-positive tuning.
 - AI-agent documentation covering architecture, detectors, roadmap, Codex integration, GitHub
   integration, editor surface, evaluation strategy, and release policy.
@@ -42,4 +43,5 @@ Initial alpha candidate for Critical Gate.
 - Intended audience: alpha users and dogfooding repositories.
 - Distribution: local CLI build, local Codex hook, GitHub Action from this repository, and VSIX
   artifact from `pnpm package:vscode` or the VS Code extension workflow.
-- Marketplace status: pre-release package metadata is configured for `criticaldeveloper.critical-gate`.
+- Marketplace status: stable extension package metadata is configured for
+  `criticaldeveloper.critical-gate`.

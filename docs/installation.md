@@ -1,8 +1,8 @@
 # Installation
 
-Critical Gate is currently released as `0.1.0-alpha.0`. The supported alpha installation path is
-source checkout plus pnpm build artifacts. Package-registry, Marketplace, and published-action
-distribution can be added after remote repository metadata and release infrastructure are finalized.
+Critical Gate currently supports source-based CLI and action installation, local Codex hook setup,
+and a packaged VS Code extension VSIX. The root CLI package remains on the alpha release line while
+the VS Code extension uses Marketplace-compatible numeric versions.
 
 ## Requirements
 
@@ -204,7 +204,10 @@ After installing:
 
 2. Configure `criticalGate.cliPath` if the CLI is not at `dist/cli.js` relative to the workspace.
 
-3. Run `Critical Gate: Run Check`.
+3. Open the `Critical Gate` Activity Bar view or run `Critical Gate: Run Check`.
+
+The extension provides a `Gate Runs` dashboard, Problems diagnostics, a `Critical Gate` output
+channel report, evidence navigation, repair-copy actions, and status bar pass/fail state.
 
 Optional settings:
 
