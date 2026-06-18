@@ -27,10 +27,15 @@ interface CriticalGateDiagnosticPayload {
 
 export function activate(context: vscode.ExtensionContext): void {
   const diagnostics = vscode.languages.createDiagnosticCollection(diagnosticSource);
+  const refreshState: RefreshState = {
+    diagnostics,
+    running: false
+  };
   const runCommand = vscode.commands.registerCommand("criticalGate.runCheck", async () => {
-    await runCriticalGate(diagnostics);
+    await runCriticalGate(refreshState, "manual");
   });
   const clearCommand = vscode.commands.registerCommand("criticalGate.clearDiagnostics", () => {
+    clearPendingRefresh(refreshState);
     diagnostics.clear();
   });
   const openEvidenceCommand = vscode.commands.registerCommand(
@@ -53,6 +58,9 @@ export function activate(context: vscode.ExtensionContext): void {
       providedCodeActionKinds: [vscode.CodeActionKind.QuickFix]
     }
   );
+  const saveRefresh = vscode.workspace.onDidSaveTextDocument(() => {
+    scheduleRefresh(refreshState);
+  });
 
   context.subscriptions.push(
     diagnostics,
@@ -60,7 +68,11 @@ export function activate(context: vscode.ExtensionContext): void {
     clearCommand,
     openEvidenceCommand,
     copyRepairCommand,
-    codeActions
+    codeActions,
+    saveRefresh,
+    {
+      dispose: () => clearPendingRefresh(refreshState)
+    }
   );
 }
 
@@ -68,7 +80,19 @@ export function deactivate(): void {
   // VS Code disposes registered subscriptions for us.
 }
 
-async function runCriticalGate(diagnostics: vscode.DiagnosticCollection): Promise<void> {
+interface RefreshState {
+  diagnostics: vscode.DiagnosticCollection;
+  running: boolean;
+  pendingTimer?: ReturnType<typeof setTimeout>;
+}
+
+type RunReason = "manual" | "onSave";
+
+async function runCriticalGate(state: RefreshState, reason: RunReason): Promise<void> {
+  if (state.running) {
+    return;
+  }
+
   const folder = vscode.workspace.workspaceFolders?.[0];
 
   if (folder === undefined) {
@@ -83,11 +107,19 @@ async function runCriticalGate(diagnostics: vscode.DiagnosticCollection): Promis
   }
 
   try {
+    state.running = true;
     const result = await runCli(folder, task);
-    applyDiagnostics(diagnostics, folder, result);
+    applyDiagnostics(state.diagnostics, folder, result);
 
-    if (result.summary.decision === "pass") {
+    if (reason === "onSave" && result.summary.decision === "pass") {
+      vscode.window.setStatusBarMessage("Critical Gate passed.", 3000);
+    } else if (result.summary.decision === "pass") {
       vscode.window.showInformationMessage("Critical Gate passed. No diagnostics found.");
+    } else if (reason === "onSave") {
+      vscode.window.setStatusBarMessage(
+        `Critical Gate found ${result.summary.findingCount} finding(s).`,
+        5000
+      );
     } else {
       vscode.window.showWarningMessage(
         `Critical Gate found ${result.summary.findingCount} finding(s).`
@@ -96,14 +128,43 @@ async function runCriticalGate(diagnostics: vscode.DiagnosticCollection): Promis
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown Critical Gate error.";
     vscode.window.showErrorMessage(message);
+  } finally {
+    state.running = false;
+  }
+}
+
+function scheduleRefresh(state: RefreshState): void {
+  if (getRefreshMode() !== "onSave") {
+    return;
+  }
+
+  const task = getConfiguredTask();
+
+  if (task.length === 0) {
+    vscode.window.setStatusBarMessage(
+      "Critical Gate on-save refresh skipped: configure criticalGate.task.",
+      5000
+    );
+    return;
+  }
+
+  clearPendingRefresh(state);
+
+  state.pendingTimer = setTimeout(() => {
+    state.pendingTimer = undefined;
+    void runCriticalGate(state, "onSave");
+  }, getRefreshDebounceMs());
+}
+
+function clearPendingRefresh(state: RefreshState): void {
+  if (state.pendingTimer !== undefined) {
+    clearTimeout(state.pendingTimer);
+    state.pendingTimer = undefined;
   }
 }
 
 async function resolveTask(): Promise<string | undefined> {
-  const configuredTask = vscode.workspace
-    .getConfiguration("criticalGate")
-    .get<string>("task", "")
-    .trim();
+  const configuredTask = getConfiguredTask();
 
   if (configuredTask.length > 0) {
     return configuredTask;
@@ -206,6 +267,26 @@ function toDiagnosticSeverity(severity: EditorDiagnostic["severity"]): vscode.Di
 
 function resolveWorkspacePath(folder: vscode.WorkspaceFolder, configuredPath: string): string {
   return isAbsolute(configuredPath) ? configuredPath : join(folder.uri.fsPath, configuredPath);
+}
+
+function getRefreshMode(): "manual" | "onSave" {
+  const configuredMode = vscode.workspace
+    .getConfiguration("criticalGate")
+    .get<string>("refreshMode", "manual");
+
+  return configuredMode === "onSave" ? "onSave" : "manual";
+}
+
+function getRefreshDebounceMs(): number {
+  const configuredDelay = vscode.workspace
+    .getConfiguration("criticalGate")
+    .get<number>("refreshDebounceMs", 1200);
+
+  return Math.max(0, configuredDelay);
+}
+
+function getConfiguredTask(): string {
+  return vscode.workspace.getConfiguration("criticalGate").get<string>("task", "").trim();
 }
 
 function toDiagnosticPayload(editorDiagnostic: EditorDiagnostic): CriticalGateDiagnosticPayload {

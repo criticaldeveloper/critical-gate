@@ -53,6 +53,21 @@
           "type": "string",
           "default": "dist/cli.js",
           "description": "Path to the built Critical Gate CLI, relative to the workspace root unless absolute."
+        },
+        "criticalGate.refreshMode": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "onSave"
+          ],
+          "default": "manual",
+          "description": "Controls when Critical Gate refreshes diagnostics. Manual runs only from the command; onSave also runs after explicit file saves."
+        },
+        "criticalGate.refreshDebounceMs": {
+          "type": "number",
+          "default": 1200,
+          "minimum": 0,
+          "description": "Debounce delay before running Critical Gate after a file save when refreshMode is onSave."
         }
       }
     }

@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 
 export async function runExtensionTests(): Promise<void> {
   await activatesCommandContributions();
+  await contributesManualRefreshDefaults();
   await copiesRepairTextThroughCommandPayload();
   await opensEvidenceFilesThroughCommandPayload();
 }
@@ -17,6 +18,13 @@ async function activatesCommandContributions(): Promise<void> {
   assert.ok(commands.includes("criticalGate.clearDiagnostics"));
   assert.ok(commands.includes("criticalGate.openEvidence"));
   assert.ok(commands.includes("criticalGate.copyRepair"));
+}
+
+async function contributesManualRefreshDefaults(): Promise<void> {
+  const config = vscode.workspace.getConfiguration("criticalGate");
+
+  assert.equal(config.get("refreshMode"), "manual");
+  assert.equal(config.get("refreshDebounceMs"), 1200);
 }
 
 async function copiesRepairTextThroughCommandPayload(): Promise<void> {

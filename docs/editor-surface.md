@@ -32,6 +32,12 @@ The VS Code scaffold contributes these settings:
 - `criticalGate.task`: task intent passed to the CLI. If empty, the extension asks before running.
 - `criticalGate.base`: optional git base ref or SHA.
 - `criticalGate.cliPath`: path to the built CLI, defaulting to `dist/cli.js` in the workspace.
+- `criticalGate.refreshMode`: `manual` by default, or `onSave` to refresh after explicit saves.
+- `criticalGate.refreshDebounceMs`: debounce delay for on-save refreshes, defaulting to 1200 ms.
+
+Manual refresh is always available through `Critical Gate: Run Check`. On-save refresh only runs
+when `criticalGate.refreshMode` is `onSave` and `criticalGate.task` is configured, so saving a file
+does not unexpectedly prompt for task intent.
 
 ## Diagnostic Mapping
 
@@ -84,5 +90,4 @@ commands.
 
 Before packaging this as a marketplace extension:
 
-1. Tune refresh behavior so diagnostics run on demand or after explicit save, not continuously.
-2. Add packaging metadata and a VSIX release workflow.
+1. Add packaging metadata and a VSIX release workflow.
