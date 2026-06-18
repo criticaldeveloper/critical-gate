@@ -355,6 +355,10 @@ function getConfiguredTask(): string {
   return vscode.workspace.getConfiguration("criticalGate").get<string>("task", "").trim();
 }
 
+function getConfiguredBase(): string {
+  return vscode.workspace.getConfiguration("criticalGate").get<string>("base", "").trim();
+}
+
 function toDiagnosticPayload(editorDiagnostic: EditorDiagnostic): CriticalGateDiagnosticPayload {
   return {
     findingId: editorDiagnostic.code,
@@ -376,7 +380,9 @@ async function openEvidence(payload: CriticalGateDiagnosticPayload): Promise<voi
   }
 
   const uri = vscode.Uri.file(join(folder.uri.fsPath, payload.evidencePath));
-  const document = await vscode.workspace.openTextDocument(uri);
+  const document = (await fileExists(uri))
+    ? await vscode.workspace.openTextDocument(uri)
+    : await openDeletedEvidenceDocument(folder, payload.evidencePath);
   const editor = await vscode.window.showTextDocument(document);
   const startLine = Math.max(0, (payload.startLine ?? 1) - 1);
   const endLine = Math.max(0, (payload.endLine ?? payload.startLine ?? 1) - 1);
@@ -384,6 +390,40 @@ async function openEvidence(payload: CriticalGateDiagnosticPayload): Promise<voi
 
   editor.selection = new vscode.Selection(range.start, range.end);
   editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
+}
+
+async function fileExists(uri: vscode.Uri): Promise<boolean> {
+  try {
+    await vscode.workspace.fs.stat(uri);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function openDeletedEvidenceDocument(
+  folder: vscode.WorkspaceFolder,
+  evidencePath: string
+): Promise<vscode.TextDocument> {
+  const base = getConfiguredBase() || "HEAD";
+
+  try {
+    const { stdout } = await execFileAsync("git", ["show", `${base}:${evidencePath}`], {
+      cwd: folder.uri.fsPath,
+      maxBuffer: 10 * 1024 * 1024
+    });
+
+    vscode.window.setStatusBarMessage(`Critical Gate opened deleted evidence from ${base}.`, 4000);
+
+    return vscode.workspace.openTextDocument({
+      content: stdout,
+      language: inferVsCodeLanguage(evidencePath)
+    });
+  } catch {
+    throw new Error(
+      `Critical Gate could not open deleted evidence for ${evidencePath}. Try setting criticalGate.base to the branch or SHA that still contains the file.`
+    );
+  }
 }
 
 function addRunHistory(state: RefreshState, result: GateResult): void {
@@ -1015,6 +1055,40 @@ function formatDecision(state: DashboardState): string {
 
 function formatTask(task: string): string {
   return task.length === 0 ? "Set a task intent or run the gate to enter one." : task;
+}
+
+function inferVsCodeLanguage(path: string): string {
+  const extension = path.split(".").pop()?.toLowerCase();
+
+  switch (extension) {
+    case "css":
+      return "css";
+    case "scss":
+      return "scss";
+    case "sass":
+      return "sass";
+    case "less":
+      return "less";
+    case "ts":
+      return "typescript";
+    case "tsx":
+      return "typescriptreact";
+    case "js":
+    case "mjs":
+    case "cjs":
+      return "javascript";
+    case "jsx":
+      return "javascriptreact";
+    case "json":
+      return "json";
+    case "md":
+      return "markdown";
+    case "yml":
+    case "yaml":
+      return "yaml";
+    default:
+      return "plaintext";
+  }
 }
 
 function isCriticalGateDiagnostic(diagnostic: vscode.Diagnostic): boolean {
