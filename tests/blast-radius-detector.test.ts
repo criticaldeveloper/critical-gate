@@ -137,4 +137,105 @@ index 57b22a0..cb3e0f1 100644
       false
     );
   });
+
+  it("deduplicates overlapping medium legacy scope findings in the runner", () => {
+    const diff = parse(`diff --git a/src/signup.ts b/src/signup.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/signup.ts
++++ b/src/signup.ts
+@@ -1 +1,2 @@
++export const signup = true;
+diff --git a/tests/signup.test.ts b/tests/signup.test.ts
+index 57b22a0..cb3e0f1 100644
+--- a/tests/signup.test.ts
++++ b/tests/signup.test.ts
+@@ -1 +1,2 @@
++expect(signup).toBe(true);
+diff --git a/src/logger.ts b/src/logger.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/logger.ts
++++ b/src/logger.ts
+@@ -1 +1,2 @@
++export const logger = true;
+`);
+
+    const findings = runDetectors(task, diff, {
+      knowledge: knowledge({
+        nodes: [],
+        edges: [
+          {
+            from: "src/signup.ts",
+            to: "tests/signup.test.ts",
+            kind: "test",
+            weight: 0.9
+          }
+        ]
+      })
+    });
+
+    expect(findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          detector: "blast-radius"
+        })
+      ])
+    );
+    expect(
+      findings.some(
+        (finding) =>
+          finding.detector === "scope" &&
+          finding.evidence.some((evidence) => evidence.path === "src/logger.ts")
+      )
+    ).toBe(false);
+    expect(findings.some((finding) => finding.detector === "blast-radius")).toBe(true);
+  });
+
+  it("keeps high-confidence legacy scope findings for config clusters", () => {
+    const diff = parse(`diff --git a/src/signup.ts b/src/signup.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/signup.ts
++++ b/src/signup.ts
+@@ -1 +1,2 @@
++export const signup = true;
+diff --git a/tests/signup.test.ts b/tests/signup.test.ts
+index 57b22a0..cb3e0f1 100644
+--- a/tests/signup.test.ts
++++ b/tests/signup.test.ts
+@@ -1 +1,2 @@
++expect(signup).toBe(true);
+diff --git a/webpack.config.js b/webpack.config.js
+index 57b22a0..cb3e0f1 100644
+--- a/webpack.config.js
++++ b/webpack.config.js
+@@ -1 +1,2 @@
++export const cache = true;
+`);
+
+    const findings = runDetectors(task, diff, {
+      knowledge: knowledge({
+        nodes: [],
+        edges: [
+          {
+            from: "src/signup.ts",
+            to: "tests/signup.test.ts",
+            kind: "test",
+            weight: 0.9
+          }
+        ]
+      })
+    });
+
+    expect(findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          detector: "blast-radius"
+        }),
+        expect.objectContaining({
+          detector: "scope",
+          severity: "high",
+          id: "scope:webpack.config.js"
+        })
+      ])
+    );
+  });
 });

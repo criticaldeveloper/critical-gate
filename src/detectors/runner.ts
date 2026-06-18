@@ -34,7 +34,7 @@ export function runDetectors(
   context?: DetectorRepoContext,
   detectors = defaultDetectors
 ): Finding[] {
-  return detectors.flatMap((detector) => detector.run({ task, diff, context }));
+  return dedupeFindings(detectors.flatMap((detector) => detector.run({ task, diff, context })));
 }
 
 export function summarizeFindings(
@@ -60,4 +60,27 @@ export function summarizeFindings(
 
 function countSeverity(findings: Finding[], severity: Finding["severity"]): number {
   return findings.filter((finding) => finding.severity === severity).length;
+}
+
+function dedupeFindings(findings: Finding[]): Finding[] {
+  const blastRadiusPaths = new Set(
+    findings
+      .filter((finding) => finding.detector === "blast-radius")
+      .flatMap((finding) => finding.evidence.map((evidence) => evidence.path))
+      .filter((path): path is string => path !== undefined)
+  );
+
+  if (blastRadiusPaths.size === 0) {
+    return findings;
+  }
+
+  return findings.filter((finding) => {
+    if (finding.detector !== "scope" || finding.severity !== "medium") {
+      return true;
+    }
+
+    return !finding.evidence.some(
+      (evidence) => evidence.path !== undefined && blastRadiusPaths.has(evidence.path)
+    );
+  });
 }
