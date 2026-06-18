@@ -38,10 +38,10 @@ The extension manifest lives in `extensions/vscode/package.json`.
 Current public identity:
 
 - Publisher: `criticaldeveloper`
-- Extension name: `critical-gate`
+- Extension name: `critical-gate-vscode`
 - Extension version: `1.0.0`
 - Display name: `Critical Gate`
-- Extension ID: `criticaldeveloper.critical-gate`
+- Extension ID: `criticaldeveloper.critical-gate-vscode`
 - Icon: `extensions/vscode/resources/icon.png`
 
 Before the first public publish, confirm the extension ID because Marketplace extension names are

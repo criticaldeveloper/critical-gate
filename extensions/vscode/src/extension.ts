@@ -98,7 +98,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const settingsCommand = vscode.commands.registerCommand("criticalGate.openSettings", async () => {
     await vscode.commands.executeCommand(
       "workbench.action.openSettings",
-      "@ext:criticaldeveloper.critical-gate"
+      "@ext:criticaldeveloper.critical-gate-vscode"
     );
   });
   const openEvidenceCommand = vscode.commands.registerCommand(
