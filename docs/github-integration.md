@@ -28,6 +28,10 @@ node dist/cli.js check --task "<task>" --base "<base>" --format sarif --output c
 For a published action, keep `dist/` available in the release package or leave `build: "true"` so
 the composite action can compile before it runs.
 
+For push workflows, make the task intent cover the same range as the selected base. If one push
+contains multiple commits, join all commit messages from the push payload instead of using only the
+head commit message.
+
 ## SARIF Upload Workflow
 
 Use full git history so repository intelligence and base comparisons have enough context.

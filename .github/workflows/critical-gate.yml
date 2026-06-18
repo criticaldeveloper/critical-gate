@@ -17,9 +17,6 @@ jobs:
   critical-gate:
     name: Diff integrity gate
     runs-on: ubuntu-latest
-    env:
-      CRITICAL_GATE_TASK: ${{ github.event.pull_request.title || github.event.head_commit.message || github.workflow }}
-      CRITICAL_GATE_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
 
     steps:
       - name: Checkout
@@ -27,19 +24,73 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Resolve Critical Gate inputs
+        id: critical-gate-inputs
+        shell: bash
+        run: |
+          node <<'NODE'
+          const {appendFileSync, readFileSync} = require('node:fs');
+
+          const event = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
+          const eventName = process.env.GITHUB_EVENT_NAME;
+          const workflowName = process.env.GITHUB_WORKFLOW || 'Critical Gate';
+
+          const task = getTaskIntent(eventName, event, workflowName);
+          const base = getBaseRef(eventName, event);
+
+          writeOutput('task', task);
+          writeOutput('base', base);
+
+          function getTaskIntent(eventName, event, workflowName) {
+            if (eventName === 'pull_request') {
+              return [event.pull_request?.title, event.pull_request?.body]
+                .filter((part) => typeof part === 'string' && part.trim().length > 0)
+                .join('\n\n');
+            }
+
+            if (Array.isArray(event.commits) && event.commits.length > 0) {
+              return event.commits
+                .map((commit) => commit.message)
+                .filter((message) => typeof message === 'string' && message.trim().length > 0)
+                .join('\n\n---\n\n');
+            }
+
+            return event.head_commit?.message || workflowName;
+          }
+
+          function getBaseRef(eventName, event) {
+            if (eventName === 'pull_request') {
+              return event.pull_request?.base?.sha || '';
+            }
+
+            return event.before || '';
+          }
+
+          function writeOutput(name, value) {
+            const delimiter = `critical_gate_${name}_${Date.now()}`;
+            appendFileSync(
+              process.env.GITHUB_OUTPUT,
+              `${name}<<${delimiter}\n${value || ''}\n${delimiter}\n`
+            );
+          }
+          NODE
+
       - name: Run Critical Gate
         id: critical-gate
         uses: ./
         continue-on-error: true
         with:
-          task: ${{ env.CRITICAL_GATE_TASK }}
-          base: ${{ env.CRITICAL_GATE_BASE }}
+          task: ${{ steps.critical-gate-inputs.outputs.task }}
+          base: ${{ steps.critical-gate-inputs.outputs.base }}
           format: sarif
           output: critical-gate.sarif
 
       - name: Write Critical Gate summary
         if: always()
         shell: bash
+        env:
+          CRITICAL_GATE_TASK: ${{ steps.critical-gate-inputs.outputs.task }}
+          CRITICAL_GATE_BASE: ${{ steps.critical-gate-inputs.outputs.base }}
         run: |
           set +e
 
@@ -60,9 +111,14 @@ jobs:
           {
             echo "## Critical Gate"
             echo
-            echo "- Task: \`$CRITICAL_GATE_TASK\`"
             echo "- Base: \`$CRITICAL_GATE_BASE\`"
             echo "- CLI exit code: \`$status\`"
+            echo
+            echo "### Task intent"
+            echo
+            echo '```text'
+            echo "$CRITICAL_GATE_TASK"
+            echo '```'
             echo
             cat critical-gate.md
           } >> "$GITHUB_STEP_SUMMARY"
