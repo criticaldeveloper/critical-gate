@@ -51,7 +51,8 @@ index 0000000..cb3e0f1
         title: "New utility may duplicate existing helper",
         message:
           "formatDateForSignup was added in src/helpers/date-utils.ts, but formatDate already exists in src/utils/date.ts.",
-        repair: "Reuse the existing utility or document why a separate helper is needed.",
+        repair:
+          "Reuse formatDate from src/utils/date.ts, or document why a separate helper is needed.",
         tags: ["utility"]
       })
     ]);

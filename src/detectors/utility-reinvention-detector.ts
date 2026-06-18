@@ -101,7 +101,7 @@ function toFinding(
         }
       }
     ],
-    repair: "Reuse the existing utility or document why a separate helper is needed.",
+    repair: `Reuse ${match.existingName} from ${match.entry.path}, or document why a separate helper is needed.`,
     tags: ["utility"]
   };
 }
