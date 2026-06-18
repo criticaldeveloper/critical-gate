@@ -9,7 +9,13 @@ export {
   type KnowledgeCacheKeyOptions,
   type KnowledgeCache
 } from "./cache.js";
-export { createEmptyFileGraph, createFileGraph } from "./graph.js";
+export {
+  buildFileGraph,
+  createEmptyFileGraph,
+  createFileGraph,
+  type BuildFileGraphOptions,
+  type FileGraphRunner
+} from "./graph.js";
 export {
   buildHistoryIndex,
   buildRepositoryProfileFromHistoryIndex,
