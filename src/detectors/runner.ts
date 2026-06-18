@@ -2,6 +2,7 @@ import type { Finding, GateResult, TaskIntent } from "../schema/index.js";
 
 import { calculateDiffCostScore } from "../intent/index.js";
 import { apiSurfaceDetector } from "./api-surface-detector.js";
+import { blastRadiusDetector } from "./blast-radius-detector.js";
 import { configChangeDetector } from "./config-change-detector.js";
 import { dependencyDetector } from "./dependency-detector.js";
 import { intentVerificationDetector } from "./intent-verification-detector.js";
@@ -20,6 +21,7 @@ const defaultDetectors: Detector[] = [
   secretPathDetector,
   apiSurfaceDetector,
   intentVerificationDetector,
+  blastRadiusDetector,
   scopeDetector,
   rewriteDetector,
   repositoryIntelligenceDetector,

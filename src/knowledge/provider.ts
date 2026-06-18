@@ -4,9 +4,16 @@ import {
   type KnowledgeCache,
   type KnowledgeCacheKeyOptions
 } from "./cache.js";
+import { buildFileGraph } from "./graph.js";
 import { buildHistoryIndex } from "./history-index.js";
 import { buildSolutionIndex } from "./solution-index.js";
-import type { HistoryIndex, KnowledgeCacheKey, KnowledgeProvider, SolutionIndex } from "./types.js";
+import type {
+  FileGraph,
+  HistoryIndex,
+  KnowledgeCacheKey,
+  KnowledgeProvider,
+  SolutionIndex
+} from "./types.js";
 
 export interface KnowledgeProviderRunner {
   execFile: (file: string, args: string[], options?: { cwd?: string }) => string;
@@ -27,6 +34,7 @@ export function createLazyKnowledgeProvider(
 ): KnowledgeProvider {
   let historyIndex: HistoryIndex | undefined;
   let solutionIndex: SolutionIndex | undefined;
+  let fileGraph: FileGraph | undefined;
   let cacheKey: KnowledgeCacheKey | undefined;
   const cacheEnabled =
     options.useCache !== false && process.env.CRITICAL_GATE_DISABLE_CACHE !== "true";
@@ -35,6 +43,22 @@ export function createLazyKnowledgeProvider(
     : undefined;
 
   return {
+    getFileGraph: () => {
+      const cached = cache?.get(getCacheKey());
+      historyIndex ??= cached?.history;
+      fileGraph ??= cached?.graph;
+
+      if (fileGraph === undefined) {
+        historyIndex ??= buildAndCacheHistory(options, cache, getCacheKey);
+        fileGraph = buildFileGraph({ ...options, history: historyIndex });
+        const key = cache === undefined ? undefined : getCacheKey();
+        if (key !== undefined) {
+          cache?.set(key, { ...(cache.get(key) ?? {}), graph: fileGraph, history: historyIndex });
+        }
+      }
+
+      return fileGraph;
+    },
     getHistoryIndex: () => {
       historyIndex ??=
         cache?.get(getCacheKey())?.history ?? buildAndCacheHistory(options, cache, getCacheKey);
@@ -45,6 +69,7 @@ export function createLazyKnowledgeProvider(
         cache?.get(getCacheKey())?.solutions ?? buildAndCacheSolutions(options, cache, getCacheKey);
       return solutionIndex;
     },
+    getLoadedFileGraph: () => fileGraph,
     getLoadedHistoryIndex: () => historyIndex,
     getLoadedSolutionIndex: () => solutionIndex
   };

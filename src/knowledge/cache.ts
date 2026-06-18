@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-import type { HistoryIndex, KnowledgeCacheKey, SolutionIndex } from "./types.js";
+import type { FileGraph, HistoryIndex, KnowledgeCacheKey, SolutionIndex } from "./types.js";
 
 export const KNOWLEDGE_CACHE_SCHEMA_VERSION = 1;
 export const KNOWLEDGE_CACHE_DIR = ".critical-gate/cache";
@@ -13,6 +13,7 @@ export interface KnowledgeCache {
 }
 
 export interface KnowledgeCacheEntry {
+  graph?: FileGraph;
   history?: HistoryIndex;
   solutions?: SolutionIndex;
 }
