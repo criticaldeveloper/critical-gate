@@ -169,3 +169,5 @@ Deliverables:
 Exit criteria:
 
 - Editor diagnostics are useful and quiet enough for repeated use.
+- The prototype runs the CLI and displays Problems panel diagnostics without becoming a separate
+  detector implementation.

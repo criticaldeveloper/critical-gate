@@ -61,6 +61,7 @@ Before implementing, read:
 5. `docs/implementation-roadmap.md`
 6. `docs/task-backlog.md`
 7. `docs/llm-layer.md` when changing model-assisted explanation behavior
+8. `docs/editor-surface.md` when changing editor integrations
 
 When changing code later:
 

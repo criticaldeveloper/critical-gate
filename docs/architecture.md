@@ -143,6 +143,11 @@ Human summary for local CLI, PR comments, and agent handoff.
 
 Interoperability format for code scanning and review systems.
 
+### Editor Diagnostics
+
+Editor surfaces should consume existing `GateResult` findings and map them into file diagnostics.
+They should not re-run detector logic or create editor-only findings.
+
 ## LLM Usage Boundary
 
 Use an LLM only after deterministic detectors produce a compact artifact.

@@ -1,0 +1,52 @@
+{
+  "name": "critical-gate-vscode",
+  "displayName": "Critical Gate",
+  "description": "VS Code diagnostics prototype for Critical Gate findings.",
+  "version": "0.1.0",
+  "publisher": "critical-gate",
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "Linters",
+    "Testing"
+  ],
+  "activationEvents": [
+    "onCommand:criticalGate.runCheck"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "criticalGate.runCheck",
+        "title": "Critical Gate: Run Check"
+      },
+      {
+        "command": "criticalGate.clearDiagnostics",
+        "title": "Critical Gate: Clear Diagnostics"
+      }
+    ],
+    "configuration": {
+      "title": "Critical Gate",
+      "properties": {
+        "criticalGate.task": {
+          "type": "string",
+          "default": "",
+          "description": "Task intent to pass to Critical Gate. When empty, the extension asks before running."
+        },
+        "criticalGate.base": {
+          "type": "string",
+          "default": "",
+          "description": "Optional git base ref or SHA for Critical Gate."
+        },
+        "criticalGate.cliPath": {
+          "type": "string",
+          "default": "dist/cli.js",
+          "description": "Path to the built Critical Gate CLI, relative to the workspace root unless absolute."
+        }
+      }
+    }
+  }
+}
