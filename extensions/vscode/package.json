@@ -38,9 +38,6 @@
     "Linters",
     "Testing"
   ],
-  "activationEvents": [
-    "onCommand:criticalGate.runCheck"
-  ],
   "extensionKind": [
     "workspace"
   ],
