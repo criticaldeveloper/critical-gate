@@ -5,6 +5,7 @@ import { apiSurfaceDetector } from "./api-surface-detector.js";
 import { blastRadiusDetector } from "./blast-radius-detector.js";
 import { configChangeDetector } from "./config-change-detector.js";
 import { dependencyDetector } from "./dependency-detector.js";
+import { existingSolutionDetector } from "./existing-solution-detector.js";
 import { intentVerificationDetector } from "./intent-verification-detector.js";
 import { rewriteDetector } from "./rewrite-detector.js";
 import { repositoryIntelligenceDetector } from "./repository-intelligence-detector.js";
@@ -25,7 +26,8 @@ const defaultDetectors: Detector[] = [
   scopeDetector,
   rewriteDetector,
   repositoryIntelligenceDetector,
-  utilityReinventionDetector
+  utilityReinventionDetector,
+  existingSolutionDetector
 ];
 
 export function runDetectors(

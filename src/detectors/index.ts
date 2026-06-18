@@ -2,6 +2,7 @@ export { apiSurfaceDetector } from "./api-surface-detector.js";
 export { blastRadiusDetector } from "./blast-radius-detector.js";
 export { configChangeDetector } from "./config-change-detector.js";
 export { dependencyDetector } from "./dependency-detector.js";
+export { existingSolutionDetector } from "./existing-solution-detector.js";
 export { intentVerificationDetector } from "./intent-verification-detector.js";
 export { rewriteDetector } from "./rewrite-detector.js";
 export { repositoryIntelligenceDetector } from "./repository-intelligence-detector.js";

@@ -27,6 +27,7 @@ export {
 export {
   buildSolutionIndex,
   extractExportedNames,
+  extractSolutionEntries,
   solutionIndexToUtilityIndex,
   type BuildSolutionIndexOptions,
   type SolutionIndexRunner

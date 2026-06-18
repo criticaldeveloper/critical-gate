@@ -113,13 +113,17 @@ function getTrackedSourceFiles(options: BuildSolutionIndexOptions): string[] {
 }
 
 function toSolutionEntries(path: string, options: BuildSolutionIndexOptions): SolutionEntry[] {
+  const sourceText = options.runner.readFile?.(join(options.root, path)) ?? "";
+  return extractSolutionEntries(path, sourceText);
+}
+
+export function extractSolutionEntries(path: string, sourceText: string): SolutionEntry[] {
   const solutionClass = classifySolutionPath(path);
 
   if (solutionClass === undefined) {
     return [];
   }
 
-  const sourceText = options.runner.readFile?.(join(options.root, path)) ?? "";
   const exportedNames = extractExportedNames(sourceText);
   const importTokens = extractImportTokens(sourceText);
 
