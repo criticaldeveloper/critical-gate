@@ -14,7 +14,10 @@ The VSIX is written to:
 artifacts/vscode/critical-gate-vscode.vsix
 ```
 
-The current alpha package is marked as a VS Code pre-release.
+The current alpha package is marked as a VS Code pre-release with `vsce --pre-release`.
+
+Visual Studio Marketplace requires the extension manifest version to be numeric, so the VS Code
+extension uses `0.1.0` even while the root CLI remains `0.1.0-alpha.0`.
 
 ## Publish
 
@@ -35,6 +38,7 @@ Current public identity:
 
 - Publisher: `criticaldeveloper`
 - Extension name: `critical-gate`
+- Extension version: `0.1.0`
 - Display name: `Critical Gate`
 - Extension ID: `criticaldeveloper.critical-gate`
 - Icon: `extensions/vscode/resources/icon.png`
