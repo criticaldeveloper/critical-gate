@@ -2,7 +2,7 @@
   "name": "critical-gate-vscode",
   "displayName": "Critical Gate",
   "description": "VS Code diagnostics prototype for Critical Gate findings.",
-  "version": "0.1.0",
+  "version": "0.1.0-alpha.0",
   "publisher": "critical-gate",
   "license": "UNLICENSED",
   "type": "module",

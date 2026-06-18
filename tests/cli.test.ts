@@ -50,7 +50,7 @@ describe("cli", () => {
     const { io, stdout, stderr } = createTestIo();
 
     expect(main(["--version"], io)).toBe(ExitCode.Pass);
-    expect(stdout).toEqual(["critical-gate 0.1.0"]);
+    expect(stdout).toEqual(["critical-gate 0.1.0-alpha.0"]);
     expect(stderr).toEqual([]);
   });
 

@@ -62,6 +62,7 @@ Before implementing, read:
 6. `docs/task-backlog.md`
 7. `docs/llm-layer.md` when changing model-assisted explanation behavior
 8. `docs/editor-surface.md` when changing editor integrations
+9. `docs/versioning-policy.md` and `CHANGELOG.md` when preparing releases
 
 When changing code later:
 

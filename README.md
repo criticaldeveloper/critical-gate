@@ -79,6 +79,8 @@ small tasks. Reports include an initial Diff Cost Score.
 - `docs/github-integration.md`: GitHub Action, SARIF upload, checks summary, and threshold guidance.
 - `docs/llm-layer.md`: optional model explanation boundary, artifact, redaction, cache, and budgets.
 - `docs/editor-surface.md`: VS Code diagnostics prototype and editor integration notes.
+- `docs/versioning-policy.md`: release stages, SemVer policy, artifact alignment, and checklist.
+- `CHANGELOG.md`: project-level release notes.
 
 ## Current State
 
@@ -86,3 +88,6 @@ This repository now contains the first CLI implementation, deterministic detecto
 integration, GitHub Action integration, and an optional LLM explanation boundary. Continue with the
 roadmap and backlog before extending the next surface. A first VS Code diagnostics prototype lives
 under `extensions/vscode`.
+
+The current release target is `0.1.0-alpha.0`: suitable for internal alpha dogfooding, not yet a
+public stable release.

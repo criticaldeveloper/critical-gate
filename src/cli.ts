@@ -15,7 +15,7 @@ import {
   type ReportFormat
 } from "./index.js";
 
-export const CLI_VERSION = "0.1.0";
+export const CLI_VERSION = "0.1.0-alpha.0";
 
 export const ExitCode = {
   Pass: 0,
