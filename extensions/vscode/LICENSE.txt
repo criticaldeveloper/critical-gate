@@ -1,0 +1,5 @@
+UNLICENSED
+
+Copyright (c) Critical Gate contributors.
+
+All rights reserved. This prototype package is not licensed for redistribution.

@@ -1,0 +1,14 @@
+.vscode-test/**
+dist/test/**
+dist/src/schema/**
+test/**
+src/**
+tsconfig*.json
+**/*.map
+**/*.d.ts
+**/*.d.ts.map
+*.tsbuildinfo
+node_modules/**
+package-lock.json
+pnpm-lock.yaml
+README.dev.md

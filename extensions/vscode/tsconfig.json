@@ -8,5 +8,5 @@
     "rootDir": "../..",
     "types": ["node", "vscode"]
   },
-  "include": ["src", "../../src/editor", "../../src/schema"]
+  "include": ["src", "../../src/editor"]
 }

@@ -6,6 +6,13 @@
   "publisher": "critical-gate",
   "license": "UNLICENSED",
   "type": "module",
+  "keywords": [
+    "ai",
+    "codex",
+    "diagnostics",
+    "quality-gate",
+    "code-review"
+  ],
   "engines": {
     "vscode": "^1.100.0"
   },

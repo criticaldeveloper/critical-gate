@@ -1,0 +1,68 @@
+name: VS Code Extension
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/vscode-extension.yml"
+      - "extensions/vscode/**"
+      - "src/editor/**"
+      - "src/schema/**"
+      - "scripts/run-vscode-tests.mjs"
+      - "fixtures/vscode-workspace/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/vscode-extension.yml"
+      - "extensions/vscode/**"
+      - "src/editor/**"
+      - "src/schema/**"
+      - "scripts/run-vscode-tests.mjs"
+      - "fixtures/vscode-workspace/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Build VSIX
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.1.2
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify extension
+        run: xvfb-run -a pnpm test:vscode
+
+      - name: Package VSIX
+        run: pnpm package:vscode
+
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: critical-gate-vscode
+          path: artifacts/vscode/*.vsix
+          if-no-files-found: error

@@ -86,8 +86,18 @@ The harness uses `@vscode/test-electron`, launches the fixture workspace in
 `fixtures/vscode-workspace`, activates the command contributions, and checks the evidence/repair
 commands.
 
+Package a local VSIX artifact with:
+
+```bash
+pnpm package:vscode
+```
+
+The package command writes `artifacts/vscode/critical-gate-vscode.vsix`. The VS Code extension
+workflow builds, tests, packages, and uploads that VSIX as a GitHub Actions artifact. It does not
+publish to the Marketplace.
+
 ## Later Work
 
 Before packaging this as a marketplace extension:
 
-1. Add packaging metadata and a VSIX release workflow.
+1. Add Marketplace publishing credentials and a signed release flow.

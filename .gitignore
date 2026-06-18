@@ -2,6 +2,7 @@ node_modules/
 dist/
 extensions/vscode/dist/
 .vscode-test/
+artifacts/
 coverage/
 .turbo/
 .vite/
