@@ -94,5 +94,4 @@ Before a public `0.1.0` release, complete:
 - Add real repository, issue, and homepage metadata.
 - Run all GitHub workflows remotely.
 - Dogfood on at least one separate repository and document noisy findings.
-- Publish installation docs for CLI, GitHub Action, Codex hook, and VSIX.
 - Decide whether VS Code distribution remains artifact-only or moves to Marketplace publishing.

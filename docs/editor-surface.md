@@ -2,6 +2,7 @@
 
 The editor surface starts as a VS Code diagnostics prototype. It should display mature Critical Gate
 findings close to the changed files without replacing the CLI, Codex hook, or CI enforcement path.
+Installation steps live in `docs/installation.md`.
 
 ## Current Prototype
 

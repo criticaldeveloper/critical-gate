@@ -42,6 +42,8 @@ node dist/cli.js check --task "Add signup validation" --format repair
 node dist/cli.js hook --base main
 ```
 
+See `docs/installation.md` for CLI, GitHub Action, Codex hook, and VSIX installation steps.
+
 GitHub Actions can use the root composite action:
 
 ```yaml
@@ -75,6 +77,7 @@ small tasks. Reports include an initial Diff Cost Score.
 - `docs/implementation-roadmap.md`: chronological phases from docs to CLI, repair loop, and repository intelligence.
 - `docs/task-backlog.md`: concrete implementation tasks in dependency order.
 - `docs/evaluation-strategy.md`: how to measure precision, recall, noise, and usefulness.
+- `docs/installation.md`: installation steps for CLI, GitHub Action, Codex hook, and VSIX.
 - `docs/codex-integration.md`: how this should integrate with Codex instructions, hooks, and automation.
 - `docs/github-integration.md`: GitHub Action, SARIF upload, checks summary, and threshold guidance.
 - `docs/llm-layer.md`: optional model explanation boundary, artifact, redaction, cache, and budgets.

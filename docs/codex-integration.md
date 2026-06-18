@@ -37,6 +37,7 @@ Use a Codex `Stop` hook after the CLI exists and findings are precise enough.
 This repository includes an example project hook at `.codex/hooks.json`. Codex discovers hooks
 from active config layers, and repo-local hooks must be reviewed and trusted before they run.
 Use `/hooks` in Codex CLI to review or trust the hook after changes.
+Installation steps live in `docs/installation.md`.
 
 Example shape:
 

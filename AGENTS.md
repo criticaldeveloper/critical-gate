@@ -63,6 +63,7 @@ Before implementing, read:
 7. `docs/llm-layer.md` when changing model-assisted explanation behavior
 8. `docs/editor-surface.md` when changing editor integrations
 9. `docs/versioning-policy.md` and `CHANGELOG.md` when preparing releases
+10. `docs/installation.md` when changing user-facing installation or distribution paths
 
 When changing code later:
 

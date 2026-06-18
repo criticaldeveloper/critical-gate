@@ -3,6 +3,7 @@
 Critical Gate can run as a GitHub Action or as plain CLI steps in a workflow. The
 recommended first integration is SARIF upload, because GitHub can attach findings to code scanning
 while the workflow still fails on blocker or high-severity findings.
+Installation steps live in `docs/installation.md`.
 
 ## Composite Action
 
