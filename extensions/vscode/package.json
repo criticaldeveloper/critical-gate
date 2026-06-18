@@ -1,17 +1,35 @@
 {
-  "name": "critical-gate-vscode",
+  "name": "critical-gate",
   "displayName": "Critical Gate",
-  "description": "VS Code diagnostics prototype for Critical Gate findings.",
+  "description": "Repository-aware diff integrity diagnostics for AI-generated code changes.",
   "version": "0.1.0-alpha.0",
-  "publisher": "critical-gate",
+  "publisher": "criticaldeveloper",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/criticaldeveloper/critical-gate.git"
+  },
+  "homepage": "https://github.com/criticaldeveloper/critical-gate#readme",
+  "bugs": {
+    "url": "https://github.com/criticaldeveloper/critical-gate/issues"
+  },
   "type": "module",
+  "preview": true,
+  "galleryBanner": {
+    "color": "#0B1220",
+    "theme": "dark"
+  },
+  "icon": "resources/icon.png",
   "keywords": [
     "ai",
+    "ai agents",
     "codex",
     "diagnostics",
+    "diff integrity",
     "quality-gate",
-    "code-review"
+    "code-review",
+    "developer tools",
+    "critical developer"
   ],
   "engines": {
     "vscode": "^1.100.0"
@@ -23,6 +41,19 @@
   "activationEvents": [
     "onCommand:criticalGate.runCheck"
   ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "Critical Gate can show existing diagnostics in Restricted Mode, but running repository diffs requires workspace trust and local git access."
+    },
+    "virtualWorkspaces": {
+      "supported": "limited",
+      "description": "Critical Gate diagnostics depend on a local workspace, git repository, and CLI path. Virtual workspaces may not provide enough filesystem access to run checks."
+    }
+  },
   "main": "./dist/extensions/vscode/src/extension.js",
   "contributes": {
     "commands": [

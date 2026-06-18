@@ -20,9 +20,14 @@ const manifestTaskTerms = [
   "dependencies",
   "engine",
   "engines",
+  "extension",
   "manifest",
+  "marketplace",
+  "metadata",
   "node",
   "package",
+  "publish",
+  "publisher",
   "pnpm",
   "runtime"
 ];

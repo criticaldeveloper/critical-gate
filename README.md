@@ -82,6 +82,7 @@ small tasks. Reports include an initial Diff Cost Score.
 - `docs/github-integration.md`: GitHub Action, SARIF upload, checks summary, and threshold guidance.
 - `docs/llm-layer.md`: optional model explanation boundary, artifact, redaction, cache, and budgets.
 - `docs/editor-surface.md`: VS Code diagnostics prototype and editor integration notes.
+- `docs/vscode-marketplace-release.md`: VS Code Marketplace packaging and publish checklist.
 - `docs/versioning-policy.md`: release stages, SemVer policy, artifact alignment, and checklist.
 - `CHANGELOG.md`: project-level release notes.
 

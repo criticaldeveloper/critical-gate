@@ -145,6 +145,30 @@ index 57b22a0..cb3e0f1 100644
     ).toEqual([]);
   });
 
+  it("does not emit for package metadata changes when the task mentions Marketplace", () => {
+    const diff = parse(`diff --git a/extensions/vscode/package.json b/extensions/vscode/package.json
+index 57b22a0..cb3e0f1 100644
+--- a/extensions/vscode/package.json
++++ b/extensions/vscode/package.json
+@@ -1,5 +1,6 @@
+ {
+   "name": "critical-gate",
++  "publisher": "criticaldeveloper",
+   "displayName": "Critical Gate"
+ }
+`);
+
+    expect(
+      scopeDetector.run({
+        task: {
+          source: "cli",
+          text: "Prepare VS Code Marketplace metadata"
+        },
+        diff
+      })
+    ).toEqual([]);
+  });
+
   it("does not emit for version-only release manifest changes", () => {
     const diff = parse(`diff --git a/package.json b/package.json
 index 57b22a0..cb3e0f1 100644
