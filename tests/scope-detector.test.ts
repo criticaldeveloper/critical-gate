@@ -1,5 +1,5 @@
-import { parseUnifiedDiff, runDetectors, scopeDetector, summarizeFindings } from "../src/index.js";
 import type { GateResult, TaskIntent } from "../src/index.js";
+import { parseUnifiedDiff, runDetectors, scopeDetector, summarizeFindings } from "../src/index.js";
 
 const task: TaskIntent = {
   source: "cli",
@@ -207,7 +207,7 @@ index 57b22a0..cb3e0f1 100644
  {
    "name": "critical-gate",
 +  "publisher": "criticaldeveloper",
-   "displayName": "Critical Gate"
+   "displayName": "Critical-Gate"
  }
 `);
 

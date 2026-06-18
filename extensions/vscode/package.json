@@ -1,8 +1,8 @@
 {
   "name": "critical-gate-vscode",
-  "displayName": "Critical Gate",
+  "displayName": "Critical-Gate",
   "description": "Repository-aware diff integrity diagnostics for AI-generated code changes.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "criticaldeveloper",
   "license": "MIT",
   "repository": {

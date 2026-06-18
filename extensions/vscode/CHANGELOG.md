@@ -2,6 +2,14 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 1.0.1 - 2026-06-18
+
+Patch Marketplace package for the renamed `critical-gate-vscode` extension ID.
+
+- Fix deleted-file evidence navigation by opening missing files from git history.
+- Improve scope detection for deleted stylesheet/source files in small tasks.
+- Add semantic changed-file badges for created, updated, deleted, and renamed files.
+
 ## 1.0.0 - 2026-06-18
 
 Stable Marketplace package for the Critical Gate VS Code extension.
