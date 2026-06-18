@@ -798,6 +798,22 @@ function renderDashboardHtml(state: DashboardState, nonce: string): string {
       padding: 2px 7px;
       white-space: nowrap;
     }
+    .status-added {
+      background: var(--vscode-testing-iconPassed);
+      color: var(--vscode-editor-background);
+    }
+    .status-deleted {
+      background: var(--vscode-testing-iconFailed);
+      color: var(--vscode-editor-background);
+    }
+    .status-modified {
+      background: var(--vscode-button-background);
+      color: var(--vscode-button-foreground);
+    }
+    .status-renamed {
+      background: var(--vscode-charts-yellow);
+      color: var(--vscode-editor-background);
+    }
     code {
       color: var(--vscode-textPreformat-foreground);
       font-family: var(--vscode-editor-font-family);
@@ -905,12 +921,40 @@ function renderFiles(files: GateResult["diff"]["files"]): string {
       (file) => `<li class="file">
         <div class="row">
           <code>${escapeHtml(file.path)}</code>
-          <span class="badge">${escapeHtml(file.status)}</span>
+          <span class="badge ${getFileStatusBadgeClass(file.status)}">${escapeHtml(
+            formatFileStatus(file.status)
+          )}</span>
         </div>
         <span class="subtle">${escapeHtml(file.role)} | +${file.additions}/-${file.deletions}</span>
       </li>`
     )
     .join("")}</ul>`;
+}
+
+function getFileStatusBadgeClass(status: GateResult["diff"]["files"][number]["status"]): string {
+  switch (status) {
+    case "added":
+      return "status-added";
+    case "deleted":
+      return "status-deleted";
+    case "modified":
+      return "status-modified";
+    case "renamed":
+      return "status-renamed";
+  }
+}
+
+function formatFileStatus(status: GateResult["diff"]["files"][number]["status"]): string {
+  switch (status) {
+    case "added":
+      return "created";
+    case "deleted":
+      return "deleted";
+    case "modified":
+      return "updated";
+    case "renamed":
+      return "renamed";
+  }
 }
 
 function renderHistory(history: RunRecord[]): string {
