@@ -1,0 +1,11 @@
+{
+  "shouldBlock": true,
+  "expectedFindings": [
+    {
+      "detector": "test-weakening",
+      "severity": "high",
+      "file": "src/components/ArtistIntro.test.ts"
+    }
+  ],
+  "allowedExtraDetectors": ["blast-radius"]
+}

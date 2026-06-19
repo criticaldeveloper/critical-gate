@@ -94,6 +94,7 @@ function readUntrackedFiles(root: string, runner: GitCommandRunner): DiffFile[] 
     .map((path) => {
       const content = runner.readFile?.(join(root, path)) ?? "";
       const additions = countLines(content);
+      const lines = toAddedDiffLines(content);
 
       return {
         path,
@@ -103,7 +104,18 @@ function readUntrackedFiles(root: string, runner: GitCommandRunner): DiffFile[] 
         deletions: 0,
         newPath: path,
         language: detectLanguage(path),
-        hunks: []
+        hunks:
+          lines.length === 0
+            ? []
+            : [
+                {
+                  oldStart: 0,
+                  oldLines: 0,
+                  newStart: 1,
+                  newLines: lines.length,
+                  lines
+                }
+              ]
       };
     });
 }
@@ -118,6 +130,22 @@ function countLines(content: string): number {
   }
 
   return content.endsWith("\n") ? content.split(/\r?\n/).length - 1 : content.split(/\r?\n/).length;
+}
+
+function toAddedDiffLines(content: string): DiffFile["hunks"][number]["lines"] {
+  if (content.length === 0) {
+    return [];
+  }
+
+  const rawLines = content.endsWith("\n")
+    ? content.split(/\r?\n/).slice(0, -1)
+    : content.split(/\r?\n/);
+
+  return rawLines.map((line, index) => ({
+    kind: "add",
+    content: line,
+    newLineNumber: index + 1
+  }));
 }
 
 function getOptionalGitOutput(

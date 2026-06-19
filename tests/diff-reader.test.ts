@@ -7,6 +7,7 @@ import {
   getKnowledgeCacheRoot,
   parseUnifiedDiff,
   readGitDiff,
+  testWeakeningDetector,
   type GitCommandRunner
 } from "../src/index.js";
 
@@ -234,10 +235,63 @@ describe("readGitDiff", () => {
         deletions: 0,
         newPath: "src/new-detector.ts",
         language: "typescript",
-        hunks: []
+        hunks: [
+          {
+            oldStart: 0,
+            oldLines: 0,
+            newStart: 1,
+            newLines: 1,
+            lines: [
+              {
+                kind: "add",
+                content: "export const detector = true;",
+                newLineNumber: 1
+              }
+            ]
+          }
+        ]
       }
     ]);
     expect(calls).toContainEqual(["diff", "--no-ext-diff", "--no-color", "HEAD", "--"]);
+  });
+
+  it("exposes untracked file content to detectors", () => {
+    const runner: GitCommandRunner = {
+      execFile: (_file, args) => {
+        if (args.join(" ") === "rev-parse --show-toplevel") {
+          return "C:/dev/critical-gate\n";
+        }
+
+        if (args.join(" ") === "rev-parse --abbrev-ref HEAD") {
+          return "feature/diff-reader\n";
+        }
+
+        if (args.join(" ") === "diff --no-ext-diff --no-color HEAD --") {
+          return "";
+        }
+
+        if (args.join(" ") === "ls-files --others --exclude-standard") {
+          return "src/components/ArtistIntro.test.ts\n";
+        }
+
+        throw new Error(`Unexpected git args: ${args.join(" ")}`);
+      },
+      readFile: () => 'it.skip("keeps artist intro copy stable", () => {});\n'
+    };
+
+    const diff = readGitDiff({ runner });
+    const findings = testWeakeningDetector.run({
+      task: { source: "cli", text: "Refactor artist intro without changing behavior" },
+      diff
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        detector: "test-weakening",
+        severity: "high",
+        title: "Skipped or todo test added"
+      })
+    ]);
   });
 
   it("uses cached diff and skips untracked files for staged checks", () => {
