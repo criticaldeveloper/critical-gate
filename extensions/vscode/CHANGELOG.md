@@ -2,6 +2,15 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.2.0 - 2026-06-19
+
+Marketplace release aligned with Critical Gate 2.2.0.
+
+- Bundle dogfood-backed detector fixes for broad rewrites, untracked skipped tests, runtime config
+  drift, and framework contract export removals.
+- Bundle the mv-ft dogfood proof report and expanded evaluation fixtures.
+- Preserve lower-noise clean passes for legitimate typography and coherent multi-file UI work.
+
 ## 2.1.1 - 2026-06-19
 
 Patch release aligned with Critical Gate 2.1.1.

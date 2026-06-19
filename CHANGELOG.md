@@ -4,6 +4,34 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## 2.2.0 - 2026-06-19
+
+Dogfood-backed detector release based on the `mv-ft` real-repository evaluation pass.
+
+### Added
+
+- Add `docs/dogfood-mv-ft-2026-06-19.md` with scenario outcomes, initial precision/recall,
+  false-negative fixes, repair-loop notes, and current evaluation baseline.
+- Add eval cases for broad component rewrites, skipped tests in newly added files, runtime config
+  drift, and framework contract export removals.
+
+### Changed
+
+- Detect source-like rewrites even when role metadata is stale or unknown.
+- Expose untracked file content as synthetic added-file hunks so detectors can inspect new files
+  before staging.
+- Classify runtime/tooling pin files such as `.node-version`, `.nvmrc`, `.tool-versions`, `.npmrc`,
+  `.pnpmrc`, and related files as configuration.
+- Treat task wording such as "without changing config" as a config-change prohibition rather than
+  config-change permission.
+- Protect framework contract exports such as Astro `collections` in `content.config.ts` even before
+  a repository has committed a public API snapshot.
+
+### Fixed
+
+- Close four `mv-ft` dogfood false negatives: copy-task rewrites, skipped test additions in new
+  files, UI-task runtime config drift, and silent framework contract export removals.
+
 ## 2.1.1 - 2026-06-19
 
 Patch release for global CLI installs.
