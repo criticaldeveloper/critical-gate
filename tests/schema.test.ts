@@ -107,6 +107,17 @@ describe("gate result schema", () => {
         lowCount: 0,
         infoCount: 0,
         diffCostScore: 32,
+        diffCoherenceScore: {
+          score: 86,
+          drivers: [
+            {
+              code: "tests-move-with-source",
+              label: "Tests changed with source",
+              points: 10,
+              evidence: ["tests/signup.test.ts"]
+            }
+          ]
+        },
         scopeExpansionScore: {
           score: 4,
           drivers: [

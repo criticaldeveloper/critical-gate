@@ -1,6 +1,10 @@
 import type { Finding, GateResult, TaskIntent } from "../schema/index.js";
 
-import { calculateDiffCostScore, calculateScopeExpansionScore } from "../intent/index.js";
+import {
+  calculateDiffCoherenceScore,
+  calculateDiffCostScore,
+  calculateScopeExpansionScore
+} from "../intent/index.js";
 import { apiSurfaceDetector } from "./api-surface-detector.js";
 import { blastRadiusDetector } from "./blast-radius-detector.js";
 import { configChangeDetector } from "./config-change-detector.js";
@@ -82,6 +86,10 @@ export function summarizeFindings(
     scopeExpansionScore:
       task !== undefined && diff !== undefined
         ? calculateScopeExpansionScore(task, diff.files, findings)
+        : undefined,
+    diffCoherenceScore:
+      task !== undefined && diff !== undefined
+        ? calculateDiffCoherenceScore(task, diff.files, findings)
         : undefined
   };
 }

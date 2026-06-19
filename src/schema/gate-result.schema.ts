@@ -297,7 +297,8 @@ export const gateResultJsonSchema = {
         lowCount: { type: "integer", minimum: 0 },
         infoCount: { type: "integer", minimum: 0 },
         diffCostScore: { type: "number", minimum: 0, maximum: 100 },
-        scopeExpansionScore: { $ref: "#/$defs/scopeExpansionScore" }
+        scopeExpansionScore: { $ref: "#/$defs/scopeExpansionScore" },
+        diffCoherenceScore: { $ref: "#/$defs/diffCoherenceScore" }
       }
     },
     scopeExpansionScore: {
@@ -313,6 +314,29 @@ export const gateResultJsonSchema = {
       }
     },
     scopeExpansionDriver: {
+      type: "object",
+      additionalProperties: false,
+      required: ["code", "label", "points"],
+      properties: {
+        code: { type: "string", minLength: 1 },
+        label: { type: "string", minLength: 1 },
+        points: { type: "number", minimum: 0 },
+        evidence: stringArraySchema
+      }
+    },
+    diffCoherenceScore: {
+      type: "object",
+      additionalProperties: false,
+      required: ["score", "drivers"],
+      properties: {
+        score: { type: "number", minimum: 0, maximum: 100 },
+        drivers: {
+          type: "array",
+          items: { $ref: "#/$defs/diffCoherenceDriver" }
+        }
+      }
+    },
+    diffCoherenceDriver: {
       type: "object",
       additionalProperties: false,
       required: ["code", "label", "points"],

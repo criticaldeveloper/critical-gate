@@ -13,6 +13,7 @@ export function renderMarkdownReport(result: GateResult): string {
     `Additions: ${metrics.additions}`,
     `Deletions: ${metrics.deletions}`,
     `Findings: ${result.summary.findingCount}`,
+    `Diff Coherence Score: ${result.summary.diffCoherenceScore?.score ?? 0}/100`,
     `Scope Expansion Score: ${result.summary.scopeExpansionScore?.score ?? 0}/10`,
     `Diff Cost Score: ${result.summary.diffCostScore ?? 0}`,
     ""
@@ -21,6 +22,14 @@ export function renderMarkdownReport(result: GateResult): string {
   if ((result.summary.scopeExpansionScore?.drivers.length ?? 0) > 0) {
     lines.push("## Scope Expansion Drivers", "");
     for (const driver of result.summary.scopeExpansionScore?.drivers ?? []) {
+      lines.push(`- ${driver.label}: +${driver.points} (${driver.code})`);
+    }
+    lines.push("");
+  }
+
+  if ((result.summary.diffCoherenceScore?.drivers.length ?? 0) > 0) {
+    lines.push("## Diff Coherence Drivers", "");
+    for (const driver of result.summary.diffCoherenceScore?.drivers ?? []) {
       lines.push(`- ${driver.label}: +${driver.points} (${driver.code})`);
     }
     lines.push("");
@@ -77,6 +86,7 @@ function getCleanDiffCertificate(result: GateResult): string[] {
 
   return [
     `Gate passed with ${result.diff.files.length} changed ${fileLabel} and ${result.summary.findingCount} non-blocking findings.`,
+    `Diff coherence is ${result.summary.diffCoherenceScore?.score ?? 0}/100.`,
     hasBlockingFindings
       ? "Blocking checks found high-risk findings, but rollout policy kept them observational."
       : "No blocker or high-severity findings failed the configured threshold.",

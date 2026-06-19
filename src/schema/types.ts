@@ -147,6 +147,7 @@ export interface GateSummary {
   infoCount: number;
   diffCostScore?: number;
   scopeExpansionScore?: ScopeExpansionScore;
+  diffCoherenceScore?: DiffCoherenceScore;
 }
 
 export interface ScopeExpansionScore {
@@ -155,6 +156,18 @@ export interface ScopeExpansionScore {
 }
 
 export interface ScopeExpansionDriver {
+  code: string;
+  label: string;
+  points: number;
+  evidence?: string[];
+}
+
+export interface DiffCoherenceScore {
+  score: number;
+  drivers: DiffCoherenceDriver[];
+}
+
+export interface DiffCoherenceDriver {
   code: string;
   label: string;
   points: number;

@@ -6,6 +6,8 @@ export type {
   DiffHunk,
   DiffLine,
   DiffLineKind,
+  DiffCoherenceDriver,
+  DiffCoherenceScore,
   Finding,
   FindingEvidence,
   FindingReasonChain,

@@ -100,6 +100,8 @@ A report includes:
 - **Changed files**: file role, status, additions, and deletions.
 - **Findings**: severity, detector, confidence, message, evidence, and repair guidance.
 - **Diff Cost Score**: a rough signal for blast radius and churn.
+- **Diff Coherence Score**: a 0-100 positive signal for how well the changed files, support files,
+  churn, and findings fit the task intent.
 
 Severity levels:
 
@@ -251,6 +253,11 @@ The status bar summarizes the most important latest-run signal. A clean result s
 `Critical Gate: clean`; larger or risky diffs may show the Scope Expansion Score, unexpected
 clusters, missing companions, or API-surface changes. Hover the status item for counts, timestamps,
 and top scope drivers. Click it to open the latest report after a run.
+
+The Diff Coherence Score is intentionally evidence-backed and additive. A high score means the diff
+looks contained, expected companions are present, churn fits the task size, and no high-risk detector
+fired. A low score is not a separate detector; it is a summary of the concrete signals already shown
+in changed files and findings.
 
 Useful settings:
 

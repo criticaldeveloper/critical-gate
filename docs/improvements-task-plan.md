@@ -48,7 +48,7 @@ root note.
    - Each pack should define expected companions, normal file relationships, and support-file
      allowances.
 
-5. Diff coherence score.
+5. Diff coherence score. Completed in `feature/diff-coherence-score`.
    - Add a positive coherence score derived from feature clusters, expected support files, and
      out-of-cluster changes.
    - Keep every score driver evidence-backed.

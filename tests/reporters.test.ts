@@ -79,6 +79,22 @@ const result: GateResult = {
     lowCount: 0,
     infoCount: 0,
     diffCostScore: 42,
+    diffCoherenceScore: {
+      score: 71,
+      drivers: [
+        {
+          code: "scope-drift",
+          label: "Scope findings reduce diff coherence",
+          points: 22,
+          evidence: ["expected-companions:src/signup.ts:tests/signup.test.ts"]
+        },
+        {
+          code: "tests-move-with-source",
+          label: "Tests changed with source",
+          points: 10
+        }
+      ]
+    },
     scopeExpansionScore: {
       score: 3,
       drivers: [
@@ -121,8 +137,11 @@ describe("reporters", () => {
 
     expect(report).toContain("# Critical Gate Report");
     expect(report).toContain("Changed Files: 2");
+    expect(report).toContain("Diff Coherence Score: 71/100");
     expect(report).toContain("Scope Expansion Score: 3/10");
     expect(report).toContain("- Config, manifest, or lockfile touched: +2 (high-risk-roles)");
+    expect(report).toContain("## Diff Coherence Drivers");
+    expect(report).toContain("- Tests changed with source: +10 (tests-move-with-source)");
     expect(report).toContain("## Intent Verification");
     expect(report).toContain("Requested Classes: source");
     expect(report).toContain("Unexpected Classes: tests");
@@ -150,6 +169,7 @@ describe("reporters", () => {
 
     expect(report).toContain("## Clean Diff Certificate");
     expect(report).toContain("- Gate passed with 2 changed files and 0 non-blocking findings.");
+    expect(report).toContain("- Diff coherence is 71/100.");
     expect(report).toContain("- No dependency changes were flagged.");
     expect(report).toContain("- No test weakening was detected.");
     expect(report).toContain("- No public API surface change was flagged.");

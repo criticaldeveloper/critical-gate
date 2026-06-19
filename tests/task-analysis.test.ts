@@ -1,6 +1,7 @@
 import {
   analyzeTaskIntent,
   calculateScopeExpansionScore,
+  calculateDiffCoherenceScore,
   buildIntentModel,
   calculateDiffCostScore,
   estimateTaskComplexity,
@@ -158,6 +159,95 @@ describe("task analysis", () => {
         }
       ]
     });
+  });
+
+  it("calculates a high coherence score for contained source and test changes", () => {
+    const task: TaskIntent = {
+      source: "cli",
+      text: "Fix signup validation"
+    };
+    const files: DiffFile[] = [
+      createFile("src/signup.ts", "source", 10, 2),
+      createFile("tests/signup.test.ts", "test", 8, 1)
+    ];
+
+    expect(calculateDiffCoherenceScore(task, files, [])).toEqual({
+      score: 100,
+      drivers: [
+        {
+          code: "contained-diff",
+          label: "Diff is contained to the expected task area",
+          points: 30,
+          evidence: ["src/signup.ts", "tests/signup.test.ts"]
+        },
+        {
+          code: "support-files-present",
+          label: "No expected companion files are missing",
+          points: 20,
+          evidence: ["source", "test"]
+        },
+        {
+          code: "risk-disciplined",
+          label: "No high-risk integrity findings",
+          points: 25
+        },
+        {
+          code: "churn-fits-task",
+          label: "Churn fits task complexity",
+          points: 15,
+          evidence: ["churn:21", "complexity:small"]
+        },
+        {
+          code: "tests-move-with-source",
+          label: "Tests changed with source",
+          points: 10
+        }
+      ]
+    });
+  });
+
+  it("reduces coherence for missing support and high-risk findings", () => {
+    const task: TaskIntent = {
+      source: "cli",
+      text: "Fix signup validation"
+    };
+    const files: DiffFile[] = [
+      createFile("src/signup.ts", "source", 120, 30),
+      createFile("package.json", "manifest", 1, 0)
+    ];
+    const score = calculateDiffCoherenceScore(task, files, [
+      {
+        id: "dependency-addition:package.json:dependencies:axios",
+        detector: "dependency-addition",
+        severity: "blocker",
+        confidence: 0.9,
+        title: "Unjustified production dependency added",
+        message: "axios added.",
+        evidence: [{ kind: "manifest", path: "package.json", message: "axios" }],
+        repair: "Remove dependency.",
+        tags: ["dependency"]
+      },
+      {
+        id: "expected-companions:src/signup.ts:tests/signup.test.ts",
+        detector: "expected-companions",
+        severity: "medium",
+        confidence: 0.8,
+        title: "Expected companion file missing",
+        message: "Missing test.",
+        evidence: [{ kind: "history", message: "Missing test." }],
+        repair: "Add test.",
+        tags: ["scope"]
+      }
+    ]);
+
+    expect(score.score).toBeLessThan(70);
+    expect(score.drivers.map((driver) => driver.code)).toEqual([
+      "scope-drift",
+      "missing-support-files",
+      "risk-findings",
+      "churn-exceeds-task",
+      "source-without-tests"
+    ]);
   });
 });
 
