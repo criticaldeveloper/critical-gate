@@ -30,6 +30,20 @@ describe("task analysis", () => {
     ]);
   });
 
+  it("expands style-related task aliases and drops generic project wording", () => {
+    expect(extractTaskKeywords("Fixed fonts of the project")).toEqual([
+      "fonts",
+      "font",
+      "typography",
+      "type",
+      "text",
+      "style",
+      "styles",
+      "css",
+      "scss"
+    ]);
+  });
+
   it("analyzes task intent", () => {
     const task: TaskIntent = {
       source: "cli",

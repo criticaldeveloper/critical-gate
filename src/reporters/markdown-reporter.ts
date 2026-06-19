@@ -48,6 +48,14 @@ export function renderMarkdownReport(result: GateResult): string {
     lines.push("");
   }
 
+  if (result.summary.decision === "pass") {
+    lines.push("## Clean Diff Certificate", "");
+    for (const certificateLine of getCleanDiffCertificate(result)) {
+      lines.push(`- ${certificateLine}`);
+    }
+    lines.push("");
+  }
+
   if (result.findings.length > 0) {
     lines.push("## Findings", "");
     for (const finding of result.findings) {
@@ -56,6 +64,35 @@ export function renderMarkdownReport(result: GateResult): string {
   }
 
   return `${lines.join("\n").trimEnd()}\n`;
+}
+
+function getCleanDiffCertificate(result: GateResult): string[] {
+  const findings = result.findings;
+  const hasDependencyFinding = findings.some((finding) => finding.tags.includes("dependency"));
+  const hasTestWeakeningFinding = findings.some((finding) => finding.tags.includes("test"));
+  const hasApiFinding = findings.some((finding) => finding.tags.includes("api"));
+  const hasSecretFinding = findings.some((finding) => finding.tags.includes("secret"));
+  const hasBlockingFindings = result.summary.blockerCount > 0 || result.summary.highCount > 0;
+  const fileLabel = result.diff.files.length === 1 ? "file" : "files";
+
+  return [
+    `Gate passed with ${result.diff.files.length} changed ${fileLabel} and ${result.summary.findingCount} non-blocking findings.`,
+    hasBlockingFindings
+      ? "Blocking checks found high-risk findings, but rollout policy kept them observational."
+      : "No blocker or high-severity findings failed the configured threshold.",
+    hasDependencyFinding
+      ? "Dependency discipline emitted non-blocking observations."
+      : "No dependency changes were flagged.",
+    hasTestWeakeningFinding
+      ? "Test integrity emitted non-blocking observations."
+      : "No test weakening was detected.",
+    hasApiFinding
+      ? "Public API checks emitted non-blocking observations."
+      : "No public API surface change was flagged.",
+    hasSecretFinding
+      ? "Secret/path checks emitted non-blocking observations."
+      : "No hardcoded secrets, local paths, or internal URLs were flagged."
+  ];
 }
 
 function formatClasses(classes: string[]): string {

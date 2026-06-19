@@ -226,6 +226,7 @@ Branch and commit conventions for this repository:
 - [docs/github-integration.md](docs/github-integration.md): GitHub Action, SARIF, and threshold guidance.
 - [docs/codex-integration.md](docs/codex-integration.md): Codex hook and repair-loop guidance.
 - [docs/versioning-policy.md](docs/versioning-policy.md): release and versioning policy.
+- [docs/improvements-task-plan.md](docs/improvements-task-plan.md): trust and calibration roadmap.
 - [CHANGELOG.md](CHANGELOG.md): project-level release notes.
 
 ## Project Status

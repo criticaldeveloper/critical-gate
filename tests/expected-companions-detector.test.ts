@@ -139,4 +139,61 @@ index 57b22a0..cb3e0f1 100644
       )
     ).toBe(false);
   });
+
+  it("caps historical companion findings per changed source path", () => {
+    const diff = parse(`diff --git a/src/styles/typography.scss b/src/styles/typography.scss
+index 57b22a0..cb3e0f1 100644
+--- a/src/styles/typography.scss
++++ b/src/styles/typography.scss
+@@ -1 +1,2 @@
++$font-weight: 700;
+`);
+    const findings = expectedCompanionsDetector.run({
+      task,
+      diff,
+      context: {
+        knowledge: {
+          getFileGraph: () => ({ nodes: [], edges: [] }),
+          getHistoryIndex: () => ({
+            coChanges: [],
+            companionRules: [
+              {
+                sourcePath: "src/styles/typography.scss",
+                expectedPath: "src/components/Hero.astro",
+                support: 4,
+                confidence: 0.8
+              },
+              {
+                sourcePath: "src/styles/typography.scss",
+                expectedPath: "src/components/Footer.astro",
+                support: 7,
+                confidence: 0.82
+              },
+              {
+                sourcePath: "src/styles/typography.scss",
+                expectedPath: "src/layouts/BaseLayout.astro",
+                support: 3,
+                confidence: 0.8
+              },
+              {
+                sourcePath: "src/styles/typography.scss",
+                expectedPath: "src/pages/index.astro",
+                support: 9,
+                confidence: 0.7
+              }
+            ]
+          }),
+          getPatternIndex: () => ({ patterns: [] }),
+          getSolutionIndex: () => ({ solutions: [] })
+        }
+      }
+    });
+
+    expect(findings).toHaveLength(3);
+    expect(findings.map((finding) => finding.id)).toEqual([
+      "expected-companions:src/styles/typography.scss:src/components/Footer.astro",
+      "expected-companions:src/styles/typography.scss:src/components/Hero.astro",
+      "expected-companions:src/styles/typography.scss:src/layouts/BaseLayout.astro"
+    ]);
+  });
 });

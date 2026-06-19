@@ -55,7 +55,23 @@ const verbAliases: Array<{ verb: IntentVerb; terms: string[] }> = [
 ];
 
 const classTerms: Array<{ changeClass: ChangeClass; terms: string[] }> = [
-  { changeClass: "ui", terms: ["ui", "view", "component", "button", "style", "css", "theme"] },
+  {
+    changeClass: "ui",
+    terms: [
+      "ui",
+      "view",
+      "component",
+      "button",
+      "style",
+      "styles",
+      "css",
+      "scss",
+      "font",
+      "fonts",
+      "typography",
+      "theme"
+    ]
+  },
   { changeClass: "tests", terms: ["test", "tests", "spec", "coverage"] },
   { changeClass: "config", terms: ["config", "configuration", "settings"] },
   { changeClass: "dependency", terms: ["dependency", "dependencies", "package", "library"] },

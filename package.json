@@ -1,6 +1,6 @@
 {
   "name": "critical-gate",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Repository-aware diff integrity gate for AI-generated code changes.",
   "type": "module",
   "packageManager": "pnpm@11.1.2",

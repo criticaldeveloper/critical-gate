@@ -6,7 +6,7 @@ changes clearly.
 
 ## Current Release Stage
 
-The current target is `2.0.1`.
+The current target is `2.1.0`.
 
 This means:
 

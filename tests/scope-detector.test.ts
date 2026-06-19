@@ -142,6 +142,29 @@ index 57b22a0..0000000
     });
   });
 
+  it("treats typography changes as aligned with font task wording", () => {
+    const diff = parse(`diff --git a/src/styles/typography.scss b/src/styles/typography.scss
+index 57b22a0..cb3e0f1 100644
+--- a/src/styles/typography.scss
++++ b/src/styles/typography.scss
+@@ -10,7 +10,7 @@
+ .hero-title {
+-  font-weight: 900;
++  font-weight: 700;
+ }
+`);
+
+    expect(
+      scopeDetector.run({
+        task: {
+          source: "cli",
+          text: "Fixed fonts of the project"
+        },
+        diff
+      })
+    ).toEqual([]);
+  });
+
   it("does not emit for acknowledged deleted stylesheet files", () => {
     const diff = parse(`diff --git a/src/styles/typography.scss b/src/styles/typography.scss
 deleted file mode 100644

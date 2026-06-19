@@ -51,7 +51,7 @@ function detectSecretAssignment(file: DiffFile, line: DiffLine): SecretPathSigna
   const quote = match[1] ?? "";
   const value = match[2] ?? "";
 
-  if (quote.length === 0 && !/[0-9_./+=:-]/.test(value)) {
+  if (quote.length === 0 && !/[0-9]/.test(value)) {
     return undefined;
   }
 

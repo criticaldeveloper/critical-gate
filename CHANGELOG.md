@@ -4,6 +4,26 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## 2.1.0 - 2026-06-19
+
+Trust and calibration release based on real-project dogfooding.
+
+### Added
+
+- Add an improvement task plan in `docs/improvements-task-plan.md` that converts the root
+  improvement brief into implementation-sized roadmap tasks.
+- Add clean diff certificates to passing Markdown reports so successful runs explain what was
+  checked, not only what failed.
+
+### Changed
+
+- Expand style-related task aliases so words such as font, fonts, typography, weight, CSS, SCSS,
+  and styles align with stylesheet and typography paths.
+- Treat generic words such as project and repo as non-scope keywords during task analysis.
+- Cap historical expected-companion findings to the top three per changed source path to reduce
+  report noise.
+- Normalize task keyword extraction defensively for mixed-case task text.
+
 ## 2.0.1 - 2026-06-19
 
 Patch release for real-project dogfood findings.

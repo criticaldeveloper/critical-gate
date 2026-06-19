@@ -2,6 +2,8 @@ import type { CompanionRule } from "../knowledge/index.js";
 import type { DiffFile, Finding } from "../schema/index.js";
 import type { Detector } from "./types.js";
 
+const maxHistoryFindingsPerSource = 3;
+
 export const expectedCompanionsDetector: Detector = {
   name: "expected-companions",
   run: ({ diff, context }) => {
@@ -12,14 +14,39 @@ export const expectedCompanionsDetector: Detector = {
     }
 
     const changedPaths = new Set(diff.files.map((file) => file.path));
-    const historyFindings = history.companionRules
-      .filter((rule) => changedPaths.has(rule.sourcePath) && !changedPaths.has(rule.expectedPath))
-      .map((rule) => toHistoryFinding(rule));
+    const historyFindings = getCappedHistoryFindings(
+      history.companionRules.filter(
+        (rule) => changedPaths.has(rule.sourcePath) && !changedPaths.has(rule.expectedPath)
+      )
+    );
     const packageFinding = detectMissingLockfile(diff.files);
 
     return packageFinding === undefined ? historyFindings : [...historyFindings, packageFinding];
   }
 };
+
+function getCappedHistoryFindings(rules: CompanionRule[]): Finding[] {
+  const grouped = new Map<string, CompanionRule[]>();
+
+  for (const rule of rules) {
+    grouped.set(rule.sourcePath, [...(grouped.get(rule.sourcePath) ?? []), rule]);
+  }
+
+  return [...grouped.values()].flatMap((sourceRules) =>
+    [...sourceRules]
+      .sort((left, right) => {
+        const confidenceDelta = right.confidence - left.confidence;
+
+        if (confidenceDelta !== 0) {
+          return confidenceDelta;
+        }
+
+        return right.support - left.support;
+      })
+      .slice(0, maxHistoryFindingsPerSource)
+      .map((rule) => toHistoryFinding(rule))
+  );
+}
 
 function detectMissingLockfile(files: DiffFile[]): Finding | undefined {
   const changedPaths = new Set(files.map((file) => file.path));

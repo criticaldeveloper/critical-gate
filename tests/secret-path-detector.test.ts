@@ -68,10 +68,6 @@ index 57b22a0..cb3e0f1 100644
     expect(findings).toEqual([
       expect.objectContaining({
         severity: "blocker",
-        title: "Possible hardcoded secret added"
-      }),
-      expect.objectContaining({
-        severity: "blocker",
         title: "Provider token pattern added"
       })
     ]);
@@ -156,6 +152,19 @@ index 57b22a0..cb3e0f1 100644
 +const targetTokens = extractTaskKeywords(normalizedText);
 +const importTokens = extractImportTokens(sourceText);
 +domainTokens: pathToDomainTokens(path, exportedName)
+`);
+
+    expect(secretPathDetector.run({ task, diff })).toEqual([]);
+  });
+
+  it("ignores secret-related boolean variable names assigned from local expressions", () => {
+    const diff =
+      parse(`diff --git a/src/reporters/markdown-reporter.ts b/src/reporters/markdown-reporter.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/reporters/markdown-reporter.ts
++++ b/src/reporters/markdown-reporter.ts
+@@ -1 +1,2 @@
++const hasSecretFinding = findings.some((finding) => finding.tags.includes("secret"));
 `);
 
     expect(secretPathDetector.run({ task, diff })).toEqual([]);

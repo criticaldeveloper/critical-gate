@@ -121,6 +121,27 @@ describe("reporters", () => {
     expect(report).toContain("Repair: Restore the removed behavioral assertion.");
   });
 
+  it("renders a clean diff certificate for passing Markdown reports", () => {
+    const report = renderMarkdownReport({
+      ...result,
+      findings: [],
+      summary: {
+        ...result.summary,
+        decision: "pass",
+        findingCount: 0,
+        highCount: 0,
+        mediumCount: 0
+      }
+    });
+
+    expect(report).toContain("## Clean Diff Certificate");
+    expect(report).toContain("- Gate passed with 2 changed files and 0 non-blocking findings.");
+    expect(report).toContain("- No dependency changes were flagged.");
+    expect(report).toContain("- No test weakening was detected.");
+    expect(report).toContain("- No public API surface change was flagged.");
+    expect(report).toContain("- No hardcoded secrets, local paths, or internal URLs were flagged.");
+  });
+
   it("renders compact repair output", () => {
     const report = renderRepairReport(result);
 

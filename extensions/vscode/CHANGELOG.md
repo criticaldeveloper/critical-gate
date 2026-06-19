@@ -2,6 +2,14 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.1.0 - 2026-06-19
+
+Marketplace release aligned with Critical Gate 2.1.0.
+
+- Bundle style/font task-alignment calibration for lower-noise legitimate typography changes.
+- Bundle capped expected-companion findings so one changed file does not flood the dashboard.
+- Show clean diff certificate details in passing Markdown reports.
+
 ## 2.0.1 - 2026-06-19
 
 Patch release aligned with Critical Gate 2.0.1.

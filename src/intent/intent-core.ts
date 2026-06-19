@@ -40,10 +40,26 @@ const stopWords = new Set([
   "update",
   "change",
   "implement",
+  "fixed",
   "new",
+  "project",
+  "repo",
   "task",
   "issue"
 ]);
+
+const keywordAliases: Record<string, string[]> = {
+  css: ["style", "styles", "stylesheet", "stylesheets", "scss"],
+  font: ["fonts", "typography", "type", "text", "style", "styles", "css", "scss"],
+  fonts: ["font", "typography", "type", "text", "style", "styles", "css", "scss"],
+  scss: ["style", "styles", "stylesheet", "stylesheets", "css"],
+  style: ["styles", "stylesheet", "stylesheets", "css", "scss"],
+  styles: ["style", "stylesheet", "stylesheets", "css", "scss"],
+  text: ["typography", "font", "fonts"],
+  type: ["typography", "font", "fonts"],
+  typography: ["font", "fonts", "type", "text", "style", "styles", "css", "scss"],
+  weight: ["font", "fonts", "typography"]
+};
 
 export function estimateTaskComplexity(normalizedTaskText: string): TaskComplexity {
   if (largeTaskTerms.some((term) => normalizedTaskText.includes(term))) {
@@ -60,7 +76,9 @@ export function estimateTaskComplexity(normalizedTaskText: string): TaskComplexi
 }
 
 export function extractTaskKeywords(normalizedTaskText: string): string[] {
-  return [...new Set(normalizedTaskText.match(/[a-z0-9]+/g) ?? [])]
+  const keywords = [...new Set(normalizedTaskText.toLowerCase().match(/[a-z0-9]+/g) ?? [])]
     .filter((word) => word.length >= 3)
     .filter((word) => !stopWords.has(word));
+
+  return [...new Set(keywords.flatMap((keyword) => [keyword, ...(keywordAliases[keyword] ?? [])]))];
 }
