@@ -109,6 +109,35 @@ Severity levels:
 - `low`: informational unless combined with other risks.
 - `info`: context for humans and dashboards.
 
+## Repository Learning Controls
+
+Critical Gate can record explicit repository knowledge in `.critical-gate.json`. These entries are
+reviewable policy-as-code, not hidden global suppressions.
+
+Accept an exact finding when the team has reviewed it and wants future runs with the same finding id
+to stay quiet:
+
+```bash
+node dist/cli.js accept \
+  --finding "scope:src/generated/client.ts" \
+  --reason "Generated client file is expected for API schema refreshes."
+```
+
+Teach expected support files when a repository has a normal companion relationship that the generic
+detectors do not know yet:
+
+```bash
+node dist/cli.js teach \
+  --id "i18n-for-ui-copy" \
+  --when-changed "src/features/**/*.tsx" \
+  --allow "src/i18n/**/*.json,locales/**/*.json" \
+  --reason "UI copy changes require translation updates."
+```
+
+The next `check` or `hook` run applies those rules and reports applied rule ids in JSON metadata.
+Use this for durable team conventions; do not use it to hide one-off risky diffs that should be
+fixed or split.
+
 ## Common Examples
 
 ### Small Feature With Expected Source And Test Changes

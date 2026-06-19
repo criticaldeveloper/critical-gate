@@ -5,13 +5,16 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
+  CRITICAL_GATE_CONFIG_FILE,
   GATE_RESULT_SCHEMA_VERSION,
+  applyLearningPolicy,
   loadCriticalGateConfig,
   readGitDiff,
   renderReport,
   runDetectors,
   summarizeFindings,
   summarizeIntentVerification,
+  updateCriticalGateConfig,
   type GateResult,
   type GitDiffResult,
   type ReportFormat
@@ -42,9 +45,11 @@ interface CliIo {
   writeFile: (path: string, content: string) => void;
   now: () => Date;
   readDiff: (baseRef?: string) => GitDiffResult;
+  exists?: (path: string) => boolean;
+  readFile?: (path: string) => string;
 }
 
-type CommandName = "check" | "hook";
+type CommandName = "check" | "hook" | "accept" | "teach";
 
 const defaultIo: CliIo = {
   stdout: (message) => console.log(message),
@@ -84,8 +89,16 @@ function runCli(argv: string[], io: CliIo): ExitCode {
   }
 
   if (args.includes("--help") || args.includes("-h")) {
-    io.stdout(command === "hook" ? getHookHelpText() : getCheckHelpText());
+    io.stdout(getCommandHelpText(command));
     return ExitCode.Pass;
+  }
+
+  if (command === "accept") {
+    return runAcceptCommand(args, io);
+  }
+
+  if (command === "teach") {
+    return runTeachCommand(args, io);
   }
 
   const parsed = parseCheckArgs(args, command);
@@ -97,7 +110,7 @@ function runCli(argv: string[], io: CliIo): ExitCode {
   }
 
   const diff = io.readDiff(parsed.options.base);
-  const result = createGateResult(parsed.options, io.now(), diff);
+  const result = createGateResult(parsed.options, io.now(), diff, io);
   const rendered =
     command === "hook"
       ? renderReport(
@@ -199,9 +212,13 @@ function parseCheckArgs(
 function createGateResult(
   options: CheckOptions,
   generatedAt: Date,
-  diffResult: GitDiffResult
+  diffResult: GitDiffResult,
+  io: Pick<CliIo, "exists" | "readFile"> = {}
 ): GateResult {
-  const configResult = loadCriticalGateConfig(diffResult.root);
+  const configResult = loadCriticalGateConfig(diffResult.root, {
+    exists: io.exists,
+    readFile: io.readFile
+  });
   const task = {
     source: "cli" as const,
     text: options.task
@@ -225,7 +242,13 @@ function createGateResult(
     ...context,
     knowledge: diffResult.knowledge
   };
-  const findings = runDetectors(task, diff, detectorContext);
+  const detectorFindings = runDetectors(task, diff, detectorContext);
+  const learningResult = applyLearningPolicy(
+    detectorFindings,
+    diff.files,
+    configResult.config.learning
+  );
+  const findings = learningResult.findings;
   const loadedHistoryIndex = diffResult.knowledge?.getLoadedHistoryIndex?.();
   const loadedSolutionIndex = diffResult.knowledge?.getLoadedSolutionIndex?.();
 
@@ -245,9 +268,117 @@ function createGateResult(
       cliVersion: CLI_VERSION,
       strict: options.strict,
       rolloutPolicy: configResult.config.rollout,
+      learning: {
+        acceptedFindingsApplied: learningResult.appliedAcceptedFindings,
+        expectedSupportRulesApplied: learningResult.appliedExpectedSupportRules
+      },
       configWarnings: configResult.warnings
     }
   };
+}
+
+function runAcceptCommand(args: string[], io: CliIo): ExitCode {
+  const parsed = parseFlagArgs(args, ["--finding", "--reason"]);
+
+  if (!parsed.ok) {
+    io.stderr(parsed.error);
+    io.stderr("Run critical-gate accept --help for usage.");
+    return ExitCode.UsageError;
+  }
+
+  const finding = parsed.values["--finding"];
+  const reason = parsed.values["--reason"];
+
+  if (finding === undefined || reason === undefined) {
+    io.stderr("Missing required --finding or --reason value.");
+    io.stderr("Run critical-gate accept --help for usage.");
+    return ExitCode.UsageError;
+  }
+
+  const root = io.readDiff().root;
+  const updated = updateCriticalGateConfig(
+    root,
+    (config) => ({
+      ...config,
+      learning: {
+        ...config.learning,
+        acceptedFindings: upsertById(config.learning?.acceptedFindings ?? [], {
+          id: finding,
+          reason,
+          createdAt: io.now().toISOString()
+        })
+      }
+    }),
+    {
+      exists: io.exists,
+      readFile: io.readFile,
+      writeFile: io.writeFile
+    }
+  );
+
+  io.stdout(
+    `Accepted finding ${finding} in ${CRITICAL_GATE_CONFIG_FILE} (${updated.learning?.acceptedFindings?.length ?? 0} accepted finding rules).`
+  );
+
+  return ExitCode.Pass;
+}
+
+function runTeachCommand(args: string[], io: CliIo): ExitCode {
+  const parsed = parseFlagArgs(args, ["--id", "--when-changed", "--allow", "--reason"]);
+
+  if (!parsed.ok) {
+    io.stderr(parsed.error);
+    io.stderr("Run critical-gate teach --help for usage.");
+    return ExitCode.UsageError;
+  }
+
+  const id = parsed.values["--id"];
+  const whenChanged = parsed.values["--when-changed"];
+  const allow = parsed.values["--allow"]
+    ?.split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+  const reason = parsed.values["--reason"];
+
+  if (
+    id === undefined ||
+    whenChanged === undefined ||
+    allow === undefined ||
+    reason === undefined
+  ) {
+    io.stderr("Missing required --id, --when-changed, --allow, or --reason value.");
+    io.stderr("Run critical-gate teach --help for usage.");
+    return ExitCode.UsageError;
+  }
+
+  const root = io.readDiff().root;
+  const updated = updateCriticalGateConfig(
+    root,
+    (config) => ({
+      ...config,
+      learning: {
+        ...config.learning,
+        expectedSupportFiles: upsertById(config.learning?.expectedSupportFiles ?? [], {
+          id,
+          whenChanged,
+          allow,
+          reason,
+          createdAt: io.now().toISOString()
+        })
+      }
+    }),
+    {
+      exists: io.exists,
+      readFile: io.readFile,
+      writeFile: io.writeFile
+    }
+  );
+
+  io.stdout(
+    `Taught expected support rule ${id} in ${CRITICAL_GATE_CONFIG_FILE} (${updated.learning?.expectedSupportFiles?.length ?? 0} support rules).`
+  );
+
+  return ExitCode.Pass;
 }
 
 function getHelpText(): string {
@@ -257,10 +388,28 @@ function getHelpText(): string {
     "Usage:",
     "  critical-gate check --task <text> [--base <ref>] [--format json|markdown|sarif|repair] [--strict] [--output <path>]",
     "  critical-gate hook [--task <text>] [--base <ref>] [--output <path>]",
+    "  critical-gate accept --finding <id> --reason <text>",
+    "  critical-gate teach --id <id> --when-changed <glob> --allow <glob[,glob]> --reason <text>",
     "  critical-gate --version",
     "  critical-gate --help",
     ""
   ].join("\n");
+}
+
+function getCommandHelpText(command: CommandName): string {
+  if (command === "hook") {
+    return getHookHelpText();
+  }
+
+  if (command === "accept") {
+    return getAcceptHelpText();
+  }
+
+  if (command === "teach") {
+    return getTeachHelpText();
+  }
+
+  return getCheckHelpText();
 }
 
 function getCheckHelpText(): string {
@@ -291,12 +440,78 @@ function getHookHelpText(): string {
   ].join("\n");
 }
 
+function getAcceptHelpText(): string {
+  return [
+    "critical-gate accept",
+    "",
+    "Records an explicit accepted finding in .critical-gate.json.",
+    "",
+    "Required:",
+    "  --finding <id>     Exact finding id to accept",
+    "  --reason <text>    Reviewable reason for accepting the finding",
+    ""
+  ].join("\n");
+}
+
+function getTeachHelpText(): string {
+  return [
+    "critical-gate teach",
+    "",
+    "Records a repository-specific expected support-file rule in .critical-gate.json.",
+    "",
+    "Required:",
+    "  --id <id>                 Stable rule id",
+    "  --when-changed <glob>     Changed file glob that activates the rule",
+    "  --allow <glob[,glob]>     Support-file glob or comma-separated globs to allow",
+    "  --reason <text>           Reviewable reason for the rule",
+    ""
+  ].join("\n");
+}
+
 function isCommandName(value: string): value is CommandName {
-  return value === "check" || value === "hook";
+  return value === "check" || value === "hook" || value === "accept" || value === "teach";
 }
 
 function isReportFormat(value: string): value is ReportFormat {
   return value === "json" || value === "markdown" || value === "sarif" || value === "repair";
+}
+
+function parseFlagArgs(
+  args: string[],
+  allowedFlags: string[]
+):
+  | {
+      ok: true;
+      values: Record<string, string>;
+    }
+  | {
+      ok: false;
+      error: string;
+    } {
+  const values: Record<string, string> = {};
+
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+
+    if (!allowedFlags.includes(arg)) {
+      return { ok: false, error: `Unknown option: ${arg}.` };
+    }
+
+    const value = args[index + 1];
+
+    if (value === undefined || value.startsWith("--")) {
+      return { ok: false, error: `Missing value for ${arg}.` };
+    }
+
+    values[arg] = value;
+    index += 1;
+  }
+
+  return { ok: true, values };
+}
+
+function upsertById<T extends { id: string }>(entries: T[], next: T): T[] {
+  return [...entries.filter((entry) => entry.id !== next.id), next];
 }
 
 const isDirectRun =

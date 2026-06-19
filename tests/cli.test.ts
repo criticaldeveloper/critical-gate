@@ -22,18 +22,22 @@ function createTestIo() {
   const writes = new Map<string, string>();
   const stdout: string[] = [];
   const stderr: string[] = [];
+  const files = new Map<string, string>();
 
   return {
     io: {
       stdout: (message: string) => stdout.push(message),
       stderr: (message: string) => stderr.push(message),
       writeFile: (path: string, content: string) => writes.set(path, content),
+      exists: (path: string) => files.has(path),
+      readFile: (path: string) => files.get(path) ?? "",
       now: () => new Date("2026-06-17T21:20:00.000Z"),
       readDiff: () => testDiffResult
     },
     stdout,
     stderr,
-    writes
+    writes,
+    files
   };
 }
 
@@ -66,6 +70,72 @@ describe("cli", () => {
 
     expect(main(["scan", "--task", "Add validation"], io)).toBe(ExitCode.UsageError);
     expect(stderr[0]).toBe("Unknown command: scan");
+  });
+
+  it("records accepted findings in .critical-gate.json", () => {
+    const { io, stdout, writes } = createTestIo();
+
+    expect(
+      main(
+        [
+          "accept",
+          "--finding",
+          "scope:src/generated.ts",
+          "--reason",
+          "Generated file is expected for this task."
+        ],
+        io
+      )
+    ).toBe(ExitCode.Pass);
+
+    expect(stdout[0]).toContain("Accepted finding scope:src/generated.ts");
+    expect(JSON.parse([...writes.values()][0] ?? "{}")).toMatchObject({
+      learning: {
+        acceptedFindings: [
+          {
+            id: "scope:src/generated.ts",
+            reason: "Generated file is expected for this task.",
+            createdAt: "2026-06-17T21:20:00.000Z"
+          }
+        ]
+      }
+    });
+  });
+
+  it("records expected support-file rules in .critical-gate.json", () => {
+    const { io, stdout, writes } = createTestIo();
+
+    expect(
+      main(
+        [
+          "teach",
+          "--id",
+          "i18n-for-ui-copy",
+          "--when-changed",
+          "src/features/**/*.tsx",
+          "--allow",
+          "src/i18n/**/*.json,locales/**/*.json",
+          "--reason",
+          "UI copy changes require translations."
+        ],
+        io
+      )
+    ).toBe(ExitCode.Pass);
+
+    expect(stdout[0]).toContain("Taught expected support rule i18n-for-ui-copy");
+    expect(JSON.parse([...writes.values()][0] ?? "{}")).toMatchObject({
+      learning: {
+        expectedSupportFiles: [
+          {
+            id: "i18n-for-ui-copy",
+            whenChanged: "src/features/**/*.tsx",
+            allow: ["src/i18n/**/*.json", "locales/**/*.json"],
+            reason: "UI copy changes require translations.",
+            createdAt: "2026-06-17T21:20:00.000Z"
+          }
+        ]
+      }
+    });
   });
 
   it("rejects invalid formats", () => {
@@ -273,6 +343,82 @@ describe("cli", () => {
       main(["check", "--task", "Add signup validation", "--format", "repair"], packageDiffIo)
     ).toBe(ExitCode.FindingsFailed);
     expect(stdout[0]).toContain("Unjustified production dependency added");
+  });
+
+  it("applies accepted finding learning rules during checks", () => {
+    const { io, stdout, files } = createTestIo();
+    const packageDiffIo = {
+      ...io,
+      readDiff: () => ({
+        ...testDiffResult,
+        files: [
+          {
+            path: "package.json",
+            status: "modified" as const,
+            role: "manifest" as const,
+            additions: 1,
+            deletions: 0,
+            language: "json",
+            hunks: [
+              {
+                oldStart: 10,
+                oldLines: 4,
+                newStart: 10,
+                newLines: 5,
+                lines: [
+                  {
+                    kind: "context" as const,
+                    content: '  "dependencies": {',
+                    oldLineNumber: 10,
+                    newLineNumber: 10
+                  },
+                  {
+                    kind: "add" as const,
+                    content: '    "axios": "^1.7.0",',
+                    newLineNumber: 11
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+    };
+    files.set(
+      "C:\\dev\\critical-gate\\.critical-gate.json",
+      JSON.stringify({
+        learning: {
+          acceptedFindings: [
+            {
+              id: "dependency-addition:package.json:dependencies:axios",
+              reason: "Axios is approved for this repository.",
+              createdAt: "2026-06-17T21:20:00.000Z"
+            },
+            {
+              id: "scope:package.json",
+              reason: "Package manifest change is expected with the approved dependency.",
+              createdAt: "2026-06-17T21:20:00.000Z"
+            }
+          ]
+        }
+      })
+    );
+
+    expect(
+      main(["check", "--task", "Add signup validation", "--format", "json"], packageDiffIo)
+    ).toBe(ExitCode.Pass);
+
+    expect(JSON.parse(stdout[0] ?? "")).toMatchObject({
+      findings: [],
+      metadata: {
+        learning: {
+          acceptedFindingsApplied: [
+            "dependency-addition:package.json:dependencies:axios",
+            "scope:package.json"
+          ]
+        }
+      }
+    });
   });
 
   it("fails hook mode with compact repair output", () => {

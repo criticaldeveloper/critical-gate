@@ -38,7 +38,7 @@ root note.
      signals, acceptability criteria, and repair guidance.
    - Render reason chains in Markdown, PR comments, and repair output.
 
-3. Repository learning controls.
+3. Repository learning controls. Completed in `feature/repository-learning-controls`.
    - Add accept and teach commands that write reviewable policy entries.
    - Store accepted patterns as policy-as-code, not hidden suppressions.
 
