@@ -96,6 +96,36 @@ describe("cli", () => {
     expect(stderr[0]).toContain("Refusing to overwrite existing pre-commit hook");
   });
 
+  it("writes a starter policy file", () => {
+    const { io, stdout, writes } = createTestIo();
+
+    expect(main(["init-policy"], io)).toBe(ExitCode.Pass);
+
+    const output = writes.get("C:\\dev\\critical-gate\\.critical-gate.json");
+    expect(output).toBeDefined();
+    expect(JSON.parse(output ?? "{}")).toMatchObject({
+      policy: {
+        failOn: "high",
+        detectorOverrides: [
+          {
+            detector: "expected-companions",
+            mode: "observation"
+          }
+        ]
+      }
+    });
+    expect(stdout[0]).toContain("Wrote reviewable Critical Gate policy");
+  });
+
+  it("refuses to overwrite an existing policy file without force", () => {
+    const { io, stderr, files } = createTestIo();
+
+    files.set("C:\\dev\\critical-gate\\.critical-gate.json", "{}");
+
+    expect(main(["init-policy"], io)).toBe(ExitCode.UsageError);
+    expect(stderr[0]).toContain("Refusing to overwrite existing .critical-gate.json");
+  });
+
   it("records accepted findings in .critical-gate.json", () => {
     const { io, stdout, writes } = createTestIo();
 
@@ -860,6 +890,66 @@ describe("cli", () => {
       main(["check", "--task", "Add signup validation", "--format", "markdown"], apiDiffIo)
     ).toBe(ExitCode.Pass);
     expect(stdout[0]).toContain("Public export added");
+  });
+
+  it("uses policy failOn medium when no CLI fail-on override is provided", () => {
+    const { io, stdout, files } = createTestIo();
+    const apiDiffIo = {
+      ...io,
+      readDiff: () => ({
+        ...testDiffResult,
+        files: [
+          {
+            path: "src/index.ts",
+            status: "modified" as const,
+            role: "source" as const,
+            additions: 1,
+            deletions: 0,
+            language: "typescript",
+            hunks: [
+              {
+                oldStart: 1,
+                oldLines: 1,
+                newStart: 1,
+                newLines: 2,
+                lines: [
+                  {
+                    kind: "add" as const,
+                    content: "export function validateSignup() {}",
+                    newLineNumber: 2
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+    };
+    files.set(
+      "C:\\dev\\critical-gate\\.critical-gate.json",
+      JSON.stringify({
+        policy: {
+          failOn: "medium"
+        }
+      })
+    );
+
+    expect(main(["check", "--task", "Add signup validation", "--format", "json"], apiDiffIo)).toBe(
+      ExitCode.FindingsFailed
+    );
+
+    expect(JSON.parse(stdout[0] ?? "")).toMatchObject({
+      summary: {
+        decision: "fail",
+        mediumCount: expect.any(Number)
+      },
+      metadata: {
+        failOn: "medium",
+        policy: {
+          failOn: "medium"
+        }
+      }
+    });
   });
 
   it("fails when API surface detector reports a removed export", () => {

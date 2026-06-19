@@ -99,7 +99,7 @@ root note.
     - Add careful pre-commit and pre-push install modes.
     - Default to blocker-only pre-commit and high/blocker pre-push.
 
-17. Policy as code.
+17. Policy as code. Completed in `feature/policy-as-code`.
     - Add a YAML/JSON policy file for thresholds, detector overrides, expected companions, and
       allowed support files.
 

@@ -162,6 +162,53 @@ The next `check` or `hook` run applies those rules and reports applied rule ids 
 Use this for durable team conventions; do not use it to hide one-off risky diffs that should be
 fixed or split.
 
+## Policy As Code
+
+Create a starter repository policy:
+
+```bash
+critical-gate init-policy
+git add .critical-gate.json
+```
+
+The policy section controls reviewable defaults:
+
+```json
+{
+  "policy": {
+    "failOn": "high",
+    "detectorOverrides": [
+      {
+        "detector": "expected-companions",
+        "mode": "observation",
+        "reason": "Useful guidance during rollout, not blocking yet."
+      }
+    ],
+    "expectedCompanions": [
+      {
+        "id": "source-test-companion",
+        "whenChanged": "src/**/*.ts",
+        "allow": ["tests/**/*.test.ts", "src/**/*.test.ts"],
+        "reason": "Source changes commonly need behavior tests.",
+        "createdAt": "2026-06-19T10:00:00.000Z"
+      }
+    ],
+    "allowedSupportFiles": [
+      {
+        "id": "docs-for-config",
+        "whenChanged": ".github/workflows/**",
+        "allow": ["docs/**/*.md", "README.md", "CHANGELOG.md"],
+        "reason": "Workflow changes may include visible operational docs.",
+        "createdAt": "2026-06-19T10:00:00.000Z"
+      }
+    ]
+  }
+}
+```
+
+CLI flags such as `--fail-on blocker` still override policy for a single run. Use policy for team
+defaults and use `accept` or `teach` commands for reviewable local exceptions.
+
 ## Framework Packs
 
 Critical Gate includes deterministic framework packs for React, Next.js, Angular, Astro, Lit, Nest,

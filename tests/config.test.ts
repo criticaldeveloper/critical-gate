@@ -1,5 +1,10 @@
 import {
   applyLearningPolicy,
+  createDefaultPolicyConfig,
+  getConfiguredExpectedSupportFiles,
+  getConfiguredFailOn,
+  getPolicyBlockingDetectors,
+  getPolicyObservationDetectors,
   loadCriticalGateConfig,
   updateCriticalGateConfig
 } from "../src/index.js";
@@ -27,7 +32,36 @@ describe("loadCriticalGateConfig", () => {
             excludePatterns: ["generated"],
             rollout: {
               observationDetectors: ["blast-radius"],
-              blockingDetectors: ["expected-companions"]
+              blockingDetectors: ["expected-companions"],
+              failOn: "high"
+            },
+            policy: {
+              failOn: "medium",
+              detectorOverrides: [
+                {
+                  detector: "existing-solution",
+                  mode: "blocking",
+                  reason: "Team has tuned this detector."
+                }
+              ],
+              expectedCompanions: [
+                {
+                  id: "source-tests",
+                  whenChanged: "src/**/*.ts",
+                  allow: ["tests/**/*.test.ts"],
+                  reason: "Source changes require tests.",
+                  createdAt: "2026-06-19T10:00:00.000Z"
+                }
+              ],
+              allowedSupportFiles: [
+                {
+                  id: "docs-for-ci",
+                  whenChanged: ".github/workflows/**",
+                  allow: ["docs/**/*.md"],
+                  reason: "CI changes may include docs.",
+                  createdAt: "2026-06-19T10:00:00.000Z"
+                }
+              ]
             },
             learning: {
               acceptedFindings: [
@@ -59,7 +93,36 @@ describe("loadCriticalGateConfig", () => {
         excludePatterns: ["generated"],
         rollout: {
           observationDetectors: ["blast-radius"],
-          blockingDetectors: ["expected-companions"]
+          blockingDetectors: ["expected-companions"],
+          failOn: "high"
+        },
+        policy: {
+          failOn: "medium",
+          detectorOverrides: [
+            {
+              detector: "existing-solution",
+              mode: "blocking",
+              reason: "Team has tuned this detector."
+            }
+          ],
+          expectedCompanions: [
+            {
+              id: "source-tests",
+              whenChanged: "src/**/*.ts",
+              allow: ["tests/**/*.test.ts"],
+              reason: "Source changes require tests.",
+              createdAt: "2026-06-19T10:00:00.000Z"
+            }
+          ],
+          allowedSupportFiles: [
+            {
+              id: "docs-for-ci",
+              whenChanged: ".github/workflows/**",
+              allow: ["docs/**/*.md"],
+              reason: "CI changes may include docs.",
+              createdAt: "2026-06-19T10:00:00.000Z"
+            }
+          ]
         },
         learning: {
           acceptedFindings: [
@@ -98,9 +161,89 @@ describe("loadCriticalGateConfig", () => {
       validatorRoots: undefined,
       excludePatterns: undefined,
       rollout: undefined,
+      policy: undefined,
       learning: undefined
     });
     expect(result.warnings).toEqual(["featureRoots must be an array of strings."]);
+  });
+
+  it("derives policy helpers from policy-as-code and legacy rollout config", () => {
+    const config = {
+      rollout: {
+        observationDetectors: ["blast-radius"],
+        blockingDetectors: ["scope"],
+        failOn: "high" as const
+      },
+      policy: {
+        failOn: "medium" as const,
+        detectorOverrides: [
+          {
+            detector: "existing-solution",
+            mode: "blocking" as const,
+            reason: "Tuned locally."
+          },
+          {
+            detector: "expected-companions",
+            mode: "observation" as const,
+            reason: "Guidance only."
+          }
+        ],
+        expectedCompanions: [
+          {
+            id: "source-tests",
+            whenChanged: "src/**/*.ts",
+            allow: ["tests/**/*.test.ts"],
+            reason: "Source changes require tests.",
+            createdAt: "2026-06-19T10:00:00.000Z"
+          }
+        ]
+      },
+      learning: {
+        expectedSupportFiles: [
+          {
+            id: "docs-for-config",
+            whenChanged: "tsconfig.json",
+            allow: ["docs/**/*.md"],
+            reason: "Config changes need docs.",
+            createdAt: "2026-06-19T10:00:00.000Z"
+          }
+        ]
+      }
+    };
+
+    expect(getConfiguredFailOn(config)).toBe("medium");
+    expect(getPolicyObservationDetectors(config)).toEqual(["blast-radius", "expected-companions"]);
+    expect(getPolicyBlockingDetectors(config)).toEqual(["scope", "existing-solution"]);
+    expect(getConfiguredExpectedSupportFiles(config)?.map((rule) => rule.id)).toEqual([
+      "docs-for-config",
+      "source-tests"
+    ]);
+  });
+
+  it("creates a starter policy config", () => {
+    expect(createDefaultPolicyConfig(new Date("2026-06-19T10:00:00.000Z"))).toMatchObject({
+      policy: {
+        failOn: "high",
+        detectorOverrides: [
+          {
+            detector: "expected-companions",
+            mode: "observation"
+          }
+        ],
+        expectedCompanions: [
+          {
+            id: "source-test-companion",
+            createdAt: "2026-06-19T10:00:00.000Z"
+          }
+        ],
+        allowedSupportFiles: [
+          {
+            id: "docs-for-config",
+            createdAt: "2026-06-19T10:00:00.000Z"
+          }
+        ]
+      }
+    });
   });
 
   it("updates config as reviewable JSON", () => {

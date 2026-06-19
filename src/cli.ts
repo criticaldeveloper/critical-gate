@@ -10,10 +10,15 @@ import {
   applyLearningPolicy,
   analyzeTaskIntentQuality,
   buildApiSurfaceSnapshot,
+  createDefaultPolicyConfig,
   detectFrameworkPacks,
   detectMonorepoContext,
   getApiSnapshotOutputDirectory,
   getApiSnapshotOutputPath,
+  getConfiguredExpectedSupportFiles,
+  getConfiguredFailOn,
+  getPolicyBlockingDetectors,
+  getPolicyObservationDetectors,
   loadApiSurfaceSnapshot,
   loadCriticalGateConfig,
   readGitDiff,
@@ -60,7 +65,14 @@ interface CliIo {
   readFile?: (path: string) => string;
 }
 
-type CommandName = "check" | "hook" | "accept" | "teach" | "snapshot-api" | "install-hooks";
+type CommandName =
+  | "check"
+  | "hook"
+  | "accept"
+  | "teach"
+  | "snapshot-api"
+  | "install-hooks"
+  | "init-policy";
 
 const defaultIo: CliIo = {
   stdout: (message) => console.log(message),
@@ -124,6 +136,10 @@ function runCli(argv: string[], io: CliIo): ExitCode {
 
   if (command === "install-hooks") {
     return runInstallHooksCommand(args, io);
+  }
+
+  if (command === "init-policy") {
+    return runInitPolicyCommand(args, io);
   }
 
   const parsed = parseCheckArgs(args, command);
@@ -302,11 +318,10 @@ function createGateResult(
     knowledge: diffResult.knowledge
   };
   const detectorFindings = runDetectors(task, diff, detectorContext);
-  const learningResult = applyLearningPolicy(
-    detectorFindings,
-    diff.files,
-    configResult.config.learning
-  );
+  const learningResult = applyLearningPolicy(detectorFindings, diff.files, {
+    ...configResult.config.learning,
+    expectedSupportFiles: getConfiguredExpectedSupportFiles(configResult.config)
+  });
   const findings = learningResult.findings;
   const loadedHistoryIndex = diffResult.knowledge?.getLoadedHistoryIndex?.();
   const loadedSolutionIndex = diffResult.knowledge?.getLoadedSolutionIndex?.();
@@ -322,8 +337,9 @@ function createGateResult(
     context,
     findings,
     summary: summarizeFindings(findings, task, diff, {
-      ...configResult.config.rollout,
-      failOn: options.failOn
+      observationDetectors: getPolicyObservationDetectors(configResult.config),
+      blockingDetectors: getPolicyBlockingDetectors(configResult.config),
+      failOn: options.failOn ?? getConfiguredFailOn(configResult.config)
     }),
     intentVerification: summarizeIntentVerification(task, diff.files),
     intentQuality: analyzeTaskIntentQuality(task),
@@ -331,8 +347,9 @@ function createGateResult(
       cliVersion: CLI_VERSION,
       strict: options.strict,
       staged: options.staged,
-      failOn: options.failOn ?? "high",
+      failOn: options.failOn ?? getConfiguredFailOn(configResult.config) ?? "high",
       rolloutPolicy: configResult.config.rollout,
+      policy: configResult.config.policy,
       frameworkPacks: frameworkPacks.map((pack) => pack.id),
       learning: {
         acceptedFindingsApplied: learningResult.appliedAcceptedFindings,
@@ -397,6 +414,29 @@ function runInstallHooksCommand(args: string[], io: CliIo): ExitCode {
   }
 
   io.stdout(`Installed Critical Gate hook(s): ${installed.join(", ")}`);
+
+  return ExitCode.Pass;
+}
+
+function runInitPolicyCommand(args: string[], io: CliIo): ExitCode {
+  const parsed = parseInitPolicyArgs(args);
+
+  if (!parsed.ok) {
+    io.stderr(parsed.error);
+    io.stderr("Run critical-gate init-policy --help for usage.");
+    return ExitCode.UsageError;
+  }
+
+  const root = io.readDiff().root;
+  const path = join(root, CRITICAL_GATE_CONFIG_FILE);
+
+  if (io.exists?.(path) === true && parsed.options.force !== true) {
+    io.stderr(`Refusing to overwrite existing ${CRITICAL_GATE_CONFIG_FILE}. Re-run with --force.`);
+    return ExitCode.UsageError;
+  }
+
+  io.writeFile(path, `${JSON.stringify(createDefaultPolicyConfig(io.now()), null, 2)}\n`);
+  io.stdout(`Wrote reviewable Critical Gate policy to ${path}.`);
 
   return ExitCode.Pass;
 }
@@ -530,6 +570,7 @@ function getHelpText(): string {
     "  critical-gate teach --id <id> --when-changed <glob> --allow <glob[,glob]> --reason <text>",
     "  critical-gate snapshot-api [--entrypoint <path>] [--output <path>]",
     "  critical-gate install-hooks [--hook pre-commit|pre-push|all] [--cli <command>] [--force]",
+    "  critical-gate init-policy [--force]",
     "  critical-gate --version",
     "  critical-gate --help",
     ""
@@ -555,6 +596,10 @@ function getCommandHelpText(command: CommandName): string {
 
   if (command === "install-hooks") {
     return getInstallHooksHelpText();
+  }
+
+  if (command === "init-policy") {
+    return getInitPolicyHelpText();
   }
 
   return getCheckHelpText();
@@ -649,6 +694,18 @@ function getInstallHooksHelpText(): string {
   ].join("\n");
 }
 
+function getInitPolicyHelpText(): string {
+  return [
+    "critical-gate init-policy",
+    "",
+    `Writes a starter ${CRITICAL_GATE_CONFIG_FILE} policy file.`,
+    "",
+    "Options:",
+    "  --force             Overwrite an existing policy file",
+    ""
+  ].join("\n");
+}
+
 function isCommandName(value: string): value is CommandName {
   return (
     value === "check" ||
@@ -656,7 +713,8 @@ function isCommandName(value: string): value is CommandName {
     value === "accept" ||
     value === "teach" ||
     value === "snapshot-api" ||
-    value === "install-hooks"
+    value === "install-hooks" ||
+    value === "init-policy"
   );
 }
 
@@ -806,6 +864,32 @@ function parseInstallHooksArgs(args: string[]):
     }
 
     index += 1;
+  }
+
+  return { ok: true, options };
+}
+
+function parseInitPolicyArgs(args: string[]):
+  | {
+      ok: true;
+      options: {
+        force: boolean;
+      };
+    }
+  | {
+      ok: false;
+      error: string;
+    } {
+  const options = {
+    force: false
+  };
+
+  for (const arg of args) {
+    if (arg !== "--force") {
+      return { ok: false, error: `Unknown option: ${arg}.` };
+    }
+
+    options.force = true;
   }
 
   return { ok: true, options };

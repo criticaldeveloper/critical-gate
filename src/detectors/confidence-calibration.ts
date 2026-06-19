@@ -22,7 +22,8 @@ export function calibrateFindingConfidence(finding: Finding): FindingConfidenceC
   const band = getConfidenceBand(finding.confidence);
   const minimumBlockingConfidence =
     detectorBlockingThresholds[finding.detector] ?? getSeverityBlockingThreshold(finding.severity);
-  const severityEligible = finding.severity === "blocker" || finding.severity === "high";
+  const severityEligible =
+    finding.severity === "blocker" || finding.severity === "high" || finding.severity === "medium";
   const blockingEligible = severityEligible && finding.confidence >= minimumBlockingConfidence;
 
   return {
@@ -60,6 +61,10 @@ function getSeverityBlockingThreshold(severity: Finding["severity"]): number {
     return 0.8;
   }
 
+  if (severity === "medium") {
+    return 0.6;
+  }
+
   return 1;
 }
 
@@ -69,7 +74,7 @@ function getNonBlockingReason(
   minimumBlockingConfidence: number
 ): string {
   if (finding.severity !== "blocker" && finding.severity !== "high") {
-    return `${finding.severity} findings are observational by default.`;
+    return `${finding.severity} findings are observational unless policy failOn is set to medium.`;
   }
 
   return `${finding.detector} ${finding.severity} finding is ${band} confidence; blocking requires ${Math.round(

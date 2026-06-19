@@ -1,11 +1,18 @@
 export {
   CRITICAL_GATE_CONFIG_FILE,
+  createDefaultPolicyConfig,
+  getConfiguredExpectedSupportFiles,
+  getConfiguredFailOn,
+  getPolicyBlockingDetectors,
+  getPolicyObservationDetectors,
   loadCriticalGateConfig,
   updateCriticalGateConfig,
   type AcceptedFindingRule,
   type ConfigReader,
   type ConfigWriter,
   type CriticalGateConfig,
+  type CriticalGatePolicy,
+  type DetectorPolicyOverride,
   type ExpectedSupportFileRule,
   type LearningConfig,
   type LoadCriticalGateConfigResult

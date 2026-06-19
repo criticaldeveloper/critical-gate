@@ -22,6 +22,19 @@ export interface LearningConfig {
   expectedSupportFiles?: ExpectedSupportFileRule[];
 }
 
+export interface DetectorPolicyOverride {
+  detector: string;
+  mode: "blocking" | "observation";
+  reason: string;
+}
+
+export interface CriticalGatePolicy {
+  failOn?: "blocker" | "high" | "medium";
+  detectorOverrides?: DetectorPolicyOverride[];
+  expectedCompanions?: ExpectedSupportFileRule[];
+  allowedSupportFiles?: ExpectedSupportFileRule[];
+}
+
 export interface CriticalGateConfig {
   frameworkPacks?: string[];
   patternAliases?: Record<string, string>;
@@ -32,7 +45,9 @@ export interface CriticalGateConfig {
   rollout?: {
     observationDetectors?: string[];
     blockingDetectors?: string[];
+    failOn?: "blocker" | "high" | "medium";
   };
+  policy?: CriticalGatePolicy;
   learning?: LearningConfig;
 }
 
@@ -48,6 +63,38 @@ export interface ConfigReader {
 
 export interface ConfigWriter {
   writeFile?: (path: string, content: string) => void;
+}
+
+export function getConfiguredFailOn(
+  config: CriticalGateConfig
+): "blocker" | "high" | "medium" | undefined {
+  return config.policy?.failOn ?? config.rollout?.failOn;
+}
+
+export function getPolicyObservationDetectors(config: CriticalGateConfig): string[] | undefined {
+  const policyObservation = config.policy?.detectorOverrides
+    ?.filter((override) => override.mode === "observation")
+    .map((override) => override.detector);
+
+  return mergeUnique(config.rollout?.observationDetectors, policyObservation);
+}
+
+export function getPolicyBlockingDetectors(config: CriticalGateConfig): string[] | undefined {
+  const policyBlocking = config.policy?.detectorOverrides
+    ?.filter((override) => override.mode === "blocking")
+    .map((override) => override.detector);
+
+  return mergeUnique(config.rollout?.blockingDetectors, policyBlocking);
+}
+
+export function getConfiguredExpectedSupportFiles(
+  config: CriticalGateConfig
+): ExpectedSupportFileRule[] | undefined {
+  return mergeRules(
+    config.learning?.expectedSupportFiles,
+    config.policy?.expectedCompanions,
+    config.policy?.allowedSupportFiles
+  );
 }
 
 export function loadCriticalGateConfig(
@@ -93,6 +140,7 @@ function validateConfig(value: unknown): LoadCriticalGateConfigResult {
       validatorRoots: readStringArray(value, "validatorRoots", warnings),
       excludePatterns: readStringArray(value, "excludePatterns", warnings),
       rollout: readRolloutConfig(value, warnings),
+      policy: readPolicyConfig(value, warnings),
       learning: readLearningConfig(value, warnings)
     },
     warnings
@@ -118,6 +166,43 @@ export function updateCriticalGateConfig(
   return updated;
 }
 
+export function createDefaultPolicyConfig(now: Date): CriticalGateConfig {
+  return {
+    policy: {
+      failOn: "high",
+      detectorOverrides: [
+        {
+          detector: "expected-companions",
+          mode: "observation",
+          reason: "Companion rules are useful guidance during rollout but should not block yet."
+        }
+      ],
+      expectedCompanions: [
+        {
+          id: "source-test-companion",
+          whenChanged: "src/**/*.ts",
+          allow: ["tests/**/*.test.ts", "src/**/*.test.ts"],
+          reason: "Source changes commonly require corresponding behavior tests.",
+          createdAt: now.toISOString()
+        }
+      ],
+      allowedSupportFiles: [
+        {
+          id: "docs-for-config",
+          whenChanged: ".github/workflows/**",
+          allow: ["docs/**/*.md", "README.md", "CHANGELOG.md"],
+          reason: "CI or workflow changes may include visible operational documentation.",
+          createdAt: now.toISOString()
+        }
+      ]
+    },
+    learning: {
+      acceptedFindings: [],
+      expectedSupportFiles: []
+    }
+  };
+}
+
 function readRolloutConfig(
   value: Record<string, unknown>,
   warnings: string[]
@@ -135,7 +220,31 @@ function readRolloutConfig(
 
   return {
     observationDetectors: readStringArray(rawValue, "observationDetectors", warnings),
-    blockingDetectors: readStringArray(rawValue, "blockingDetectors", warnings)
+    blockingDetectors: readStringArray(rawValue, "blockingDetectors", warnings),
+    failOn: readFailOn(rawValue, "rollout.failOn", warnings)
+  };
+}
+
+function readPolicyConfig(
+  value: Record<string, unknown>,
+  warnings: string[]
+): CriticalGateConfig["policy"] {
+  const rawValue = value.policy;
+
+  if (rawValue === undefined) {
+    return undefined;
+  }
+
+  if (!isRecord(rawValue)) {
+    warnings.push("policy must be an object.");
+    return undefined;
+  }
+
+  return {
+    failOn: readFailOn(rawValue, "policy.failOn", warnings),
+    detectorOverrides: readDetectorPolicyOverrides(rawValue, warnings),
+    expectedCompanions: readSupportRules(rawValue, "expectedCompanions", warnings),
+    allowedSupportFiles: readSupportRules(rawValue, "allowedSupportFiles", warnings)
   };
 }
 
@@ -156,7 +265,7 @@ function readLearningConfig(
 
   return {
     acceptedFindings: readAcceptedFindings(rawValue, warnings),
-    expectedSupportFiles: readExpectedSupportFiles(rawValue, warnings)
+    expectedSupportFiles: readSupportRules(rawValue, "expectedSupportFiles", warnings)
   };
 }
 
@@ -184,30 +293,73 @@ function readAcceptedFindings(
   return entries;
 }
 
-function readExpectedSupportFiles(
+function readSupportRules(
   value: Record<string, unknown>,
+  key: "expectedSupportFiles" | "expectedCompanions" | "allowedSupportFiles",
   warnings: string[]
 ): ExpectedSupportFileRule[] | undefined {
-  const rawValue = value.expectedSupportFiles;
+  const rawValue = value[key];
 
   if (rawValue === undefined) {
     return undefined;
   }
 
   if (!Array.isArray(rawValue)) {
-    warnings.push("learning.expectedSupportFiles must be an array.");
+    warnings.push(`${key} must be an array.`);
     return undefined;
   }
 
   const entries = rawValue.filter(isExpectedSupportFileRule);
 
   if (entries.length !== rawValue.length) {
-    warnings.push(
-      "learning.expectedSupportFiles entries require id, whenChanged, allow, reason, and createdAt."
-    );
+    warnings.push(`${key} entries require id, whenChanged, allow, reason, and createdAt strings.`);
   }
 
   return entries;
+}
+
+function readDetectorPolicyOverrides(
+  value: Record<string, unknown>,
+  warnings: string[]
+): DetectorPolicyOverride[] | undefined {
+  const rawValue = value.detectorOverrides;
+
+  if (rawValue === undefined) {
+    return undefined;
+  }
+
+  if (!Array.isArray(rawValue)) {
+    warnings.push("policy.detectorOverrides must be an array.");
+    return undefined;
+  }
+
+  const entries = rawValue.filter(isDetectorPolicyOverride);
+
+  if (entries.length !== rawValue.length) {
+    warnings.push("policy.detectorOverrides entries require detector, mode, and reason strings.");
+  }
+
+  return entries;
+}
+
+function readFailOn(
+  value: Record<string, unknown>,
+  key: string,
+  warnings: string[]
+): CriticalGatePolicy["failOn"] {
+  const property = key.split(".").at(-1) ?? key;
+  const rawValue = value[property];
+
+  if (rawValue === undefined) {
+    return undefined;
+  }
+
+  if (rawValue !== "blocker" && rawValue !== "high" && rawValue !== "medium") {
+    warnings.push(`${key} must be blocker, high, or medium.`);
+    return undefined;
+  }
+
+  return rawValue;
 }
 
 function readStringArray(
@@ -252,6 +404,23 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+function mergeUnique(...entries: Array<string[] | undefined>): string[] | undefined {
+  const merged = entries.flatMap((entry) => entry ?? []);
+  return merged.length === 0 ? undefined : [...new Set(merged)];
+}
+
+function mergeRules(
+  ...entries: Array<ExpectedSupportFileRule[] | undefined>
+): ExpectedSupportFileRule[] | undefined {
+  const merged = new Map<string, ExpectedSupportFileRule>();
+
+  for (const entry of entries.flatMap((rules) => rules ?? [])) {
+    merged.set(entry.id, entry);
+  }
+
+  return merged.size === 0 ? undefined : [...merged.values()];
+}
+
 function isAcceptedFindingRule(value: unknown): value is AcceptedFindingRule {
   return (
     isRecord(value) &&
@@ -270,5 +439,14 @@ function isExpectedSupportFileRule(value: unknown): value is ExpectedSupportFile
     value.allow.every((entry) => typeof entry === "string") &&
     typeof value.reason === "string" &&
     typeof value.createdAt === "string"
+  );
+}
+
+function isDetectorPolicyOverride(value: unknown): value is DetectorPolicyOverride {
+  return (
+    isRecord(value) &&
+    typeof value.detector === "string" &&
+    (value.mode === "blocking" || value.mode === "observation") &&
+    typeof value.reason === "string"
   );
 }

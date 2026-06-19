@@ -65,6 +65,7 @@ node dist/cli.js check --task "Add signup validation" --format sarif --output cr
 node dist/cli.js check --task "Add signup validation" --format repair
 node dist/cli.js snapshot-api
 node dist/cli.js install-hooks
+node dist/cli.js init-policy
 ```
 
 Exit codes:
