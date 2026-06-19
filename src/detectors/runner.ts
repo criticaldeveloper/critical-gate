@@ -6,6 +6,7 @@ import { blastRadiusDetector } from "./blast-radius-detector.js";
 import { configChangeDetector } from "./config-change-detector.js";
 import { dependencyDetector } from "./dependency-detector.js";
 import { existingSolutionDetector } from "./existing-solution-detector.js";
+import { expectedCompanionsDetector } from "./expected-companions-detector.js";
 import { intentVerificationDetector } from "./intent-verification-detector.js";
 import { patternViolationDetector } from "./pattern-violation-detector.js";
 import { rewriteDetector } from "./rewrite-detector.js";
@@ -29,7 +30,8 @@ const defaultDetectors: Detector[] = [
   repositoryIntelligenceDetector,
   utilityReinventionDetector,
   existingSolutionDetector,
-  patternViolationDetector
+  patternViolationDetector,
+  expectedCompanionsDetector
 ];
 
 export function runDetectors(
