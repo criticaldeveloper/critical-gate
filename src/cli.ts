@@ -173,7 +173,7 @@ function parseCheckArgs(
         if (!isReportFormat(value)) {
           return {
             ok: false,
-            error: "Invalid --format value. Expected json, markdown, sarif, or repair."
+            error: "Invalid --format value. Expected json, markdown, sarif, repair, or pr-comment."
           };
         }
 
@@ -410,7 +410,7 @@ function getHelpText(): string {
     "critical-gate",
     "",
     "Usage:",
-    "  critical-gate check --task <text> [--base <ref>] [--format json|markdown|sarif|repair] [--strict] [--output <path>]",
+    "  critical-gate check --task <text> [--base <ref>] [--format json|markdown|sarif|repair|pr-comment] [--strict] [--output <path>]",
     "  critical-gate hook [--task <text>] [--base <ref>] [--output <path>]",
     "  critical-gate accept --finding <id> --reason <text>",
     "  critical-gate teach --id <id> --when-changed <glob> --allow <glob[,glob]> --reason <text>",
@@ -445,7 +445,7 @@ function getCheckHelpText(): string {
     "",
     "Options:",
     "  --base <ref>        Git baseline reference",
-    "  --format <format>   json, markdown, sarif, or repair",
+    "  --format <format>   json, markdown, sarif, repair, or pr-comment",
     "  --strict            Fail on strict-mode findings once detectors exist",
     "  --output <path>     Write report to a file instead of stdout",
     ""
@@ -497,7 +497,13 @@ function isCommandName(value: string): value is CommandName {
 }
 
 function isReportFormat(value: string): value is ReportFormat {
-  return value === "json" || value === "markdown" || value === "sarif" || value === "repair";
+  return (
+    value === "json" ||
+    value === "markdown" ||
+    value === "sarif" ||
+    value === "repair" ||
+    value === "pr-comment"
+  );
 }
 
 function parseFlagArgs(

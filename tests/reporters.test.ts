@@ -2,6 +2,7 @@ import {
   GATE_RESULT_SCHEMA_VERSION,
   renderJsonReport,
   renderMarkdownReport,
+  renderPrCommentReport,
   renderRepairReport,
   renderSarifReport,
   type Finding,
@@ -190,6 +191,27 @@ describe("reporters", () => {
       "Acceptable if: The assertion is replaced by an equally specific behavioral assertion."
     );
     expect(report).toContain("Evidence: tests/signup.test.ts:24.");
+  });
+
+  it("renders a compact PR comment with grouped findings and support changes", () => {
+    const report = renderPrCommentReport(result);
+
+    expect(report).toContain("## Critical Gate: fail");
+    expect(report).toContain("Task: Add signup validation");
+    expect(report).toContain("Changed files: 2 (+3/-2)");
+    expect(report).toContain("Diff coherence: 71/100");
+    expect(report).toContain("### Blocking findings");
+    expect(report).toContain(
+      "- **HIGH** Assertion removed from signup test (test-weakening, 92%)."
+    );
+    expect(report).toContain("Repair: Restore the removed behavioral assertion.");
+    expect(report).toContain("Evidence: tests/signup.test.ts:24");
+    expect(report).toContain("### Observations");
+    expect(report).toContain("- None.");
+    expect(report).toContain("### Expected support changes");
+    expect(report).toContain("- modified tests/signup.test.ts (test, +0/-1)");
+    expect(report).toContain("### Scope drivers");
+    expect(report).toContain("- Config, manifest, or lockfile touched: +2");
   });
 
   it("renders pass repair output without noisy instructions", () => {

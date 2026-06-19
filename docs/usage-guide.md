@@ -67,6 +67,16 @@ node dist/cli.js check \
   --format repair
 ```
 
+Write a compact GitHub PR comment:
+
+```bash
+node dist/cli.js check \
+  --task "Add email validation to signup form" \
+  --base main \
+  --format pr-comment \
+  --output critical-gate-pr-comment.md
+```
+
 ## Choosing Good Task Intent
 
 Task intent is part of the input contract. The gate uses it to estimate expected scope and identify
@@ -102,6 +112,10 @@ A report includes:
 - **Diff Cost Score**: a rough signal for blast radius and churn.
 - **Diff Coherence Score**: a 0-100 positive signal for how well the changed files, support files,
   churn, and findings fit the task intent.
+
+Use `--format pr-comment` when the audience is a pull request discussion. It keeps the same
+evidence-backed data but groups it into blocking findings, observations, expected support changes,
+and the strongest scope drivers.
 
 Severity levels:
 

@@ -53,7 +53,7 @@ root note.
      out-of-cluster changes.
    - Keep every score driver evidence-backed.
 
-6. PR comment mode.
+6. PR comment mode. Completed in `feature/pr-comment-mode`.
    - Add a compact Markdown PR summary optimized for GitHub comments.
    - Separate high-confidence blockers, medium observations, and expected support changes.
 

@@ -2,10 +2,11 @@ import type { GateResult } from "../schema/index.js";
 
 import { renderJsonReport } from "./json-reporter.js";
 import { renderMarkdownReport } from "./markdown-reporter.js";
+import { renderPrCommentReport } from "./pr-comment-reporter.js";
 import { renderRepairReport } from "./repair-reporter.js";
 import { renderSarifReport } from "./sarif-reporter.js";
 
-export type ReportFormat = "json" | "markdown" | "sarif" | "repair";
+export type ReportFormat = "json" | "markdown" | "sarif" | "repair" | "pr-comment";
 
 export function renderReport(result: GateResult, format: ReportFormat): string {
   switch (format) {
@@ -13,6 +14,8 @@ export function renderReport(result: GateResult, format: ReportFormat): string {
       return renderJsonReport(result);
     case "markdown":
       return renderMarkdownReport(result);
+    case "pr-comment":
+      return renderPrCommentReport(result);
     case "sarif":
       return renderSarifReport(result);
     case "repair":
@@ -22,5 +25,6 @@ export function renderReport(result: GateResult, format: ReportFormat): string {
 
 export { renderJsonReport } from "./json-reporter.js";
 export { renderMarkdownReport } from "./markdown-reporter.js";
+export { renderPrCommentReport } from "./pr-comment-reporter.js";
 export { renderRepairReport } from "./repair-reporter.js";
 export { renderSarifReport } from "./sarif-reporter.js";

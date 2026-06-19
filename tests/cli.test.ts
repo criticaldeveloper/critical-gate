@@ -46,7 +46,7 @@ describe("cli", () => {
     const { io, stdout, stderr } = createTestIo();
 
     expect(main(["--help"], io)).toBe(ExitCode.Pass);
-    expect(stdout.join("\n")).toContain("--format json|markdown|sarif|repair");
+    expect(stdout.join("\n")).toContain("--format json|markdown|sarif|repair|pr-comment");
     expect(stderr).toEqual([]);
   });
 
@@ -144,7 +144,9 @@ describe("cli", () => {
     expect(main(["check", "--task", "Add validation", "--format", "xml"], io)).toBe(
       ExitCode.UsageError
     );
-    expect(stderr[0]).toBe("Invalid --format value. Expected json, markdown, sarif, or repair.");
+    expect(stderr[0]).toBe(
+      "Invalid --format value. Expected json, markdown, sarif, repair, or pr-comment."
+    );
   });
 
   it("emits markdown by default", () => {
@@ -238,6 +240,19 @@ describe("cli", () => {
     );
 
     expect(stdout).toEqual(["Critical Gate passed. No repair actions required.\n"]);
+  });
+
+  it("emits compact PR comment output", () => {
+    const { io, stdout } = createTestIo();
+
+    expect(main(["check", "--task", "Add signup validation", "--format", "pr-comment"], io)).toBe(
+      ExitCode.Pass
+    );
+
+    expect(stdout[0]).toContain("## Critical Gate: pass");
+    expect(stdout[0]).toContain("Task: Add signup validation");
+    expect(stdout[0]).toContain("### Blocking findings");
+    expect(stdout[0]).toContain("### Observations");
   });
 
   it("prints hook help", () => {
