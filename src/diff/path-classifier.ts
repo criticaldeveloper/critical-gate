@@ -19,7 +19,14 @@ const configFilePatterns = [
   /(^|\/)webpack\.config\.[cm]?[jt]s$/,
   /(^|\/)\.prettierrc/,
   /(^|\/)\.gitattributes$/,
-  /(^|\/)\.gitignore$/
+  /(^|\/)\.gitignore$/,
+  /(^|\/)\.node-version$/,
+  /(^|\/)\.nvmrc$/,
+  /(^|\/)\.npmrc$/,
+  /(^|\/)\.pnpmrc$/,
+  /(^|\/)\.yarnrc(?:\.ya?ml)?$/,
+  /(^|\/)\.tool-versions$/,
+  /(^|\/)mise\.toml$/
 ];
 
 const testPathPattern = /(^|\/)(tests?|__tests__)\/|[._-](test|spec)\.[cm]?[jt]sx?$/;

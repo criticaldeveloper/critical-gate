@@ -109,6 +109,9 @@ describe("classifyPath", () => {
     ["package.json", "manifest"],
     ["pnpm-lock.yaml", "lockfile"],
     [".github/workflows/ci.yml", "config"],
+    [".node-version", "config"],
+    [".nvmrc", "config"],
+    [".tool-versions", "config"],
     ["docs/usage.md", "docs"],
     ["dist/bundle.js", "generated"]
   ] as const)("classifies %s as %s", (path, role) => {

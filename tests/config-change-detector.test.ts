@@ -78,6 +78,34 @@ index 57b22a0..cb3e0f1 100644
     expect(findings).toEqual([]);
   });
 
+  it("does emit when config is mentioned as forbidden scope", () => {
+    const diff = parse(`diff --git a/.node-version b/.node-version
+index 57b22a0..cb3e0f1 100644
+--- a/.node-version
++++ b/.node-version
+@@ -1 +1 @@
+-22.12.0
++24.0.0
+`);
+
+    const findings = configChangeDetector.run({
+      task: {
+        source: "cli",
+        text: "Adjust ArtistIntro spacing without changing config"
+      },
+      diff
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        detector: "config-change",
+        severity: "medium",
+        message:
+          ".node-version changed, but the task did not mention configuration and no documentation file changed."
+      })
+    ]);
+  });
+
   it("does not emit when documentation changes alongside config", () => {
     const diff = parse(`diff --git a/vitest.config.ts b/vitest.config.ts
 index 57b22a0..cb3e0f1 100644

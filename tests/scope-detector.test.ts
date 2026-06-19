@@ -250,6 +250,42 @@ index 57b22a0..cb3e0f1 100644
     ).toEqual([]);
   });
 
+  it("emits for config changes when the task explicitly forbids config edits", () => {
+    const diff = parse(`diff --git a/.node-version b/.node-version
+index 57b22a0..cb3e0f1 100644
+--- a/.node-version
++++ b/.node-version
+@@ -1 +1 @@
+-22.12.0
++24.0.0
+diff --git a/src/components/ArtistIntro.astro b/src/components/ArtistIntro.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/ArtistIntro.astro
++++ b/src/components/ArtistIntro.astro
+@@ -1,3 +1,3 @@
+ <section class="artist-intro">
+-  <p>Original spacing</p>
++  <p class="artist-intro__lede">Original spacing</p>
+ </section>
+`);
+
+    const findings = scopeDetector.run({
+      task: {
+        source: "cli",
+        text: "Adjust ArtistIntro spacing without changing config"
+      },
+      diff
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        detector: "scope",
+        severity: "high",
+        message: ".node-version changed during a small task but does not align with expected scope."
+      })
+    ]);
+  });
+
   it("does not emit for package engine changes when the task mentions Node", () => {
     const diff = parse(`diff --git a/package.json b/package.json
 index 57b22a0..cb3e0f1 100644

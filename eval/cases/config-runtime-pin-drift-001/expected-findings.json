@@ -1,0 +1,11 @@
+{
+  "shouldBlock": true,
+  "expectedFindings": [
+    {
+      "detector": "scope",
+      "severity": "high",
+      "file": ".node-version"
+    }
+  ],
+  "allowedExtraDetectors": ["config-change", "blast-radius"]
+}

@@ -90,6 +90,10 @@ function isRoleAlignedConfigOrManifestChange(
   keywords: string[]
 ): boolean {
   if (file.role === "config") {
+    if (hasConfigProhibition(taskText)) {
+      return false;
+    }
+
     return (
       hasAnyTaskTerm(taskText, configTaskTerms) || hasPathKeywordAlignment(file.path, keywords)
     );
@@ -105,6 +109,12 @@ function isRoleAlignedConfigOrManifestChange(
 function hasAnyTaskTerm(taskText: string, terms: string[]): boolean {
   const normalizedTask = taskText.toLowerCase();
   return terms.some((term) => normalizedTask.includes(term));
+}
+
+function hasConfigProhibition(taskText: string): boolean {
+  return /\b(?:without|no|avoid|do not|don't|dont|must not|never)\s+(?:(?:touching|changing|editing|modify|modifying)\s+)?(?:config|configuration|settings|runtime|node|tooling)\b/i.test(
+    taskText
+  );
 }
 
 function isDeletionAcknowledged(file: DiffFile, taskText: string, keywords: string[]): boolean {

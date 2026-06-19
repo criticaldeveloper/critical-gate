@@ -44,9 +44,19 @@ function isConfigChange(file: DiffFile): boolean {
 function hasVisibleConfigExplanation(task: TaskIntent, files: DiffFile[]): boolean {
   const normalizedTask = task.text.toLowerCase();
 
+  if (hasConfigProhibition(task.text)) {
+    return false;
+  }
+
   return (
     configTaskTerms.some((term) => normalizedTask.includes(term)) ||
     files.some((file) => documentationPathPattern.test(file.path))
+  );
+}
+
+function hasConfigProhibition(taskText: string): boolean {
+  return /\b(?:without|no|avoid|do not|don't|dont|must not|never)\s+(?:(?:touching|changing|editing|modify|modifying)\s+)?(?:config|configuration|settings|runtime|node|tooling)\b/i.test(
+    taskText
   );
 }
 
