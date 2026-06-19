@@ -319,6 +319,12 @@ scripts/render-dogfood-report.mjs
 artifacts/dogfood/<run-id>/report.html
 ```
 
+Render a collected run with:
+
+```bash
+pnpm dogfood:render -- --input artifacts/dogfood/<run-id>/metrics.json
+```
+
 Then capture browser screenshots with Playwright:
 
 ```bash
