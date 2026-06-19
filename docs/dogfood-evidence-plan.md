@@ -328,10 +328,11 @@ pnpm dogfood:render -- --input artifacts/dogfood/<run-id>/metrics.json
 Then capture browser screenshots with Playwright:
 
 ```bash
-pnpm exec playwright screenshot \
-  artifacts/dogfood/<run-id>/report.html \
-  artifacts/dogfood/<run-id>/screenshots/overview.png
+pnpm dogfood:screenshots -- --html artifacts/dogfood/<run-id>/report.html
 ```
+
+The screenshot script uses `npx playwright`; on first use it installs Chromium automatically unless
+`--no-install` is passed.
 
 Prefer HTML report screenshots for public docs because they are deterministic, readable, and do not
 depend on local VS Code window state.

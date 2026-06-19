@@ -25,6 +25,7 @@
     "evaluate": "pnpm build && node scripts/evaluate-fixtures.mjs",
     "dogfood:plan": "node scripts/dogfood-runner.mjs plan",
     "dogfood:render": "node scripts/render-dogfood-report.mjs",
+    "dogfood:screenshots": "node scripts/capture-dogfood-screenshots.mjs",
     "verify": "pnpm format && pnpm lint && pnpm typecheck && pnpm build:vscode && pnpm build:vscode-tests && pnpm test"
   },
   "keywords": [
