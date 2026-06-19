@@ -16,6 +16,8 @@ export type {
   RepositoryCoChange,
   RepositoryProfile,
   RepoContext,
+  ScopeExpansionDriver,
+  ScopeExpansionScore,
   UtilityEntry,
   UtilityIndex,
   TaskIntent,

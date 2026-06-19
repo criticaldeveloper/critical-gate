@@ -136,6 +136,19 @@ export interface GateSummary {
   lowCount: number;
   infoCount: number;
   diffCostScore?: number;
+  scopeExpansionScore?: ScopeExpansionScore;
+}
+
+export interface ScopeExpansionScore {
+  score: number;
+  drivers: ScopeExpansionDriver[];
+}
+
+export interface ScopeExpansionDriver {
+  code: string;
+  label: string;
+  points: number;
+  evidence?: string[];
 }
 
 export interface IntentVerificationSummary {

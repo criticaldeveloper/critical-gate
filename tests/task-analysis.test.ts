@@ -1,5 +1,6 @@
 import {
   analyzeTaskIntent,
+  calculateScopeExpansionScore,
   buildIntentModel,
   calculateDiffCostScore,
   estimateTaskComplexity,
@@ -93,6 +94,56 @@ describe("task analysis", () => {
     ];
 
     expect(calculateDiffCostScore(task, files)).toBeGreaterThanOrEqual(50);
+  });
+
+  it("calculates a scope expansion score with drivers", () => {
+    const task: TaskIntent = {
+      source: "cli",
+      text: "Fix signup validation"
+    };
+    const files: DiffFile[] = [
+      createFile("src/signup.ts", "source", 90, 4),
+      createFile("webpack.config.js", "config", 8, 3),
+      createFile("package.json", "manifest", 1, 0)
+    ];
+
+    expect(
+      calculateScopeExpansionScore(task, files, [
+        {
+          id: "expected-companions:src/signup.ts:tests/signup.test.ts",
+          detector: "expected-companions",
+          severity: "medium",
+          confidence: 0.8,
+          title: "Expected companion file missing",
+          message: "Missing test.",
+          evidence: [{ kind: "history", message: "Missing test." }],
+          repair: "Add test.",
+          tags: ["scope"]
+        }
+      ])
+    ).toEqual({
+      score: 5,
+      drivers: [
+        {
+          code: "high-risk-roles",
+          label: "Config, manifest, or lockfile touched",
+          points: 2,
+          evidence: ["webpack.config.js", "package.json"]
+        },
+        {
+          code: "missing-companions",
+          label: "Expected companion files missing",
+          points: 1,
+          evidence: ["expected-companions:src/signup.ts:tests/signup.test.ts"]
+        },
+        {
+          code: "churn",
+          label: "Churn exceeds task complexity",
+          points: 2,
+          evidence: ["churn:106", "complexity:small"]
+        }
+      ]
+    });
   });
 });
 

@@ -1,6 +1,6 @@
 import type { Finding, GateResult, TaskIntent } from "../schema/index.js";
 
-import { calculateDiffCostScore } from "../intent/index.js";
+import { calculateDiffCostScore, calculateScopeExpansionScore } from "../intent/index.js";
 import { apiSurfaceDetector } from "./api-surface-detector.js";
 import { blastRadiusDetector } from "./blast-radius-detector.js";
 import { configChangeDetector } from "./config-change-detector.js";
@@ -60,7 +60,11 @@ export function summarizeFindings(
     lowCount: countSeverity(findings, "low"),
     infoCount: countSeverity(findings, "info"),
     diffCostScore:
-      task !== undefined && diff !== undefined ? calculateDiffCostScore(task, diff.files) : 0
+      task !== undefined && diff !== undefined ? calculateDiffCostScore(task, diff.files) : 0,
+    scopeExpansionScore:
+      task !== undefined && diff !== undefined
+        ? calculateScopeExpansionScore(task, diff.files, findings)
+        : undefined
   };
 }
 

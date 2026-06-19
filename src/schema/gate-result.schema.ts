@@ -276,7 +276,31 @@ export const gateResultJsonSchema = {
         mediumCount: { type: "integer", minimum: 0 },
         lowCount: { type: "integer", minimum: 0 },
         infoCount: { type: "integer", minimum: 0 },
-        diffCostScore: { type: "number", minimum: 0, maximum: 100 }
+        diffCostScore: { type: "number", minimum: 0, maximum: 100 },
+        scopeExpansionScore: { $ref: "#/$defs/scopeExpansionScore" }
+      }
+    },
+    scopeExpansionScore: {
+      type: "object",
+      additionalProperties: false,
+      required: ["score", "drivers"],
+      properties: {
+        score: { type: "number", minimum: 0, maximum: 10 },
+        drivers: {
+          type: "array",
+          items: { $ref: "#/$defs/scopeExpansionDriver" }
+        }
+      }
+    },
+    scopeExpansionDriver: {
+      type: "object",
+      additionalProperties: false,
+      required: ["code", "label", "points"],
+      properties: {
+        code: { type: "string", minLength: 1 },
+        label: { type: "string", minLength: 1 },
+        points: { type: "number", minimum: 0 },
+        evidence: stringArraySchema
       }
     },
     intentVerificationSummary: {

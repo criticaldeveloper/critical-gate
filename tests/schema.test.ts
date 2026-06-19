@@ -92,7 +92,18 @@ describe("gate result schema", () => {
         mediumCount: 0,
         lowCount: 0,
         infoCount: 0,
-        diffCostScore: 32
+        diffCostScore: 32,
+        scopeExpansionScore: {
+          score: 4,
+          drivers: [
+            {
+              code: "missing-companions",
+              label: "Expected companion files missing",
+              points: 1,
+              evidence: ["expected-companions:src/signup.ts:tests/signup.test.ts"]
+            }
+          ]
+        }
       },
       intentVerification: {
         requestedClasses: ["source"],

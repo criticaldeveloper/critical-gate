@@ -21,3 +21,4 @@ export {
   type ObservedChangeClassEvidence,
   type ObservedDiffActions
 } from "./observed-actions.js";
+export { calculateScopeExpansionScore } from "./scope-expansion-score.js";
