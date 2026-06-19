@@ -91,6 +91,12 @@ The extension persists the last run report and recent run metadata in VS Code wo
 After a reload, restored data is marked as historical. Problems diagnostics are not restored as fresh
 findings; run the gate again to repopulate diagnostics for the current diff.
 
+The status bar summarizes the highest-value latest-run signal instead of only showing pass/fail.
+Examples include `Critical Gate: scope 8/10`, `Critical Gate: 1 unexpected cluster`,
+`Critical Gate: companions missing`, and `Critical Gate: API surface touched`. The tooltip includes
+counts, generation time, restored-state markers, and top scope drivers. Clicking the status bar opens
+the latest report after a run, or starts a run when no result is available.
+
 ## Local Build
 
 Build the root CLI before running the extension:

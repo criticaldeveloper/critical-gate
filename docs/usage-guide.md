@@ -199,6 +199,11 @@ Contextual actions appear where the finding has matching evidence:
   workspace storage.
 - All findings with file evidence can open evidence and copy a repair prompt.
 
+The status bar summarizes the most important latest-run signal. A clean result shows
+`Critical Gate: clean`; larger or risky diffs may show the Scope Expansion Score, unexpected
+clusters, missing companions, or API-surface changes. Hover the status item for counts, timestamps,
+and top scope drivers. Click it to open the latest report after a run.
+
 Useful settings:
 
 - `criticalGate.task`: preset task intent so runs do not prompt.

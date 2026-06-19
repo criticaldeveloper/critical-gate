@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import type { GateResult } from "../../../src/schema/index.js";
+import type { Finding, GateResult } from "../../../src/schema/index.js";
 import type { DashboardState, RefreshState, RunRecord } from "./types.js";
 
 const runStateStorageKey = "criticalGate.workspaceRunState.v1";
@@ -95,29 +95,21 @@ export function updateStatusBar(state: RefreshState): void {
   if (state.lastError !== undefined) {
     state.statusBar.text = "$(error) Critical Gate";
     state.statusBar.tooltip = state.lastError;
+    state.statusBar.command = "criticalGate.showReport";
     return;
   }
 
   if (result === undefined) {
     state.statusBar.text = "$(shield) Critical Gate";
     state.statusBar.tooltip = "Run Critical Gate";
+    state.statusBar.command = "criticalGate.runCheck";
     return;
   }
 
-  const checked = `${result.diff.files.length} file${result.diff.files.length === 1 ? "" : "s"}`;
-  const findings = `${result.summary.findingCount} finding${
-    result.summary.findingCount === 1 ? "" : "s"
-  }`;
-
-  if (result.summary.decision === "pass") {
-    state.statusBar.text =
-      state.restoredAt === undefined ? "$(pass) Critical Gate" : "$(history) Critical Gate";
-    state.statusBar.tooltip = `${state.restoredAt === undefined ? "Passed" : "Restored last pass"}: ${checked}, ${findings}.`;
-  } else {
-    state.statusBar.text =
-      state.restoredAt === undefined ? "$(warning) Critical Gate" : "$(history) Critical Gate";
-    state.statusBar.tooltip = `${state.restoredAt === undefined ? "Failed" : "Restored last failure"}: ${checked}, ${findings}.`;
-  }
+  const signal = getStatusSignal(result, state.restoredAt !== undefined);
+  state.statusBar.text = signal.text;
+  state.statusBar.tooltip = getStatusTooltip(result, signal, state.restoredAt);
+  state.statusBar.command = "criticalGate.showReport";
 }
 
 export function updateRunViews(state: RefreshState): void {
@@ -144,4 +136,109 @@ function isPersistedRunState(input: PersistedRunState): boolean {
     typeof input.runSequence === "number" &&
     Array.isArray(input.history)
   );
+}
+
+function getStatusSignal(result: GateResult, restored: boolean): { text: string; detail: string } {
+  const prefix = restored ? "$(history)" : getDecisionIcon(result);
+  const expectedCompanionCount = countFindings(result.findings, "expected-companions");
+  const blastRadiusCount = countFindings(result.findings, "blast-radius");
+  const apiTouched =
+    result.intentVerification?.observedClasses.includes("api-surface") === true ||
+    result.findings.some((finding) => finding.tags.includes("api"));
+  const score = result.summary.scopeExpansionScore?.score;
+
+  if (score !== undefined && (score >= 7 || result.summary.decision === "fail")) {
+    return {
+      text: `${prefix} Critical Gate: scope ${score}/10`,
+      detail: `Scope Expansion Score: ${score}/10`
+    };
+  }
+
+  if (blastRadiusCount > 0) {
+    return {
+      text: `${prefix} Critical Gate: ${blastRadiusCount} unexpected cluster${
+        blastRadiusCount === 1 ? "" : "s"
+      }`,
+      detail: `${blastRadiusCount} unexpected changed-file cluster${
+        blastRadiusCount === 1 ? "" : "s"
+      }`
+    };
+  }
+
+  if (expectedCompanionCount > 0) {
+    return {
+      text: `${prefix} Critical Gate: companions missing`,
+      detail: `${expectedCompanionCount} expected companion finding${
+        expectedCompanionCount === 1 ? "" : "s"
+      }`
+    };
+  }
+
+  if (apiTouched) {
+    return {
+      text: `${prefix} Critical Gate: API surface touched`,
+      detail: "API surface touched"
+    };
+  }
+
+  if (result.summary.findingCount > 0) {
+    return {
+      text: `${prefix} Critical Gate: ${result.summary.findingCount} finding${
+        result.summary.findingCount === 1 ? "" : "s"
+      }`,
+      detail: `${result.summary.findingCount} finding${
+        result.summary.findingCount === 1 ? "" : "s"
+      }`
+    };
+  }
+
+  return {
+    text: `${prefix} Critical Gate: clean`,
+    detail: "No findings"
+  };
+}
+
+function getDecisionIcon(result: GateResult): string {
+  return result.summary.decision === "pass" ? "$(pass)" : "$(warning)";
+}
+
+function countFindings(findings: Finding[], detector: string): number {
+  return findings.filter((finding) => finding.detector === detector).length;
+}
+
+function getStatusTooltip(
+  result: GateResult,
+  signal: { detail: string },
+  restoredAt: string | undefined
+): string {
+  const checked = `${result.diff.files.length} file${result.diff.files.length === 1 ? "" : "s"}`;
+  const findings = `${result.summary.findingCount} finding${
+    result.summary.findingCount === 1 ? "" : "s"
+  }`;
+  const generated = new Date(result.generatedAt).toLocaleString();
+  const lines = [
+    restoredAt === undefined
+      ? `Latest run: ${result.summary.decision}`
+      : `Restored historical run: ${result.summary.decision}`,
+    signal.detail,
+    `${checked}, ${findings}`,
+    `Generated: ${generated}`
+  ];
+
+  if (restoredAt !== undefined) {
+    lines.push(`Restored: ${new Date(restoredAt).toLocaleString()}`);
+  }
+
+  const drivers = result.summary.scopeExpansionScore?.drivers ?? [];
+
+  if (drivers.length > 0) {
+    lines.push(
+      "Top drivers:",
+      ...drivers.slice(0, 3).map((driver) => `- ${driver.label} (+${driver.points})`)
+    );
+  }
+
+  lines.push("Click to open the Critical Gate report.");
+
+  return lines.join("\n");
 }

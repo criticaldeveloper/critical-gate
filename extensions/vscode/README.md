@@ -12,7 +12,8 @@ dependencies, and expected blast radius.
   files, browse the native Analysis tree, and revisit recent gate runs.
 - Run Critical Gate from the Command Palette with `Critical Gate: Run Check`.
 - Show the full run report in the `Critical Gate` output channel.
-- See pass/fail state in the VS Code status bar.
+- See the highest-value latest-run signal in the VS Code status bar, including scope score,
+  unexpected clusters, missing companions, or clean pass state.
 - Show findings in the Problems panel with file, line, severity, and detector context.
 - Open evidence locations from diagnostics.
 - Copy repair guidance for Codex or another coding agent.
