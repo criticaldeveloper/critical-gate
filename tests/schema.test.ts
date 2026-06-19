@@ -93,6 +93,16 @@ describe("gate result schema", () => {
             repairHint:
               "Restore the removed behavioral assertion or replace it with an equally specific assertion."
           },
+          repairContract: {
+            instructions: [
+              "Restore the removed behavioral assertion or replace it with an equally specific assertion."
+            ],
+            allowedFiles: ["tests/signup.test.ts"],
+            forbiddenFiles: ["src/signup.ts"],
+            successCriteria: [
+              "The test-weakening-001 finding no longer appears after rerunning Critical Gate."
+            ]
+          },
           repair:
             "Restore the removed behavioral assertion or replace it with an equally specific assertion.",
           tags: ["test"]

@@ -1,4 +1,5 @@
 import type { Finding, GateResult } from "../schema/index.js";
+import { renderFindingRepairContract } from "./repair-contract.js";
 
 const maxRepairFindings = 5;
 
@@ -48,9 +49,17 @@ function renderRepairFinding(finding: Finding, index: number): string[] {
     `${index}. ${finding.severity.toUpperCase()}: ${finding.title}`,
     `${finding.message}${location}`,
     ...renderReasonChain(finding),
-    `Repair: ${finding.repair}`,
+    "Repair Contract:",
+    indent(renderFindingRepairContract(finding)),
     ""
   ];
+}
+
+function indent(value: string): string {
+  return value
+    .split("\n")
+    .map((line) => (line.length === 0 ? "" : `  ${line}`))
+    .join("\n");
 }
 
 function renderReasonChain(finding: Finding): string[] {

@@ -57,7 +57,7 @@ root note.
    - Add a compact Markdown PR summary optimized for GitHub comments.
    - Separate high-confidence blockers, medium observations, and expected support changes.
 
-7. Agent repair contract.
+7. Agent repair contract. Completed in `feature/agent-repair-contract`.
    - Add structured repair contracts with instructions, allowed files, forbidden files, and success
      criteria.
    - Surface contracts in Codex hook output and VS Code repair-copy actions.

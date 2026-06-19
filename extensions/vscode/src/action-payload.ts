@@ -1,4 +1,5 @@
-import type { Finding, FindingEvidence } from "../../../src/schema/index.js";
+import { renderFindingRepairContract } from "../../../src/reporters/index.js";
+import type { Finding, FindingEvidence, FindingRepairContract } from "../../../src/schema/index.js";
 import type { CriticalGateDiagnosticPayload } from "./types.js";
 
 interface PayloadInput {
@@ -7,6 +8,7 @@ interface PayloadInput {
   title: string;
   message?: string;
   repair: string;
+  repairContract?: FindingRepairContract;
   evidencePath: string;
   startLine?: number;
   endLine?: number;
@@ -30,6 +32,7 @@ export function toCriticalGatePayload(input: PayloadInput): CriticalGateDiagnost
     title: input.title,
     message: input.message,
     repair: input.repair,
+    repairContract: input.repairContract,
     evidencePath: input.evidencePath,
     startLine: input.startLine,
     endLine: input.endLine,
@@ -55,7 +58,8 @@ export function toFindingPayload(finding: Finding): CriticalGateDiagnosticPayloa
     detector: finding.detector,
     title: finding.title,
     message: finding.message,
-    repair: finding.repair,
+    repair: renderFindingRepairContract(finding),
+    repairContract: finding.repairContract,
     evidencePath: evidence.path,
     startLine: evidence.startLine,
     endLine: evidence.endLine,

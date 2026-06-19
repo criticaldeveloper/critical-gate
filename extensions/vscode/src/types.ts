@@ -1,6 +1,6 @@
 import type * as vscode from "vscode";
 
-import type { GateResult } from "../../../src/schema/index.js";
+import type { FindingRepairContract, GateResult } from "../../../src/schema/index.js";
 import type { CriticalGateDashboardProvider, CriticalGateTreeProvider } from "./tree-provider.js";
 
 export const diagnosticSource = "critical-gate";
@@ -11,6 +11,7 @@ export interface CriticalGateDiagnosticPayload {
   title: string;
   message?: string;
   repair: string;
+  repairContract?: FindingRepairContract;
   evidencePath: string;
   startLine?: number;
   endLine?: number;

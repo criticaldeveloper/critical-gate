@@ -16,6 +16,7 @@ import { patternViolationDetector } from "./pattern-violation-detector.js";
 import { rewriteDetector } from "./rewrite-detector.js";
 import { repositoryIntelligenceDetector } from "./repository-intelligence-detector.js";
 import { enrichFindingWithReasonChain } from "./reason-chain.js";
+import { enrichFindingWithRepairContract } from "./repair-contract.js";
 import { secretPathDetector } from "./secret-path-detector.js";
 import { scopeDetector } from "./scope-detector.js";
 import { testWeakeningDetector } from "./test-weakening-detector.js";
@@ -58,9 +59,9 @@ export function runDetectors(
   context?: DetectorRepoContext,
   detectors = defaultDetectors
 ): Finding[] {
-  return dedupeFindings(detectors.flatMap((detector) => detector.run({ task, diff, context }))).map(
-    enrichFindingWithReasonChain
-  );
+  return dedupeFindings(detectors.flatMap((detector) => detector.run({ task, diff, context })))
+    .map(enrichFindingWithReasonChain)
+    .map((finding) => enrichFindingWithRepairContract(finding, diff.files));
 }
 
 export function summarizeFindings(

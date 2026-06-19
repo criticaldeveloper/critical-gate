@@ -292,6 +292,11 @@ node dist/cli.js hook --base main
 When findings fail the gate, the hook emits compact repair guidance instead of a long review. Codex
 or another agent can use that guidance to make a scoped repair and rerun the gate.
 
+Each failing finding includes an agent repair contract with deterministic instructions, allowed
+files, forbidden files, and success criteria. The allowed files come from finding evidence, and the
+forbidden files are other changed files that should not be touched while fixing that finding unless
+the task intent is expanded.
+
 Review `.codex/hooks.json` before trusting it in Codex CLI.
 
 ## GitHub Action Workflow

@@ -11,6 +11,7 @@ export type {
   Finding,
   FindingEvidence,
   FindingReasonChain,
+  FindingRepairContract,
   FindingSeverity,
   FindingTag,
   GateResult,

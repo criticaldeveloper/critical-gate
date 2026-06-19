@@ -64,7 +64,8 @@ the finding title, explanation, and repair text.
 The VS Code scaffold registers quick fixes for Critical Gate diagnostics:
 
 - `Critical Gate: Open evidence` opens the evidence file and selects the reported line range.
-- `Critical Gate: Copy repair prompt` copies the finding repair guidance to the clipboard.
+- `Critical Gate: Copy repair prompt` copies the finding repair contract to the clipboard when one
+  is available, including allowed files, forbidden files, and success criteria.
 - `Critical Gate: Open existing solution` appears for existing-solution findings.
 - `Critical Gate: Open expected companion` appears for missing-companion findings.
 - `Critical Gate: Open cluster report` appears for blast-radius cluster findings.

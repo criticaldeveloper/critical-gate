@@ -216,6 +216,7 @@ export const gateResultJsonSchema = {
           items: { $ref: "#/$defs/findingEvidence" }
         },
         reasonChain: { $ref: "#/$defs/findingReasonChain" },
+        repairContract: { $ref: "#/$defs/findingRepairContract" },
         repair: { type: "string", minLength: 1 },
         tags: {
           type: "array",
@@ -253,6 +254,29 @@ export const gateResultJsonSchema = {
         supportingSignals: stringArraySchema,
         acceptableIf: stringArraySchema,
         repairHint: { type: "string", minLength: 1 }
+      }
+    },
+    findingRepairContract: {
+      type: "object",
+      additionalProperties: false,
+      required: ["instructions", "allowedFiles", "forbiddenFiles", "successCriteria"],
+      properties: {
+        instructions: {
+          type: "array",
+          items: { type: "string", minLength: 1 }
+        },
+        allowedFiles: {
+          type: "array",
+          items: { type: "string", minLength: 1 }
+        },
+        forbiddenFiles: {
+          type: "array",
+          items: { type: "string", minLength: 1 }
+        },
+        successCriteria: {
+          type: "array",
+          items: { type: "string", minLength: 1 }
+        }
       }
     },
     findingEvidence: {

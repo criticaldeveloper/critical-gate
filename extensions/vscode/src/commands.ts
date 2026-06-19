@@ -155,7 +155,7 @@ export async function copyRepair(payloadOrRepair: unknown): Promise<void> {
   }
 
   await vscode.env.clipboard.writeText(repair);
-  vscode.window.showInformationMessage("Critical Gate repair text copied.");
+  vscode.window.showInformationMessage("Critical Gate repair contract copied.");
 }
 
 export async function openExistingSolution(payloadOrTreeItem: unknown): Promise<void> {

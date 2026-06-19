@@ -78,6 +78,13 @@ node dist/cli.js hook --base main
 The hook output intentionally uses the compact repair reporter. If findings fail the gate, the
 command exits non-zero and prints the highest-priority repair actions.
 
+Repair output includes an agent repair contract for each finding:
+
+- Instructions: the smallest safe repair direction.
+- Allowed files: evidence-backed paths the agent may edit for that finding.
+- Forbidden files: other changed files that should stay untouched during that repair.
+- Success criteria: what must be true after rerunning Critical Gate.
+
 ### Codex Exec And CI
 
 Use noninteractive execution for scripts and CI workflows when Codex needs to consume or repair findings.

@@ -7,18 +7,69 @@ Scope Expansion Score: 4/10
 axios@^1.7.0 was added to dependencies without visible task justification. Evidence: package.json:10.
 Why suspicious: New dependencies expand maintenance, security, and install surface area and should be justified by the task.
 Acceptable if: The task explicitly requires the dependency.
-Repair: Remove axios unless it is required, or update the task/PR context with a clear justification and alternatives considered.
+Repair Contract:
+  Repair contract for dependency-addition:package.json:dependencies:axios
+
+  Instructions:
+  - Remove axios unless it is required, or update the task/PR context with a clear justification and alternatives considered.
+  - Keep the repair limited to the allowed files unless the task intent explicitly requires more.
+  - Do not broaden scope, add dependencies, weaken tests, or rewrite unrelated code while repairing this finding.
+
+  Allowed files:
+  - package.json
+
+  Forbidden files:
+  - None.
+
+  Success criteria:
+  - The finding dependency-addition:package.json:dependencies:axios no longer appears after rerunning Critical Gate.
+  - The original task intent is still satisfied.
+  - No new blocker or high-severity Critical Gate finding is introduced.
 
 2. HIGH: Unexpected file changed for small task
 package.json changed during a small task but does not align with expected scope. Evidence: package.json:10.
 Why suspicious: The changed files or historical relationships do not clearly fit the task's expected blast radius.
 Acceptable if: The task intent explicitly covers this file or support area.
-Repair: Remove unrelated edits or split them into a separate task with explicit justification.
+Repair Contract:
+  Repair contract for scope:package.json
+
+  Instructions:
+  - Remove unrelated edits or split them into a separate task with explicit justification.
+  - Keep the repair limited to the allowed files unless the task intent explicitly requires more.
+  - Do not broaden scope, add dependencies, weaken tests, or rewrite unrelated code while repairing this finding.
+
+  Allowed files:
+  - package.json
+
+  Forbidden files:
+  - None.
+
+  Success criteria:
+  - The finding scope:package.json no longer appears after rerunning Critical Gate.
+  - The original task intent is still satisfied.
+  - No new blocker or high-severity Critical Gate finding is introduced.
 
 3. MEDIUM: Expected companion lockfile missing
 package.json changed without a corresponding package lockfile change. Evidence: package.json.
 Why suspicious: New dependencies expand maintenance, security, and install surface area and should be justified by the task.
 Acceptable if: The task explicitly requires the dependency.
-Repair: Update the matching lockfile, or document why the manifest-only change is intentional.
+Repair Contract:
+  Repair contract for expected-companions:package.json:lockfile
+
+  Instructions:
+  - Update the matching lockfile, or document why the manifest-only change is intentional.
+  - Keep the repair limited to the allowed files unless the task intent explicitly requires more.
+  - Do not broaden scope, add dependencies, weaken tests, or rewrite unrelated code while repairing this finding.
+
+  Allowed files:
+  - package.json
+
+  Forbidden files:
+  - None.
+
+  Success criteria:
+  - The finding expected-companions:package.json:lockfile no longer appears after rerunning Critical Gate.
+  - The original task intent is still satisfied.
+  - No new blocker or high-severity Critical Gate finding is introduced.
 
 Rerun Critical Gate after applying focused repairs.

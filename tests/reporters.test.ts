@@ -67,6 +67,18 @@ const result: GateResult = {
         acceptableIf: ["The assertion is replaced by an equally specific behavioral assertion."],
         repairHint: "Restore the removed behavioral assertion."
       },
+      repairContract: {
+        instructions: [
+          "Restore the removed behavioral assertion.",
+          "Keep the repair limited to the allowed files unless the task intent explicitly requires more."
+        ],
+        allowedFiles: ["tests/signup.test.ts"],
+        forbiddenFiles: ["src/signup.ts"],
+        successCriteria: [
+          "The finding test-weakening-001 no longer appears after rerunning Critical Gate.",
+          "The original task intent is still satisfied."
+        ]
+      },
       repair: "Restore the removed behavioral assertion.",
       tags: ["test"]
     }
@@ -191,6 +203,16 @@ describe("reporters", () => {
       "Acceptable if: The assertion is replaced by an equally specific behavioral assertion."
     );
     expect(report).toContain("Evidence: tests/signup.test.ts:24.");
+    expect(report).toContain("Repair Contract:");
+    expect(report).toContain("Repair contract for test-weakening-001");
+    expect(report).toContain("Allowed files:");
+    expect(report).toContain("- tests/signup.test.ts");
+    expect(report).toContain("Forbidden files:");
+    expect(report).toContain("- src/signup.ts");
+    expect(report).toContain("Success criteria:");
+    expect(report).toContain(
+      "- The finding test-weakening-001 no longer appears after rerunning Critical Gate."
+    );
   });
 
   it("renders a compact PR comment with grouped findings and support changes", () => {

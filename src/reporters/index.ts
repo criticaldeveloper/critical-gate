@@ -26,5 +26,6 @@ export function renderReport(result: GateResult, format: ReportFormat): string {
 export { renderJsonReport } from "./json-reporter.js";
 export { renderMarkdownReport } from "./markdown-reporter.js";
 export { renderPrCommentReport } from "./pr-comment-reporter.js";
+export { renderFindingRepairContract } from "./repair-contract.js";
 export { renderRepairReport } from "./repair-reporter.js";
 export { renderSarifReport } from "./sarif-reporter.js";

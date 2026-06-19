@@ -7,6 +7,7 @@ export async function runExtensionTests(): Promise<void> {
   await contributesNativeAnalysisTree();
   await contributesManualRefreshDefaults();
   await copiesRepairTextThroughCommandPayload();
+  await copiesRepairContractThroughCommandPayload();
   await copiesRepairTextThroughTreeItemPayload();
   await opensEvidenceFilesThroughCommandPayload();
   await opensExistingSolutionThroughTreeItemPayload();
@@ -83,6 +84,32 @@ async function copiesRepairTextThroughCommandPayload(): Promise<void> {
   });
 
   assert.equal(await vscode.env.clipboard.readText(), "Restore the removed assertion.");
+}
+
+async function copiesRepairContractThroughCommandPayload(): Promise<void> {
+  await vscode.commands.executeCommand("criticalGate.copyRepair", {
+    findingId: "contract-finding",
+    detector: "test",
+    title: "Contract finding",
+    repair: [
+      "Repair contract for contract-finding",
+      "",
+      "Instructions:",
+      "- Restore the removed assertion.",
+      "",
+      "Allowed files:",
+      "- tests/signup.test.ts",
+      "",
+      "Forbidden files:",
+      "- src/signup.ts",
+      "",
+      "Success criteria:",
+      "- The finding no longer appears."
+    ].join("\n"),
+    evidencePath: "evidence.ts"
+  });
+
+  assert.match(await vscode.env.clipboard.readText(), /Repair contract for contract-finding/);
 }
 
 async function copiesRepairTextThroughTreeItemPayload(): Promise<void> {

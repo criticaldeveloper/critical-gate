@@ -133,8 +133,16 @@ export interface Finding {
   message: string;
   evidence: FindingEvidence[];
   reasonChain?: FindingReasonChain;
+  repairContract?: FindingRepairContract;
   repair: string;
   tags: FindingTag[];
+}
+
+export interface FindingRepairContract {
+  instructions: string[];
+  allowedFiles: string[];
+  forbiddenFiles: string[];
+  successCriteria: string[];
 }
 
 export interface GateSummary {

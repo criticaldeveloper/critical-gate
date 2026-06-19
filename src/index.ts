@@ -7,5 +7,6 @@ export * from "./intent/index.js";
 export * from "./knowledge/index.js";
 export * from "./llm/index.js";
 export * from "./reporters/index.js";
+export * from "./detectors/repair-contract.js";
 export * from "./repository/index.js";
 export * from "./schema/index.js";
