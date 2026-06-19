@@ -64,6 +64,7 @@ node dist/cli.js check --task "Add signup validation" --format json --output cri
 node dist/cli.js check --task "Add signup validation" --format sarif --output critical-gate.sarif
 node dist/cli.js check --task "Add signup validation" --format repair
 node dist/cli.js snapshot-api
+node dist/cli.js install-hooks
 ```
 
 Exit codes:
@@ -72,6 +73,39 @@ Exit codes:
 - `1`: findings failed the configured threshold.
 - `2`: usage or configuration error.
 - `3`: internal error.
+
+## Local Git Hooks
+
+Critical Gate can install reviewable local git hooks:
+
+```bash
+critical-gate install-hooks
+```
+
+This writes:
+
+- `.git/hooks/pre-commit`: checks staged changes with `--fail-on blocker`.
+- `.git/hooks/pre-push`: checks the branch against `${CRITICAL_GATE_BASE:-origin/main}` with
+  `--fail-on high`.
+
+Install only one hook when desired:
+
+```bash
+critical-gate install-hooks --hook pre-commit
+critical-gate install-hooks --hook pre-push
+```
+
+Use `--force` to overwrite an existing hook after reviewing it. Use `--cli <command>` when the hook
+should call a specific local CLI path, for example:
+
+```bash
+critical-gate install-hooks --cli "node ./node_modules/critical-gate/dist/cli.js" --force
+```
+
+At runtime, hooks accept:
+
+- `CRITICAL_GATE_TASK`: overrides the task intent.
+- `CRITICAL_GATE_BASE`: overrides the pre-push base branch.
 
 ## GitHub Action
 

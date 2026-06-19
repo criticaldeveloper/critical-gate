@@ -29,6 +29,7 @@ function createTestIo() {
       stdout: (message: string) => stdout.push(message),
       stderr: (message: string) => stderr.push(message),
       writeFile: (path: string, content: string) => writes.set(path, content),
+      chmodFile: () => undefined,
       exists: (path: string) => files.has(path),
       readFile: (path: string) => files.get(path) ?? "",
       now: () => new Date("2026-06-17T21:20:00.000Z"),
@@ -70,6 +71,29 @@ describe("cli", () => {
 
     expect(main(["scan", "--task", "Add validation"], io)).toBe(ExitCode.UsageError);
     expect(stderr[0]).toBe("Unknown command: scan");
+  });
+
+  it("installs pre-commit and pre-push git hooks with conservative defaults", () => {
+    const { io, stdout, writes } = createTestIo();
+
+    expect(main(["install-hooks", "--cli", "node ./dist/cli.js"], io)).toBe(ExitCode.Pass);
+
+    expect(stdout[0]).toContain("Installed Critical Gate hook(s):");
+    expect(writes.get("C:\\dev\\critical-gate\\.git\\hooks\\pre-commit")).toContain(
+      "'node ./dist/cli.js' check --staged --task \"$TASK\" --format repair --fail-on blocker"
+    );
+    expect(writes.get("C:\\dev\\critical-gate\\.git\\hooks\\pre-push")).toContain(
+      '\'node ./dist/cli.js\' check --base "$BASE" --task "$TASK" --format repair --fail-on high'
+    );
+  });
+
+  it("refuses to overwrite existing git hooks without force", () => {
+    const { io, stderr, files } = createTestIo();
+
+    files.set("C:\\dev\\critical-gate\\.git\\hooks\\pre-commit", "# custom hook\n");
+
+    expect(main(["install-hooks", "--hook", "pre-commit"], io)).toBe(ExitCode.UsageError);
+    expect(stderr[0]).toContain("Refusing to overwrite existing pre-commit hook");
   });
 
   it("records accepted findings in .critical-gate.json", () => {
@@ -204,6 +228,72 @@ describe("cli", () => {
       summary: {
         decision: "pass",
         findingCount: 0
+      }
+    });
+  });
+
+  it("allows blocker-only checks to pass high findings for pre-commit style hooks", () => {
+    const { io, stdout } = createTestIo();
+    const testDiffIo = {
+      ...io,
+      readDiff: (_baseRef?: string, options?: { staged?: boolean }) => {
+        expect(options).toEqual({ staged: true });
+
+        return {
+          ...testDiffResult,
+          files: [
+            {
+              path: "tests/signup.test.ts",
+              status: "modified" as const,
+              role: "test" as const,
+              additions: 0,
+              deletions: 1,
+              language: "typescript",
+              hunks: [
+                {
+                  oldStart: 1,
+                  oldLines: 1,
+                  newStart: 1,
+                  newLines: 0,
+                  lines: [
+                    {
+                      kind: "delete" as const,
+                      content: "expect(result.ok).toBe(true);",
+                      oldLineNumber: 1
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        };
+      }
+    };
+
+    expect(
+      main(
+        [
+          "check",
+          "--staged",
+          "--task",
+          "Pre-commit staged change",
+          "--format",
+          "json",
+          "--fail-on",
+          "blocker"
+        ],
+        testDiffIo
+      )
+    ).toBe(ExitCode.Pass);
+
+    expect(JSON.parse(stdout[0] ?? "")).toMatchObject({
+      summary: {
+        decision: "pass",
+        highCount: 1
+      },
+      metadata: {
+        staged: true,
+        failOn: "blocker"
       }
     });
   });

@@ -95,7 +95,7 @@ root note.
 15. Reviewer checklist. Completed in `feature/reviewer-checklist`.
     - Generate a concise human-review checklist from non-blocking and blocking findings.
 
-16. Local hook installers.
+16. Local hook installers. Completed in `feature/local-hook-installers`.
     - Add careful pre-commit and pre-push install modes.
     - Default to blocker-only pre-commit and high/blocker pre-push.
 

@@ -17,6 +17,7 @@ export interface GitCommandRunner {
 export interface ReadGitDiffOptions {
   baseRef?: string;
   cwd?: string;
+  staged?: boolean;
   runner?: GitCommandRunner;
 }
 
@@ -49,12 +50,13 @@ export function readGitDiff(options: ReadGitDiffOptions = {}): GitDiffResult {
     .trim();
   const baseRef = options.baseRef;
   const headRef = getOptionalGitOutput(runner, ["rev-parse", "--abbrev-ref", "HEAD"], root);
-  const diffArgs = getDiffArgs(baseRef);
+  const diffArgs = getDiffArgs(baseRef, options.staged === true);
   const diffText = runner.execFile("git", diffArgs, { cwd: root });
   const trackedFiles = parseUnifiedDiff(diffText).filter(
     (file) => !isInternalCriticalGatePath(file.path)
   );
-  const untrackedFiles = baseRef === undefined ? readUntrackedFiles(root, runner) : [];
+  const untrackedFiles =
+    baseRef === undefined && options.staged !== true ? readUntrackedFiles(root, runner) : [];
 
   return {
     root,
@@ -65,7 +67,11 @@ export function readGitDiff(options: ReadGitDiffOptions = {}): GitDiffResult {
   };
 }
 
-function getDiffArgs(baseRef: string | undefined): string[] {
+function getDiffArgs(baseRef: string | undefined, staged: boolean): string[] {
+  if (staged) {
+    return ["diff", "--cached", "--no-ext-diff", "--no-color", "--"];
+  }
+
   if (baseRef === undefined) {
     return ["diff", "--no-ext-diff", "--no-color", "HEAD", "--"];
   }

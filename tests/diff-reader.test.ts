@@ -228,6 +228,35 @@ describe("readGitDiff", () => {
     expect(calls).toContainEqual(["diff", "--no-ext-diff", "--no-color", "HEAD", "--"]);
   });
 
+  it("uses cached diff and skips untracked files for staged checks", () => {
+    const calls: string[][] = [];
+    const runner: GitCommandRunner = {
+      execFile: (_file, args) => {
+        calls.push(args);
+
+        if (args.join(" ") === "rev-parse --show-toplevel") {
+          return "C:/dev/critical-gate\n";
+        }
+
+        if (args.join(" ") === "rev-parse --abbrev-ref HEAD") {
+          return "feature/hooks\n";
+        }
+
+        if (args.join(" ") === "diff --cached --no-ext-diff --no-color --") {
+          return readFileSync(fixturePath, "utf8");
+        }
+
+        throw new Error(`Unexpected git args: ${args.join(" ")}`);
+      }
+    };
+
+    const result = readGitDiff({ runner, staged: true });
+
+    expect(result.files).toHaveLength(5);
+    expect(calls).toContainEqual(["diff", "--cached", "--no-ext-diff", "--no-color", "--"]);
+    expect(calls).not.toContainEqual(["ls-files", "--others", "--exclude-standard"]);
+  });
+
   it("excludes Critical Gate cache artifacts from working-tree checks", () => {
     const runner: GitCommandRunner = {
       execFile: (_file, args) => {

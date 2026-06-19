@@ -230,6 +230,19 @@ is a short handoff of evidence-backed prompts such as resolving blocking finding
 tests still assert behavior, confirming dependency changes, or verifying config changes include
 operational context.
 
+## Local Git Hooks
+
+Use local hooks for lightweight pre-merge guardrails:
+
+```bash
+critical-gate install-hooks
+```
+
+The generated `pre-commit` hook checks staged changes only and fails on blocker findings. The
+generated `pre-push` hook checks the branch against `${CRITICAL_GATE_BASE:-origin/main}` and fails
+on high or blocker findings. The files are plain shell scripts under `.git/hooks` so teams can
+review and adapt them before relying on them.
+
 ## Common Examples
 
 ### Small Feature With Expected Source And Test Changes

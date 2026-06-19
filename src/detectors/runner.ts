@@ -27,6 +27,7 @@ import type { Detector, DetectorRepoContext } from "./types.js";
 export interface FindingDecisionPolicy {
   observationDetectors?: string[];
   blockingDetectors?: string[];
+  failOn?: "blocker" | "high" | "medium";
 }
 
 const defaultObservationDetectors = [
@@ -110,7 +111,7 @@ function summarizeConfidenceCalibration(
 }
 
 function isBlockingFinding(finding: Finding, policy: FindingDecisionPolicy): boolean {
-  if (finding.severity !== "blocker" && finding.severity !== "high") {
+  if (!meetsFailSeverity(finding, policy.failOn ?? "high")) {
     return false;
   }
 
@@ -130,7 +131,7 @@ function isBlockingFinding(finding: Finding, policy: FindingDecisionPolicy): boo
 }
 
 function isObservationModeFinding(finding: Finding, policy: FindingDecisionPolicy): boolean {
-  if (finding.severity !== "blocker" && finding.severity !== "high") {
+  if (!meetsFailSeverity(finding, policy.failOn ?? "high")) {
     return false;
   }
 
@@ -145,6 +146,23 @@ function isObservationModeFinding(finding: Finding, policy: FindingDecisionPolic
   const observationDetectors = policy.observationDetectors ?? defaultObservationDetectors;
 
   return observationDetectors.includes(finding.detector);
+}
+
+function meetsFailSeverity(
+  finding: Finding,
+  failOn: NonNullable<FindingDecisionPolicy["failOn"]>
+): boolean {
+  if (failOn === "blocker") {
+    return finding.severity === "blocker";
+  }
+
+  if (failOn === "medium") {
+    return (
+      finding.severity === "blocker" || finding.severity === "high" || finding.severity === "medium"
+    );
+  }
+
+  return finding.severity === "blocker" || finding.severity === "high";
 }
 
 function isConfidenceSuppressedFinding(finding: Finding): boolean {

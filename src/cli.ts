@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -44,6 +44,8 @@ interface CheckOptions {
   base?: string;
   format: ReportFormat;
   strict: boolean;
+  staged: boolean;
+  failOn?: "blocker" | "high" | "medium";
   output?: string;
 }
 
@@ -51,13 +53,14 @@ interface CliIo {
   stdout: (message: string) => void;
   stderr: (message: string) => void;
   writeFile: (path: string, content: string) => void;
+  chmodFile?: (path: string, mode: number) => void;
   now: () => Date;
-  readDiff: (baseRef?: string) => GitDiffResult;
+  readDiff: (baseRef?: string, options?: { staged?: boolean }) => GitDiffResult;
   exists?: (path: string) => boolean;
   readFile?: (path: string) => string;
 }
 
-type CommandName = "check" | "hook" | "accept" | "teach" | "snapshot-api";
+type CommandName = "check" | "hook" | "accept" | "teach" | "snapshot-api" | "install-hooks";
 
 const defaultIo: CliIo = {
   stdout: (message) => console.log(message),
@@ -69,7 +72,8 @@ const defaultIo: CliIo = {
   now: () => new Date(),
   exists: (path) => existsSync(path),
   readFile: (path) => readFileSync(path, "utf8"),
-  readDiff: (baseRef) => readGitDiff({ baseRef })
+  chmodFile: (path, mode) => chmodSync(path, mode),
+  readDiff: (baseRef, options) => readGitDiff({ baseRef, staged: options?.staged })
 };
 
 export function main(argv = process.argv.slice(2), io = defaultIo): ExitCode {
@@ -118,6 +122,10 @@ function runCli(argv: string[], io: CliIo): ExitCode {
     return runSnapshotApiCommand(args, io);
   }
 
+  if (command === "install-hooks") {
+    return runInstallHooksCommand(args, io);
+  }
+
   const parsed = parseCheckArgs(args, command);
 
   if (!parsed.ok) {
@@ -126,7 +134,7 @@ function runCli(argv: string[], io: CliIo): ExitCode {
     return ExitCode.UsageError;
   }
 
-  const diff = io.readDiff(parsed.options.base);
+  const diff = io.readDiff(parsed.options.base, { staged: parsed.options.staged });
   const result = createGateResult(parsed.options, io.now(), diff, io);
   const rendered =
     command === "hook"
@@ -159,7 +167,8 @@ function parseCheckArgs(
     } {
   const options: Partial<CheckOptions> = {
     format: "markdown",
-    strict: false
+    strict: false,
+    staged: false
   };
 
   for (let index = 0; index < args.length; index += 1) {
@@ -170,7 +179,18 @@ function parseCheckArgs(
       continue;
     }
 
-    if (arg === "--task" || arg === "--base" || arg === "--format" || arg === "--output") {
+    if (arg === "--staged") {
+      options.staged = true;
+      continue;
+    }
+
+    if (
+      arg === "--task" ||
+      arg === "--base" ||
+      arg === "--format" ||
+      arg === "--output" ||
+      arg === "--fail-on"
+    ) {
       const value = args[index + 1];
 
       if (value === undefined || value.startsWith("--")) {
@@ -192,6 +212,15 @@ function parseCheckArgs(
         }
 
         options.format = value;
+      } else if (arg === "--fail-on") {
+        if (!isFailOnSeverity(value)) {
+          return {
+            ok: false,
+            error: "Invalid --fail-on value. Expected blocker, high, or medium."
+          };
+        }
+
+        options.failOn = value;
       } else if (arg === "--output") {
         options.output = value;
       }
@@ -221,6 +250,8 @@ function parseCheckArgs(
       base: options.base,
       format: options.format ?? "markdown",
       strict: options.strict ?? false,
+      staged: options.staged ?? false,
+      failOn: options.failOn,
       output: options.output
     }
   };
@@ -290,12 +321,17 @@ function createGateResult(
     diff,
     context,
     findings,
-    summary: summarizeFindings(findings, task, diff, configResult.config.rollout),
+    summary: summarizeFindings(findings, task, diff, {
+      ...configResult.config.rollout,
+      failOn: options.failOn
+    }),
     intentVerification: summarizeIntentVerification(task, diff.files),
     intentQuality: analyzeTaskIntentQuality(task),
     metadata: {
       cliVersion: CLI_VERSION,
       strict: options.strict,
+      staged: options.staged,
+      failOn: options.failOn ?? "high",
       rolloutPolicy: configResult.config.rollout,
       frameworkPacks: frameworkPacks.map((pack) => pack.id),
       learning: {
@@ -329,6 +365,38 @@ function runSnapshotApiCommand(args: string[], io: CliIo): ExitCode {
   io.stdout(
     `Wrote public API snapshot to ${outputPath} (${snapshot.exports.length} exports across ${snapshot.entrypoints.length} entrypoints).`
   );
+
+  return ExitCode.Pass;
+}
+
+function runInstallHooksCommand(args: string[], io: CliIo): ExitCode {
+  const parsed = parseInstallHooksArgs(args);
+
+  if (!parsed.ok) {
+    io.stderr(parsed.error);
+    io.stderr("Run critical-gate install-hooks --help for usage.");
+    return ExitCode.UsageError;
+  }
+
+  const root = io.readDiff().root;
+  const hooks: Array<"pre-commit" | "pre-push"> =
+    parsed.options.hook === "all" ? ["pre-commit", "pre-push"] : [parsed.options.hook];
+  const installed: string[] = [];
+
+  for (const hook of hooks) {
+    const path = join(root, ".git", "hooks", hook);
+
+    if (io.exists?.(path) === true && parsed.options.force !== true) {
+      io.stderr(`Refusing to overwrite existing ${hook} hook at ${path}. Re-run with --force.`);
+      return ExitCode.UsageError;
+    }
+
+    io.writeFile(path, renderGitHookScript(hook, parsed.options.cli));
+    io.chmodFile?.(path, 0o755);
+    installed.push(path);
+  }
+
+  io.stdout(`Installed Critical Gate hook(s): ${installed.join(", ")}`);
 
   return ExitCode.Pass;
 }
@@ -461,6 +529,7 @@ function getHelpText(): string {
     "  critical-gate accept --finding <id> --reason <text>",
     "  critical-gate teach --id <id> --when-changed <glob> --allow <glob[,glob]> --reason <text>",
     "  critical-gate snapshot-api [--entrypoint <path>] [--output <path>]",
+    "  critical-gate install-hooks [--hook pre-commit|pre-push|all] [--cli <command>] [--force]",
     "  critical-gate --version",
     "  critical-gate --help",
     ""
@@ -484,6 +553,10 @@ function getCommandHelpText(command: CommandName): string {
     return getSnapshotApiHelpText();
   }
 
+  if (command === "install-hooks") {
+    return getInstallHooksHelpText();
+  }
+
   return getCheckHelpText();
 }
 
@@ -497,6 +570,8 @@ function getCheckHelpText(): string {
     "Options:",
     "  --base <ref>        Git baseline reference",
     "  --format <format>   json, markdown, sarif, repair, or pr-comment",
+    "  --fail-on <level>   blocker, high, or medium; defaults to high",
+    "  --staged            Analyze staged changes with git diff --cached",
     "  --strict            Fail on strict-mode findings once detectors exist",
     "  --output <path>     Write report to a file instead of stdout",
     ""
@@ -556,13 +631,32 @@ function getSnapshotApiHelpText(): string {
   ].join("\n");
 }
 
+function getInstallHooksHelpText(): string {
+  return [
+    "critical-gate install-hooks",
+    "",
+    "Installs reviewable local git hooks.",
+    "",
+    "Options:",
+    "  --hook <hook>       pre-commit, pre-push, or all; defaults to all",
+    "  --cli <command>     Critical Gate command/path used by the hook; defaults to critical-gate",
+    "  --force             Overwrite an existing generated or custom hook",
+    "",
+    "Defaults:",
+    "  pre-commit runs staged changes with --fail-on blocker.",
+    "  pre-push runs branch changes against ${CRITICAL_GATE_BASE:-origin/main} with --fail-on high.",
+    ""
+  ].join("\n");
+}
+
 function isCommandName(value: string): value is CommandName {
   return (
     value === "check" ||
     value === "hook" ||
     value === "accept" ||
     value === "teach" ||
-    value === "snapshot-api"
+    value === "snapshot-api" ||
+    value === "install-hooks"
   );
 }
 
@@ -574,6 +668,10 @@ function isReportFormat(value: string): value is ReportFormat {
     value === "repair" ||
     value === "pr-comment"
   );
+}
+
+function isFailOnSeverity(value: string): value is NonNullable<CheckOptions["failOn"]> {
+  return value === "blocker" || value === "high" || value === "medium";
 }
 
 function parseFlagArgs(
@@ -658,6 +756,94 @@ function parseSnapshotApiArgs(args: string[]):
       entrypoints: options.entrypoints.length > 0 ? options.entrypoints : undefined
     }
   };
+}
+
+function parseInstallHooksArgs(args: string[]):
+  | {
+      ok: true;
+      options: {
+        hook: "pre-commit" | "pre-push" | "all";
+        cli: string;
+        force: boolean;
+      };
+    }
+  | {
+      ok: false;
+      error: string;
+    } {
+  const options = {
+    hook: "all" as "pre-commit" | "pre-push" | "all",
+    cli: "critical-gate",
+    force: false
+  };
+
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+
+    if (arg === "--force") {
+      options.force = true;
+      continue;
+    }
+
+    if (arg !== "--hook" && arg !== "--cli") {
+      return { ok: false, error: `Unknown option: ${arg}.` };
+    }
+
+    const value = args[index + 1];
+
+    if (value === undefined || value.startsWith("--")) {
+      return { ok: false, error: `Missing value for ${arg}.` };
+    }
+
+    if (arg === "--hook") {
+      if (value !== "pre-commit" && value !== "pre-push" && value !== "all") {
+        return { ok: false, error: "Invalid --hook value. Expected pre-commit, pre-push, or all." };
+      }
+
+      options.hook = value;
+    } else {
+      options.cli = value;
+    }
+
+    index += 1;
+  }
+
+  return { ok: true, options };
+}
+
+function renderGitHookScript(hook: "pre-commit" | "pre-push", cliCommand: string): string {
+  const quotedCli = shellQuote(cliCommand);
+
+  if (hook === "pre-commit") {
+    return [
+      "#!/bin/sh",
+      "# Critical Gate pre-commit hook.",
+      "# Generated by `critical-gate install-hooks`; review before trusting.",
+      "set -eu",
+      'TASK="${CRITICAL_GATE_TASK:-Pre-commit staged change}"',
+      `${quotedCli} check --staged --task "$TASK" --format repair --fail-on blocker`,
+      ""
+    ].join("\n");
+  }
+
+  return [
+    "#!/bin/sh",
+    "# Critical Gate pre-push hook.",
+    "# Generated by `critical-gate install-hooks`; review before trusting.",
+    "set -eu",
+    'TASK="${CRITICAL_GATE_TASK:-Pre-push branch change}"',
+    'BASE="${CRITICAL_GATE_BASE:-origin/main}"',
+    `${quotedCli} check --base "$BASE" --task "$TASK" --format repair --fail-on high`,
+    ""
+  ].join("\n");
+}
+
+function shellQuote(value: string): string {
+  if (/^[A-Za-z0-9_./:-]+$/.test(value)) {
+    return value;
+  }
+
+  return `'${value.replaceAll("'", "'\\''")}'`;
 }
 
 function upsertById<T extends { id: string }>(entries: T[], next: T): T[] {
