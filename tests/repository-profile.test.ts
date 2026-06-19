@@ -83,6 +83,52 @@ describe("repository profile", () => {
     );
   });
 
+  it("filters low-support companion rules while preserving co-change profile", () => {
+    const index = buildHistoryIndex({
+      root: "C:/repo",
+      minConfidenceCommitCount: 1,
+      minCompanionSupport: 2,
+      minCompanionConfidence: 0.5,
+      runner: {
+        execFile: () =>
+          [
+            "__COMMIT__",
+            "src/signup.ts",
+            "tests/signup.test.ts",
+            "__COMMIT__",
+            "src/signup.ts",
+            "tests/signup.test.ts",
+            "__COMMIT__",
+            "src/signup.ts",
+            "docs/signup.md"
+          ].join("\n")
+      }
+    });
+
+    expect(index.coChanges).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: "src/signup.ts",
+          relatedPaths: expect.arrayContaining([{ path: "docs/signup.md", count: 1 }])
+        })
+      ])
+    );
+    expect(index.companionRules).toEqual([
+      {
+        sourcePath: "src/signup.ts",
+        expectedPath: "tests/signup.test.ts",
+        support: 2,
+        confidence: 2 / 3
+      },
+      {
+        sourcePath: "tests/signup.test.ts",
+        expectedPath: "src/signup.ts",
+        support: 2,
+        confidence: 1
+      }
+    ]);
+  });
+
   it("returns an empty low-confidence profile when git history is unavailable", () => {
     const profile = buildRepositoryProfile({
       root: "C:/repo",

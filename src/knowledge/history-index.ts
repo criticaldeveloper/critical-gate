@@ -10,6 +10,8 @@ export interface BuildHistoryIndexOptions {
   runner: HistoryCommandRunner;
   maxCommits?: number;
   minConfidenceCommitCount?: number;
+  minCompanionSupport?: number;
+  minCompanionConfidence?: number;
 }
 
 export function createEmptyHistoryIndex(): HistoryIndex {
@@ -22,6 +24,8 @@ export function createEmptyHistoryIndex(): HistoryIndex {
 export function buildHistoryIndex(options: BuildHistoryIndexOptions): HistoryIndex {
   const maxCommits = options.maxCommits ?? 200;
   const minConfidenceCommitCount = options.minConfidenceCommitCount ?? 20;
+  const minCompanionSupport = options.minCompanionSupport ?? 2;
+  const minCompanionConfidence = options.minCompanionConfidence ?? 0.4;
   const logOutput = getOptionalGitOutput(
     options.runner,
     ["log", `--max-count=${maxCommits}`, "--name-only", "--pretty=format:__COMMIT__"],
@@ -74,7 +78,7 @@ export function buildHistoryIndex(options: BuildHistoryIndexOptions): HistoryInd
       coChanges
     },
     coChanges,
-    companionRules: toCompanionRules(coChanges)
+    companionRules: toCompanionRules(coChanges, minCompanionSupport, minCompanionConfidence)
   };
 }
 
@@ -129,7 +133,11 @@ function toCoChange(path: string, count: number, related: Map<string, number>): 
   };
 }
 
-function toCompanionRules(coChanges: RepositoryCoChange[]): CompanionRule[] {
+function toCompanionRules(
+  coChanges: RepositoryCoChange[],
+  minSupport: number,
+  minConfidence: number
+): CompanionRule[] {
   return coChanges
     .flatMap((coChange) =>
       coChange.relatedPaths.map((related) => ({
@@ -139,6 +147,7 @@ function toCompanionRules(coChanges: RepositoryCoChange[]): CompanionRule[] {
         confidence: coChange.count > 0 ? related.count / coChange.count : 0
       }))
     )
+    .filter((rule) => rule.support >= minSupport && rule.confidence >= minConfidence)
     .sort(
       (left, right) =>
         left.sourcePath.localeCompare(right.sourcePath) ||
