@@ -2,6 +2,13 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.0.1 - 2026-06-19
+
+Patch release aligned with Critical Gate 2.0.1.
+
+- Bundle the scope fix for casual "project" wording in task intent.
+- Bundle cache-noise fixes so Critical Gate cache artifacts do not appear as changed files.
+
 ## 2.0.0 - 2026-06-19
 
 Marketplace release aligned with the Critical Gate 2.0.0 package.

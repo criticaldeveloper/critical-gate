@@ -4,6 +4,18 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## 2.0.1 - 2026-06-19
+
+Patch release for real-project dogfood findings.
+
+### Fixed
+
+- Stop treating casual task wording such as "of the project" as a broad scope escape hatch.
+- Fail small scoped tasks when unrelated stylesheet/source deletions are detected.
+- Ignore Critical Gate internal cache artifacts in working-tree reports.
+- Move repository knowledge cache files outside user repositories so gate runs do not dirty the
+  target project.
+
 ## 2.0.0 - 2026-06-19
 
 Release candidate for the completed Critical Gate deep-improvement package.
