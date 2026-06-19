@@ -1,4 +1,5 @@
 export * from "./detectors/index.js";
+export * from "./config/index.js";
 export * from "./diff/index.js";
 export * from "./editor/index.js";
 export * from "./intent/index.js";

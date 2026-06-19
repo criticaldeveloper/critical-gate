@@ -1,3 +1,4 @@
+import type { CriticalGateConfig } from "../config/index.js";
 import type { PatternIndex, RepositoryPattern, RepositoryPatternKind } from "./types.js";
 
 export interface PatternIndexRunner {
@@ -7,6 +8,7 @@ export interface PatternIndexRunner {
 export interface BuildPatternIndexOptions {
   root: string;
   runner: PatternIndexRunner;
+  config?: CriticalGateConfig;
 }
 
 const patternRules: Array<{ kind: RepositoryPatternKind; segment: RegExp }> = [
@@ -19,12 +21,33 @@ const patternRules: Array<{ kind: RepositoryPatternKind; segment: RegExp }> = [
 ];
 
 export function buildPatternIndex(options: BuildPatternIndexOptions): PatternIndex {
-  const files = getTrackedSourceFiles(options);
-  const patterns = [...inferClassPatterns(files), ...inferFeatureRootPatterns(files)].sort(
+  const files = getTrackedSourceFiles(options).filter(
+    (path) => !isExcluded(path, options.config?.excludePatterns ?? [])
+  );
+  const patterns = [
+    ...inferClassPatterns(files),
+    ...inferConfiguredRootPatterns(files, "service", options.config?.serviceRoots ?? []),
+    ...inferConfiguredRootPatterns(files, "validator", options.config?.validatorRoots ?? []),
+    ...inferFeatureRootPatterns(files),
+    ...inferConfiguredRootPatterns(files, "feature-root", options.config?.featureRoots ?? [])
+  ].sort(
     (left, right) => left.kind.localeCompare(right.kind) || left.root.localeCompare(right.root)
   );
 
   return { patterns };
+}
+
+function inferConfiguredRootPatterns(
+  files: string[],
+  kind: RepositoryPatternKind,
+  roots: string[]
+): RepositoryPattern[] {
+  return roots
+    .map((root) => {
+      const examples = files.filter((file) => file === root || file.startsWith(`${root}/`));
+      return examples.length === 0 ? undefined : toPattern(kind, root, examples);
+    })
+    .filter((pattern): pattern is RepositoryPattern => pattern !== undefined);
 }
 
 function inferClassPatterns(files: string[]): RepositoryPattern[] {
@@ -106,4 +129,8 @@ function getTrackedSourceFiles(options: BuildPatternIndexOptions): string[] {
   } catch {
     return [];
   }
+}
+
+function isExcluded(path: string, excludePatterns: string[]): boolean {
+  return excludePatterns.some((pattern) => path.includes(pattern));
 }
