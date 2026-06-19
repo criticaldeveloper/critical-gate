@@ -1,11 +1,13 @@
 import type { DiffFile, Finding, RepositoryProfile } from "../schema/index.js";
+import type { HistoryIndex, NormalChangePattern } from "../knowledge/index.js";
 
 import type { Detector } from "./types.js";
 
 export const repositoryIntelligenceDetector: Detector = {
   name: "repository-intelligence",
   run: ({ diff, context }) => {
-    const profile = context?.repositoryProfile ?? context?.knowledge?.getHistoryIndex().profile;
+    const history = context?.knowledge?.getHistoryIndex();
+    const profile = context?.repositoryProfile ?? history?.profile;
 
     if (profile === undefined || profile.commitCount < profile.minConfidenceCommitCount) {
       return [];
@@ -19,7 +21,7 @@ export const repositoryIntelligenceDetector: Detector = {
 
     return diff.files
       .filter((file) => isHistoricallyUnrelated(file, changedPaths, profile))
-      .map((file) => toFinding(file, changedPaths, profile));
+      .map((file) => toFinding(file, changedPaths, profile, history));
   }
 };
 
@@ -41,9 +43,15 @@ function isHistoricallyUnrelated(
   return relatedChangedPaths.length === 0;
 }
 
-function toFinding(file: DiffFile, changedPaths: string[], profile: RepositoryProfile): Finding {
+function toFinding(
+  file: DiffFile,
+  changedPaths: string[],
+  profile: RepositoryProfile,
+  history: HistoryIndex | undefined
+): Finding {
   const coChange = profile.coChanges.find((entry) => entry.path === file.path);
   const topRelated = coChange?.relatedPaths.slice(0, 3).map((related) => related.path) ?? [];
+  const normalPatterns = getNormalPatternsForPath(file.path, history?.normalPatterns ?? []);
 
   return {
     id: `repository-intelligence:${file.path}`,
@@ -60,7 +68,13 @@ function toFinding(file: DiffFile, changedPaths: string[], profile: RepositoryPr
         data: {
           commitCount: profile.commitCount,
           fileChangeCount: coChange?.count ?? 0,
-          historicallyRelatedPaths: topRelated
+          historicallyRelatedPaths: topRelated,
+          normalPatterns: normalPatterns.map((pattern) => ({
+            kind: pattern.kind,
+            relatedPath: pattern.relatedPath,
+            support: pattern.support,
+            confidence: pattern.confidence
+          }))
         }
       }
     ],
@@ -68,4 +82,13 @@ function toFinding(file: DiffFile, changedPaths: string[], profile: RepositoryPr
       "Confirm this cross-area change belongs in the current task, or split unrelated edits into a separate task.",
     tags: ["scope"]
   };
+}
+
+function getNormalPatternsForPath(
+  path: string,
+  normalPatterns: NormalChangePattern[]
+): NormalChangePattern[] {
+  return normalPatterns
+    .filter((pattern) => pattern.sourcePath === path || pattern.relatedPath === path)
+    .slice(0, 5);
 }

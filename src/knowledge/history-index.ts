@@ -1,4 +1,5 @@
 import type { RepositoryCoChange, RepositoryProfile } from "../schema/index.js";
+import { buildNormalChangePatterns } from "./normal-change-model.js";
 import type { CompanionRule, HistoryIndex } from "./types.js";
 
 export interface HistoryCommandRunner {
@@ -17,7 +18,8 @@ export interface BuildHistoryIndexOptions {
 export function createEmptyHistoryIndex(): HistoryIndex {
   return {
     coChanges: [],
-    companionRules: []
+    companionRules: [],
+    normalPatterns: []
   };
 }
 
@@ -40,7 +42,8 @@ export function buildHistoryIndex(options: BuildHistoryIndexOptions): HistoryInd
         coChanges: []
       },
       coChanges: [],
-      companionRules: []
+      companionRules: [],
+      normalPatterns: []
     };
   }
 
@@ -78,7 +81,11 @@ export function buildHistoryIndex(options: BuildHistoryIndexOptions): HistoryInd
       coChanges
     },
     coChanges,
-    companionRules: toCompanionRules(coChanges, minCompanionSupport, minCompanionConfidence)
+    companionRules: toCompanionRules(coChanges, minCompanionSupport, minCompanionConfidence),
+    normalPatterns: buildNormalChangePatterns(coChanges, {
+      minSupport: minCompanionSupport,
+      minConfidence: minCompanionConfidence
+    })
   };
 }
 

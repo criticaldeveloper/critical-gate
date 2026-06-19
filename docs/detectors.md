@@ -185,6 +185,30 @@ Initial implementation:
 - Build local naming profiles by folder.
 - Flag rare names only when confidence is high and the symbol is newly introduced.
 
+### Normal Change Model
+
+Goal: use repository history as positive evidence for normal companion relationships before
+flagging scope drift.
+
+Evidence:
+
+- Git co-change history.
+- Source/test pairs.
+- Component/story pairs.
+- Translation/UI pairs.
+- Config/docs pairs.
+- Package manifest/lockfile pairs.
+- Source/docs pairs.
+
+Initial implementation:
+
+- Build typed normal patterns from the same history index used for companion rules.
+- Preserve raw co-change evidence and directed companion rules for compatibility.
+- Add the normal pattern kind to expected-companion evidence when a missing file is a known normal
+  relationship.
+- Include known normal patterns in repository-intelligence evidence when a changed path appears with
+  an unusual combination.
+
 ## P2 Detectors
 
 ### Duplicate Code

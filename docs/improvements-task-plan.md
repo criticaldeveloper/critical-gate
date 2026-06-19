@@ -66,7 +66,7 @@ root note.
    - Define per-detector confidence bands and decision behavior.
    - Ensure uncertain architecture guesses do not block by default.
 
-9. Normal change model.
+9. Normal change model. Completed in `feature/normal-change-model`.
    - Deepen history-derived co-change models for source/test, story/component, translation/UI,
      config/docs, and package/lockfile relationships.
 

@@ -81,6 +81,17 @@ describe("repository profile", () => {
         }
       ])
     );
+    expect(index.normalPatterns).toEqual(
+      expect.arrayContaining([
+        {
+          kind: "source-test",
+          sourcePath: "src/signup.ts",
+          relatedPath: "tests/signup.test.ts",
+          support: 2,
+          confidence: 2 / 3
+        }
+      ])
+    );
   });
 
   it("filters low-support companion rules while preserving co-change profile", () => {

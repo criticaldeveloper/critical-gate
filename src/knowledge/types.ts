@@ -90,6 +90,7 @@ export interface HistoryIndex {
   profile?: RepositoryProfile;
   coChanges: RepositoryCoChange[];
   companionRules: CompanionRule[];
+  normalPatterns?: NormalChangePattern[];
 }
 
 export interface CompanionRule {
@@ -98,6 +99,23 @@ export interface CompanionRule {
   support: number;
   confidence: number;
   lastSeen?: string;
+}
+
+export type NormalChangePatternKind =
+  | "source-test"
+  | "component-story"
+  | "translation-ui"
+  | "config-docs"
+  | "package-lockfile"
+  | "source-docs"
+  | "unknown";
+
+export interface NormalChangePattern {
+  kind: NormalChangePatternKind;
+  sourcePath: string;
+  relatedPath: string;
+  support: number;
+  confidence: number;
 }
 
 export type SolutionClass =

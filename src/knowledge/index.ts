@@ -25,6 +25,7 @@ export {
   type BuildHistoryIndexOptions,
   type HistoryCommandRunner
 } from "./history-index.js";
+export { buildNormalChangePatterns, classifyNormalChangePattern } from "./normal-change-model.js";
 export {
   buildSolutionIndex,
   extractExportedNames,
@@ -55,6 +56,8 @@ export type {
   KnowledgeIndexKind,
   KnowledgeProvider,
   KnowledgeRequest,
+  NormalChangePattern,
+  NormalChangePatternKind,
   PatternIndex,
   RepositoryKnowledge,
   RepositoryPattern,

@@ -177,6 +177,16 @@ Framework-pack findings use the existing `expected-companions` detector. They ar
 non-blocking by default, and intended to explain normal support files for the stack rather than
 replace repository-specific learning rules.
 
+## Normal Change Model
+
+Critical Gate also derives normal change patterns from git history. These are typed relationships
+such as source/test, component/story, translation/UI, config/docs, package/lockfile, and source/docs.
+They help the gate distinguish normal support changes from unrelated drift and make missing
+companion evidence clearer.
+
+The model is deterministic and local. It uses co-change support and confidence from repository
+history, and it stays quiet when the repository does not have enough history to be reliable.
+
 ## Common Examples
 
 ### Small Feature With Expected Source And Test Changes

@@ -133,6 +133,59 @@ index 57b22a0..cb3e0f1 100644
       })
     ).toEqual([]);
   });
+
+  it("includes normal change model evidence for unusual combinations", () => {
+    const diff = parse(`diff --git a/src/signup.ts b/src/signup.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/signup.ts
++++ b/src/signup.ts
+@@ -1 +1,2 @@
++export const signup = true;
+diff --git a/webpack.config.js b/webpack.config.js
+index 57b22a0..cb3e0f1 100644
+--- a/webpack.config.js
++++ b/webpack.config.js
+@@ -1 +1,2 @@
++export const cache = true;
+`);
+
+    const findings = repositoryIntelligenceDetector.run({
+      task,
+      diff,
+      context: {
+        repositoryProfile: profile,
+        knowledge: {
+          getFileGraph: () => ({ nodes: [], edges: [] }),
+          getHistoryIndex: () => ({
+            coChanges: profile.coChanges,
+            companionRules: [],
+            normalPatterns: [
+              {
+                kind: "source-test",
+                sourcePath: "src/signup.ts",
+                relatedPath: "tests/signup.test.ts",
+                support: 8,
+                confidence: 0.8
+              }
+            ]
+          }),
+          getPatternIndex: () => ({ patterns: [] }),
+          getSolutionIndex: () => ({ solutions: [] })
+        }
+      }
+    });
+
+    expect(findings[0]?.evidence[0]?.data).toMatchObject({
+      normalPatterns: [
+        {
+          kind: "source-test",
+          relatedPath: "tests/signup.test.ts",
+          support: 8,
+          confidence: 0.8
+        }
+      ]
+    });
+  });
 });
 
 describe("detector runner with repository intelligence", () => {

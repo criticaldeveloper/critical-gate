@@ -1,5 +1,5 @@
 import { frameworkPacks, matchesPathPattern } from "../frameworks/index.js";
-import type { CompanionRule } from "../knowledge/index.js";
+import type { CompanionRule, NormalChangePattern } from "../knowledge/index.js";
 import type { DiffFile, Finding } from "../schema/index.js";
 import type { Detector } from "./types.js";
 
@@ -18,7 +18,8 @@ export const expectedCompanionsDetector: Detector = {
         : getCappedHistoryFindings(
             history.companionRules.filter(
               (rule) => changedPaths.has(rule.sourcePath) && !changedPaths.has(rule.expectedPath)
-            )
+            ),
+            history.normalPatterns ?? []
           );
     const frameworkFindings = getFrameworkFindings(diff.files, context?.frameworkPacks ?? []);
     const packageFinding = detectMissingLockfile(diff.files);
@@ -102,7 +103,10 @@ function toFrameworkFinding(
   };
 }
 
-function getCappedHistoryFindings(rules: CompanionRule[]): Finding[] {
+function getCappedHistoryFindings(
+  rules: CompanionRule[],
+  normalPatterns: NormalChangePattern[]
+): Finding[] {
   const grouped = new Map<string, CompanionRule[]>();
 
   for (const rule of rules) {
@@ -121,7 +125,7 @@ function getCappedHistoryFindings(rules: CompanionRule[]): Finding[] {
         return right.support - left.support;
       })
       .slice(0, maxHistoryFindingsPerSource)
-      .map((rule) => toHistoryFinding(rule))
+      .map((rule) => toHistoryFinding(rule, findNormalPattern(rule, normalPatterns)))
   );
 }
 
@@ -160,14 +164,20 @@ function detectMissingLockfile(files: DiffFile[]): Finding | undefined {
   };
 }
 
-function toHistoryFinding(rule: CompanionRule): Finding {
+function toHistoryFinding(
+  rule: CompanionRule,
+  normalPattern: NormalChangePattern | undefined
+): Finding {
+  const relationship =
+    normalPattern === undefined ? "historically paired companion" : normalPattern.kind;
+
   return {
     id: `expected-companions:${rule.sourcePath}:${rule.expectedPath}`,
     detector: "expected-companions",
     severity: "medium",
     confidence: Math.min(0.92, 0.55 + rule.confidence * 0.35),
     title: "Expected companion file missing",
-    message: `${rule.sourcePath} changed without historically paired companion ${rule.expectedPath}.`,
+    message: `${rule.sourcePath} changed without ${relationship} companion ${rule.expectedPath}.`,
     evidence: [
       {
         kind: "history",
@@ -176,11 +186,21 @@ function toHistoryFinding(rule: CompanionRule): Finding {
         data: {
           expectedPath: rule.expectedPath,
           support: rule.support,
-          confidence: rule.confidence
+          confidence: rule.confidence,
+          normalPattern: normalPattern?.kind
         }
       }
     ],
     repair: `Update ${rule.expectedPath}, or document why this change does not need its usual companion.`,
     tags: ["scope"]
   };
+}
+
+function findNormalPattern(
+  rule: CompanionRule,
+  normalPatterns: NormalChangePattern[]
+): NormalChangePattern | undefined {
+  return normalPatterns.find(
+    (pattern) => pattern.sourcePath === rule.sourcePath && pattern.relatedPath === rule.expectedPath
+  );
 }

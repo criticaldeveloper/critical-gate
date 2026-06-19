@@ -24,6 +24,15 @@ function knowledge(): KnowledgeProvider {
           support: 5,
           confidence: 0.8
         }
+      ],
+      normalPatterns: [
+        {
+          kind: "source-test",
+          sourcePath: "src/signup.ts",
+          relatedPath: "tests/signup.test.ts",
+          support: 5,
+          confidence: 0.8
+        }
       ]
     }),
     getPatternIndex: () => ({ patterns: [] }),
@@ -47,8 +56,14 @@ index 57b22a0..cb3e0f1 100644
       expect.objectContaining({
         detector: "expected-companions",
         title: "Expected companion file missing",
-        message:
-          "src/signup.ts changed without historically paired companion tests/signup.test.ts.",
+        message: "src/signup.ts changed without source-test companion tests/signup.test.ts.",
+        evidence: [
+          expect.objectContaining({
+            data: expect.objectContaining({
+              normalPattern: "source-test"
+            })
+          })
+        ],
         repair:
           "Update tests/signup.test.ts, or document why this change does not need its usual companion."
       })
