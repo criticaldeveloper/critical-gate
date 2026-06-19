@@ -1,0 +1,44 @@
+name: Critical Gate
+
+on:
+  pull_request:
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: read
+
+jobs:
+  critical-gate:
+    name: Diff integrity gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Run Critical Gate Markdown report
+        id: critical-gate
+        uses: criticaldeveloper/critical-gate@v1
+        continue-on-error: true
+        with:
+          task: ${{ github.event.pull_request.title }}
+          base: ${{ github.event.pull_request.base.sha }}
+          format: markdown
+          output: critical-gate.md
+
+      - name: Publish Critical Gate summary
+        if: always() && hashFiles('critical-gate.md') != ''
+        shell: bash
+        run: |
+          {
+            echo "## Critical Gate"
+            echo
+            cat critical-gate.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail on Critical Gate findings
+        if: steps.critical-gate.outcome == 'failure'
+        run: exit 1

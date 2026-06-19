@@ -1,0 +1,41 @@
+name: Critical Gate
+
+on:
+  pull_request:
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: read
+  security-events: write
+
+jobs:
+  critical-gate:
+    name: Diff integrity gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Run Critical Gate
+        id: critical-gate
+        uses: criticaldeveloper/critical-gate@v1
+        continue-on-error: true
+        with:
+          task: ${{ github.event.pull_request.title }}
+          base: ${{ github.event.pull_request.base.sha }}
+          format: sarif
+          output: critical-gate.sarif
+
+      - name: Upload Critical Gate SARIF
+        if: always() && hashFiles('critical-gate.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: critical-gate.sarif
+
+      - name: Fail on Critical Gate findings
+        if: steps.critical-gate.outcome == 'failure'
+        run: exit 1

@@ -35,6 +35,8 @@ head commit message.
 ## SARIF Upload Workflow
 
 Use full git history so repository intelligence and base comparisons have enough context.
+Copy the maintained template from `docs/workflows/critical-gate-sarif.yml` when you want GitHub code
+scanning annotations.
 
 ```yaml
 name: Critical Gate
@@ -57,7 +59,7 @@ jobs:
           fetch-depth: 0
 
       - id: critical-gate
-        uses: ./
+        uses: criticaldeveloper/critical-gate@v1
         continue-on-error: true
         with:
           task: ${{ github.event.pull_request.title }}
@@ -78,20 +80,41 @@ jobs:
 
 For repositories that do not use GitHub code scanning, emit Markdown to the job summary and rely on
 the failed check as the blocking signal.
+Copy the maintained template from `docs/workflows/critical-gate-summary.yml`.
 
 ```yaml
-- name: Run Critical Gate summary
-  run: |
-    pnpm build
-    node dist/cli.js check \
-      --task "${{ github.event.pull_request.title }}" \
-      --base "${{ github.event.pull_request.base.sha }}" \
-      --format markdown \
-      --output critical-gate.md
+name: Critical Gate
 
-- name: Publish Critical Gate summary
-  if: always() && hashFiles('critical-gate.md') != ''
-  run: cat critical-gate.md >> "$GITHUB_STEP_SUMMARY"
+on:
+  pull_request:
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: read
+
+jobs:
+  critical-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - id: critical-gate
+        uses: criticaldeveloper/critical-gate@v1
+        continue-on-error: true
+        with:
+          task: ${{ github.event.pull_request.title }}
+          base: ${{ github.event.pull_request.base.sha }}
+          format: markdown
+          output: critical-gate.md
+
+      - if: always() && hashFiles('critical-gate.md') != ''
+        run: cat critical-gate.md >> "$GITHUB_STEP_SUMMARY"
+
+      - if: steps.critical-gate.outcome == 'failure'
+        run: exit 1
 ```
 
 ## Recommended Thresholds
