@@ -28,10 +28,10 @@ const defaultDetectors: Detector[] = [
   scopeDetector,
   rewriteDetector,
   repositoryIntelligenceDetector,
+  expectedCompanionsDetector,
   utilityReinventionDetector,
   existingSolutionDetector,
-  patternViolationDetector,
-  expectedCompanionsDetector
+  patternViolationDetector
 ];
 
 export function runDetectors(
@@ -75,12 +75,27 @@ function dedupeFindings(findings: Finding[]): Finding[] {
       .flatMap((finding) => finding.evidence.map((evidence) => evidence.path))
       .filter((path): path is string => path !== undefined)
   );
+  const expectedCompanionSourcePaths = new Set(
+    findings
+      .filter((finding) => finding.detector === "expected-companions")
+      .flatMap((finding) => finding.evidence.map((evidence) => evidence.path))
+      .filter((path): path is string => path !== undefined)
+  );
 
-  if (blastRadiusPaths.size === 0) {
+  if (blastRadiusPaths.size === 0 && expectedCompanionSourcePaths.size === 0) {
     return findings;
   }
 
   return findings.filter((finding) => {
+    if (
+      finding.detector === "repository-intelligence" &&
+      finding.evidence.some(
+        (evidence) => evidence.path !== undefined && expectedCompanionSourcePaths.has(evidence.path)
+      )
+    ) {
+      return false;
+    }
+
     if (finding.detector !== "scope" || finding.severity !== "medium") {
       return true;
     }

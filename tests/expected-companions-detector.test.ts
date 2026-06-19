@@ -1,4 +1,4 @@
-import { expectedCompanionsDetector, parseUnifiedDiff } from "../src/index.js";
+import { expectedCompanionsDetector, parseUnifiedDiff, runDetectors } from "../src/index.js";
 import type { GateResult, KnowledgeProvider, TaskIntent } from "../src/index.js";
 
 const task: TaskIntent = {
@@ -92,5 +92,51 @@ index 57b22a0..cb3e0f1 100644
         message: "package.json changed without a corresponding package lockfile change."
       })
     ]);
+  });
+
+  it("deduplicates older repository-intelligence findings for the same historical root cause", () => {
+    const diff = parse(`diff --git a/src/signup.ts b/src/signup.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/signup.ts
++++ b/src/signup.ts
+@@ -1 +1,2 @@
++export const signup = true;
+diff --git a/src/logger.ts b/src/logger.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/logger.ts
++++ b/src/logger.ts
+@@ -1 +1,2 @@
++export const logger = true;
+`);
+    const findings = runDetectors(task, diff, {
+      repositoryProfile: {
+        commitCount: 50,
+        minConfidenceCommitCount: 20,
+        coChanges: [
+          {
+            path: "src/signup.ts",
+            count: 5,
+            relatedPaths: [{ path: "tests/signup.test.ts", count: 4 }]
+          }
+        ]
+      },
+      knowledge: knowledge()
+    });
+
+    expect(findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          detector: "expected-companions",
+          id: "expected-companions:src/signup.ts:tests/signup.test.ts"
+        })
+      ])
+    );
+    expect(
+      findings.some(
+        (finding) =>
+          finding.detector === "repository-intelligence" &&
+          finding.evidence.some((evidence) => evidence.path === "src/signup.ts")
+      )
+    ).toBe(false);
   });
 });
