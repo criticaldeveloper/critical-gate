@@ -209,6 +209,24 @@ Initial implementation:
 - Include known normal patterns in repository-intelligence evidence when a changed path appears with
   an unusual combination.
 
+### Task Intent Quality Warnings
+
+Goal: warn when the task text is too vague to form a reliable diff boundary.
+
+Evidence:
+
+- Very short task text.
+- Generic phrases such as `fix bug`, `update code`, or `improve project`.
+- Intent text with only generic maintenance words.
+- Missing repository-specific target nouns.
+
+Initial implementation:
+
+- Emit a non-blocking `intentQuality` summary.
+- Score task intent quality from `0` to `100`.
+- Include deterministic suggestions in Markdown, PR comments, and JSON.
+- Keep warnings separate from detector findings so vague task text does not fail the gate alone.
+
 ## P2 Detectors
 
 ### Duplicate Code

@@ -164,6 +164,15 @@ describe("cli", () => {
     expect(stderr).toEqual([]);
   });
 
+  it("emits task intent quality warnings for vague task text", () => {
+    const { io, stdout } = createTestIo();
+
+    expect(main(["check", "--task", "fix bug", "--format", "markdown"], io)).toBe(ExitCode.Pass);
+
+    expect(stdout[0]).toContain("## Task Intent Quality");
+    expect(stdout[0]).toContain('Task intent uses vague wording: "fix bug".');
+  });
+
   it("emits valid json output", () => {
     const { io, stdout } = createTestIo();
 

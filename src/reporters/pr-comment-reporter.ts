@@ -62,6 +62,14 @@ export function renderPrCommentReport(result: GateResult): string {
     lines.push("");
   }
 
+  if ((result.intentQuality?.warnings.length ?? 0) > 0) {
+    lines.push("### Task intent quality", "");
+    for (const warning of result.intentQuality?.warnings.slice(0, 3) ?? []) {
+      lines.push(`- ${warning.message} ${warning.suggestion}`);
+    }
+    lines.push("");
+  }
+
   lines.push(
     "<sub>Critical Gate reports evidence-backed diff integrity signals; review the full Markdown or SARIF output for complete evidence.</sub>",
     ""

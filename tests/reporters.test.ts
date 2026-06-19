@@ -132,6 +132,18 @@ const result: GateResult = {
     unexpectedClasses: ["tests"],
     coverage: "partial",
     explanationCodes: ["matched:source", "unexpected:tests"]
+  },
+  intentQuality: {
+    score: 70,
+    warnings: [
+      {
+        code: "missing-target",
+        message: "Task intent does not name a clear target area.",
+        suggestion:
+          "Mention the feature, module, file family, user flow, or public API being changed.",
+        penalty: 25
+      }
+    ]
   }
 };
 
@@ -158,6 +170,9 @@ describe("reporters", () => {
     expect(report).toContain("## Intent Verification");
     expect(report).toContain("Requested Classes: source");
     expect(report).toContain("Unexpected Classes: tests");
+    expect(report).toContain("## Task Intent Quality");
+    expect(report).toContain("Score: 70/100");
+    expect(report).toContain("Task intent does not name a clear target area.");
     expect(report).toContain("- modified src/signup.ts (source, +3/-1)");
     expect(report).toContain("### Assertion removed from signup test");
     expect(report).toContain("Reason Chain:");
@@ -234,6 +249,8 @@ describe("reporters", () => {
     expect(report).toContain("- modified tests/signup.test.ts (test, +0/-1)");
     expect(report).toContain("### Scope drivers");
     expect(report).toContain("- Config, manifest, or lockfile touched: +2");
+    expect(report).toContain("### Task intent quality");
+    expect(report).toContain("Mention the feature, module, file family, user flow, or public API");
   });
 
   it("renders pass repair output without noisy instructions", () => {

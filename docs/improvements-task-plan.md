@@ -70,7 +70,7 @@ root note.
    - Deepen history-derived co-change models for source/test, story/component, translation/UI,
      config/docs, and package/lockfile relationships.
 
-10. Task intent quality warnings.
+10. Task intent quality warnings. Completed in `feature/task-intent-quality-warnings`.
     - Detect vague task text such as "fix bug" or "update code".
     - Recommend more specific task intent text.
 

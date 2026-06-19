@@ -152,6 +152,10 @@ describe("gate result schema", () => {
         coverage: "partial",
         explanationCodes: ["matched:source", "unexpected:tests"]
       },
+      intentQuality: {
+        score: 100,
+        warnings: []
+      },
       metadata: {
         cliVersion: "0.1.0"
       }

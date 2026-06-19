@@ -8,6 +8,7 @@ import {
   CRITICAL_GATE_CONFIG_FILE,
   GATE_RESULT_SCHEMA_VERSION,
   applyLearningPolicy,
+  analyzeTaskIntentQuality,
   detectFrameworkPacks,
   loadCriticalGateConfig,
   readGitDiff,
@@ -273,6 +274,7 @@ function createGateResult(
     findings,
     summary: summarizeFindings(findings, task, diff, configResult.config.rollout),
     intentVerification: summarizeIntentVerification(task, diff.files),
+    intentQuality: analyzeTaskIntentQuality(task),
     metadata: {
       cliVersion: CLI_VERSION,
       strict: options.strict,

@@ -98,6 +98,10 @@ Fix stuff.
 Improve project.
 ```
 
+Critical Gate reports task intent quality warnings for vague or generic task text. These warnings do
+not fail the gate by themselves; they explain why a diff may be harder to judge and suggest adding a
+feature, module, file family, user flow, or public API target.
+
 When running in CI, prefer PR titles plus short PR-body context. If a PR intentionally changes
 configuration, dependencies, or public API, include that in the task text so the gate can distinguish
 expected blast radius from drift.

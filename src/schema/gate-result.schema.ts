@@ -24,6 +24,7 @@ export const gateResultJsonSchema = {
     },
     summary: { $ref: "#/$defs/gateSummary" },
     intentVerification: { $ref: "#/$defs/intentVerificationSummary" },
+    intentQuality: { $ref: "#/$defs/taskIntentQualitySummary" },
     metadata: {
       type: "object",
       additionalProperties: true
@@ -400,6 +401,31 @@ export const gateResultJsonSchema = {
           enum: ["none", "partial", "matched"]
         },
         explanationCodes: stringArraySchema
+      }
+    },
+    taskIntentQualitySummary: {
+      type: "object",
+      additionalProperties: false,
+      required: ["score", "warnings"],
+      properties: {
+        score: { type: "number", minimum: 0, maximum: 100 },
+        warnings: {
+          type: "array",
+          items: { $ref: "#/$defs/taskIntentQualityWarning" }
+        }
+      }
+    },
+    taskIntentQualityWarning: {
+      type: "object",
+      additionalProperties: false,
+      required: ["code", "message", "suggestion", "penalty"],
+      properties: {
+        code: {
+          enum: ["too-short", "vague-task", "missing-target", "generic-only"]
+        },
+        message: { type: "string", minLength: 1 },
+        suggestion: { type: "string", minLength: 1 },
+        penalty: { type: "number", minimum: 0 }
       }
     }
   }

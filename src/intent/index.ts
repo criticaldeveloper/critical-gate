@@ -8,6 +8,7 @@ export {
   type TaskAnalysis,
   type TaskComplexity
 } from "./task-analysis.js";
+export { analyzeTaskIntentQuality, getTaskIntentQualityWarnings } from "./task-intent-quality.js";
 export {
   buildIntentModel,
   type ChangeClass,

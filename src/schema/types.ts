@@ -197,6 +197,18 @@ export interface IntentVerificationSummary {
   explanationCodes: string[];
 }
 
+export interface TaskIntentQualitySummary {
+  score: number;
+  warnings: TaskIntentQualityWarning[];
+}
+
+export interface TaskIntentQualityWarning {
+  code: "too-short" | "vague-task" | "missing-target" | "generic-only";
+  message: string;
+  suggestion: string;
+  penalty: number;
+}
+
 export interface GateResult {
   schemaVersion: typeof GATE_RESULT_SCHEMA_VERSION;
   generatedAt: string;
@@ -210,5 +222,6 @@ export interface GateResult {
   findings: Finding[];
   summary: GateSummary;
   intentVerification?: IntentVerificationSummary;
+  intentQuality?: TaskIntentQualitySummary;
   metadata?: Record<string, unknown>;
 }

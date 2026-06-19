@@ -47,6 +47,14 @@ export function renderMarkdownReport(result: GateResult): string {
     );
   }
 
+  if ((result.intentQuality?.warnings.length ?? 0) > 0) {
+    lines.push("## Task Intent Quality", "", `Score: ${result.intentQuality?.score ?? 0}/100`);
+    for (const warning of result.intentQuality?.warnings ?? []) {
+      lines.push(`- ${warning.message} Suggestion: ${warning.suggestion}`);
+    }
+    lines.push("");
+  }
+
   if (result.diff.files.length > 0) {
     lines.push("## Changed Files", "");
     for (const file of result.diff.files) {
