@@ -139,6 +139,8 @@ export interface SolutionEntry {
   exportedName?: string;
   arity?: number;
   returnType?: string;
+  signatureShape?: string;
+  importCount?: number;
   importTokens: string[];
   domainTokens: string[];
 }

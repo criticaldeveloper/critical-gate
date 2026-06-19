@@ -34,8 +34,9 @@ const solutionPathPatterns: Array<{ class: SolutionClass; pattern: RegExp }> = [
 ];
 
 export function buildSolutionIndex(options: BuildSolutionIndexOptions): SolutionIndex {
+  const importCounts = collectImportCounts(options);
   const solutions = getTrackedSourceFiles(options)
-    .flatMap((path) => toSolutionEntries(path, options))
+    .flatMap((path) => toSolutionEntries(path, options, importCounts))
     .sort(
       (left, right) =>
         left.path.localeCompare(right.path) ||
@@ -112,9 +113,16 @@ function getTrackedSourceFiles(options: BuildSolutionIndexOptions): string[] {
   }
 }
 
-function toSolutionEntries(path: string, options: BuildSolutionIndexOptions): SolutionEntry[] {
+function toSolutionEntries(
+  path: string,
+  options: BuildSolutionIndexOptions,
+  importCounts: Map<string, number>
+): SolutionEntry[] {
   const sourceText = options.runner.readFile?.(join(options.root, path)) ?? "";
-  return extractSolutionEntries(path, sourceText);
+  return extractSolutionEntries(path, sourceText).map((entry) => ({
+    ...entry,
+    importCount: importCounts.get(entry.exportedName ?? entry.normalizedName) ?? 0
+  }));
 }
 
 export function extractSolutionEntries(path: string, sourceText: string): SolutionEntry[] {
@@ -137,10 +145,51 @@ export function extractSolutionEntries(path: string, sourceText: string): Soluti
       exportedName,
       arity: metadata.arity,
       returnType: metadata.returnType,
+      signatureShape: toSignatureShape(metadata.arity, metadata.returnType),
       importTokens,
       domainTokens: pathToDomainTokens(path, exportedName)
     };
   });
+}
+
+function collectImportCounts(options: BuildSolutionIndexOptions): Map<string, number> {
+  const counts = new Map<string, number>();
+
+  try {
+    const output = options.runner.execFile("git", ["grep", "-h", "-E", "\\bimport\\b"], {
+      cwd: options.root
+    });
+
+    for (const line of output.split(/\r?\n/)) {
+      for (const importedName of extractImportedNames(line)) {
+        counts.set(importedName, (counts.get(importedName) ?? 0) + 1);
+      }
+    }
+  } catch {
+    return counts;
+  }
+
+  return counts;
+}
+
+function extractImportedNames(line: string): string[] {
+  const namedImport = /\bimport\s*\{([^}]+)\}/.exec(line);
+
+  if (namedImport !== null) {
+    return (namedImport[1] ?? "")
+      .split(",")
+      .map((entry) =>
+        entry
+          .trim()
+          .split(/\s+as\s+/i)[0]
+          ?.trim()
+      )
+      .filter((entry): entry is string => entry !== undefined && entry.length > 0);
+  }
+
+  const defaultImport = /\bimport\s+([A-Za-z_$][\w$]*)\s+from\b/.exec(line);
+
+  return defaultImport?.[1] === undefined ? [] : [defaultImport[1]];
 }
 
 function classifySolutionPath(path: string): SolutionClass | undefined {
@@ -223,6 +272,11 @@ function countParameters(parameterText: string): number {
 function normalizeReturnType(returnType: string | undefined): string | undefined {
   const normalized = returnType?.trim().replace(/\s+/g, " ");
   return normalized === undefined || normalized.length === 0 ? undefined : normalized;
+}
+
+function toSignatureShape(arity: number | undefined, returnType: string | undefined): string {
+  const parameterShape = arity === undefined ? "unknown parameters" : `${arity} parameter(s)`;
+  return returnType === undefined ? parameterShape : `${parameterShape} -> ${returnType}`;
 }
 
 function pathToDomainTokens(path: string, exportedName: string): string[] {

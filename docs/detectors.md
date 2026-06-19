@@ -178,11 +178,13 @@ Evidence:
 - New helper files or utility functions.
 - Existing local utilities with similar names or signatures.
 - Import graph and nearby symbols.
+- Exported symbol name, parameter count, return shape, folder role, and import count.
 
 Initial implementation:
 
 - Index utility-like files and exported helper names.
 - Compare new helper names against existing utilities.
+- Include symbol-level evidence so repair loops can reuse the existing solution confidently.
 - Later use embeddings or LLM only for ambiguous semantic similarity.
 
 ### Repository Convention Violation

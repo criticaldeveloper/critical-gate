@@ -87,7 +87,8 @@ root note.
     - Score assertion specificity and detect high-to-low specificity changes.
     - Detect tests changed to assert rendering presence instead of behavior.
 
-14. Symbol-level existing-solution evidence.
+14. Symbol-level existing-solution evidence. Completed in
+    `feature/symbol-level-existing-solution-evidence`.
     - Include exported name, parameter shape, return shape, folder role, and import count in
       existing-solution findings.
 

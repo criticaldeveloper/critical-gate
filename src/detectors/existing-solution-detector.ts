@@ -103,9 +103,15 @@ function toFinding(file: DiffFile, match: SolutionMatch): Finding {
         message: `Existing ${match.existing.class} candidate: ${match.existing.path}#${match.existing.exportedName ?? match.existing.normalizedName} (${match.reason}).`,
         data: {
           addedClass: match.added.class,
+          addedExport: match.added.exportedName,
+          addedSignatureShape: match.added.signatureShape,
+          addedFolderRole: match.added.class,
           existingClass: match.existing.class,
           existingPath: match.existing.path,
           existingExport: match.existing.exportedName,
+          existingSignatureShape: match.existing.signatureShape,
+          existingFolderRole: match.existing.class,
+          existingImportCount: match.existing.importCount,
           reason: match.reason
         }
       }

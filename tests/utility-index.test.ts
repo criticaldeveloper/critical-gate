@@ -17,7 +17,10 @@ export { internal as exposedInternal, parseDate as parseAgain };
       root: "C:/repo",
       runner: {
         execFile: (_file, args) => {
-          expect(args).toEqual(["ls-files"]);
+          if (args[0] === "grep") {
+            return "";
+          }
+
           return ["src/utils/date.ts", "src/components/button.tsx", "src/helpers/string.ts"].join(
             "\n"
           );
@@ -48,14 +51,23 @@ export { internal as exposedInternal, parseDate as parseAgain };
     const index = buildSolutionIndex({
       root: "C:/repo",
       runner: {
-        execFile: () =>
-          [
+        execFile: (_file, args) => {
+          if (args[0] === "grep") {
+            return [
+              'import { useUser } from "./hooks/use-user";',
+              'import { validateEmail as checkEmail } from "./validators/email";',
+              'import { validateEmail } from "./validators/email";'
+            ].join("\n");
+          }
+
+          return [
             "src/utils/date.ts",
             "src/hooks/use-user.ts",
             "src/services/user-service.ts",
             "src/validators/email.ts",
             "src/components/button.tsx"
-          ].join("\n"),
+          ].join("\n");
+        },
         readFile: (path) => {
           const normalizedPath = path.replaceAll("\\", "/");
 
@@ -89,6 +101,8 @@ export { internal as exposedInternal, parseDate as parseAgain };
           exportedName: "useUser",
           arity: 1,
           returnType: "User",
+          signatureShape: "1 parameter(s) -> User",
+          importCount: 1,
           importTokens: ["react"]
         }),
         expect.objectContaining({
@@ -104,6 +118,8 @@ export { internal as exposedInternal, parseDate as parseAgain };
           exportedName: "validateEmail",
           arity: 1,
           returnType: "boolean",
+          signatureShape: "1 parameter(s) -> boolean",
+          importCount: 2,
           importTokens: ["zod"]
         })
       ])

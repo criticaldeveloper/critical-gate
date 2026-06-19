@@ -14,6 +14,9 @@ const solutionIndex: SolutionIndex = {
       normalizedName: "formatdate",
       exportedName: "formatDate",
       arity: 1,
+      returnType: "string",
+      signatureShape: "1 parameter(s) -> string",
+      importCount: 4,
       importTokens: [],
       domainTokens: ["date", "format", "src", "utils"]
     },
@@ -24,6 +27,8 @@ const solutionIndex: SolutionIndex = {
       exportedName: "useUser",
       arity: 1,
       returnType: "User",
+      signatureShape: "1 parameter(s) -> User",
+      importCount: 3,
       importTokens: ["react"],
       domainTokens: ["hooks", "src", "use", "user"]
     },
@@ -34,6 +39,8 @@ const solutionIndex: SolutionIndex = {
       exportedName: "validateEmail",
       arity: 1,
       returnType: "boolean",
+      signatureShape: "1 parameter(s) -> boolean",
+      importCount: 2,
       importTokens: ["zod"],
       domainTokens: ["email", "src", "validate", "validators"]
     },
@@ -73,10 +80,13 @@ index 0000000..cb3e0f1
 @@ -0,0 +1 @@
 +export function formatDateForSignup(value: Date): string { return ""; }
 `);
+    const findings = existingSolutionDetector.run({
+      task,
+      diff,
+      context: { knowledge: knowledge(solutionIndex) }
+    });
 
-    expect(
-      existingSolutionDetector.run({ task, diff, context: { knowledge: knowledge(solutionIndex) } })
-    ).toEqual([
+    expect(findings).toEqual([
       expect.objectContaining({
         detector: "existing-solution",
         severity: "medium",
@@ -86,6 +96,15 @@ index 0000000..cb3e0f1
           "Reuse formatDate from src/utils/date.ts, or document why a separate utility is needed."
       })
     ]);
+    expect(findings[0]?.evidence[0]?.data).toMatchObject({
+      addedExport: "formatDateForSignup",
+      addedSignatureShape: "1 parameter(s) -> string",
+      addedFolderRole: "utility",
+      existingExport: "formatDate",
+      existingSignatureShape: "1 parameter(s) -> string",
+      existingFolderRole: "utility",
+      existingImportCount: 4
+    });
   });
 
   it("emits for a new hook duplicating an existing hook", () => {
