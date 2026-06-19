@@ -137,7 +137,7 @@ function inferAllowedChangeClasses(normalizedText: string): ChangeClass[] {
     }
   }
 
-  if (hasTerm(normalizedText, "release") || hasTerm(normalizedText, "version")) {
+  if (isReleaseManagementIntent(normalizedText)) {
     classes.add("docs");
     classes.add("dependency");
   }
@@ -147,6 +147,14 @@ function inferAllowedChangeClasses(normalizedText: string): ChangeClass[] {
   }
 
   return [...classes].sort();
+}
+
+function isReleaseManagementIntent(normalizedText: string): boolean {
+  return (
+    hasTerm(normalizedText, "version") ||
+    (hasTerm(normalizedText, "release") &&
+      /\b(?:bump|publish|prepare|cut|tag|changelog|notes|version)\b/i.test(normalizedText))
+  );
 }
 
 function hasCodeBearingClass(classes: Set<ChangeClass>): boolean {

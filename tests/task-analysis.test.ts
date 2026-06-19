@@ -96,6 +96,15 @@ describe("task analysis", () => {
     expect(model.allowedChangeClasses).toEqual(["dependency", "docs"]);
   });
 
+  it("does not treat release UI wording as release management", () => {
+    const model = buildIntentModel({
+      source: "cli",
+      text: "Improve release carousel counter label readability"
+    });
+
+    expect(model.allowedChangeClasses).toEqual(["source"]);
+  });
+
   it("calculates higher diff cost for broad small-task diffs", () => {
     const task: TaskIntent = {
       source: "cli",
