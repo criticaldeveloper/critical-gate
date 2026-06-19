@@ -23,6 +23,7 @@ export interface LearningConfig {
 }
 
 export interface CriticalGateConfig {
+  frameworkPacks?: string[];
   patternAliases?: Record<string, string>;
   featureRoots?: string[];
   serviceRoots?: string[];
@@ -85,6 +86,7 @@ function validateConfig(value: unknown): LoadCriticalGateConfigResult {
 
   return {
     config: {
+      frameworkPacks: readStringArray(value, "frameworkPacks", warnings),
       patternAliases: readStringRecord(value, "patternAliases", warnings),
       featureRoots: readStringArray(value, "featureRoots", warnings),
       serviceRoots: readStringArray(value, "serviceRoots", warnings),

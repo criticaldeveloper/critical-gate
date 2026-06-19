@@ -2,6 +2,7 @@ export * from "./detectors/index.js";
 export * from "./config/index.js";
 export * from "./diff/index.js";
 export * from "./editor/index.js";
+export * from "./frameworks/index.js";
 export * from "./intent/index.js";
 export * from "./knowledge/index.js";
 export * from "./llm/index.js";

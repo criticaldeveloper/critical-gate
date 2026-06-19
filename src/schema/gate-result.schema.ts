@@ -119,6 +119,7 @@ export const gateResultJsonSchema = {
         manifests: stringArraySchema,
         configFiles: stringArraySchema,
         testFrameworks: stringArraySchema,
+        frameworkPacks: stringArraySchema,
         publicEntrypoints: stringArraySchema,
         repositoryProfile: { $ref: "#/$defs/repositoryProfile" },
         utilityIndex: { $ref: "#/$defs/utilityIndex" },

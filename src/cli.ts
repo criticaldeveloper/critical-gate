@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 
-import { writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
   CRITICAL_GATE_CONFIG_FILE,
   GATE_RESULT_SCHEMA_VERSION,
   applyLearningPolicy,
+  detectFrameworkPacks,
   loadCriticalGateConfig,
   readGitDiff,
   renderReport,
@@ -56,6 +57,8 @@ const defaultIo: CliIo = {
   stderr: (message) => console.error(message),
   writeFile: (path, content) => writeFileSync(path, content, "utf8"),
   now: () => new Date(),
+  exists: (path) => existsSync(path),
+  readFile: (path) => readFileSync(path, "utf8"),
   readDiff: (baseRef) => readGitDiff({ baseRef })
 };
 
@@ -228,9 +231,15 @@ function createGateResult(
     headRef: diffResult.headRef,
     files: diffResult.files
   };
+  const frameworkPacks = detectFrameworkPacks({
+    files: diff.files,
+    packageJson: readOptionalPackageJson(diffResult.root, io),
+    config: configResult.config
+  });
   const context: GateResult["context"] = {
     root: diffResult.root,
     packageManager: "pnpm",
+    frameworkPacks: frameworkPacks.map((pack) => pack.id),
     repositoryProfile: diffResult.repositoryProfile,
     utilityIndex: diffResult.utilityIndex,
     git: {
@@ -268,6 +277,7 @@ function createGateResult(
       cliVersion: CLI_VERSION,
       strict: options.strict,
       rolloutPolicy: configResult.config.rollout,
+      frameworkPacks: frameworkPacks.map((pack) => pack.id),
       learning: {
         acceptedFindingsApplied: learningResult.appliedAcceptedFindings,
         expectedSupportRulesApplied: learningResult.appliedExpectedSupportRules
@@ -275,6 +285,20 @@ function createGateResult(
       configWarnings: configResult.warnings
     }
   };
+}
+
+function readOptionalPackageJson(root: string, io: Pick<CliIo, "exists" | "readFile">): unknown {
+  const path = join(root, "package.json");
+
+  if (io.exists?.(path) !== true) {
+    return undefined;
+  }
+
+  try {
+    return JSON.parse(io.readFile?.(path) ?? "");
+  } catch {
+    return undefined;
+  }
 }
 
 function runAcceptCommand(args: string[], io: CliIo): ExitCode {

@@ -1,29 +1,106 @@
+import { frameworkPacks, matchesPathPattern } from "../frameworks/index.js";
 import type { CompanionRule } from "../knowledge/index.js";
 import type { DiffFile, Finding } from "../schema/index.js";
 import type { Detector } from "./types.js";
 
 const maxHistoryFindingsPerSource = 3;
+const maxFrameworkFindingsPerSource = 2;
 
 export const expectedCompanionsDetector: Detector = {
   name: "expected-companions",
   run: ({ diff, context }) => {
     const history = context?.knowledge?.getHistoryIndex();
 
-    if (history === undefined) {
-      return [];
-    }
-
     const changedPaths = new Set(diff.files.map((file) => file.path));
-    const historyFindings = getCappedHistoryFindings(
-      history.companionRules.filter(
-        (rule) => changedPaths.has(rule.sourcePath) && !changedPaths.has(rule.expectedPath)
-      )
-    );
+    const historyFindings =
+      history === undefined
+        ? []
+        : getCappedHistoryFindings(
+            history.companionRules.filter(
+              (rule) => changedPaths.has(rule.sourcePath) && !changedPaths.has(rule.expectedPath)
+            )
+          );
+    const frameworkFindings = getFrameworkFindings(diff.files, context?.frameworkPacks ?? []);
     const packageFinding = detectMissingLockfile(diff.files);
 
-    return packageFinding === undefined ? historyFindings : [...historyFindings, packageFinding];
+    return packageFinding === undefined
+      ? [...historyFindings, ...frameworkFindings]
+      : [...historyFindings, ...frameworkFindings, packageFinding];
   }
 };
+
+function getFrameworkFindings(files: DiffFile[], activePackIds: string[]): Finding[] {
+  if (activePackIds.length === 0) {
+    return [];
+  }
+
+  const changedPaths = files.map((file) => file.path);
+  const findingsBySource = new Map<string, Finding[]>();
+
+  for (const pack of frameworkPacks.filter((candidate) => activePackIds.includes(candidate.id))) {
+    for (const rule of pack.companionRules) {
+      const matchingSources = files.filter(
+        (file) =>
+          file.role === "source" &&
+          file.status !== "deleted" &&
+          matchesPathPattern(rule.whenChanged, file.path)
+      );
+
+      if (
+        matchingSources.length === 0 ||
+        rule.expectAny.some((pattern) =>
+          changedPaths.some((path) => matchesPathPattern(pattern, path))
+        )
+      ) {
+        continue;
+      }
+
+      for (const source of matchingSources) {
+        findingsBySource.set(source.path, [
+          ...(findingsBySource.get(source.path) ?? []),
+          toFrameworkFinding(source, pack.label, rule)
+        ]);
+      }
+    }
+  }
+
+  return [...findingsBySource.values()].flatMap((findings) =>
+    findings.slice(0, maxFrameworkFindingsPerSource)
+  );
+}
+
+function toFrameworkFinding(
+  file: DiffFile,
+  frameworkLabel: string,
+  rule: {
+    id: string;
+    expectAny: string[];
+    reason: string;
+  }
+): Finding {
+  return {
+    id: `expected-companions:framework:${rule.id}:${file.path}`,
+    detector: "expected-companions",
+    severity: "medium",
+    confidence: 0.72,
+    title: "Expected framework companion missing",
+    message: `${file.path} changed without an expected ${frameworkLabel} support file.`,
+    evidence: [
+      {
+        kind: "file",
+        path: file.path,
+        message: rule.reason,
+        data: {
+          expectedAny: rule.expectAny,
+          framework: frameworkLabel,
+          rule: rule.id
+        }
+      }
+    ],
+    repair: `Add one of ${rule.expectAny.join(", ")}, or document why this ${frameworkLabel} change does not need a support file.`,
+    tags: ["scope"]
+  };
+}
 
 function getCappedHistoryFindings(rules: CompanionRule[]): Finding[] {
   const grouped = new Map<string, CompanionRule[]>();

@@ -20,6 +20,7 @@ describe("loadCriticalGateConfig", () => {
         readFile: () =>
           JSON.stringify({
             patternAliases: { modules: "features" },
+            frameworkPacks: ["react", "astro"],
             featureRoots: ["src/signup"],
             serviceRoots: ["src/app-services"],
             validatorRoots: ["src/rules"],
@@ -51,6 +52,7 @@ describe("loadCriticalGateConfig", () => {
     ).toEqual({
       config: {
         patternAliases: { modules: "features" },
+        frameworkPacks: ["react", "astro"],
         featureRoots: ["src/signup"],
         serviceRoots: ["src/app-services"],
         validatorRoots: ["src/rules"],
@@ -90,6 +92,7 @@ describe("loadCriticalGateConfig", () => {
 
     expect(result.config).toEqual({
       patternAliases: undefined,
+      frameworkPacks: undefined,
       featureRoots: undefined,
       serviceRoots: undefined,
       validatorRoots: undefined,

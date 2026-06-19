@@ -409,7 +409,12 @@ describe("cli", () => {
     ).toBe(ExitCode.Pass);
 
     expect(JSON.parse(stdout[0] ?? "")).toMatchObject({
-      findings: [],
+      findings: [
+        {
+          id: "expected-companions:package.json:lockfile",
+          severity: "medium"
+        }
+      ],
       metadata: {
         learning: {
           acceptedFindingsApplied: [

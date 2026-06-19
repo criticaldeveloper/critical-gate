@@ -138,6 +138,25 @@ The next `check` or `hook` run applies those rules and reports applied rule ids 
 Use this for durable team conventions; do not use it to hide one-off risky diffs that should be
 fixed or split.
 
+## Framework Packs
+
+Critical Gate includes deterministic framework packs for React, Next.js, Angular, Astro, Lit, Nest,
+Express, Vite, and Storybook. Packs add ecosystem-specific expected companion hints such as
+component tests, stories, Angular templates, Nest specs, or framework docs.
+
+Packs are auto-detected from `package.json` dependencies and common framework config files when
+possible. You can also force packs in `.critical-gate.json`:
+
+```json
+{
+  "frameworkPacks": ["react", "storybook", "vite"]
+}
+```
+
+Framework-pack findings use the existing `expected-companions` detector. They are evidence-backed,
+non-blocking by default, and intended to explain normal support files for the stack rather than
+replace repository-specific learning rules.
+
 ## Common Examples
 
 ### Small Feature With Expected Source And Test Changes

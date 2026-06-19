@@ -57,6 +57,7 @@ export interface RepoContext {
   manifests?: string[];
   configFiles?: string[];
   testFrameworks?: string[];
+  frameworkPacks?: string[];
   publicEntrypoints?: string[];
   repositoryProfile?: RepositoryProfile;
   utilityIndex?: UtilityIndex;

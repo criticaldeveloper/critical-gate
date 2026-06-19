@@ -1,5 +1,8 @@
 Critical Gate found findings that need repair:
 
+Scope Expansion Score: 4/10
+- Dependency changes: +2
+
 1. BLOCKER: Unjustified production dependency added
 axios@^1.7.0 was added to dependencies without visible task justification. Evidence: package.json:10.
 Why suspicious: New dependencies expand maintenance, security, and install surface area and should be justified by the task.
@@ -11,5 +14,11 @@ package.json changed during a small task but does not align with expected scope.
 Why suspicious: The changed files or historical relationships do not clearly fit the task's expected blast radius.
 Acceptable if: The task intent explicitly covers this file or support area.
 Repair: Remove unrelated edits or split them into a separate task with explicit justification.
+
+3. MEDIUM: Expected companion lockfile missing
+package.json changed without a corresponding package lockfile change. Evidence: package.json.
+Why suspicious: New dependencies expand maintenance, security, and install surface area and should be justified by the task.
+Acceptable if: The task explicitly requires the dependency.
+Repair: Update the matching lockfile, or document why the manifest-only change is intentional.
 
 Rerun Critical Gate after applying focused repairs.

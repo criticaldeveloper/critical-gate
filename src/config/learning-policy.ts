@@ -1,5 +1,6 @@
 import type { DiffFile, Finding } from "../schema/index.js";
 import type { LearningConfig } from "./critical-gate-config.js";
+import { matchesPathPattern } from "../frameworks/index.js";
 
 export interface ApplyLearningPolicyResult {
   findings: Finding[];
@@ -56,23 +57,4 @@ function findMatchingSupportRule(
       files.some((file) => matchesPathPattern(rule.whenChanged, file.path)) &&
       evidencePaths.some((path) => rule.allow.some((allowed) => matchesPathPattern(allowed, path)))
   )?.id;
-}
-
-function matchesPathPattern(pattern: string, path: string): boolean {
-  if (pattern === path) {
-    return true;
-  }
-
-  return globToRegExp(pattern).test(path);
-}
-
-function globToRegExp(pattern: string): RegExp {
-  const escaped = pattern
-    .replaceAll(/[.+?^${}()|[\]\\]/g, "\\$&")
-    .replaceAll("**/", "\0")
-    .replaceAll("**", ".*")
-    .replaceAll("*", "[^/]*")
-    .replaceAll("\0", "(?:.*/)?");
-
-  return new RegExp(`^${escaped}$`);
 }

@@ -42,7 +42,7 @@ root note.
    - Add accept and teach commands that write reviewable policy entries.
    - Store accepted patterns as policy-as-code, not hidden suppressions.
 
-4. Framework packs.
+4. Framework packs. Completed in `feature/framework-packs`.
    - Add boring deterministic packs for React, Next.js, Angular, Astro, Lit, Nest, Express, Vite,
      and Storybook.
    - Each pack should define expected companions, normal file relationships, and support-file
