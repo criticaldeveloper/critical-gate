@@ -16,6 +16,7 @@ function knowledge(graph: FileGraph): KnowledgeProvider {
   return {
     getFileGraph: () => graph,
     getHistoryIndex: () => ({ coChanges: [], companionRules: [] }),
+    getPatternIndex: () => ({ patterns: [] }),
     getSolutionIndex: () => ({ solutions: [] })
   };
 }

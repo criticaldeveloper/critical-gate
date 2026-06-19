@@ -6,12 +6,14 @@ import {
 } from "./cache.js";
 import { buildFileGraph } from "./graph.js";
 import { buildHistoryIndex } from "./history-index.js";
+import { buildPatternIndex } from "./pattern-index.js";
 import { buildSolutionIndex } from "./solution-index.js";
 import type {
   FileGraph,
   HistoryIndex,
   KnowledgeCacheKey,
   KnowledgeProvider,
+  PatternIndex,
   SolutionIndex
 } from "./types.js";
 
@@ -34,6 +36,7 @@ export function createLazyKnowledgeProvider(
 ): KnowledgeProvider {
   let historyIndex: HistoryIndex | undefined;
   let solutionIndex: SolutionIndex | undefined;
+  let patternIndex: PatternIndex | undefined;
   let fileGraph: FileGraph | undefined;
   let cacheKey: KnowledgeCacheKey | undefined;
   const cacheEnabled =
@@ -64,6 +67,11 @@ export function createLazyKnowledgeProvider(
         cache?.get(getCacheKey())?.history ?? buildAndCacheHistory(options, cache, getCacheKey);
       return historyIndex;
     },
+    getPatternIndex: () => {
+      patternIndex ??=
+        cache?.get(getCacheKey())?.patterns ?? buildAndCachePatterns(options, cache, getCacheKey);
+      return patternIndex;
+    },
     getSolutionIndex: () => {
       solutionIndex ??=
         cache?.get(getCacheKey())?.solutions ?? buildAndCacheSolutions(options, cache, getCacheKey);
@@ -71,6 +79,7 @@ export function createLazyKnowledgeProvider(
     },
     getLoadedFileGraph: () => fileGraph,
     getLoadedHistoryIndex: () => historyIndex,
+    getLoadedPatternIndex: () => patternIndex,
     getLoadedSolutionIndex: () => solutionIndex
   };
 
@@ -78,6 +87,20 @@ export function createLazyKnowledgeProvider(
     cacheKey ??= buildKnowledgeCacheKey(options as KnowledgeCacheKeyOptions);
     return cacheKey;
   }
+}
+
+function buildAndCachePatterns(
+  options: CreateLazyKnowledgeProviderOptions,
+  cache: KnowledgeCache | undefined,
+  getCacheKey: () => KnowledgeCacheKey
+): PatternIndex {
+  const patterns = buildPatternIndex(options);
+  const key = cache === undefined ? undefined : getCacheKey();
+  const current = key === undefined ? {} : (cache?.get(key) ?? {});
+  if (key !== undefined) {
+    cache?.set(key, { ...current, patterns });
+  }
+  return patterns;
 }
 
 function buildAndCacheHistory(

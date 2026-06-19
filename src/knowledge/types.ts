@@ -36,9 +36,11 @@ export interface RepositoryKnowledge {
 export interface KnowledgeProvider {
   getFileGraph: () => FileGraph;
   getHistoryIndex: () => HistoryIndex;
+  getPatternIndex: () => PatternIndex;
   getSolutionIndex: () => SolutionIndex;
   getLoadedFileGraph?: () => FileGraph | undefined;
   getLoadedHistoryIndex?: () => HistoryIndex | undefined;
+  getLoadedPatternIndex?: () => PatternIndex | undefined;
   getLoadedSolutionIndex?: () => SolutionIndex | undefined;
 }
 

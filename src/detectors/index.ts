@@ -4,6 +4,7 @@ export { configChangeDetector } from "./config-change-detector.js";
 export { dependencyDetector } from "./dependency-detector.js";
 export { existingSolutionDetector } from "./existing-solution-detector.js";
 export { intentVerificationDetector } from "./intent-verification-detector.js";
+export { patternViolationDetector } from "./pattern-violation-detector.js";
 export { rewriteDetector } from "./rewrite-detector.js";
 export { repositoryIntelligenceDetector } from "./repository-intelligence-detector.js";
 export { runDetectors, summarizeFindings } from "./runner.js";

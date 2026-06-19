@@ -58,6 +58,7 @@ function knowledge(index: SolutionIndex): KnowledgeProvider {
   return {
     getFileGraph: () => ({ nodes: [], edges: [] }),
     getHistoryIndex: () => ({ coChanges: [], companionRules: [] }),
+    getPatternIndex: () => ({ patterns: [] }),
     getSolutionIndex: () => index
   };
 }
