@@ -19,7 +19,11 @@ describe("loadCriticalGateConfig", () => {
             featureRoots: ["src/signup"],
             serviceRoots: ["src/app-services"],
             validatorRoots: ["src/rules"],
-            excludePatterns: ["generated"]
+            excludePatterns: ["generated"],
+            rollout: {
+              observationDetectors: ["blast-radius"],
+              blockingDetectors: ["expected-companions"]
+            }
           })
       })
     ).toEqual({
@@ -28,7 +32,11 @@ describe("loadCriticalGateConfig", () => {
         featureRoots: ["src/signup"],
         serviceRoots: ["src/app-services"],
         validatorRoots: ["src/rules"],
-        excludePatterns: ["generated"]
+        excludePatterns: ["generated"],
+        rollout: {
+          observationDetectors: ["blast-radius"],
+          blockingDetectors: ["expected-companions"]
+        }
       },
       warnings: []
     });
@@ -45,7 +53,8 @@ describe("loadCriticalGateConfig", () => {
       featureRoots: undefined,
       serviceRoots: undefined,
       validatorRoots: undefined,
-      excludePatterns: undefined
+      excludePatterns: undefined,
+      rollout: undefined
     });
     expect(result.warnings).toEqual(["featureRoots must be an array of strings."]);
   });

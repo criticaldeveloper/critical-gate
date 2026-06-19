@@ -264,6 +264,18 @@ Good rollout sequence:
 4. Review findings for noise and false positives.
 5. Add Codex hook enforcement where repair loops are useful.
 
+New detector families start as observation-friendly by default. They still report evidence and
+repair guidance, but they do not fail the gate unless promoted. Promote a detector family in
+`.critical-gate.json` after dogfooding:
+
+```json
+{
+  "rollout": {
+    "blockingDetectors": ["expected-companions"]
+  }
+}
+```
+
 ## Troubleshooting
 
 ### The CLI reports no changed files

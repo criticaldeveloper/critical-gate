@@ -7,6 +7,10 @@ export interface CriticalGateConfig {
   serviceRoots?: string[];
   validatorRoots?: string[];
   excludePatterns?: string[];
+  rollout?: {
+    observationDetectors?: string[];
+    blockingDetectors?: string[];
+  };
 }
 
 export interface LoadCriticalGateConfigResult {
@@ -59,15 +63,37 @@ function validateConfig(value: unknown): LoadCriticalGateConfigResult {
       featureRoots: readStringArray(value, "featureRoots", warnings),
       serviceRoots: readStringArray(value, "serviceRoots", warnings),
       validatorRoots: readStringArray(value, "validatorRoots", warnings),
-      excludePatterns: readStringArray(value, "excludePatterns", warnings)
+      excludePatterns: readStringArray(value, "excludePatterns", warnings),
+      rollout: readRolloutConfig(value, warnings)
     },
     warnings
   };
 }
 
+function readRolloutConfig(
+  value: Record<string, unknown>,
+  warnings: string[]
+): CriticalGateConfig["rollout"] {
+  const rawValue = value.rollout;
+
+  if (rawValue === undefined) {
+    return undefined;
+  }
+
+  if (!isRecord(rawValue)) {
+    warnings.push("rollout must be an object.");
+    return undefined;
+  }
+
+  return {
+    observationDetectors: readStringArray(rawValue, "observationDetectors", warnings),
+    blockingDetectors: readStringArray(rawValue, "blockingDetectors", warnings)
+  };
+}
+
 function readStringArray(
   value: Record<string, unknown>,
-  key: keyof CriticalGateConfig,
+  key: string,
   warnings: string[]
 ): string[] | undefined {
   const rawValue = value[key];

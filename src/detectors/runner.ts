@@ -17,6 +17,19 @@ import { testWeakeningDetector } from "./test-weakening-detector.js";
 import { utilityReinventionDetector } from "./utility-reinvention-detector.js";
 import type { Detector, DetectorRepoContext } from "./types.js";
 
+export interface FindingDecisionPolicy {
+  observationDetectors?: string[];
+  blockingDetectors?: string[];
+}
+
+const defaultObservationDetectors = [
+  "intent-verification",
+  "blast-radius",
+  "existing-solution",
+  "pattern-violation",
+  "expected-companions"
+];
+
 const defaultDetectors: Detector[] = [
   dependencyDetector,
   testWeakeningDetector,
@@ -46,13 +59,15 @@ export function runDetectors(
 export function summarizeFindings(
   findings: Finding[],
   task?: TaskIntent,
-  diff?: GateResult["diff"]
+  diff?: GateResult["diff"],
+  policy: FindingDecisionPolicy = {}
 ): GateResult["summary"] {
   const blockerCount = countSeverity(findings, "blocker");
   const highCount = countSeverity(findings, "high");
+  const blockingFindings = findings.filter((finding) => isBlockingFinding(finding, policy));
 
   return {
-    decision: blockerCount > 0 || highCount > 0 ? "fail" : "pass",
+    decision: blockingFindings.length > 0 ? "fail" : "pass",
     findingCount: findings.length,
     blockerCount,
     highCount,
@@ -66,6 +81,20 @@ export function summarizeFindings(
         ? calculateScopeExpansionScore(task, diff.files, findings)
         : undefined
   };
+}
+
+function isBlockingFinding(finding: Finding, policy: FindingDecisionPolicy): boolean {
+  if (finding.severity !== "blocker" && finding.severity !== "high") {
+    return false;
+  }
+
+  if (policy.blockingDetectors?.includes(finding.detector) === true) {
+    return true;
+  }
+
+  const observationDetectors = policy.observationDetectors ?? defaultObservationDetectors;
+
+  return !observationDetectors.includes(finding.detector);
 }
 
 function countSeverity(findings: Finding[], severity: Finding["severity"]): number {

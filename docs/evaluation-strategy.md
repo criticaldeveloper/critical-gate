@@ -141,3 +141,33 @@ Track:
 4. Enable strict blockers for high-confidence detectors.
 5. Add repair loop once findings are precise.
 6. Add editor diagnostics last.
+
+## Observation Mode
+
+New detector families are observation-friendly by default. They can emit findings, evidence, repair
+guidance, SARIF, and editor diagnostics without failing the gate solely because they emitted a high
+or blocker severity finding.
+
+Default observation detector families:
+
+- `intent-verification`
+- `blast-radius`
+- `existing-solution`
+- `pattern-violation`
+- `expected-companions`
+
+Promote a detector family only after the fixture suite and dogfood runs show acceptable precision.
+Use `.critical-gate.json`:
+
+```json
+{
+  "rollout": {
+    "blockingDetectors": ["expected-companions"],
+    "observationDetectors": ["blast-radius", "existing-solution"]
+  }
+}
+```
+
+`blockingDetectors` takes precedence over `observationDetectors`. Legacy high-confidence detectors,
+such as secrets, dependency additions, test weakening, API removals, rewrite risk, and legacy scope
+findings, remain blocking unless explicitly added to `observationDetectors`.

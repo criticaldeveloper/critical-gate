@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   GATE_RESULT_SCHEMA_VERSION,
+  loadCriticalGateConfig,
   readGitDiff,
   renderReport,
   runDetectors,
@@ -200,6 +201,7 @@ function createGateResult(
   generatedAt: Date,
   diffResult: GitDiffResult
 ): GateResult {
+  const configResult = loadCriticalGateConfig(diffResult.root);
   const task = {
     source: "cli" as const,
     text: options.task
@@ -237,11 +239,13 @@ function createGateResult(
     diff,
     context,
     findings,
-    summary: summarizeFindings(findings, task, diff),
+    summary: summarizeFindings(findings, task, diff, configResult.config.rollout),
     intentVerification: summarizeIntentVerification(task, diff.files),
     metadata: {
       cliVersion: CLI_VERSION,
-      strict: options.strict
+      strict: options.strict,
+      rolloutPolicy: configResult.config.rollout,
+      configWarnings: configResult.warnings
     }
   };
 }
