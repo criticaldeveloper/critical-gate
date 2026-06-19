@@ -32,12 +32,14 @@ export interface RefreshState {
   statusBar: vscode.StatusBarItem;
   dashboard: CriticalGateDashboardProvider;
   analysisTree: CriticalGateTreeProvider;
+  workspaceState: vscode.Memento;
   running: boolean;
   pendingTimer?: ReturnType<typeof setTimeout>;
   lastResult?: GateResult;
   lastReport?: string;
   lastTask?: string;
   lastError?: string;
+  restoredAt?: string;
   runSequence: number;
   history: RunRecord[];
 }
@@ -48,6 +50,8 @@ export interface DashboardState {
   result?: GateResult;
   history: RunRecord[];
   error?: string;
+  stale?: boolean;
+  restoredAt?: string;
 }
 
 export type DashboardMessage =

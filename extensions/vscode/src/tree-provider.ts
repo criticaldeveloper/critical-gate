@@ -153,6 +153,10 @@ function createTreeRoots(state: DashboardState): GateTreeNode[] {
 function createLatestRunNode(state: DashboardState): GateTreeNode {
   const result = state.result;
   const decision = state.running ? "running" : (result?.summary.decision ?? "idle");
+  const restoredLabel =
+    state.stale && state.restoredAt !== undefined
+      ? `restored ${new Date(state.restoredAt).toLocaleString()}`
+      : undefined;
   const score = result?.summary.scopeExpansionScore?.score;
   const children: GateTreeNode[] = [
     {
@@ -215,8 +219,11 @@ function createLatestRunNode(state: DashboardState): GateTreeNode {
   return {
     kind: "latest",
     label: "Latest run",
-    description: decision,
-    icon: new vscode.ThemeIcon(decision === "fail" ? "warning" : "shield"),
+    description: restoredLabel ?? decision,
+    tooltip: restoredLabel,
+    icon: new vscode.ThemeIcon(
+      state.stale ? "history" : decision === "fail" ? "warning" : "shield"
+    ),
     collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
     children
   };
@@ -598,6 +605,13 @@ function renderDashboardHtml(state: DashboardState, nonce: string): string {
   </section>
 
   ${state.error === undefined ? "" : `<p class="subtle">${escapeHtml(state.error)}</p>`}
+  ${
+    state.stale && state.restoredAt !== undefined
+      ? `<p class="subtle">Restored last run from ${escapeHtml(
+          new Date(state.restoredAt).toLocaleString()
+        )}. Problems diagnostics will refresh on the next run.</p>`
+      : ""
+  }
 
   <h2>Findings</h2>
   ${renderFindings(result?.findings ?? [])}

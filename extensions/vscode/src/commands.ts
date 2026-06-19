@@ -5,9 +5,11 @@ import { applyDiagnostics } from "./diagnostics.js";
 import { renderReport, showReport, writeReport } from "./report-view.js";
 import {
   addRunHistory,
+  clearPersistedRunState,
   getConfiguredTask,
   getRefreshDebounceMs,
   getRefreshMode,
+  persistRunState,
   updateRunViews,
   updateStatusBar
 } from "./state.js";
@@ -35,6 +37,7 @@ export async function runCriticalGate(state: RefreshState, reason: RunReason): P
     state.running = true;
     state.lastError = undefined;
     state.lastTask = task;
+    state.restoredAt = undefined;
     state.statusBar.text = "$(sync~spin) Critical Gate";
     state.statusBar.tooltip = "Critical Gate is running.";
     updateRunViews(state);
@@ -46,6 +49,7 @@ export async function runCriticalGate(state: RefreshState, reason: RunReason): P
     addRunHistory(state, result);
     applyDiagnostics(state.diagnostics, folder, result);
     writeReport(state.output, report);
+    await persistRunState(state);
     updateStatusBar(state);
     updateRunViews(state);
 
@@ -94,14 +98,16 @@ export function clearPendingRefresh(state: RefreshState): void {
   }
 }
 
-export function clearRunState(state: RefreshState): void {
+export async function clearRunState(state: RefreshState): Promise<void> {
   clearPendingRefresh(state);
   state.diagnostics.clear();
   state.lastResult = undefined;
   state.lastReport = undefined;
   state.lastError = undefined;
+  state.restoredAt = undefined;
   state.statusBar.text = "$(shield) Critical Gate";
   state.statusBar.tooltip = "Run Critical Gate";
+  await clearPersistedRunState(state);
   updateRunViews(state);
 }
 

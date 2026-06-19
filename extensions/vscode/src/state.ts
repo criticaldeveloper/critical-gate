@@ -1,7 +1,18 @@
 import * as vscode from "vscode";
 
 import type { GateResult } from "../../../src/schema/index.js";
-import type { DashboardState, RefreshState } from "./types.js";
+import type { DashboardState, RefreshState, RunRecord } from "./types.js";
+
+const runStateStorageKey = "criticalGate.workspaceRunState.v1";
+
+interface PersistedRunState {
+  lastResult?: GateResult;
+  lastReport?: string;
+  lastTask?: string;
+  history: RunRecord[];
+  runSequence: number;
+  savedAt: string;
+}
 
 export function getRefreshMode(): "manual" | "onSave" {
   const configuredMode = vscode.workspace
@@ -39,7 +50,39 @@ export function addRunHistory(state: RefreshState, result: GateResult): void {
       diffCostScore: result.summary.diffCostScore
     },
     ...state.history
-  ].slice(0, 8);
+  ].slice(0, 20);
+}
+
+export function restoreRunState(state: RefreshState): void {
+  const persisted = state.workspaceState.get<PersistedRunState>(runStateStorageKey);
+
+  if (persisted === undefined || !isPersistedRunState(persisted)) {
+    return;
+  }
+
+  state.lastResult = persisted.lastResult;
+  state.lastReport = persisted.lastReport;
+  state.lastTask = persisted.lastTask;
+  state.history = persisted.history.slice(0, 20);
+  state.runSequence = persisted.runSequence;
+  state.restoredAt = persisted.savedAt;
+}
+
+export async function persistRunState(state: RefreshState): Promise<void> {
+  const persisted: PersistedRunState = {
+    lastResult: state.lastResult,
+    lastReport: state.lastReport,
+    lastTask: state.lastTask,
+    history: state.history.slice(0, 20),
+    runSequence: state.runSequence,
+    savedAt: new Date().toISOString()
+  };
+
+  await state.workspaceState.update(runStateStorageKey, persisted);
+}
+
+export async function clearPersistedRunState(state: RefreshState): Promise<void> {
+  await state.workspaceState.update(runStateStorageKey, undefined);
 }
 
 export function updateStatusBar(state: RefreshState): void {
@@ -67,11 +110,13 @@ export function updateStatusBar(state: RefreshState): void {
   }`;
 
   if (result.summary.decision === "pass") {
-    state.statusBar.text = "$(pass) Critical Gate";
-    state.statusBar.tooltip = `Passed: ${checked}, ${findings}.`;
+    state.statusBar.text =
+      state.restoredAt === undefined ? "$(pass) Critical Gate" : "$(history) Critical Gate";
+    state.statusBar.tooltip = `${state.restoredAt === undefined ? "Passed" : "Restored last pass"}: ${checked}, ${findings}.`;
   } else {
-    state.statusBar.text = "$(warning) Critical Gate";
-    state.statusBar.tooltip = `Failed: ${checked}, ${findings}.`;
+    state.statusBar.text =
+      state.restoredAt === undefined ? "$(warning) Critical Gate" : "$(history) Critical Gate";
+    state.statusBar.tooltip = `${state.restoredAt === undefined ? "Failed" : "Restored last failure"}: ${checked}, ${findings}.`;
   }
 }
 
@@ -87,6 +132,16 @@ export function toDashboardState(state: RefreshState): DashboardState {
     task: state.lastTask ?? getConfiguredTask(),
     result: state.lastResult,
     history: state.history,
-    error: state.lastError
+    error: state.lastError,
+    stale: state.restoredAt !== undefined,
+    restoredAt: state.restoredAt
   };
+}
+
+function isPersistedRunState(input: PersistedRunState): boolean {
+  return (
+    typeof input.savedAt === "string" &&
+    typeof input.runSequence === "number" &&
+    Array.isArray(input.history)
+  );
 }

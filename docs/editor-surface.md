@@ -18,10 +18,11 @@ The extension command is:
 Critical Gate: Run Check
 ```
 
-The Activity Bar view is:
+The Activity Bar views are:
 
 ```text
 Critical Gate > Gate Runs
+Critical Gate > Analysis
 ```
 
 It runs:
@@ -69,13 +70,21 @@ The diagnostic code link also opens the evidence location when VS Code renders i
 
 ## Run Dashboard
 
-The Activity Bar dashboard shows the latest run decision, changed-file count, finding count, Diff
-Cost Score, finding cards, changed files, and recent run history. It also provides actions to run
-the gate, open the full report output channel, clear diagnostics, open settings, open finding
+The Activity Bar dashboard shows the latest run decision, changed-file count, finding count, Scope
+Expansion Score, finding cards, changed files, and recent run history. It also provides actions to
+run the gate, open the full report output channel, clear diagnostics, open settings, open finding
 evidence, and copy repair text.
 
 The dashboard consumes the same `GateResult` JSON as diagnostics. It does not introduce editor-only
 detectors or reinterpret the repository independently from the CLI.
+
+The native `Analysis` tree provides keyboard-friendly sections for the latest run, findings grouped
+by detector, changed clusters, missing companions, existing-solution signals, changed files, and
+recent runs.
+
+The extension persists the last run report and recent run metadata in VS Code workspace storage.
+After a reload, restored data is marked as historical. Problems diagnostics are not restored as fresh
+findings; run the gate again to repopulate diagnostics for the current diff.
 
 ## Local Build
 

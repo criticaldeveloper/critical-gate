@@ -9,13 +9,15 @@ dependencies, and expected blast radius.
 ## Features
 
 - Use the Critical Gate Activity Bar view to run checks, inspect the latest run, review changed
-  files, and revisit recent gate runs.
+  files, browse the native Analysis tree, and revisit recent gate runs.
 - Run Critical Gate from the Command Palette with `Critical Gate: Run Check`.
 - Show the full run report in the `Critical Gate` output channel.
 - See pass/fail state in the VS Code status bar.
 - Show findings in the Problems panel with file, line, severity, and detector context.
 - Open evidence locations from diagnostics.
 - Copy repair guidance for Codex or another coding agent.
+- Restore the last report and recent run history after reloading VS Code, clearly marked as
+  historical until the next run.
 - Optionally refresh diagnostics on file save.
 
 ## Requirements

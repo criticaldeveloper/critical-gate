@@ -180,10 +180,16 @@ The dashboard shows:
 - Latest decision.
 - Files checked.
 - Finding count.
-- Diff Cost Score.
+- Scope Expansion Score.
 - Finding cards with evidence and repair actions.
 - Changed files.
 - Recent run history.
+
+The `Analysis` tree shows the same run as native VS Code tree items: latest run metrics, findings by
+detector, changed clusters, missing companions, existing-solution signals, changed files, and recent
+runs. After a VS Code reload, the extension restores the last report and run history as historical
+state, but it does not restore Problems diagnostics as fresh findings. Run the gate again when you
+need diagnostics for the current diff.
 
 Useful settings:
 

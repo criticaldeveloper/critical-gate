@@ -12,7 +12,7 @@ import {
   showReport
 } from "./commands.js";
 import { diagnosticPayloads, openEvidence } from "./diagnostics.js";
-import { updateRunViews } from "./state.js";
+import { restoreRunState, updateRunViews, updateStatusBar } from "./state.js";
 import { CriticalGateDashboardProvider, CriticalGateTreeProvider } from "./tree-provider.js";
 import { diagnosticSource, type RefreshState } from "./types.js";
 
@@ -29,16 +29,19 @@ export function activate(context: vscode.ExtensionContext): void {
     statusBar,
     dashboard,
     analysisTree,
+    workspaceState: context.workspaceState,
     running: false,
     runSequence: 0,
     history: []
   };
 
+  restoreRunState(refreshState);
   statusBar.name = "Critical Gate";
   statusBar.text = "$(shield) Critical Gate";
   statusBar.tooltip = "Run Critical Gate";
   statusBar.command = "criticalGate.runCheck";
   statusBar.show();
+  updateStatusBar(refreshState);
   updateRunViews(refreshState);
 
   const dashboardView = vscode.window.registerWebviewViewProvider(
@@ -55,10 +58,13 @@ export function activate(context: vscode.ExtensionContext): void {
   const showReportCommand = vscode.commands.registerCommand("criticalGate.showReport", () => {
     showReport(refreshState);
   });
-  const clearCommand = vscode.commands.registerCommand("criticalGate.clearDiagnostics", () => {
-    clearRunState(refreshState);
-    diagnosticPayloads.clear();
-  });
+  const clearCommand = vscode.commands.registerCommand(
+    "criticalGate.clearDiagnostics",
+    async () => {
+      await clearRunState(refreshState);
+      diagnosticPayloads.clear();
+    }
+  );
   const settingsCommand = vscode.commands.registerCommand(
     "criticalGate.openSettings",
     openSettings
