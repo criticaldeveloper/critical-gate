@@ -1,3 +1,4 @@
+import { calibrateFindingConfidence } from "../detectors/confidence-calibration.js";
 import type { DiffFile, Finding, GateResult } from "../schema/index.js";
 
 export function renderPrCommentReport(result: GateResult): string {
@@ -70,7 +71,7 @@ export function renderPrCommentReport(result: GateResult): string {
 }
 
 function isBlockingFinding(finding: Finding): boolean {
-  return finding.severity === "blocker" || finding.severity === "high";
+  return calibrateFindingConfidence(finding).blockingEligible;
 }
 
 function renderFindingBullet(finding: Finding): string {

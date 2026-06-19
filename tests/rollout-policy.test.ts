@@ -16,7 +16,12 @@ describe("rollout decision policy", () => {
   it("keeps new detector families in observation mode by default", () => {
     expect(summarizeFindings([highObservationFinding])).toMatchObject({
       decision: "pass",
-      highCount: 1
+      highCount: 1,
+      confidenceCalibration: {
+        blockingEligibleCount: 0,
+        observationModeCount: 1,
+        confidenceSuppressedCount: 0
+      }
     });
   });
 
@@ -27,7 +32,12 @@ describe("rollout decision policy", () => {
       })
     ).toMatchObject({
       decision: "fail",
-      highCount: 1
+      highCount: 1,
+      confidenceCalibration: {
+        blockingEligibleCount: 1,
+        observationModeCount: 0,
+        confidenceSuppressedCount: 0
+      }
     });
   });
 

@@ -113,6 +113,10 @@ A report includes:
 - **Diff Coherence Score**: a 0-100 positive signal for how well the changed files, support files,
   churn, and findings fit the task intent.
 
+JSON output also includes confidence calibration counts. These show whether high-risk findings were
+eligible to block, kept in observation mode, or suppressed because confidence was below the
+detector's calibrated threshold.
+
 Use `--format pr-comment` when the audience is a pull request discussion. It keeps the same
 evidence-backed data but groups it into blocking findings, observations, expected support changes,
 and the strongest scope drivers.
@@ -349,6 +353,9 @@ repair guidance, but they do not fail the gate unless promoted. Promote a detect
   }
 }
 ```
+
+Promotion does not bypass confidence calibration. A promoted detector still needs a high or blocker
+severity finding with enough confidence to fail the gate.
 
 ## Troubleshooting
 

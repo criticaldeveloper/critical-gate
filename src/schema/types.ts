@@ -156,6 +156,13 @@ export interface GateSummary {
   diffCostScore?: number;
   scopeExpansionScore?: ScopeExpansionScore;
   diffCoherenceScore?: DiffCoherenceScore;
+  confidenceCalibration?: ConfidenceCalibrationSummary;
+}
+
+export interface ConfidenceCalibrationSummary {
+  blockingEligibleCount: number;
+  observationModeCount: number;
+  confidenceSuppressedCount: number;
 }
 
 export interface ScopeExpansionScore {

@@ -7,6 +7,28 @@
 - `medium`: should warn and appear in summaries.
 - `low`: informational unless combined with other risk.
 
+## Confidence Calibration
+
+Critical Gate treats confidence as part of the decision contract, not just display metadata.
+
+- `very-high`: `0.90` and above.
+- `high`: `0.80` to `0.89`.
+- `medium`: `0.60` to `0.79`.
+- `low`: below `0.60`.
+
+Only `blocker` and `high` findings can fail the gate. They must also clear the detector's calibrated
+minimum confidence. Deterministic detectors with concrete evidence, such as dependency additions,
+test weakening, secrets, rewrites, public API removals, and high-confidence scope findings, can
+block when they meet their band. Architecture, convention, co-change, and framework-pack guesses are
+observation-friendly by default unless promoted through rollout policy, and even explicit promotion
+does not bypass the minimum confidence threshold.
+
+The summary exposes calibration counts:
+
+- `blockingEligibleCount`: findings that can fail this run.
+- `observationModeCount`: high-confidence findings kept observational by rollout policy.
+- `confidenceSuppressedCount`: high or blocker severity findings that did not meet confidence.
+
 ## V1 Blockers
 
 ### Unrelated File Modifications

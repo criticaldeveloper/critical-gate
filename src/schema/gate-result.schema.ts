@@ -322,7 +322,18 @@ export const gateResultJsonSchema = {
         infoCount: { type: "integer", minimum: 0 },
         diffCostScore: { type: "number", minimum: 0, maximum: 100 },
         scopeExpansionScore: { $ref: "#/$defs/scopeExpansionScore" },
-        diffCoherenceScore: { $ref: "#/$defs/diffCoherenceScore" }
+        diffCoherenceScore: { $ref: "#/$defs/diffCoherenceScore" },
+        confidenceCalibration: { $ref: "#/$defs/confidenceCalibrationSummary" }
+      }
+    },
+    confidenceCalibrationSummary: {
+      type: "object",
+      additionalProperties: false,
+      required: ["blockingEligibleCount", "observationModeCount", "confidenceSuppressedCount"],
+      properties: {
+        blockingEligibleCount: { type: "integer", minimum: 0 },
+        observationModeCount: { type: "integer", minimum: 0 },
+        confidenceSuppressedCount: { type: "integer", minimum: 0 }
       }
     },
     scopeExpansionScore: {

@@ -62,7 +62,7 @@ root note.
      criteria.
    - Surface contracts in Codex hook output and VS Code repair-copy actions.
 
-8. Confidence calibration.
+8. Confidence calibration. Completed in `feature/confidence-calibration`.
    - Define per-detector confidence bands and decision behavior.
    - Ensure uncertain architecture guesses do not block by default.
 

@@ -1,5 +1,11 @@
 export { apiSurfaceDetector } from "./api-surface-detector.js";
 export { blastRadiusDetector } from "./blast-radius-detector.js";
+export {
+  calibrateFindingConfidence,
+  getConfidenceBand,
+  type ConfidenceBand,
+  type FindingConfidenceCalibration
+} from "./confidence-calibration.js";
 export { configChangeDetector } from "./config-change-detector.js";
 export { dependencyDetector } from "./dependency-detector.js";
 export { existingSolutionDetector } from "./existing-solution-detector.js";

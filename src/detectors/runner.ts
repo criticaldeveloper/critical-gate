@@ -7,6 +7,7 @@ import {
 } from "../intent/index.js";
 import { apiSurfaceDetector } from "./api-surface-detector.js";
 import { blastRadiusDetector } from "./blast-radius-detector.js";
+import { calibrateFindingConfidence } from "./confidence-calibration.js";
 import { configChangeDetector } from "./config-change-detector.js";
 import { dependencyDetector } from "./dependency-detector.js";
 import { existingSolutionDetector } from "./existing-solution-detector.js";
@@ -82,6 +83,7 @@ export function summarizeFindings(
     mediumCount: countSeverity(findings, "medium"),
     lowCount: countSeverity(findings, "low"),
     infoCount: countSeverity(findings, "info"),
+    confidenceCalibration: summarizeConfidenceCalibration(findings, policy),
     diffCostScore:
       task !== undefined && diff !== undefined ? calculateDiffCostScore(task, diff.files) : 0,
     scopeExpansionScore:
@@ -95,8 +97,26 @@ export function summarizeFindings(
   };
 }
 
+function summarizeConfidenceCalibration(
+  findings: Finding[],
+  policy: FindingDecisionPolicy
+): GateResult["summary"]["confidenceCalibration"] {
+  return {
+    blockingEligibleCount: findings.filter((finding) => isBlockingFinding(finding, policy)).length,
+    observationModeCount: findings.filter((finding) => isObservationModeFinding(finding, policy))
+      .length,
+    confidenceSuppressedCount: findings.filter(isConfidenceSuppressedFinding).length
+  };
+}
+
 function isBlockingFinding(finding: Finding, policy: FindingDecisionPolicy): boolean {
   if (finding.severity !== "blocker" && finding.severity !== "high") {
+    return false;
+  }
+
+  const calibration = calibrateFindingConfidence(finding);
+
+  if (!calibration.blockingEligible) {
     return false;
   }
 
@@ -107,6 +127,31 @@ function isBlockingFinding(finding: Finding, policy: FindingDecisionPolicy): boo
   const observationDetectors = policy.observationDetectors ?? defaultObservationDetectors;
 
   return !observationDetectors.includes(finding.detector);
+}
+
+function isObservationModeFinding(finding: Finding, policy: FindingDecisionPolicy): boolean {
+  if (finding.severity !== "blocker" && finding.severity !== "high") {
+    return false;
+  }
+
+  if (!calibrateFindingConfidence(finding).blockingEligible) {
+    return false;
+  }
+
+  if (policy.blockingDetectors?.includes(finding.detector) === true) {
+    return false;
+  }
+
+  const observationDetectors = policy.observationDetectors ?? defaultObservationDetectors;
+
+  return observationDetectors.includes(finding.detector);
+}
+
+function isConfidenceSuppressedFinding(finding: Finding): boolean {
+  return (
+    (finding.severity === "blocker" || finding.severity === "high") &&
+    !calibrateFindingConfidence(finding).blockingEligible
+  );
 }
 
 function countSeverity(findings: Finding[], severity: Finding["severity"]): number {

@@ -116,6 +116,11 @@ describe("gate result schema", () => {
         mediumCount: 0,
         lowCount: 0,
         infoCount: 0,
+        confidenceCalibration: {
+          blockingEligibleCount: 1,
+          observationModeCount: 0,
+          confidenceSuppressedCount: 0
+        },
         diffCostScore: 32,
         diffCoherenceScore: {
           score: 86,
