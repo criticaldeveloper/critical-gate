@@ -13,9 +13,18 @@ export function renderMarkdownReport(result: GateResult): string {
     `Additions: ${metrics.additions}`,
     `Deletions: ${metrics.deletions}`,
     `Findings: ${result.summary.findingCount}`,
+    `Scope Expansion Score: ${result.summary.scopeExpansionScore?.score ?? 0}/10`,
     `Diff Cost Score: ${result.summary.diffCostScore ?? 0}`,
     ""
   ];
+
+  if ((result.summary.scopeExpansionScore?.drivers.length ?? 0) > 0) {
+    lines.push("## Scope Expansion Drivers", "");
+    for (const driver of result.summary.scopeExpansionScore?.drivers ?? []) {
+      lines.push(`- ${driver.label}: +${driver.points} (${driver.code})`);
+    }
+    lines.push("");
+  }
 
   if (result.intentVerification !== undefined) {
     lines.push(

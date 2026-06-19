@@ -67,7 +67,24 @@ const result: GateResult = {
     mediumCount: 0,
     lowCount: 0,
     infoCount: 0,
-    diffCostScore: 42
+    diffCostScore: 42,
+    scopeExpansionScore: {
+      score: 3,
+      drivers: [
+        {
+          code: "missing-companions",
+          label: "Expected companion files missing",
+          points: 1,
+          evidence: ["expected-companions:src/signup.ts:tests/signup.test.ts"]
+        },
+        {
+          code: "high-risk-roles",
+          label: "Config, manifest, or lockfile touched",
+          points: 2,
+          evidence: ["package.json"]
+        }
+      ]
+    }
   },
   intentVerification: {
     requestedClasses: ["source"],
@@ -93,6 +110,8 @@ describe("reporters", () => {
 
     expect(report).toContain("# Critical Gate Report");
     expect(report).toContain("Changed Files: 2");
+    expect(report).toContain("Scope Expansion Score: 3/10");
+    expect(report).toContain("- Config, manifest, or lockfile touched: +2 (high-risk-roles)");
     expect(report).toContain("## Intent Verification");
     expect(report).toContain("Requested Classes: source");
     expect(report).toContain("Unexpected Classes: tests");
@@ -105,6 +124,8 @@ describe("reporters", () => {
     const report = renderRepairReport(result);
 
     expect(report).toContain("Critical Gate found findings that need repair:");
+    expect(report).toContain("Scope Expansion Score: 3/10");
+    expect(report).toContain("- Config, manifest, or lockfile touched: +2");
     expect(report).toContain("1. HIGH: Assertion removed from signup test");
     expect(report).toContain("Evidence: tests/signup.test.ts:24.");
   });

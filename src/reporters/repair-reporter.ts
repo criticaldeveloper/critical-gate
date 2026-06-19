@@ -14,11 +14,27 @@ export function renderRepairReport(result: GateResult): string {
   const lines = [
     "Critical Gate found findings that need repair:",
     "",
+    ...renderScopeExpansionContext(result),
     ...findings.flatMap((finding, index) => renderRepairFinding(finding, index + 1)),
     "Rerun Critical Gate after applying focused repairs."
   ];
 
   return `${lines.join("\n").trimEnd()}\n`;
+}
+
+function renderScopeExpansionContext(result: GateResult): string[] {
+  const score = result.summary.scopeExpansionScore;
+  const drivers = score?.drivers.filter((driver) => driver.points >= 2) ?? [];
+
+  if (score === undefined || drivers.length === 0) {
+    return [];
+  }
+
+  return [
+    `Scope Expansion Score: ${score.score}/10`,
+    ...drivers.map((driver) => `- ${driver.label}: +${driver.points}`),
+    ""
+  ];
 }
 
 function renderRepairFinding(finding: Finding, index: number): string[] {
