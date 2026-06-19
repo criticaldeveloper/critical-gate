@@ -37,6 +37,11 @@ export {
   type CreateLazyKnowledgeProviderOptions,
   type KnowledgeProviderRunner
 } from "./provider.js";
+export {
+  buildPatternIndex,
+  type BuildPatternIndexOptions,
+  type PatternIndexRunner
+} from "./pattern-index.js";
 export { createEmptySymbolIndex, createSymbolIndex } from "./symbol-index.js";
 export type {
   CompanionRule,
@@ -49,7 +54,10 @@ export type {
   KnowledgeIndexKind,
   KnowledgeProvider,
   KnowledgeRequest,
+  PatternIndex,
   RepositoryKnowledge,
+  RepositoryPattern,
+  RepositoryPatternKind,
   SolutionClass,
   SolutionEntry,
   SolutionIndex,

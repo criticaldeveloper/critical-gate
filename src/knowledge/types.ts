@@ -30,6 +30,7 @@ export interface RepositoryKnowledge {
   symbols: SymbolIndex;
   history: HistoryIndex;
   solutions: SolutionIndex;
+  patterns?: PatternIndex;
 }
 
 export interface KnowledgeProvider {
@@ -120,4 +121,24 @@ export interface SolutionEntry {
   returnType?: string;
   importTokens: string[];
   domainTokens: string[];
+}
+
+export type RepositoryPatternKind =
+  | "service"
+  | "hook"
+  | "query"
+  | "validator"
+  | "schema"
+  | "adapter"
+  | "feature-root";
+
+export interface PatternIndex {
+  patterns: RepositoryPattern[];
+}
+
+export interface RepositoryPattern {
+  kind: RepositoryPatternKind;
+  root: string;
+  examples: string[];
+  confidence: number;
 }
