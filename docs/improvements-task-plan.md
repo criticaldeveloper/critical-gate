@@ -83,7 +83,7 @@ root note.
     - Add a snapshot command for exported API surfaces.
     - Compare PR diffs against snapshots and require changeset/migration evidence.
 
-13. Test meaningfulness delta.
+13. Test meaningfulness delta. Completed in `feature/test-meaningfulness-delta`.
     - Score assertion specificity and detect high-to-low specificity changes.
     - Detect tests changed to assert rendering presence instead of behavior.
 

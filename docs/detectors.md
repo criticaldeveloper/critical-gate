@@ -102,6 +102,8 @@ Goal: detect tests made less capable while preserving green CI.
 Evidence:
 
 - Removed assertions.
+- Assertion specificity decreases from behavior/value checks to generic existence checks.
+- Rendering presence assertions replacing behavioral UI assertions.
 - Weaker matchers.
 - Removed test cases.
 - Added `.skip`, `.only`, `todo`, broad mocks, or snapshot rewrites.
@@ -112,6 +114,9 @@ Initial implementation:
 - Diff-level matcher and assertion heuristics.
 - Test framework-aware patterns for Jest, Vitest, Playwright, and Mocha.
 - Flag assertion deletion and skipped tests as high confidence.
+- Score assertion specificity in changed hunks and flag high-to-low replacements such as
+  `toHaveBeenCalledWith(...)` becoming `toBeInTheDocument()` or exact error checks becoming
+  `toBeDefined()`.
 
 ### Secret Or Hardcoded Path Detection
 

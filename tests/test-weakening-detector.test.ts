@@ -129,6 +129,63 @@ index 57b22a0..cb3e0f1 100644
 
     expect(testWeakeningDetector.run({ task, diff })).toEqual([]);
   });
+
+  it("emits high severity when an exact assertion is replaced by a generic assertion", () => {
+    const diff = {
+      files: parseUnifiedDiff(`diff --git a/tests/signup.test.ts b/tests/signup.test.ts
+index 57b22a0..cb3e0f1 100644
+--- a/tests/signup.test.ts
++++ b/tests/signup.test.ts
+@@ -1,3 +1,3 @@
+-expect(result.error.message).toContain("email is required");
++expect(result.error).toBeDefined();
+`)
+    };
+
+    const findings = testWeakeningDetector.run({ task, diff });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        severity: "high",
+        title: "Test assertion became less meaningful",
+        message:
+          "The diff replaces a stronger behavioral assertion with a weaker generic or rendering-presence assertion."
+      })
+    ]);
+    expect(findings[0]?.evidence[0]).toMatchObject({
+      message: "expect(result.error).toBeDefined();",
+      data: {
+        signal: "assertion-specificity-dropped",
+        previousAssertion: 'expect(result.error.message).toContain("email is required");',
+        replacementAssertion: "expect(result.error).toBeDefined();"
+      }
+    });
+  });
+
+  it("emits high severity when behavior is replaced by rendering presence", () => {
+    const diff = {
+      files: parseUnifiedDiff(`diff --git a/tests/signup.test.tsx b/tests/signup.test.tsx
+index 57b22a0..cb3e0f1 100644
+--- a/tests/signup.test.tsx
++++ b/tests/signup.test.tsx
+@@ -1,3 +1,3 @@
+-expect(onSubmit).toHaveBeenCalledWith({ email: "ada@example.com" });
++expect(screen.getByRole("button")).toBeInTheDocument();
+`)
+    };
+
+    const findings = testWeakeningDetector.run({ task, diff });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        severity: "high",
+        title: "Test assertion became less meaningful"
+      })
+    ]);
+    expect(findings[0]?.evidence[0]?.data).toMatchObject({
+      reason: "behavioral assertion replaced with generic or presence assertion"
+    });
+  });
 });
 
 describe("detector runner with test weakening", () => {
