@@ -6,6 +6,10 @@ import {
   clearRunState,
   copyRepair,
   getCommandPayload,
+  acceptBlastRadiusExpansion,
+  openClusterReport,
+  openExistingSolution,
+  openExpectedCompanion,
   openSettings,
   runCriticalGate,
   scheduleRefresh,
@@ -88,6 +92,30 @@ export function activate(context: vscode.ExtensionContext): void {
       await copyRepair(payloadOrTreeItem);
     }
   );
+  const openExistingSolutionCommand = vscode.commands.registerCommand(
+    "criticalGate.openExistingSolution",
+    async (payloadOrTreeItem: unknown) => {
+      await openExistingSolution(payloadOrTreeItem);
+    }
+  );
+  const openExpectedCompanionCommand = vscode.commands.registerCommand(
+    "criticalGate.openExpectedCompanion",
+    async (payloadOrTreeItem: unknown) => {
+      await openExpectedCompanion(payloadOrTreeItem);
+    }
+  );
+  const acceptBlastRadiusCommand = vscode.commands.registerCommand(
+    "criticalGate.acceptBlastRadiusExpansion",
+    async (payloadOrTreeItem: unknown) => {
+      await acceptBlastRadiusExpansion(refreshState, payloadOrTreeItem);
+    }
+  );
+  const openClusterReportCommand = vscode.commands.registerCommand(
+    "criticalGate.openClusterReport",
+    (payloadOrTreeItem: unknown) => {
+      openClusterReport(refreshState, payloadOrTreeItem);
+    }
+  );
   const codeActions = vscode.languages.registerCodeActionsProvider(
     { scheme: "file" },
     new CriticalGateCodeActionProvider(),
@@ -111,6 +139,10 @@ export function activate(context: vscode.ExtensionContext): void {
     settingsCommand,
     openEvidenceCommand,
     copyRepairCommand,
+    openExistingSolutionCommand,
+    openExpectedCompanionCommand,
+    acceptBlastRadiusCommand,
+    openClusterReportCommand,
     codeActions,
     saveRefresh,
     {

@@ -9,10 +9,15 @@ export interface CriticalGateDiagnosticPayload {
   findingId: string;
   detector: string;
   title: string;
+  message?: string;
   repair: string;
   evidencePath: string;
   startLine?: number;
   endLine?: number;
+  existingSolutionPath?: string;
+  existingSolutionSymbol?: string;
+  expectedCompanionPath?: string;
+  clusterPaths?: string[];
 }
 
 export interface RunRecord {

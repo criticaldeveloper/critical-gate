@@ -16,10 +16,13 @@ export interface EditorDiagnostic {
   code: string;
   detector: string;
   findingTitle: string;
+  findingMessage: string;
   message: string;
   range: EditorDiagnosticRange;
   repair: string;
   tags: string[];
+  evidenceData?: Record<string, unknown>;
+  findingEvidence: FindingEvidence[];
   evidence: {
     path: string;
     startLine?: number;
@@ -58,6 +61,7 @@ export function toEditorDiagnostic(
     code: finding.id,
     detector: finding.detector,
     findingTitle: finding.title,
+    findingMessage: finding.message,
     message: `${finding.title}: ${finding.message}\nRepair: ${finding.repair}`,
     range: {
       startLine: Math.max(0, (evidence.startLine ?? 1) - 1),
@@ -67,6 +71,8 @@ export function toEditorDiagnostic(
     },
     repair: finding.repair,
     tags: finding.tags,
+    evidenceData: evidence.data,
+    findingEvidence: finding.evidence,
     evidence: {
       path: evidence.path,
       startLine: evidence.startLine,

@@ -9,6 +9,8 @@ export async function runExtensionTests(): Promise<void> {
   await copiesRepairTextThroughCommandPayload();
   await copiesRepairTextThroughTreeItemPayload();
   await opensEvidenceFilesThroughCommandPayload();
+  await opensExistingSolutionThroughTreeItemPayload();
+  await acceptsBlastRadiusExpansionThroughCommandPayload();
 }
 
 async function activatesCommandContributions(): Promise<void> {
@@ -22,6 +24,10 @@ async function activatesCommandContributions(): Promise<void> {
   assert.ok(commands.includes("criticalGate.openSettings"));
   assert.ok(commands.includes("criticalGate.openEvidence"));
   assert.ok(commands.includes("criticalGate.copyRepair"));
+  assert.ok(commands.includes("criticalGate.openExistingSolution"));
+  assert.ok(commands.includes("criticalGate.openExpectedCompanion"));
+  assert.ok(commands.includes("criticalGate.acceptBlastRadiusExpansion"));
+  assert.ok(commands.includes("criticalGate.openClusterReport"));
 }
 
 async function contributesNativeAnalysisTree(): Promise<void> {
@@ -91,6 +97,32 @@ async function copiesRepairTextThroughTreeItemPayload(): Promise<void> {
   });
 
   assert.equal(await vscode.env.clipboard.readText(), "Use the tree item repair payload.");
+}
+
+async function opensExistingSolutionThroughTreeItemPayload(): Promise<void> {
+  await vscode.commands.executeCommand("criticalGate.openExistingSolution", {
+    criticalGatePayload: {
+      findingId: "existing-solution",
+      detector: "existing-solution",
+      title: "Existing solution",
+      repair: "Reuse the fixture evidence.",
+      evidencePath: "evidence.ts",
+      existingSolutionPath: "evidence.ts"
+    }
+  });
+
+  assert.equal(vscode.window.activeTextEditor?.document.fileName.endsWith("evidence.ts"), true);
+}
+
+async function acceptsBlastRadiusExpansionThroughCommandPayload(): Promise<void> {
+  await vscode.commands.executeCommand("criticalGate.acceptBlastRadiusExpansion", {
+    findingId: "blast-radius:test",
+    detector: "blast-radius",
+    title: "Unexpected changed-file cluster",
+    repair: "Confirm this separate cluster belongs to the current task.",
+    evidencePath: "evidence.ts",
+    clusterPaths: ["evidence.ts"]
+  });
 }
 
 async function opensEvidenceFilesThroughCommandPayload(): Promise<void> {

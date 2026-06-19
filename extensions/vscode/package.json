@@ -97,7 +97,23 @@
       },
       {
         "command": "criticalGate.copyRepair",
-        "title": "Critical Gate: Copy Repair Text"
+        "title": "Critical Gate: Copy Repair Prompt"
+      },
+      {
+        "command": "criticalGate.openExistingSolution",
+        "title": "Critical Gate: Open Existing Solution"
+      },
+      {
+        "command": "criticalGate.openExpectedCompanion",
+        "title": "Critical Gate: Open Expected Companion"
+      },
+      {
+        "command": "criticalGate.acceptBlastRadiusExpansion",
+        "title": "Critical Gate: Accept Blast-Radius Expansion"
+      },
+      {
+        "command": "criticalGate.openClusterReport",
+        "title": "Critical Gate: Open Cluster Report"
       }
     ],
     "menus": {
@@ -111,6 +127,26 @@
           "command": "criticalGate.copyRepair",
           "when": "view == criticalGate.analysisTree && viewItem == criticalGateFinding",
           "group": "inline"
+        },
+        {
+          "command": "criticalGate.openExistingSolution",
+          "when": "view == criticalGate.analysisTree && viewItem =~ /criticalGateExistingSolution/",
+          "group": "navigation"
+        },
+        {
+          "command": "criticalGate.openExpectedCompanion",
+          "when": "view == criticalGate.analysisTree && viewItem =~ /criticalGateExpectedCompanion/",
+          "group": "navigation"
+        },
+        {
+          "command": "criticalGate.openClusterReport",
+          "when": "view == criticalGate.analysisTree && viewItem =~ /criticalGateClusterReport/",
+          "group": "navigation"
+        },
+        {
+          "command": "criticalGate.acceptBlastRadiusExpansion",
+          "when": "view == criticalGate.analysisTree && viewItem =~ /criticalGateBlastRadius/",
+          "group": "2_accept"
         }
       ]
     },

@@ -10,6 +10,7 @@ import {
   type EditorDiagnostic
 } from "../../../src/editor/index.js";
 import type { GateResult } from "../../../src/schema/index.js";
+import { toCriticalGatePayload } from "./action-payload.js";
 import { getConfiguredBase } from "./state.js";
 import { diagnosticSource, type CriticalGateDiagnosticPayload } from "./types.js";
 
@@ -110,15 +111,18 @@ function toDiagnosticSeverity(severity: EditorDiagnostic["severity"]): vscode.Di
 }
 
 function toDiagnosticPayload(editorDiagnostic: EditorDiagnostic): CriticalGateDiagnosticPayload {
-  return {
+  return toCriticalGatePayload({
     findingId: editorDiagnostic.code,
     detector: editorDiagnostic.detector,
     title: editorDiagnostic.findingTitle,
+    message: editorDiagnostic.findingMessage,
     repair: editorDiagnostic.repair,
     evidencePath: editorDiagnostic.evidence.path,
     startLine: editorDiagnostic.evidence.startLine,
-    endLine: editorDiagnostic.evidence.endLine
-  };
+    endLine: editorDiagnostic.evidence.endLine,
+    evidenceData: editorDiagnostic.evidenceData,
+    findingEvidence: editorDiagnostic.findingEvidence
+  });
 }
 
 async function fileExists(uri: vscode.Uri): Promise<boolean> {

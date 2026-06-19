@@ -1,3 +1,5 @@
+import { join } from "node:path";
+
 import * as vscode from "vscode";
 
 import { runCli } from "./cli-adapter.js";
@@ -14,6 +16,15 @@ import {
   updateStatusBar
 } from "./state.js";
 import type { CriticalGateDiagnosticPayload, RefreshState, RunReason } from "./types.js";
+
+const acceptedBlastRadiusStorageKey = "criticalGate.acceptedBlastRadiusExpansions.v1";
+
+interface AcceptedBlastRadiusExpansion {
+  findingId: string;
+  acceptedAt: string;
+  paths: string[];
+  message?: string;
+}
 
 export async function runCriticalGate(state: RefreshState, reason: RunReason): Promise<void> {
   if (state.running) {
@@ -147,6 +158,89 @@ export async function copyRepair(payloadOrRepair: unknown): Promise<void> {
   vscode.window.showInformationMessage("Critical Gate repair text copied.");
 }
 
+export async function openExistingSolution(payloadOrTreeItem: unknown): Promise<void> {
+  const payload = getCommandPayload(payloadOrTreeItem);
+
+  if (payload?.existingSolutionPath === undefined) {
+    vscode.window.showWarningMessage("Critical Gate could not find an existing solution path.");
+    return;
+  }
+
+  await openWorkspacePath(payload.existingSolutionPath);
+}
+
+export async function openExpectedCompanion(payloadOrTreeItem: unknown): Promise<void> {
+  const payload = getCommandPayload(payloadOrTreeItem);
+
+  if (payload?.expectedCompanionPath === undefined) {
+    vscode.window.showWarningMessage("Critical Gate could not find an expected companion path.");
+    return;
+  }
+
+  await openWorkspacePath(payload.expectedCompanionPath, {
+    missingMessage: `Expected companion is not present yet: ${payload.expectedCompanionPath}`
+  });
+}
+
+export async function acceptBlastRadiusExpansion(
+  state: RefreshState,
+  payloadOrTreeItem: unknown
+): Promise<void> {
+  const payload = getCommandPayload(payloadOrTreeItem);
+
+  if (payload === undefined || payload.detector !== "blast-radius") {
+    vscode.window.showWarningMessage("Critical Gate can only accept blast-radius findings.");
+    return;
+  }
+
+  const accepted =
+    state.workspaceState.get<AcceptedBlastRadiusExpansion[]>(acceptedBlastRadiusStorageKey) ?? [];
+  const next: AcceptedBlastRadiusExpansion[] = [
+    {
+      findingId: payload.findingId,
+      acceptedAt: new Date().toISOString(),
+      paths: payload.clusterPaths ?? [payload.evidencePath],
+      message: payload.message
+    },
+    ...accepted.filter((entry) => entry.findingId !== payload.findingId)
+  ].slice(0, 50);
+
+  await state.workspaceState.update(acceptedBlastRadiusStorageKey, next);
+  vscode.window.showInformationMessage("Critical Gate blast-radius expansion accepted locally.");
+}
+
+export function openClusterReport(state: RefreshState, payloadOrTreeItem: unknown): void {
+  const payload = getCommandPayload(payloadOrTreeItem);
+
+  if (payload === undefined || (payload.clusterPaths?.length ?? 0) === 0) {
+    vscode.window.showWarningMessage("Critical Gate could not find cluster details for this item.");
+    return;
+  }
+
+  state.output.clear();
+  state.output.appendLine("# Critical Gate Cluster Report");
+  state.output.appendLine("");
+  state.output.appendLine(`Finding: ${payload.title}`);
+  state.output.appendLine(`Detector: ${payload.detector}`);
+  state.output.appendLine(`Evidence: ${payload.evidencePath}`);
+  state.output.appendLine("");
+
+  if (payload.message !== undefined) {
+    state.output.appendLine(payload.message);
+    state.output.appendLine("");
+  }
+
+  state.output.appendLine("Changed cluster files:");
+
+  for (const path of payload.clusterPaths ?? []) {
+    state.output.appendLine(`- ${path}`);
+  }
+
+  state.output.appendLine("");
+  state.output.appendLine(`Repair: ${payload.repair}`);
+  state.output.show(true);
+}
+
 export { showReport };
 
 async function resolveTask(): Promise<string | undefined> {
@@ -177,6 +271,32 @@ function isCriticalGatePayload(input: unknown): input is CriticalGateDiagnosticP
     typeof candidate.repair === "string" &&
     typeof candidate.evidencePath === "string"
   );
+}
+
+async function openWorkspacePath(
+  relativePath: string,
+  options: { missingMessage?: string } = {}
+): Promise<void> {
+  const folder = vscode.workspace.workspaceFolders?.[0];
+
+  if (folder === undefined) {
+    vscode.window.showWarningMessage("Critical Gate requires an open workspace folder.");
+    return;
+  }
+
+  const uri = vscode.Uri.file(join(folder.uri.fsPath, relativePath));
+
+  try {
+    await vscode.workspace.fs.stat(uri);
+  } catch {
+    vscode.window.showInformationMessage(
+      options.missingMessage ?? `Critical Gate could not find ${relativePath}.`
+    );
+    return;
+  }
+
+  const document = await vscode.workspace.openTextDocument(uri);
+  await vscode.window.showTextDocument(document);
 }
 
 async function notifyResult(

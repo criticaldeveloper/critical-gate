@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 
-import type { Finding, FindingEvidence, GateResult } from "../../../src/schema/index.js";
+import type { Finding, GateResult } from "../../../src/schema/index.js";
+import { getTreeContextValue, toFindingPayload } from "./action-payload.js";
 import type { CriticalGateDiagnosticPayload, DashboardMessage, DashboardState } from "./types.js";
 
 export class CriticalGateDashboardProvider implements vscode.WebviewViewProvider {
@@ -271,7 +272,7 @@ function createFindingNode(finding: Finding): GateTreeNode {
     icon: new vscode.ThemeIcon(
       finding.severity === "high" || finding.severity === "blocker" ? "error" : "warning"
     ),
-    contextValue: payload === undefined ? "criticalGateFindingNoEvidence" : "criticalGateFinding",
+    contextValue: getTreeContextValue(payload),
     payload,
     children: finding.evidence.map((evidence) => ({
       kind: "metric",
@@ -743,27 +744,6 @@ function renderHistory(history: DashboardState["history"]): string {
       </li>`
     )
     .join("")}</ul>`;
-}
-
-function toFindingPayload(finding: Finding): CriticalGateDiagnosticPayload | undefined {
-  const evidence = finding.evidence.find(
-    (item): item is FindingEvidence & { path: string } =>
-      item.path !== undefined && item.path.length > 0
-  );
-
-  if (evidence === undefined) {
-    return undefined;
-  }
-
-  return {
-    findingId: finding.id,
-    detector: finding.detector,
-    title: finding.title,
-    repair: finding.repair,
-    evidencePath: evidence.path,
-    startLine: evidence.startLine,
-    endLine: evidence.endLine
-  };
 }
 
 function formatDecision(state: DashboardState): string {

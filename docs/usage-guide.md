@@ -191,6 +191,14 @@ runs. After a VS Code reload, the extension restores the last report and run his
 state, but it does not restore Problems diagnostics as fresh findings. Run the gate again when you
 need diagnostics for the current diff.
 
+Contextual actions appear where the finding has matching evidence:
+
+- Existing-solution findings can open the existing repository implementation.
+- Missing-companion findings can open the expected companion path when it exists.
+- Blast-radius findings can open a compact cluster report or be accepted locally in VS Code
+  workspace storage.
+- All findings with file evidence can open evidence and copy a repair prompt.
+
 Useful settings:
 
 - `criticalGate.task`: preset task intent so runs do not prompt.
