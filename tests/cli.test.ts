@@ -208,6 +208,48 @@ describe("cli", () => {
     });
   });
 
+  it("includes monorepo ownership context in json output", () => {
+    const { io, stdout, files } = createTestIo();
+    const monorepoIo = {
+      ...io,
+      readDiff: () => ({
+        ...testDiffResult,
+        files: [
+          {
+            ...testDiffResult.files[0]!,
+            path: "apps/web/src/signup.ts"
+          }
+        ]
+      })
+    };
+
+    files.set(
+      "C:\\dev\\critical-gate\\pnpm-workspace.yaml",
+      ["packages:", "  - apps/*", "  - packages/*"].join("\n")
+    );
+    files.set("C:\\dev\\critical-gate\\apps\\web\\package.json", '{"name":"@repo/web"}');
+
+    expect(main(["check", "--task", "Add signup validation", "--format", "json"], monorepoIo)).toBe(
+      ExitCode.Pass
+    );
+
+    expect(JSON.parse(stdout[0] ?? "")).toMatchObject({
+      context: {
+        monorepo: {
+          tools: ["pnpm"],
+          configFiles: ["pnpm-workspace.yaml"],
+          workspaceGlobs: ["apps/*", "packages/*"],
+          packages: [
+            {
+              path: "apps/web",
+              name: "@repo/web"
+            }
+          ]
+        }
+      }
+    });
+  });
+
   it("writes output to a file when requested", () => {
     const { io, stdout, writes } = createTestIo();
 

@@ -74,7 +74,7 @@ root note.
     - Detect vague task text such as "fix bug" or "update code".
     - Recommend more specific task intent text.
 
-11. Monorepo support.
+11. Monorepo support. Completed in `feature/monorepo-support`.
     - Read `pnpm-workspace.yaml`, `turbo.json`, `nx.json`, `lerna.json`, package workspaces, and
       TypeScript paths.
     - Use package/workspace ownership in blast-radius scoring.

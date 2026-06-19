@@ -227,6 +227,28 @@ Initial implementation:
 - Include deterministic suggestions in Markdown, PR comments, and JSON.
 - Keep warnings separate from detector findings so vague task text does not fail the gate alone.
 
+### Monorepo Ownership Context
+
+Goal: identify package and workspace ownership before blast-radius and policy decisions.
+
+Evidence:
+
+- `pnpm-workspace.yaml`.
+- Root package `workspaces`.
+- `turbo.json`.
+- `nx.json`.
+- `lerna.json`.
+- Root TypeScript path aliases.
+- Changed file paths.
+
+Initial implementation:
+
+- Detect workspace globs from common monorepo manifests.
+- Infer changed package owners from the current diff.
+- Read changed package names from package-local `package.json` files.
+- Capture root TypeScript path aliases as ownership context.
+- Store the result in `context.monorepo` for downstream detectors and reports.
+
 ## P2 Detectors
 
 ### Duplicate Code

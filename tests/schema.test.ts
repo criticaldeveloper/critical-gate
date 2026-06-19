@@ -53,6 +53,18 @@ describe("gate result schema", () => {
       },
       context: {
         packageManager: "pnpm",
+        monorepo: {
+          tools: ["pnpm", "turbo"],
+          configFiles: ["pnpm-workspace.yaml", "turbo.json"],
+          workspaceGlobs: ["apps/*", "packages/*"],
+          typescriptPathAliases: ["@repo/web/*"],
+          packages: [
+            {
+              path: "apps/web",
+              name: "@repo/web"
+            }
+          ]
+        },
         manifests: ["package.json"],
         configFiles: ["tsconfig.json"],
         testFrameworks: ["vitest"],

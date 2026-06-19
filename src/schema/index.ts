@@ -18,6 +18,8 @@ export type {
   GateResult,
   GateSummary,
   IntentVerificationSummary,
+  MonorepoContext,
+  MonorepoPackage,
   RepositoryCoChange,
   RepositoryProfile,
   RepoContext,

@@ -117,6 +117,7 @@ export const gateResultJsonSchema = {
         packageManager: {
           enum: ["pnpm", "npm", "yarn", "bun", "unknown"]
         },
+        monorepo: { $ref: "#/$defs/monorepoContext" },
         manifests: stringArraySchema,
         configFiles: stringArraySchema,
         testFrameworks: stringArraySchema,
@@ -132,6 +133,35 @@ export const gateResultJsonSchema = {
             headRef: { type: "string" }
           }
         }
+      }
+    },
+    monorepoContext: {
+      type: "object",
+      additionalProperties: false,
+      required: ["configFiles", "workspaceGlobs", "packages"],
+      properties: {
+        tools: {
+          type: "array",
+          items: {
+            enum: ["pnpm", "turbo", "nx", "lerna"]
+          }
+        },
+        configFiles: stringArraySchema,
+        workspaceGlobs: stringArraySchema,
+        typescriptPathAliases: stringArraySchema,
+        packages: {
+          type: "array",
+          items: { $ref: "#/$defs/monorepoPackage" }
+        }
+      }
+    },
+    monorepoPackage: {
+      type: "object",
+      additionalProperties: false,
+      required: ["path"],
+      properties: {
+        path: { type: "string", minLength: 1 },
+        name: { type: "string", minLength: 1 }
       }
     },
     repositoryProfile: {

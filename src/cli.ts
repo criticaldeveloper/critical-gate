@@ -10,6 +10,7 @@ import {
   applyLearningPolicy,
   analyzeTaskIntentQuality,
   detectFrameworkPacks,
+  detectMonorepoContext,
   loadCriticalGateConfig,
   readGitDiff,
   renderReport,
@@ -237,9 +238,11 @@ function createGateResult(
     packageJson: readOptionalPackageJson(diffResult.root, io),
     config: configResult.config
   });
+  const monorepo = detectMonorepoContext(diffResult.root, diff.files, io);
   const context: GateResult["context"] = {
     root: diffResult.root,
     packageManager: "pnpm",
+    monorepo,
     frameworkPacks: frameworkPacks.map((pack) => pack.id),
     repositoryProfile: diffResult.repositoryProfile,
     utilityIndex: diffResult.utilityIndex,

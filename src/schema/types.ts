@@ -54,6 +54,7 @@ export interface DiffFile {
 export interface RepoContext {
   root?: string;
   packageManager?: "pnpm" | "npm" | "yarn" | "bun" | "unknown";
+  monorepo?: MonorepoContext;
   manifests?: string[];
   configFiles?: string[];
   testFrameworks?: string[];
@@ -65,6 +66,19 @@ export interface RepoContext {
     baseRef?: string;
     headRef?: string;
   };
+}
+
+export interface MonorepoContext {
+  tools?: Array<"pnpm" | "turbo" | "nx" | "lerna">;
+  configFiles: string[];
+  workspaceGlobs: string[];
+  typescriptPathAliases?: string[];
+  packages: MonorepoPackage[];
+}
+
+export interface MonorepoPackage {
+  path: string;
+  name?: string;
 }
 
 export interface RepositoryProfile {

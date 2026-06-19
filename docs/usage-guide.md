@@ -191,6 +191,16 @@ companion evidence clearer.
 The model is deterministic and local. It uses co-change support and confidence from repository
 history, and it stays quiet when the repository does not have enough history to be reliable.
 
+## Monorepo Support
+
+Critical Gate detects common JavaScript and TypeScript monorepo layouts from
+`pnpm-workspace.yaml`, package `workspaces`, `turbo.json`, `nx.json`, and `lerna.json`. The JSON
+result includes `context.monorepo` with detected tools, config files, workspace globs, changed
+package owners, and root TypeScript `compilerOptions.paths` aliases when present.
+
+This is ownership context, not a separate finding. It helps later detector and policy decisions
+judge whether a diff stayed inside one package or crossed workspace boundaries.
+
 ## Common Examples
 
 ### Small Feature With Expected Source And Test Changes

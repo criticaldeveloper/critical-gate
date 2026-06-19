@@ -62,6 +62,8 @@ Context should be requested by detectors, not loaded globally.
 Useful context includes:
 
 - `package.json` and lockfiles.
+- Monorepo workspace metadata from `pnpm-workspace.yaml`, package workspaces, `turbo.json`,
+  `nx.json`, and `lerna.json`.
 - TS config and build config.
 - ESLint/test framework config.
 - Nearby symbols and exports.
