@@ -323,6 +323,42 @@ index 57b22a0..cb3e0f1 100644
     ).toEqual([]);
   });
 
+  it("does not emit for version-only manifest changes in bugfix tasks", () => {
+    const diff = parse(`diff --git a/package.json b/package.json
+index 57b22a0..cb3e0f1 100644
+--- a/package.json
++++ b/package.json
+@@ -1,5 +1,5 @@
+ {
+   "name": "critical-gate",
+-  "version": "2.1.0",
++  "version": "2.1.1",
+   "type": "module"
+ }
+diff --git a/extensions/vscode/package.json b/extensions/vscode/package.json
+index 57b22a0..cb3e0f1 100644
+--- a/extensions/vscode/package.json
++++ b/extensions/vscode/package.json
+@@ -1,5 +1,5 @@
+ {
+   "name": "critical-gate-vscode",
+-  "version": "2.1.0",
++  "version": "2.1.1",
+   "publisher": "criticaldeveloper"
+ }
+`);
+
+    expect(
+      scopeDetector.run({
+        task: {
+          source: "cli",
+          text: "Fix global CLI entrypoint execution"
+        },
+        diff
+      })
+    ).toEqual([]);
+  });
+
   it("still emits for non-version manifest changes during release tasks", () => {
     const diff = parse(`diff --git a/package.json b/package.json
 index 57b22a0..cb3e0f1 100644

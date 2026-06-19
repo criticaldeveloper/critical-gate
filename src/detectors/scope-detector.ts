@@ -31,9 +31,6 @@ const manifestTaskTerms = [
   "pnpm",
   "runtime"
 ];
-const releaseTaskPattern =
-  /(?:^|\b)(?:v?\d+\.\d+\.\d+(?:[-+][a-z0-9.-]+)?|release|version|bump|publish)(?:\b|$)/i;
-
 export const scopeDetector: Detector = {
   name: "scope",
   run: ({ task, diff }) => {
@@ -59,7 +56,7 @@ function isUnexpectedForSmallTask(file: DiffFile, keywords: string[], taskText: 
     return false;
   }
 
-  if (file.role === "manifest" && isVersionOnlyReleaseManifestChange(file, taskText)) {
+  if (file.role === "manifest" && isPackageVersionOnlyChange(file)) {
     return false;
   }
 
@@ -115,14 +112,6 @@ function isDeletionAcknowledged(file: DiffFile, taskText: string, keywords: stri
     hasAnyTaskTerm(taskText, ["delete", "deleted", "remove", "removed", "drop", "cleanup"]) &&
     hasPathKeywordAlignment(file.path, keywords)
   );
-}
-
-function isVersionOnlyReleaseManifestChange(file: DiffFile, taskText: string): boolean {
-  return isReleaseTask(taskText) && isPackageVersionOnlyChange(file);
-}
-
-function isReleaseTask(taskText: string): boolean {
-  return releaseTaskPattern.test(taskText);
 }
 
 function isPackageVersionOnlyChange(file: DiffFile): boolean {
