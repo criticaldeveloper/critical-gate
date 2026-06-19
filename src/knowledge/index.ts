@@ -4,6 +4,7 @@ export {
   buildKnowledgeCacheKey,
   createFileKnowledgeCache,
   createMemoryKnowledgeCache,
+  getKnowledgeCacheRoot,
   serializeKnowledgeCacheKey,
   type KnowledgeCacheEntry,
   type KnowledgeCacheKeyOptions,

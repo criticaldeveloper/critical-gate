@@ -3,6 +3,7 @@ import { join } from "node:path";
 
 import {
   classifyPath,
+  getKnowledgeCacheRoot,
   parseUnifiedDiff,
   readGitDiff,
   type GitCommandRunner
@@ -225,5 +226,57 @@ describe("readGitDiff", () => {
       }
     ]);
     expect(calls).toContainEqual(["diff", "--no-ext-diff", "--no-color", "HEAD", "--"]);
+  });
+
+  it("excludes Critical Gate cache artifacts from working-tree checks", () => {
+    const runner: GitCommandRunner = {
+      execFile: (_file, args) => {
+        if (args.join(" ") === "rev-parse --show-toplevel") {
+          return "C:/dev/mv-ft\n";
+        }
+
+        if (args.join(" ") === "rev-parse --abbrev-ref HEAD") {
+          return "main\n";
+        }
+
+        if (args.join(" ") === "diff --no-ext-diff --no-color HEAD --") {
+          return `diff --git a/.critical-gate/cache/cache.json b/.critical-gate/cache/cache.json
+new file mode 100644
+index 0000000..57b22a0
+--- /dev/null
++++ b/.critical-gate/cache/cache.json
+@@ -0,0 +1 @@
++{"cached":true}
+diff --git a/src/app.ts b/src/app.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/app.ts
++++ b/src/app.ts
+@@ -1 +1,2 @@
+ export const app = true;
++export const changed = true;
+`;
+        }
+
+        if (args.join(" ") === "ls-files --others --exclude-standard") {
+          return ".critical-gate/cache/other.json\nsrc/created.ts\n";
+        }
+
+        throw new Error(`Unexpected git args: ${args.join(" ")}`);
+      },
+      readFile: (path) => {
+        expect(path.replaceAll("\\", "/")).toBe("C:/dev/mv-ft/src/created.ts");
+        return "export const created = true;\n";
+      }
+    };
+
+    const result = readGitDiff({ runner });
+
+    expect(result.files.map((file) => file.path)).toEqual(["src/app.ts", "src/created.ts"]);
+  });
+
+  it("stores knowledge cache outside the repository root", () => {
+    expect(getKnowledgeCacheRoot("C:/dev/mv-ft").replaceAll("\\", "/")).not.toContain(
+      "C:/dev/mv-ft/.critical-gate"
+    );
   });
 });

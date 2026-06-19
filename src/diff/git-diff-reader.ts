@@ -51,7 +51,9 @@ export function readGitDiff(options: ReadGitDiffOptions = {}): GitDiffResult {
   const headRef = getOptionalGitOutput(runner, ["rev-parse", "--abbrev-ref", "HEAD"], root);
   const diffArgs = getDiffArgs(baseRef);
   const diffText = runner.execFile("git", diffArgs, { cwd: root });
-  const trackedFiles = parseUnifiedDiff(diffText);
+  const trackedFiles = parseUnifiedDiff(diffText).filter(
+    (file) => !isInternalCriticalGatePath(file.path)
+  );
   const untrackedFiles = baseRef === undefined ? readUntrackedFiles(root, runner) : [];
 
   return {
@@ -82,6 +84,7 @@ function readUntrackedFiles(root: string, runner: GitCommandRunner): DiffFile[] 
     .split(/\r?\n/)
     .map((path) => path.trim())
     .filter((path) => path.length > 0)
+    .filter((path) => !isInternalCriticalGatePath(path))
     .map((path) => {
       const content = runner.readFile?.(join(root, path)) ?? "";
       const additions = countLines(content);
@@ -97,6 +100,10 @@ function readUntrackedFiles(root: string, runner: GitCommandRunner): DiffFile[] 
         hunks: []
       };
     });
+}
+
+function isInternalCriticalGatePath(path: string): boolean {
+  return path.replaceAll("\\", "/").startsWith(".critical-gate/cache/");
 }
 
 function countLines(content: string): number {

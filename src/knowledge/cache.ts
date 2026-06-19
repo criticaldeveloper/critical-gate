@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import type {
@@ -47,7 +48,7 @@ export function createMemoryKnowledgeCache(): KnowledgeCache {
 }
 
 export function createFileKnowledgeCache(root: string): KnowledgeCache {
-  const cacheRoot = join(root, KNOWLEDGE_CACHE_DIR);
+  const cacheRoot = getKnowledgeCacheRoot(root);
 
   return {
     get: (key) => {
@@ -68,6 +69,10 @@ export function createFileKnowledgeCache(root: string): KnowledgeCache {
       writeFileSync(getCachePath(cacheRoot, key), JSON.stringify(value), "utf8");
     }
   };
+}
+
+export function getKnowledgeCacheRoot(root: string): string {
+  return join(tmpdir(), "critical-gate", hashString(root), "cache");
 }
 
 export function buildKnowledgeCacheKey(options: KnowledgeCacheKeyOptions): KnowledgeCacheKey {

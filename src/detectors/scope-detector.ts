@@ -3,7 +3,7 @@ import type { DiffFile, Finding } from "../schema/index.js";
 
 import type { Detector } from "./types.js";
 
-const broadTaskTerms = ["repo", "project", "all", "setup", "scaffold", "architecture", "refactor"];
+const broadTaskTerms = ["repo", "all", "setup", "scaffold", "architecture", "refactor"];
 const configTaskTerms = [
   "build",
   "ci",

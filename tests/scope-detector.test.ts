@@ -89,6 +89,59 @@ index 57b22a0..0000000
     ]);
   });
 
+  it("does not treat casual project wording as a broad task", () => {
+    const diff = parse(`diff --git a/src/styles/reset.scss b/src/styles/reset.scss
+deleted file mode 100644
+index 57b22a0..0000000
+--- a/src/styles/reset.scss
++++ /dev/null
+@@ -1,3 +0,0 @@
+-* {
+-  box-sizing: border-box;
+-}
+diff --git a/src/styles/typography.scss b/src/styles/typography.scss
+deleted file mode 100644
+index 57b22a0..0000000
+--- a/src/styles/typography.scss
++++ /dev/null
+@@ -1,3 +0,0 @@
+-.heading {
+-  font-weight: 600;
+-}
+`);
+
+    const findings = runDetectors(
+      {
+        source: "cli",
+        text: "Fixed fonts of the project"
+      },
+      diff
+    );
+
+    expect(findings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          detector: "scope",
+          severity: "high",
+          message:
+            "src/styles/reset.scss was deleted during a small task but does not align with expected scope."
+        }),
+        expect.objectContaining({
+          detector: "scope",
+          severity: "high",
+          message:
+            "src/styles/typography.scss was deleted during a small task but does not align with expected scope."
+        })
+      ])
+    );
+    expect(
+      summarizeFindings(findings, { source: "cli", text: "Fixed fonts of the project" }, diff)
+    ).toMatchObject({
+      decision: "fail",
+      highCount: 2
+    });
+  });
+
   it("does not emit for acknowledged deleted stylesheet files", () => {
     const diff = parse(`diff --git a/src/styles/typography.scss b/src/styles/typography.scss
 deleted file mode 100644
