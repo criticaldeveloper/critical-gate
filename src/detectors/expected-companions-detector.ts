@@ -5,7 +5,14 @@ import type { Detector } from "./types.js";
 
 const maxHistoryFindingsPerSource = 3;
 const maxFrameworkFindingsPerSource = 2;
+const minimumHistoryCommitCount = 20;
+const minimumCompanionSupport = 3;
 const stylePathPattern = /\.(?:css|scss|sass|less|styl)$/i;
+const componentPathPattern = /\.(?:astro|vue|svelte|[jt]sx)$/i;
+const structuralLinePattern =
+  /^\s*(?:import\s|export\s|interface\s+Props\b|type\s+Props\b|const\s+\{\s*[^}]+\s*\}\s*=\s*Astro\.props\b)/;
+const companionRelevantDataPattern =
+  /\bdata-(?:frame|scroll|release|artist|hero|outro|cursor|sequence)-[a-z0-9-]+/gi;
 
 export const expectedCompanionsDetector: Detector = {
   name: "expected-companions",
@@ -14,14 +21,15 @@ export const expectedCompanionsDetector: Detector = {
 
     const changedPaths = new Set(diff.files.map((file) => file.path));
     const historyFindings =
-      history === undefined
+      history === undefined || !hasMatureHistory(history.profile?.commitCount)
         ? []
         : getCappedHistoryFindings(
             history.companionRules.filter(
               (rule) =>
                 changedPaths.has(rule.sourcePath) &&
                 !changedPaths.has(rule.expectedPath) &&
-                !isTrivialStylesheetChange(rule.sourcePath, diff.files)
+                isStrongCompanionRule(rule) &&
+                !isLowRelevanceCompanionChange(rule.sourcePath, diff.files)
             ),
             history.normalPatterns ?? []
           );
@@ -48,7 +56,8 @@ function getFrameworkFindings(files: DiffFile[], activePackIds: string[]): Findi
         (file) =>
           file.role === "source" &&
           file.status !== "deleted" &&
-          matchesPathPattern(rule.whenChanged, file.path)
+          matchesPathPattern(rule.whenChanged, file.path) &&
+          !isLowRelevanceFrameworkChange(file, files)
       );
 
       if (
@@ -72,6 +81,133 @@ function getFrameworkFindings(files: DiffFile[], activePackIds: string[]): Findi
   return [...findingsBySource.values()].flatMap((findings) =>
     findings.slice(0, maxFrameworkFindingsPerSource)
   );
+}
+
+function hasMatureHistory(commitCount: number | undefined): boolean {
+  return commitCount === undefined || commitCount >= minimumHistoryCommitCount;
+}
+
+function isStrongCompanionRule(rule: CompanionRule): boolean {
+  return rule.support >= minimumCompanionSupport;
+}
+
+function isLowRelevanceCompanionChange(path: string, files: DiffFile[]): boolean {
+  return isTrivialStylesheetChange(path, files) || isTinySelfContainedComponentChange(path, files);
+}
+
+function isLowRelevanceFrameworkChange(file: DiffFile, files: DiffFile[]): boolean {
+  return (
+    isTinySelfContainedComponentChange(file.path, files) ||
+    isSelfContainedAddedComponent(file) ||
+    isSelfContainedComponentWiringChange(file, files)
+  );
+}
+
+function isTinySelfContainedComponentChange(path: string, files: DiffFile[]): boolean {
+  if (!componentPathPattern.test(path) || files.length !== 1) {
+    return false;
+  }
+
+  const file = files.find((candidate) => candidate.path === path);
+
+  if (file === undefined || file.status !== "modified") {
+    return false;
+  }
+
+  const churn = file.additions + file.deletions;
+
+  if (churn === 0 || churn > 6) {
+    return false;
+  }
+
+  return !hasCompanionRelevantLine(file);
+}
+
+function isSelfContainedAddedComponent(file: DiffFile): boolean {
+  return (
+    file.status === "added" &&
+    /\.(?:astro|vue|svelte)$/.test(file.path) &&
+    (file.hunks.length === 0 || hasAddedLine(file, /<style\b/i))
+  );
+}
+
+function isSelfContainedComponentWiringChange(file: DiffFile, files: DiffFile[]): boolean {
+  if (!/\.astro$/i.test(file.path) || file.status !== "modified") {
+    return false;
+  }
+
+  const addedComponentNames = getAddedSelfContainedComponentNames(files);
+
+  if (addedComponentNames.length === 0) {
+    return false;
+  }
+
+  const churn = file.additions + file.deletions;
+
+  if (churn === 0 || churn > 8) {
+    return false;
+  }
+
+  const changedLines = file.hunks
+    .flatMap((hunk) => hunk.lines)
+    .filter((line) => line.kind === "add" || line.kind === "delete");
+
+  return changedLines.every((line) =>
+    addedComponentNames.some((componentName) => line.content.includes(componentName))
+  );
+}
+
+function getAddedSelfContainedComponentNames(files: DiffFile[]): string[] {
+  return files
+    .filter(isSelfContainedAddedComponent)
+    .map((file) =>
+      file.path
+        .split("/")
+        .at(-1)
+        ?.replace(/\.[^.]+$/, "")
+    )
+    .filter((name): name is string => name !== undefined && name.length > 0);
+}
+
+function hasCompanionRelevantLine(file: DiffFile): boolean {
+  const changedLines = file.hunks
+    .flatMap((hunk) => hunk.lines)
+    .filter((line) => line.kind === "add" || line.kind === "delete");
+
+  if (changedLines.some((line) => structuralLinePattern.test(line.content))) {
+    return true;
+  }
+
+  const addedDataHooks = new Set(
+    changedLines
+      .filter((line) => line.kind === "add")
+      .flatMap((line) => extractRelevantDataHooks(line.content))
+  );
+  const deletedDataHooks = new Set(
+    changedLines
+      .filter((line) => line.kind === "delete")
+      .flatMap((line) => extractRelevantDataHooks(line.content))
+  );
+
+  return !setsEqual(addedDataHooks, deletedDataHooks);
+}
+
+function hasAddedLine(file: DiffFile, pattern: RegExp): boolean {
+  return file.hunks
+    .flatMap((hunk) => hunk.lines)
+    .some((line) => line.kind === "add" && pattern.test(line.content));
+}
+
+function extractRelevantDataHooks(content: string): string[] {
+  return content.match(companionRelevantDataPattern)?.map((hook) => hook.toLowerCase()) ?? [];
+}
+
+function setsEqual(left: Set<string>, right: Set<string>): boolean {
+  if (left.size !== right.size) {
+    return false;
+  }
+
+  return [...left].every((entry) => right.has(entry));
 }
 
 function isTrivialStylesheetChange(path: string, files: DiffFile[]): boolean {

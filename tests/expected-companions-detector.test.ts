@@ -40,6 +40,37 @@ function knowledge(): KnowledgeProvider {
   };
 }
 
+function knowledgeWithHistory(options: {
+  commitCount?: number;
+  support?: number;
+  confidence?: number;
+}): KnowledgeProvider {
+  return {
+    getFileGraph: () => ({ nodes: [], edges: [] }),
+    getHistoryIndex: () => ({
+      profile:
+        options.commitCount === undefined
+          ? undefined
+          : {
+              commitCount: options.commitCount,
+              minConfidenceCommitCount: 20,
+              coChanges: []
+            },
+      coChanges: [],
+      companionRules: [
+        {
+          sourcePath: "src/components/HeroVideo.astro",
+          expectedPath: "src/scripts/cinematic-motion.ts",
+          support: options.support ?? 5,
+          confidence: options.confidence ?? 0.85
+        }
+      ]
+    }),
+    getPatternIndex: () => ({ patterns: [] }),
+    getSolutionIndex: () => ({ solutions: [] })
+  };
+}
+
 describe("expectedCompanionsDetector", () => {
   it("emits when a historically paired test companion is missing", () => {
     const diff = parse(`diff --git a/src/signup.ts b/src/signup.ts
@@ -257,5 +288,113 @@ index 57b22a0..cb3e0f1 100644
     });
 
     expect(findings).toEqual([]);
+  });
+
+  it("does not emit immature or weak historical companions", () => {
+    const diff = parse(`diff --git a/src/components/HeroVideo.astro b/src/components/HeroVideo.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/HeroVideo.astro
++++ b/src/components/HeroVideo.astro
+@@ -1 +1,2 @@
+ <section class="hero-video">
++  <p>Updated hero copy</p>
+`);
+
+    expect(
+      expectedCompanionsDetector.run({
+        task,
+        diff,
+        context: { knowledge: knowledgeWithHistory({ commitCount: 14, support: 9 }) }
+      })
+    ).toEqual([]);
+    expect(
+      expectedCompanionsDetector.run({
+        task,
+        diff,
+        context: { knowledge: knowledgeWithHistory({ commitCount: 50, support: 2 }) }
+      })
+    ).toEqual([]);
+  });
+
+  it("does not emit companions for tiny self-contained component copy edits", () => {
+    const diff = parse(`diff --git a/src/components/HeroVideo.astro b/src/components/HeroVideo.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/HeroVideo.astro
++++ b/src/components/HeroVideo.astro
+@@ -1,3 +1,3 @@
+ <section class="hero-video">
+-  <p class="hero-video__eyebrow" data-hero-kicker>Transmission 001 / nocturnal cinema</p>
++  <p class="hero-video__eyebrow" data-hero-kicker>Transmission 001 / cinematic signal</p>
+ </section>
+`);
+
+    expect(
+      expectedCompanionsDetector.run({
+        task,
+        diff,
+        context: {
+          frameworkPacks: ["astro"],
+          knowledge: knowledgeWithHistory({ commitCount: 50, support: 9, confidence: 1 })
+        }
+      })
+    ).toEqual([]);
+  });
+
+  it("still emits historical companions for structural component hook changes", () => {
+    const diff = parse(`diff --git a/src/components/HeroVideo.astro b/src/components/HeroVideo.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/HeroVideo.astro
++++ b/src/components/HeroVideo.astro
+@@ -1 +1 @@
+-<canvas data-frame-sequence-id="hero"></canvas>
++<canvas data-frame-sequence-id="hero" data-frame-max-scale="1.02"></canvas>
+`);
+
+    expect(
+      expectedCompanionsDetector.run({
+        task,
+        diff,
+        context: { knowledge: knowledgeWithHistory({ commitCount: 50, support: 9, confidence: 1 }) }
+      })
+    ).toEqual([
+      expect.objectContaining({
+        detector: "expected-companions",
+        title: "Expected companion file missing"
+      })
+    ]);
+  });
+
+  it("does not emit framework companions when wiring an added Astro component", () => {
+    const diff = parse(`diff --git a/src/pages/index.astro b/src/pages/index.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/pages/index.astro
++++ b/src/pages/index.astro
+@@ -1,3 +1,5 @@
+ import HeroVideo from "../components/HeroVideo.astro";
++import WorksSection from "../components/WorksSection.astro";
+ <HeroVideo />
++<WorksSection />
+diff --git a/src/components/WorksSection.astro b/src/components/WorksSection.astro
+new file mode 100644
+index 0000000..cb3e0f1
+--- /dev/null
++++ b/src/components/WorksSection.astro
+@@ -0,0 +1,7 @@
++<section class="works-section">
++  <h2>Selected works</h2>
++</section>
++
++<style lang="scss">
++  .works-section { display: grid; }
++</style>
+`);
+
+    expect(
+      expectedCompanionsDetector.run({
+        task,
+        diff,
+        context: { frameworkPacks: ["astro"] }
+      })
+    ).toEqual([]);
   });
 });

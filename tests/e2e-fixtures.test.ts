@@ -84,12 +84,10 @@ describe("e2e fixture repositories", () => {
         },
         {
           "decision": "pass",
-          "detectors": [
-            "expected-companions",
-          ],
+          "detectors": [],
           "exitCode": 0,
           "name": "missing companion",
-          "score": 1,
+          "score": 0,
           "unexpectedClasses": [],
         },
         {

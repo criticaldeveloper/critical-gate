@@ -242,6 +242,14 @@ Evidence:
 - Package manifest/lockfile pairs.
 - Source/docs pairs.
 
+Current companion relevance behavior:
+
+- Historical companion findings require mature repository history and repeated pair support.
+- Tiny self-contained component edits, such as copy or label changes, do not emit companion
+  observations.
+- Newly added Astro/Vue/Svelte components and simple page wiring for those components do not require
+  external style or script companions by default.
+
 Initial implementation:
 
 - Build typed normal patterns from the same history index used for companion rules.
