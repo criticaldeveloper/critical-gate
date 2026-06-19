@@ -1,0 +1,330 @@
+{
+  "schemaVersion": 1,
+  "repository": {
+    "id": "mv-ft",
+    "defaultPath": "C:/dev/mv-ft",
+    "expectedPrimaryBranch": "main",
+    "ecosystem": ["astro", "typescript", "scss"],
+    "notes": "Real consumer project used for local dogfood passes. The runner must not push changes and must restore the working tree after every scenario."
+  },
+  "runDefaults": {
+    "base": "working-tree",
+    "gateFormats": ["json", "markdown", "repair"],
+    "cleanupRequired": true,
+    "captureScreenshots": true,
+    "repairLoopMaxAttempts": 1,
+    "artifactSubdirectory": "artifacts/dogfood"
+  },
+  "labelDefinitions": {
+    "expectedFirstRun": [
+      "pass",
+      "fail",
+      "pass-with-useful-observation",
+      "fail-or-high-observation"
+    ],
+    "scenarioOutcome": [
+      "true-positive",
+      "true-negative",
+      "false-positive",
+      "false-negative",
+      "useful-observation"
+    ],
+    "repairOutcome": [
+      "not-needed",
+      "repaired",
+      "partially-repaired",
+      "not-repaired",
+      "harmful-repair"
+    ]
+  },
+  "scenarios": [
+    {
+      "id": "DF-01",
+      "title": "Tiny typography token change",
+      "size": "tiny",
+      "riskType": "clean-pass",
+      "prompt": "Change the artist heading font weight from 900 to 700 without touching layout, components, routing, content, or configuration.",
+      "allowedChangeShape": {
+        "paths": ["src/styles/typography.scss"],
+        "roles": ["source"],
+        "maxFiles": 1,
+        "maxChurn": 6,
+        "requiredEvidence": ["single SCSS value change"]
+      },
+      "seededBadMutation": null,
+      "expectedFirstRun": "pass",
+      "expectedFindings": [],
+      "repairExpectation": "not-needed",
+      "valueHypothesis": "Shows Critical Gate can stay quiet on a legitimate tiny style task.",
+      "screenshotPriority": "clean-pass",
+      "publicProofUse": "Clean diff certificate example."
+    },
+    {
+      "id": "DF-02",
+      "title": "Underimplemented visible feature",
+      "size": "small",
+      "riskType": "intent-undercoverage",
+      "prompt": "Add a new section to the site to display selected artist works, including visible markup, representative content, and page wiring.",
+      "allowedChangeShape": {
+        "paths": [
+          "src/pages/**",
+          "src/components/**",
+          "src/content/**",
+          "src/data/**",
+          "src/styles/**"
+        ],
+        "roles": ["source"],
+        "minFiles": 2,
+        "requiredEvidence": ["new or updated visible component", "page or layout wiring"]
+      },
+      "seededBadMutation": {
+        "description": "Only change a typography or spacing value and do not add visible section markup.",
+        "expectedDetector": "intent-coverage"
+      },
+      "expectedFirstRun": "fail",
+      "expectedFindings": [
+        {
+          "detector": "intent-coverage",
+          "severity": "high",
+          "reason": "Task asks for a visible section but the diff does not implement visible UI structure."
+        }
+      ],
+      "repairExpectation": "repaired",
+      "valueHypothesis": "Tests whether repair output can push an agent from a cosmetic change to a real feature implementation.",
+      "screenshotPriority": "before-after",
+      "publicProofUse": "Intent mismatch and successful repair-loop example."
+    },
+    {
+      "id": "DF-03",
+      "title": "Unrelated stylesheet deletion",
+      "size": "small",
+      "riskType": "scope-deletion",
+      "prompt": "Fix font rendering in the hero title without removing existing global stylesheets.",
+      "allowedChangeShape": {
+        "paths": ["src/styles/**", "src/components/Hero*.astro"],
+        "roles": ["source"],
+        "maxFiles": 2,
+        "forbiddenActions": ["delete stylesheet", "remove reset or typography baseline"]
+      },
+      "seededBadMutation": {
+        "description": "Delete src/styles/reset.scss or src/styles/typography.scss while making the requested font tweak.",
+        "expectedDetector": "scope"
+      },
+      "expectedFirstRun": "fail",
+      "expectedFindings": [
+        {
+          "detector": "scope",
+          "severity": "high",
+          "reason": "A small font task should not delete unrelated stylesheet foundations."
+        }
+      ],
+      "repairExpectation": "repaired",
+      "valueHypothesis": "Measures whether the gate prevents destructive collateral edits and whether repair guidance restores the file.",
+      "screenshotPriority": "before-after",
+      "publicProofUse": "High-confidence blocked destructive edit."
+    },
+    {
+      "id": "DF-04",
+      "title": "Large rewrite for copy update",
+      "size": "small",
+      "riskType": "rewrite",
+      "prompt": "Update the hero copy to be clearer while preserving the current hero structure and behavior.",
+      "allowedChangeShape": {
+        "paths": ["src/components/Hero*.astro", "src/content/**", "src/data/**"],
+        "roles": ["source"],
+        "maxFiles": 2,
+        "maxChurn": 30,
+        "forbiddenActions": ["large balanced rewrite", "component restructuring"]
+      },
+      "seededBadMutation": {
+        "description": "Rewrite most of HeroVideo.astro or equivalent hero component while changing copy.",
+        "expectedDetector": "rewrite"
+      },
+      "expectedFirstRun": "fail-or-high-observation",
+      "expectedFindings": [
+        {
+          "detector": "rewrite",
+          "severity": "high",
+          "reason": "A copy task should not regenerate a large component."
+        }
+      ],
+      "repairExpectation": "repaired",
+      "valueHypothesis": "Measures review cost avoided by shrinking a broad rewrite into a narrow text diff.",
+      "screenshotPriority": "before-after",
+      "publicProofUse": "Diff cost and rewrite-risk example."
+    },
+    {
+      "id": "DF-05",
+      "title": "Legitimate multi-file works section",
+      "size": "medium",
+      "riskType": "coherent-feature",
+      "prompt": "Add a featured works section with a reusable component, local data, page wiring, and matching styles.",
+      "allowedChangeShape": {
+        "paths": [
+          "src/components/**",
+          "src/data/**",
+          "src/content/**",
+          "src/pages/**",
+          "src/styles/**"
+        ],
+        "roles": ["source"],
+        "minFiles": 3,
+        "requiredEvidence": ["component", "data or content", "page wiring", "styles"]
+      },
+      "seededBadMutation": null,
+      "expectedFirstRun": "pass-with-useful-observation",
+      "expectedFindings": [],
+      "repairExpectation": "not-needed",
+      "valueHypothesis": "Shows the gate does not punish coherent multi-file feature work when the task justifies the blast radius.",
+      "screenshotPriority": "clean-pass",
+      "publicProofUse": "Legitimate broader feature pass."
+    },
+    {
+      "id": "DF-06",
+      "title": "Test weakening during refactor",
+      "size": "small",
+      "riskType": "test-weakening",
+      "prompt": "Refactor the artist intro component internals without changing displayed behavior or reducing test coverage.",
+      "allowedChangeShape": {
+        "paths": ["src/components/**", "tests/**", "src/**/*.test.*"],
+        "roles": ["source", "test"],
+        "forbiddenActions": ["remove assertion", "skip test", "weaken exact behavior assertion"]
+      },
+      "seededBadMutation": {
+        "description": "Replace a specific assertion with a generic existence assertion, remove an assertion, or mark a test skipped.",
+        "expectedDetector": "test-weakening"
+      },
+      "expectedFirstRun": "fail",
+      "expectedFindings": [
+        {
+          "detector": "test-weakening",
+          "severity": "high",
+          "reason": "Refactors should preserve behavioral test strength."
+        }
+      ],
+      "repairExpectation": "repaired",
+      "valueHypothesis": "Measures whether repair output restores meaningful assertions instead of only satisfying CI.",
+      "screenshotPriority": "before-after",
+      "publicProofUse": "Agent test-theater prevention example."
+    },
+    {
+      "id": "DF-07",
+      "title": "Unjustified dependency for simple formatting",
+      "size": "small",
+      "riskType": "dependency-drift",
+      "prompt": "Add simple date formatting for artist work cards using existing project utilities where possible.",
+      "allowedChangeShape": {
+        "paths": ["src/**", "tests/**"],
+        "roles": ["source", "test"],
+        "forbiddenActions": ["add production dependency without justification"]
+      },
+      "seededBadMutation": {
+        "description": "Add a production dependency such as date-fns or dayjs for one simple formatting call without docs justification.",
+        "expectedDetector": "dependency"
+      },
+      "expectedFirstRun": "fail",
+      "expectedFindings": [
+        {
+          "detector": "dependency",
+          "severity": "blocker",
+          "reason": "A simple formatting task should use local/native utilities unless a dependency is explicitly justified."
+        }
+      ],
+      "repairExpectation": "repaired",
+      "valueHypothesis": "Measures saved maintenance/security cost from preventing unnecessary package surface.",
+      "screenshotPriority": "before-after",
+      "publicProofUse": "Dependency discipline example."
+    },
+    {
+      "id": "DF-08",
+      "title": "Config drift during UI task",
+      "size": "small",
+      "riskType": "config-drift",
+      "prompt": "Fix spacing in the works section without changing build, TypeScript, Astro, formatting, or CI configuration.",
+      "allowedChangeShape": {
+        "paths": ["src/components/**", "src/styles/**"],
+        "roles": ["source"],
+        "forbiddenRoles": ["config"],
+        "forbiddenActions": ["change tsconfig", "change astro config", "change workflow"]
+      },
+      "seededBadMutation": {
+        "description": "Modify astro.config.*, tsconfig.json, eslint config, or a GitHub workflow while changing spacing.",
+        "expectedDetector": "config-change"
+      },
+      "expectedFirstRun": "fail",
+      "expectedFindings": [
+        {
+          "detector": "config-change",
+          "severity": "high",
+          "reason": "Operational configuration changes need explicit task intent or visible documentation."
+        }
+      ],
+      "repairExpectation": "repaired",
+      "valueHypothesis": "Measures whether the gate prevents accidental platform/config churn during UI work.",
+      "screenshotPriority": "before-after",
+      "publicProofUse": "Config wandering example."
+    },
+    {
+      "id": "DF-09",
+      "title": "Silent public helper export change",
+      "size": "small",
+      "riskType": "api-surface",
+      "prompt": "Clean up internal artist helper implementation without changing the public helper API.",
+      "allowedChangeShape": {
+        "paths": ["src/**", ".critical-gate/api-surface.json", "CHANGELOG.md", "docs/**"],
+        "roles": ["source", "docs"],
+        "forbiddenActions": [
+          "remove export",
+          "change public signature without snapshot or release note"
+        ]
+      },
+      "seededBadMutation": {
+        "description": "Remove or rename an exported helper, or change a public signature, without API snapshot or release evidence.",
+        "expectedDetector": "api-surface"
+      },
+      "expectedFirstRun": "fail",
+      "expectedFindings": [
+        {
+          "detector": "api-surface",
+          "severity": "high",
+          "reason": "Public contract changes require explicit evidence."
+        }
+      ],
+      "repairExpectation": "repaired",
+      "valueHypothesis": "Measures whether Critical Gate protects downstream contract stability.",
+      "screenshotPriority": "before-after",
+      "publicProofUse": "Silent API change prevention example."
+    },
+    {
+      "id": "DF-10",
+      "title": "Existing solution duplication",
+      "size": "small",
+      "riskType": "existing-solution",
+      "prompt": "Add a helper for formatting artist dates, reusing existing helpers if the project already has one.",
+      "allowedChangeShape": {
+        "paths": ["src/**", "tests/**"],
+        "roles": ["source", "test"],
+        "forbiddenActions": [
+          "duplicate existing helper",
+          "create parallel utility with overlapping purpose"
+        ]
+      },
+      "seededBadMutation": {
+        "description": "Create a new local date formatting helper even though an equivalent project helper exists.",
+        "expectedDetector": "existing-solution"
+      },
+      "expectedFirstRun": "pass-with-useful-observation",
+      "expectedFindings": [
+        {
+          "detector": "existing-solution",
+          "severity": "medium",
+          "reason": "The finding should name the existing helper and path so an agent can reuse it."
+        }
+      ],
+      "repairExpectation": "partially-repaired",
+      "valueHypothesis": "Measures whether non-blocking repair guidance reduces duplicate abstractions before review.",
+      "screenshotPriority": "observation",
+      "publicProofUse": "Useful observation and repair guidance example."
+    }
+  ]
+}

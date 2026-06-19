@@ -130,6 +130,10 @@ dogfood/scenarios/mv-ft.json
 docs/dogfood-results-template.md
 ```
 
+The first scenario definition file is `dogfood/scenarios/mv-ft.json`. It contains ten real-task
+dogfood scenarios with prompts, allowed change shapes, expected gate signals, repair expectations,
+and screenshot priorities.
+
 The runner should support:
 
 - Repository path.
