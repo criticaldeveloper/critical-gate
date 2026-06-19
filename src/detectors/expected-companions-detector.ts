@@ -5,6 +5,7 @@ import type { Detector } from "./types.js";
 
 const maxHistoryFindingsPerSource = 3;
 const maxFrameworkFindingsPerSource = 2;
+const stylePathPattern = /\.(?:css|scss|sass|less|styl)$/i;
 
 export const expectedCompanionsDetector: Detector = {
   name: "expected-companions",
@@ -17,7 +18,10 @@ export const expectedCompanionsDetector: Detector = {
         ? []
         : getCappedHistoryFindings(
             history.companionRules.filter(
-              (rule) => changedPaths.has(rule.sourcePath) && !changedPaths.has(rule.expectedPath)
+              (rule) =>
+                changedPaths.has(rule.sourcePath) &&
+                !changedPaths.has(rule.expectedPath) &&
+                !isTrivialStylesheetChange(rule.sourcePath, diff.files)
             ),
             history.normalPatterns ?? []
           );
@@ -67,6 +71,48 @@ function getFrameworkFindings(files: DiffFile[], activePackIds: string[]): Findi
 
   return [...findingsBySource.values()].flatMap((findings) =>
     findings.slice(0, maxFrameworkFindingsPerSource)
+  );
+}
+
+function isTrivialStylesheetChange(path: string, files: DiffFile[]): boolean {
+  if (!stylePathPattern.test(path)) {
+    return false;
+  }
+
+  const file = files.find((candidate) => candidate.path === path);
+
+  if (file === undefined || file.status === "deleted") {
+    return false;
+  }
+
+  const churn = file.additions + file.deletions;
+
+  if (churn > 4) {
+    return false;
+  }
+
+  const changedLines = file.hunks.flatMap((hunk) =>
+    hunk.lines.filter((line) => line.kind === "add" || line.kind === "delete")
+  );
+
+  if (changedLines.length === 0) {
+    return churn <= 2;
+  }
+
+  return changedLines.every((line) => isStyleValueLine(line.content));
+}
+
+function isStyleValueLine(content: string): boolean {
+  const trimmed = content.trim();
+
+  if (trimmed.length === 0 || trimmed.startsWith("//") || trimmed.startsWith("/*")) {
+    return true;
+  }
+
+  return (
+    /^\$?[-A-Za-z0-9_]+\s*:\s*[^;{}]+;?$/.test(trimmed) ||
+    /^--[-A-Za-z0-9_]+\s*:\s*[^;{}]+;?$/.test(trimmed) ||
+    /^[^{]+{\s*(?:--)?[-A-Za-z0-9_]+\s*:\s*[^;{}]+;?\s*}$/.test(trimmed)
   );
 }
 

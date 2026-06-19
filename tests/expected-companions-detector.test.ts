@@ -156,12 +156,12 @@ index 57b22a0..cb3e0f1 100644
   });
 
   it("caps historical companion findings per changed source path", () => {
-    const diff = parse(`diff --git a/src/styles/typography.scss b/src/styles/typography.scss
+    const diff = parse(`diff --git a/src/signup.ts b/src/signup.ts
 index 57b22a0..cb3e0f1 100644
---- a/src/styles/typography.scss
-+++ b/src/styles/typography.scss
+--- a/src/signup.ts
++++ b/src/signup.ts
 @@ -1 +1,2 @@
-+$font-weight: 700;
++export const signup = true;
 `);
     const findings = expectedCompanionsDetector.run({
       task,
@@ -173,25 +173,25 @@ index 57b22a0..cb3e0f1 100644
             coChanges: [],
             companionRules: [
               {
-                sourcePath: "src/styles/typography.scss",
+                sourcePath: "src/signup.ts",
                 expectedPath: "src/components/Hero.astro",
                 support: 4,
                 confidence: 0.8
               },
               {
-                sourcePath: "src/styles/typography.scss",
+                sourcePath: "src/signup.ts",
                 expectedPath: "src/components/Footer.astro",
                 support: 7,
                 confidence: 0.82
               },
               {
-                sourcePath: "src/styles/typography.scss",
+                sourcePath: "src/signup.ts",
                 expectedPath: "src/layouts/BaseLayout.astro",
                 support: 3,
                 confidence: 0.8
               },
               {
-                sourcePath: "src/styles/typography.scss",
+                sourcePath: "src/signup.ts",
                 expectedPath: "src/pages/index.astro",
                 support: 9,
                 confidence: 0.7
@@ -206,9 +206,56 @@ index 57b22a0..cb3e0f1 100644
 
     expect(findings).toHaveLength(3);
     expect(findings.map((finding) => finding.id)).toEqual([
-      "expected-companions:src/styles/typography.scss:src/components/Footer.astro",
-      "expected-companions:src/styles/typography.scss:src/components/Hero.astro",
-      "expected-companions:src/styles/typography.scss:src/layouts/BaseLayout.astro"
+      "expected-companions:src/signup.ts:src/components/Footer.astro",
+      "expected-companions:src/signup.ts:src/components/Hero.astro",
+      "expected-companions:src/signup.ts:src/layouts/BaseLayout.astro"
     ]);
+  });
+
+  it("does not emit historical companions for tiny stylesheet value changes", () => {
+    const diff = parse(`diff --git a/src/styles/typography.scss b/src/styles/typography.scss
+index 57b22a0..cb3e0f1 100644
+--- a/src/styles/typography.scss
++++ b/src/styles/typography.scss
+@@ -1 +1 @@
+-.artist-title { font-weight: 900; }
++.artist-title { font-weight: 700; }
+`);
+    const findings = expectedCompanionsDetector.run({
+      task,
+      diff,
+      context: {
+        knowledge: {
+          getFileGraph: () => ({ nodes: [], edges: [] }),
+          getHistoryIndex: () => ({
+            coChanges: [],
+            companionRules: [
+              {
+                sourcePath: "src/styles/typography.scss",
+                expectedPath: "ai-docs/architecture.md",
+                support: 9,
+                confidence: 1
+              },
+              {
+                sourcePath: "src/styles/typography.scss",
+                expectedPath: "src/components/ArtistIntro.astro",
+                support: 8,
+                confidence: 1
+              },
+              {
+                sourcePath: "src/styles/typography.scss",
+                expectedPath: "src/components/FinalOutro.astro",
+                support: 7,
+                confidence: 1
+              }
+            ]
+          }),
+          getPatternIndex: () => ({ patterns: [] }),
+          getSolutionIndex: () => ({ solutions: [] })
+        }
+      }
+    });
+
+    expect(findings).toEqual([]);
   });
 });

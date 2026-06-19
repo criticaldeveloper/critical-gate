@@ -226,6 +226,8 @@ Initial implementation:
   relationship.
 - Include known normal patterns in repository-intelligence evidence when a changed path appears with
   an unusual combination.
+- Suppress history-derived companion prompts for tiny stylesheet value-only edits, because a
+  one-line typography token change should not require broad historical docs or component companions.
 
 ### Task Intent Quality Warnings
 
