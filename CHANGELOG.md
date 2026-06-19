@@ -4,6 +4,27 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## 2.0.0 - 2026-06-19
+
+Release candidate for the completed Critical Gate deep-improvement package.
+
+### Added
+
+- Cached repository knowledge layer with history, graph, solution, pattern, and local cache support.
+- Intent verification, observed action classification, blast-radius analysis, existing-solution
+  detection, pattern-violation detection, expected-companion detection, and Scope Expansion Score.
+- VS Code Analysis tree, contextual finding actions, persisted run history, and richer status bar
+  semantics.
+- Stabilized SARIF rule IDs, deterministic fingerprints, SARIF size safeguards, and reusable
+  GitHub workflow templates.
+- End-to-end fixture repository tests, local evaluation harness, and observation-mode rollout
+  policy.
+
+### Fixed
+
+- Avoid secret-detector false positives for token-like local identifier names such as
+  `targetTokens`, `importTokens`, and `domainTokens`.
+
 ## 0.1.0-alpha.0 - 2026-06-18
 
 Initial alpha candidate for Critical Gate.

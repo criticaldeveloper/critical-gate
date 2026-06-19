@@ -2,6 +2,19 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.0.0 - 2026-06-19
+
+Marketplace release aligned with the Critical Gate 2.0.0 package.
+
+- Add native Analysis tree for latest run metrics, detector-grouped findings, changed clusters,
+  missing companions, existing-solution signals, changed files, and recent runs.
+- Add contextual actions for opening existing solutions, expected companions, cluster reports,
+  evidence, and repair prompts.
+- Persist last report and recent run history across VS Code reloads as clearly historical state.
+- Improve status bar semantics with scope score, unexpected cluster, missing companion, API surface,
+  and clean-pass signals.
+- Use the bundled analyzer by default.
+
 ## 1.1.0 - 2026-06-18
 
 Self-contained Marketplace package.

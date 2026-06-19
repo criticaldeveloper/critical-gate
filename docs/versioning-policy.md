@@ -6,7 +6,7 @@ changes clearly.
 
 ## Current Release Stage
 
-The current target is `0.1.0-alpha.0`.
+The current target is `2.0.0`.
 
 This means:
 
@@ -56,7 +56,7 @@ Use pre-release labels until the project is public-release ready:
 
 Examples:
 
-- `0.1.0-alpha.0`
+- `2.0.0`
 - `0.1.0-beta.0`
 - `0.1.0-rc.0`
 - `0.1.0`
@@ -82,7 +82,7 @@ Use `vX.Y.Z` for final releases and `vX.Y.Z-label.N` for pre-releases.
 
 Examples:
 
-- `v0.1.0-alpha.0`
+- `v2.0.0`
 - `v0.1.0`
 
 Do not tag directly from a dirty working tree.

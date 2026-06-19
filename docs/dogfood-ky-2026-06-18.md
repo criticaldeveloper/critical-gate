@@ -4,7 +4,7 @@ Date: 2026-06-18
 
 Target repository: `sindresorhus/ky`
 
-Critical Gate version: `0.1.0-alpha.0` local development build
+Critical Gate version: `2.0.0` local development build
 
 ## Goal
 
