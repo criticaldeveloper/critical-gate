@@ -1,0 +1,10 @@
+{
+  "shouldBlock": true,
+  "expectedFindings": [
+    {
+      "detector": "intent-coverage",
+      "severity": "high",
+      "file": "src/styles/typography.scss"
+    }
+  ]
+}

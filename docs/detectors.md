@@ -49,6 +49,28 @@ Initial implementation:
 - Flag unexpected config, dependency, or architecture files in small tasks.
 - Raise severity when unrelated changes combine with high LOC churn.
 
+### Intent Coverage Underimplementation
+
+Goal: detect diffs that are too small or too indirect to satisfy a concrete feature task.
+
+Evidence:
+
+- Strong implementation verbs in the task intent, such as add, create, implement, build, render,
+  display, or show.
+- UI-facing target terms, such as section, page, screen, site, component, gallery, portfolio, or
+  works.
+- Changed files and line-level churn.
+- Whether the diff only contains tiny stylesheet value edits.
+
+Current behavior:
+
+- A task like `Add new section to the site to display works done` should not be satisfied by a
+  one-line typography or color change.
+- The gate emits a high-confidence `intent-coverage` finding when visible UI implementation is
+  requested but only trivial stylesheet values changed.
+- Explicit style tasks, such as `Adjust typography font weight for the works section`, are excluded
+  so normal visual tuning remains low-noise.
+
 ### Dependency Addition Without Justification
 
 Goal: block unnecessary or unexplained new dependencies.

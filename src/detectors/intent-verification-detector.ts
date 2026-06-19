@@ -15,14 +15,110 @@ export const intentVerificationDetector: Detector = {
       .filter((changeClass) => !intent.allowedChangeClasses.includes(changeClass))
       .filter(isReportableIntentMismatch);
 
-    return unexpectedClasses.map((changeClass) =>
-      toFinding(changeClass, intent.allowedChangeClasses, observed.evidence)
-    );
+    return [
+      ...unexpectedClasses.map((changeClass) =>
+        toFinding(changeClass, intent.allowedChangeClasses, observed.evidence)
+      ),
+      ...detectIntentUndercoverage(task.text, diff.files)
+    ];
   }
 };
 
+const implementationVerbPattern =
+  /\b(?:add|create|introduce|implement|build|wire|render|display|show)\b/i;
+const uiFeatureTermPattern =
+  /\b(?:ui|view|views|component|components|section|sections|page|pages|screen|screens|site|website|gallery|portfolio|works|feature)\b/i;
+const styleTaskTermPattern =
+  /\b(?:style|styles|styled|css|scss|sass|less|typography|font|fonts|color|colors|spacing|theme|themes)\b/i;
+const stylePathPattern = /\.(?:css|scss|sass|less|styl)$/i;
+
 function isReportableIntentMismatch(changeClass: ChangeClass): boolean {
   return changeClass === "ci" || changeClass === "source";
+}
+
+function detectIntentUndercoverage(taskText: string, files: GateResultDiffFile[]): Finding[] {
+  if (!requiresVisibleUiImplementation(taskText) || !isOnlyTrivialStylesheetValueChange(files)) {
+    return [];
+  }
+
+  return [toUndercoverageFinding(taskText, files)];
+}
+
+type GateResultDiffFile = Parameters<Detector["run"]>[0]["diff"]["files"][number];
+
+function requiresVisibleUiImplementation(taskText: string): boolean {
+  return (
+    implementationVerbPattern.test(taskText) &&
+    uiFeatureTermPattern.test(taskText) &&
+    !styleTaskTermPattern.test(taskText)
+  );
+}
+
+function isOnlyTrivialStylesheetValueChange(files: GateResultDiffFile[]): boolean {
+  return (
+    files.length > 0 &&
+    files.every(
+      (file) =>
+        stylePathPattern.test(file.path) &&
+        file.status !== "deleted" &&
+        isTrivialStylesheetValueChange(file)
+    )
+  );
+}
+
+function isTrivialStylesheetValueChange(file: GateResultDiffFile): boolean {
+  const churn = file.additions + file.deletions;
+
+  if (churn === 0 || churn > 8) {
+    return false;
+  }
+
+  const changedLines = file.hunks.flatMap((hunk) =>
+    hunk.lines.filter((line) => line.kind === "add" || line.kind === "delete")
+  );
+
+  return changedLines.length > 0 && changedLines.every((line) => isStyleValueLine(line.content));
+}
+
+function isStyleValueLine(content: string): boolean {
+  const trimmed = content.trim();
+
+  if (trimmed.length === 0 || trimmed.startsWith("//") || trimmed.startsWith("/*")) {
+    return true;
+  }
+
+  return (
+    /^\$?[-A-Za-z0-9_]+\s*:\s*[^;{}]+;?$/.test(trimmed) ||
+    /^--[-A-Za-z0-9_]+\s*:\s*[^;{}]+;?$/.test(trimmed) ||
+    /^[^{]+{\s*(?:--)?[-A-Za-z0-9_]+\s*:\s*[^;{}]+;?\s*}$/.test(trimmed)
+  );
+}
+
+function toUndercoverageFinding(taskText: string, files: GateResultDiffFile[]): Finding {
+  return {
+    id: "intent-coverage:ui-implementation-not-observed",
+    detector: "intent-coverage",
+    severity: "high",
+    confidence: 0.88,
+    title: "Requested UI implementation not observed",
+    message:
+      "The task asks for visible UI implementation work, but the diff only changes trivial stylesheet values.",
+    evidence: files.map(
+      (file): FindingEvidence => ({
+        kind: "file",
+        path: file.path,
+        message: `${file.path} only contains small stylesheet value edits.`,
+        data: {
+          additions: file.additions,
+          deletions: file.deletions,
+          task: taskText
+        }
+      })
+    ),
+    repair:
+      "Add the requested UI/page/component changes, or revise the task intent if this diff is only a style adjustment.",
+    tags: ["scope"]
+  };
 }
 
 function toFinding(
