@@ -118,6 +118,12 @@ Use these baselines when dogfooding Critical Gate on real repositories:
 - Finding recall: expected detector/file/severity matches should not regress.
 - Noisiest detector: prioritize tuning detectors that repeatedly appear here.
 
+The latest tracked real-repository proof report is
+`docs/dogfood-mv-ft-2026-06-19.md`. That run started with 10 labeled mv-ft scenarios, 100% scenario
+precision, and 42.9% scenario recall. Four meaningful misses were converted into deterministic eval
+cases. The current case harness baseline after those fixes is 10 cases, 100% case precision, 100%
+case recall, 100% finding precision, and 100% finding recall.
+
 ## Detector Quality Bar
 
 A detector should not become a blocker until:

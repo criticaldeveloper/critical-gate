@@ -389,6 +389,8 @@ Branch and commit conventions for this repository:
 - [docs/codex-integration.md](docs/codex-integration.md): Codex hook and repair-loop guidance.
 - [docs/dogfood-evidence-plan.md](docs/dogfood-evidence-plan.md): real-repository dogfood automation,
   repair-loop metrics, and screenshot proof plan.
+- [docs/dogfood-mv-ft-2026-06-19.md](docs/dogfood-mv-ft-2026-06-19.md): mv-ft dogfood
+  evidence, misses, fixes, and current evaluation baseline.
 - [docs/versioning-policy.md](docs/versioning-policy.md): release and versioning policy.
 - [docs/improvements-task-plan.md](docs/improvements-task-plan.md): trust and calibration roadmap.
 - [CHANGELOG.md](CHANGELOG.md): project-level release notes.
