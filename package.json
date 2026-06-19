@@ -23,6 +23,7 @@
     "format:write": "prettier --write .",
     "test": "vitest run",
     "evaluate": "pnpm build && node scripts/evaluate-fixtures.mjs",
+    "dogfood:plan": "node scripts/dogfood-runner.mjs plan",
     "verify": "pnpm format && pnpm lint && pnpm typecheck && pnpm build:vscode && pnpm build:vscode-tests && pnpm test"
   },
   "keywords": [

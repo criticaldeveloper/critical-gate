@@ -156,6 +156,12 @@ node scripts/dogfood-runner.mjs \
   --dry-run
 ```
 
+The first manual runner command is:
+
+```bash
+pnpm dogfood:plan -- --repo C:/dev/mv-ft --scenarios dogfood/scenarios/mv-ft.json
+```
+
 The first version can be semi-automated:
 
 - Generate prompts and branches.
