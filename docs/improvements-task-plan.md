@@ -28,7 +28,7 @@ root note.
 
 ## Next Product Tasks
 
-1. Evaluation harness.
+1. Evaluation harness. Completed in `feature/case-based-evaluation`.
    - Replace fixture-proxy metrics with case-based evaluation under `eval/cases`.
    - Support expected true-positive, false-positive, false-negative, and expected-clean outcomes.
    - Emit precision, recall, noisiest detector, and best detector summaries.

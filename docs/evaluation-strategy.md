@@ -55,44 +55,68 @@ Use deterministic fixtures for:
 
 Each fixture should have positive and negative variants.
 
-## Local Harness
+## Case-Based Harness
 
-Run the current fixture-level harness with:
+Run the case-based harness with:
 
 ```bash
 pnpm evaluate
 ```
 
-The command builds the CLI, runs `tests/e2e-fixtures.test.ts` once with the knowledge cache disabled
-and once with normal cache behavior, then writes:
+The command builds the CLI, reads labeled cases from `eval/cases`, runs the deterministic detector
+pipeline for each case, and writes:
 
 - `artifacts/evaluation/critical-gate-evaluation.json`
 - `artifacts/evaluation/critical-gate-evaluation.md`
 
-The first harness tracks fixture-level proxy metrics:
+Each case directory contains:
 
-- Unexpected-actions precision.
-- Existing-solution precision.
-- Expected-companion recall.
-- Cold run time.
-- Warm run time.
+```text
+task.md
+diff.patch
+expected-findings.json
+notes.md
+```
 
-The precision/recall values currently mean that the curated E2E fixture suite passed. They are not a
-substitute for dogfood labels from real repositories; they are a stable baseline to catch regressions
-while the labeled dataset grows.
+`expected-findings.json` declares whether the case should block and which detector findings are
+required:
+
+```json
+{
+  "shouldBlock": true,
+  "expectedFindings": [
+    {
+      "detector": "test-weakening",
+      "severity": "high",
+      "file": "tests/login.test.ts"
+    }
+  ]
+}
+```
+
+The harness reports:
+
+- True positives.
+- True negatives.
+- False positives.
+- False negatives.
+- Case precision and recall.
+- Finding precision and recall.
+- Noisiest detector based on unexpected blocking findings.
+- Best detector based on matched expected findings.
+
+The seed corpus intentionally starts small. Add one case for every real false positive, false
+negative, or valuable true positive found during dogfooding.
 
 ## Current Baselines
 
 Use these baselines when dogfooding Critical Gate on real repositories:
 
-- Cold runtime: compare against the `coldRunMs` value in the latest evaluation artifact.
-- Warm runtime: compare against `warmRunMs`; warm runs should not be materially slower than cold
-  runs.
-- Unexpected-actions precision: review findings from the intent mismatch fixture and real PRs for
-  false positives.
-- Existing-solution precision: confirm reuse findings point to genuinely reusable local solutions.
-- Expected-companion recall: confirm historically paired tests, fixtures, lockfiles, or docs are
-  detected when omitted.
+- Case precision: blocking decisions should stay high before new detectors become default blockers.
+- Case recall: known risky diffs should remain blocked.
+- Finding precision: unexpected blocking findings should stay low.
+- Finding recall: expected detector/file/severity matches should not regress.
+- Noisiest detector: prioritize tuning detectors that repeatedly appear here.
 
 ## Detector Quality Bar
 

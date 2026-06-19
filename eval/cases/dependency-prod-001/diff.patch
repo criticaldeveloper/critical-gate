@@ -1,0 +1,12 @@
+diff --git a/package.json b/package.json
+index 57b22a0..cb3e0f1 100644
+--- a/package.json
++++ b/package.json
+@@ -1,6 +1,7 @@
+ {
+   "name": "example",
+   "dependencies": {
++    "left-pad": "^1.3.0",
+     "react": "^19.0.0"
+   }
+ }

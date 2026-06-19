@@ -1,0 +1,9 @@
+diff --git a/src/styles/typography.scss b/src/styles/typography.scss
+index 57b22a0..cb3e0f1 100644
+--- a/src/styles/typography.scss
++++ b/src/styles/typography.scss
+@@ -10,7 +10,7 @@
+ .hero-title {
+-  font-weight: 900;
++  font-weight: 700;
+ }
