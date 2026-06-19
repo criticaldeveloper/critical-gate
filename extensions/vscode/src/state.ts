@@ -75,6 +75,12 @@ export function updateStatusBar(state: RefreshState): void {
   }
 }
 
+export function updateRunViews(state: RefreshState): void {
+  const dashboardState = toDashboardState(state);
+  state.dashboard.update(dashboardState);
+  state.analysisTree.update(dashboardState);
+}
+
 export function toDashboardState(state: RefreshState): DashboardState {
   return {
     running: state.running,

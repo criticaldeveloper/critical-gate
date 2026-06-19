@@ -5,31 +5,30 @@ import {
   clearPendingRefresh,
   clearRunState,
   copyRepair,
+  getCommandPayload,
   openSettings,
   runCriticalGate,
   scheduleRefresh,
   showReport
 } from "./commands.js";
 import { diagnosticPayloads, openEvidence } from "./diagnostics.js";
-import { toDashboardState } from "./state.js";
-import { CriticalGateDashboardProvider } from "./tree-provider.js";
-import {
-  diagnosticSource,
-  type CriticalGateDiagnosticPayload,
-  type RefreshState
-} from "./types.js";
+import { updateRunViews } from "./state.js";
+import { CriticalGateDashboardProvider, CriticalGateTreeProvider } from "./tree-provider.js";
+import { diagnosticSource, type RefreshState } from "./types.js";
 
 export function activate(context: vscode.ExtensionContext): void {
   const diagnostics = vscode.languages.createDiagnosticCollection(diagnosticSource);
   const output = vscode.window.createOutputChannel("Critical Gate");
   const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
   const dashboard = new CriticalGateDashboardProvider(context.extensionUri);
+  const analysisTree = new CriticalGateTreeProvider();
   const refreshState: RefreshState = {
     extensionUri: context.extensionUri,
     diagnostics,
     output,
     statusBar,
     dashboard,
+    analysisTree,
     running: false,
     runSequence: 0,
     history: []
@@ -40,12 +39,16 @@ export function activate(context: vscode.ExtensionContext): void {
   statusBar.tooltip = "Run Critical Gate";
   statusBar.command = "criticalGate.runCheck";
   statusBar.show();
-  dashboard.update(toDashboardState(refreshState));
+  updateRunViews(refreshState);
 
   const dashboardView = vscode.window.registerWebviewViewProvider(
     CriticalGateDashboardProvider.viewType,
     dashboard
   );
+  const treeView = vscode.window.createTreeView(CriticalGateTreeProvider.viewType, {
+    treeDataProvider: analysisTree,
+    showCollapseAll: true
+  });
   const runCommand = vscode.commands.registerCommand("criticalGate.runCheck", async () => {
     await runCriticalGate(refreshState, "manual");
   });
@@ -62,14 +65,21 @@ export function activate(context: vscode.ExtensionContext): void {
   );
   const openEvidenceCommand = vscode.commands.registerCommand(
     "criticalGate.openEvidence",
-    async (payload: CriticalGateDiagnosticPayload) => {
+    async (payloadOrTreeItem: unknown) => {
+      const payload = getCommandPayload(payloadOrTreeItem);
+
+      if (payload === undefined) {
+        vscode.window.showWarningMessage("Critical Gate could not find evidence for this item.");
+        return;
+      }
+
       await openEvidence(payload);
     }
   );
   const copyRepairCommand = vscode.commands.registerCommand(
     "criticalGate.copyRepair",
-    async (payload: CriticalGateDiagnosticPayload) => {
-      await copyRepair(payload.repair);
+    async (payloadOrTreeItem: unknown) => {
+      await copyRepair(payloadOrTreeItem);
     }
   );
   const codeActions = vscode.languages.registerCodeActionsProvider(
@@ -88,6 +98,7 @@ export function activate(context: vscode.ExtensionContext): void {
     output,
     statusBar,
     dashboardView,
+    treeView,
     runCommand,
     showReportCommand,
     clearCommand,

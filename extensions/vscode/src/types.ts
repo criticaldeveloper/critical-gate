@@ -1,7 +1,7 @@
 import type * as vscode from "vscode";
 
 import type { GateResult } from "../../../src/schema/index.js";
-import type { CriticalGateDashboardProvider } from "./tree-provider.js";
+import type { CriticalGateDashboardProvider, CriticalGateTreeProvider } from "./tree-provider.js";
 
 export const diagnosticSource = "critical-gate";
 
@@ -31,6 +31,7 @@ export interface RefreshState {
   output: vscode.OutputChannel;
   statusBar: vscode.StatusBarItem;
   dashboard: CriticalGateDashboardProvider;
+  analysisTree: CriticalGateTreeProvider;
   running: boolean;
   pendingTimer?: ReturnType<typeof setTimeout>;
   lastResult?: GateResult;

@@ -8,10 +8,10 @@ import {
   getConfiguredTask,
   getRefreshDebounceMs,
   getRefreshMode,
-  toDashboardState,
+  updateRunViews,
   updateStatusBar
 } from "./state.js";
-import type { RefreshState, RunReason } from "./types.js";
+import type { CriticalGateDiagnosticPayload, RefreshState, RunReason } from "./types.js";
 
 export async function runCriticalGate(state: RefreshState, reason: RunReason): Promise<void> {
   if (state.running) {
@@ -37,7 +37,7 @@ export async function runCriticalGate(state: RefreshState, reason: RunReason): P
     state.lastTask = task;
     state.statusBar.text = "$(sync~spin) Critical Gate";
     state.statusBar.tooltip = "Critical Gate is running.";
-    state.dashboard.update(toDashboardState(state));
+    updateRunViews(state);
 
     const result = await runCli(folder, task, state.extensionUri);
     const report = renderReport(result);
@@ -47,7 +47,7 @@ export async function runCriticalGate(state: RefreshState, reason: RunReason): P
     applyDiagnostics(state.diagnostics, folder, result);
     writeReport(state.output, report);
     updateStatusBar(state);
-    state.dashboard.update(toDashboardState(state));
+    updateRunViews(state);
 
     await notifyResult(state, reason, result);
   } catch (error) {
@@ -55,12 +55,12 @@ export async function runCriticalGate(state: RefreshState, reason: RunReason): P
     state.lastError = message;
     state.statusBar.text = "$(error) Critical Gate";
     state.statusBar.tooltip = message;
-    state.dashboard.update(toDashboardState(state));
+    updateRunViews(state);
     vscode.window.showErrorMessage(message);
   } finally {
     state.running = false;
     updateStatusBar(state);
-    state.dashboard.update(toDashboardState(state));
+    updateRunViews(state);
   }
 }
 
@@ -102,7 +102,7 @@ export function clearRunState(state: RefreshState): void {
   state.lastError = undefined;
   state.statusBar.text = "$(shield) Critical Gate";
   state.statusBar.tooltip = "Run Critical Gate";
-  state.dashboard.update(toDashboardState(state));
+  updateRunViews(state);
 }
 
 export async function openSettings(): Promise<void> {
@@ -112,7 +112,31 @@ export async function openSettings(): Promise<void> {
   );
 }
 
-export async function copyRepair(repair: string): Promise<void> {
+export function getCommandPayload(input: unknown): CriticalGateDiagnosticPayload | undefined {
+  if (isCriticalGatePayload(input)) {
+    return input;
+  }
+
+  if (typeof input === "object" && input !== null) {
+    const candidate = (input as { criticalGatePayload?: unknown }).criticalGatePayload;
+
+    if (isCriticalGatePayload(candidate)) {
+      return candidate;
+    }
+  }
+
+  return undefined;
+}
+
+export async function copyRepair(payloadOrRepair: unknown): Promise<void> {
+  const payload = getCommandPayload(payloadOrRepair);
+  const repair = typeof payloadOrRepair === "string" ? payloadOrRepair : payload?.repair;
+
+  if (repair === undefined) {
+    vscode.window.showWarningMessage("Critical Gate could not find repair text for this item.");
+    return;
+  }
+
   await vscode.env.clipboard.writeText(repair);
   vscode.window.showInformationMessage("Critical Gate repair text copied.");
 }
@@ -131,6 +155,22 @@ async function resolveTask(): Promise<string | undefined> {
     prompt: "Describe the task this diff is expected to satisfy.",
     ignoreFocusOut: true
   });
+}
+
+function isCriticalGatePayload(input: unknown): input is CriticalGateDiagnosticPayload {
+  if (typeof input !== "object" || input === null) {
+    return false;
+  }
+
+  const candidate = input as Partial<CriticalGateDiagnosticPayload>;
+
+  return (
+    typeof candidate.findingId === "string" &&
+    typeof candidate.detector === "string" &&
+    typeof candidate.title === "string" &&
+    typeof candidate.repair === "string" &&
+    typeof candidate.evidencePath === "string"
+  );
 }
 
 async function notifyResult(

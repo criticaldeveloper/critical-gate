@@ -67,6 +67,10 @@
           "id": "criticalGate.dashboard",
           "name": "Gate Runs",
           "type": "webview"
+        },
+        {
+          "id": "criticalGate.analysisTree",
+          "name": "Analysis"
         }
       ]
     },
@@ -96,6 +100,20 @@
         "title": "Critical Gate: Copy Repair Text"
       }
     ],
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "criticalGate.openEvidence",
+          "when": "view == criticalGate.analysisTree && viewItem == criticalGateFinding",
+          "group": "inline"
+        },
+        {
+          "command": "criticalGate.copyRepair",
+          "when": "view == criticalGate.analysisTree && viewItem == criticalGateFinding",
+          "group": "inline"
+        }
+      ]
+    },
     "configuration": {
       "title": "Critical Gate",
       "properties": {
