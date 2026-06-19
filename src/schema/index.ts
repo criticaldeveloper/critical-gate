@@ -1,5 +1,6 @@
 export { gateResultJsonSchema } from "./gate-result.schema.js";
 export type {
+  ApiSurfaceSnapshotSummary,
   ConfidenceCalibrationSummary,
   DiffFile,
   DiffFileRole,

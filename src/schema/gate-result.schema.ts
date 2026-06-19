@@ -123,6 +123,7 @@ export const gateResultJsonSchema = {
         testFrameworks: stringArraySchema,
         frameworkPacks: stringArraySchema,
         publicEntrypoints: stringArraySchema,
+        apiSnapshot: { $ref: "#/$defs/apiSnapshotSummary" },
         repositoryProfile: { $ref: "#/$defs/repositoryProfile" },
         utilityIndex: { $ref: "#/$defs/utilityIndex" },
         git: {
@@ -162,6 +163,17 @@ export const gateResultJsonSchema = {
       properties: {
         path: { type: "string", minLength: 1 },
         name: { type: "string", minLength: 1 }
+      }
+    },
+    apiSnapshotSummary: {
+      type: "object",
+      additionalProperties: false,
+      required: ["path", "schemaVersion", "exportCount", "entrypoints"],
+      properties: {
+        path: { type: "string", minLength: 1 },
+        schemaVersion: { type: "string", minLength: 1 },
+        exportCount: { type: "integer", minimum: 0 },
+        entrypoints: stringArraySchema
       }
     },
     repositoryProfile: {

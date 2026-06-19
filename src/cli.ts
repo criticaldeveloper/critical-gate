@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -9,12 +9,17 @@ import {
   GATE_RESULT_SCHEMA_VERSION,
   applyLearningPolicy,
   analyzeTaskIntentQuality,
+  buildApiSurfaceSnapshot,
   detectFrameworkPacks,
   detectMonorepoContext,
+  getApiSnapshotOutputDirectory,
+  getApiSnapshotOutputPath,
+  loadApiSurfaceSnapshot,
   loadCriticalGateConfig,
   readGitDiff,
   renderReport,
   runDetectors,
+  summarizeApiSurfaceSnapshot,
   summarizeFindings,
   summarizeIntentVerification,
   updateCriticalGateConfig,
@@ -52,12 +57,15 @@ interface CliIo {
   readFile?: (path: string) => string;
 }
 
-type CommandName = "check" | "hook" | "accept" | "teach";
+type CommandName = "check" | "hook" | "accept" | "teach" | "snapshot-api";
 
 const defaultIo: CliIo = {
   stdout: (message) => console.log(message),
   stderr: (message) => console.error(message),
-  writeFile: (path, content) => writeFileSync(path, content, "utf8"),
+  writeFile: (path, content) => {
+    mkdirSync(getApiSnapshotOutputDirectory(path), { recursive: true });
+    writeFileSync(path, content, "utf8");
+  },
   now: () => new Date(),
   exists: (path) => existsSync(path),
   readFile: (path) => readFileSync(path, "utf8"),
@@ -104,6 +112,10 @@ function runCli(argv: string[], io: CliIo): ExitCode {
 
   if (command === "teach") {
     return runTeachCommand(args, io);
+  }
+
+  if (command === "snapshot-api") {
+    return runSnapshotApiCommand(args, io);
   }
 
   const parsed = parseCheckArgs(args, command);
@@ -239,10 +251,12 @@ function createGateResult(
     config: configResult.config
   });
   const monorepo = detectMonorepoContext(diffResult.root, diff.files, io);
+  const apiSnapshot = loadApiSurfaceSnapshot(diffResult.root, io);
   const context: GateResult["context"] = {
     root: diffResult.root,
     packageManager: "pnpm",
     monorepo,
+    apiSnapshot: summarizeApiSurfaceSnapshot(apiSnapshot),
     frameworkPacks: frameworkPacks.map((pack) => pack.id),
     repositoryProfile: diffResult.repositoryProfile,
     utilityIndex: diffResult.utilityIndex,
@@ -253,6 +267,7 @@ function createGateResult(
   };
   const detectorContext = {
     ...context,
+    apiSurfaceSnapshot: apiSnapshot,
     knowledge: diffResult.knowledge
   };
   const detectorFindings = runDetectors(task, diff, detectorContext);
@@ -290,6 +305,32 @@ function createGateResult(
       configWarnings: configResult.warnings
     }
   };
+}
+
+function runSnapshotApiCommand(args: string[], io: CliIo): ExitCode {
+  const parsed = parseSnapshotApiArgs(args);
+
+  if (!parsed.ok) {
+    io.stderr(parsed.error);
+    io.stderr("Run critical-gate snapshot-api --help for usage.");
+    return ExitCode.UsageError;
+  }
+
+  const root = io.readDiff().root;
+  const snapshot = buildApiSurfaceSnapshot({
+    root,
+    generatedAt: io.now(),
+    entrypoints: parsed.options.entrypoints,
+    reader: io
+  });
+  const outputPath = getApiSnapshotOutputPath(root, parsed.options.output);
+
+  io.writeFile(outputPath, `${JSON.stringify(snapshot, null, 2)}\n`);
+  io.stdout(
+    `Wrote public API snapshot to ${outputPath} (${snapshot.exports.length} exports across ${snapshot.entrypoints.length} entrypoints).`
+  );
+
+  return ExitCode.Pass;
 }
 
 function readOptionalPackageJson(root: string, io: Pick<CliIo, "exists" | "readFile">): unknown {
@@ -419,6 +460,7 @@ function getHelpText(): string {
     "  critical-gate hook [--task <text>] [--base <ref>] [--output <path>]",
     "  critical-gate accept --finding <id> --reason <text>",
     "  critical-gate teach --id <id> --when-changed <glob> --allow <glob[,glob]> --reason <text>",
+    "  critical-gate snapshot-api [--entrypoint <path>] [--output <path>]",
     "  critical-gate --version",
     "  critical-gate --help",
     ""
@@ -436,6 +478,10 @@ function getCommandHelpText(command: CommandName): string {
 
   if (command === "teach") {
     return getTeachHelpText();
+  }
+
+  if (command === "snapshot-api") {
+    return getSnapshotApiHelpText();
   }
 
   return getCheckHelpText();
@@ -497,8 +543,27 @@ function getTeachHelpText(): string {
   ].join("\n");
 }
 
+function getSnapshotApiHelpText(): string {
+  return [
+    "critical-gate snapshot-api",
+    "",
+    "Generates a reviewable public API surface snapshot.",
+    "",
+    "Options:",
+    "  --entrypoint <path>  Public entrypoint to snapshot; may be passed more than once",
+    "  --output <path>      Snapshot path; defaults to .critical-gate/api-surface.json",
+    ""
+  ].join("\n");
+}
+
 function isCommandName(value: string): value is CommandName {
-  return value === "check" || value === "hook" || value === "accept" || value === "teach";
+  return (
+    value === "check" ||
+    value === "hook" ||
+    value === "accept" ||
+    value === "teach" ||
+    value === "snapshot-api"
+  );
 }
 
 function isReportFormat(value: string): value is ReportFormat {
@@ -543,6 +608,56 @@ function parseFlagArgs(
   }
 
   return { ok: true, values };
+}
+
+function parseSnapshotApiArgs(args: string[]):
+  | {
+      ok: true;
+      options: {
+        output?: string;
+        entrypoints?: string[];
+      };
+    }
+  | {
+      ok: false;
+      error: string;
+    } {
+  const options: {
+    output?: string;
+    entrypoints: string[];
+  } = {
+    entrypoints: []
+  };
+
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+
+    if (arg !== "--entrypoint" && arg !== "--output") {
+      return { ok: false, error: `Unknown option: ${arg}.` };
+    }
+
+    const value = args[index + 1];
+
+    if (value === undefined || value.startsWith("--")) {
+      return { ok: false, error: `Missing value for ${arg}.` };
+    }
+
+    if (arg === "--entrypoint") {
+      options.entrypoints.push(value);
+    } else {
+      options.output = value;
+    }
+
+    index += 1;
+  }
+
+  return {
+    ok: true,
+    options: {
+      output: options.output,
+      entrypoints: options.entrypoints.length > 0 ? options.entrypoints : undefined
+    }
+  };
 }
 
 function upsertById<T extends { id: string }>(entries: T[], next: T): T[] {

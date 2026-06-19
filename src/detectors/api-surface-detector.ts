@@ -1,3 +1,9 @@
+import {
+  API_SURFACE_SNAPSHOT_PATH,
+  findSnapshotExport,
+  hasApiSnapshotEvidence,
+  type ApiSurfaceSnapshot
+} from "../repository/index.js";
 import type { DiffFile, DiffLine, Finding, FindingSeverity } from "../schema/index.js";
 
 import type { Detector } from "./types.js";
@@ -13,6 +19,7 @@ interface ApiSurfaceSignal {
   lineNumber?: number;
   symbol?: string;
   content: string;
+  data?: Record<string, unknown>;
 }
 
 const apiTaskTerms = [
@@ -29,6 +36,8 @@ const apiTaskTerms = [
 
 const documentationPathPattern =
   /(^|\/)(docs?|adr|changelog|changesets?)\/|(^|\/)(CHANGELOG|README|ADR)[^/]*\.md$/i;
+const contractEvidencePathPattern =
+  /(^|\/)(changesets?|migrations?|docs?|adr)\/|(^|\/)(CHANGELOG|MIGRATION|README|ADR)[^/]*\.md$/i;
 
 const exportDeclarationPattern =
   /^\s*export\s+(?:async\s+)?(?:declare\s+)?(?:function|class|interface|type|enum|const|let|var)\s+([A-Za-z_$][\w$]*)/;
@@ -37,12 +46,26 @@ const defaultExportPattern = /^\s*export\s+default\s+/;
 
 export const apiSurfaceDetector: Detector = {
   name: "api-surface",
-  run: ({ task, diff }) => {
+  run: ({ task, diff, context }) => {
+    const snapshot = context?.apiSurfaceSnapshot;
+    const snapshotSignals =
+      snapshot !== undefined && !hasContractChangeEvidence(diff.files)
+        ? extractSnapshotSignals(diff.files, snapshot)
+        : [];
+
     if (hasVisibleApiAcknowledgement(task.text, diff.files)) {
-      return [];
+      return snapshotSignals.map(toFinding);
     }
 
-    return diff.files.filter(isSourceFile).flatMap(extractSignals).map(toFinding);
+    const snapshotSignalKeys = new Set(
+      snapshotSignals.map((signal) => `${signal.path}:${signal.symbol ?? "unknown"}`)
+    );
+    const lineSignals = diff.files
+      .filter(isSourceFile)
+      .flatMap(extractSignals)
+      .filter((signal) => !snapshotSignalKeys.has(`${signal.path}:${signal.symbol ?? "unknown"}`));
+
+    return [...snapshotSignals, ...lineSignals].map(toFinding);
   }
 };
 
@@ -55,7 +78,18 @@ function hasVisibleApiAcknowledgement(taskText: string, files: DiffFile[]): bool
 
   return (
     apiTaskTerms.some((term) => normalizedTask.includes(term)) ||
-    files.some((file) => documentationPathPattern.test(file.path))
+    files.some(
+      (file) =>
+        documentationPathPattern.test(file.path) ||
+        file.path.replace(/\\/g, "/") === API_SURFACE_SNAPSHOT_PATH
+    )
+  );
+}
+
+function hasContractChangeEvidence(files: DiffFile[]): boolean {
+  return (
+    hasApiSnapshotEvidence(files) ||
+    files.some((file) => contractEvidencePathPattern.test(file.path))
   );
 }
 
@@ -94,6 +128,139 @@ function extractSignals(file: DiffFile): ApiSurfaceSignal[] {
       ];
     })
   );
+}
+
+function extractSnapshotSignals(
+  files: DiffFile[],
+  snapshot: ApiSurfaceSnapshot
+): ApiSurfaceSignal[] {
+  return files.filter(isSourceFile).flatMap((file) => {
+    const changedExports = getChangedExports(file);
+    const signals: ApiSurfaceSignal[] = [];
+
+    for (const removed of changedExports.removed) {
+      const snapshotExport = findSnapshotExport(snapshot, file.path, removed.symbol ?? "unknown");
+
+      if (snapshotExport === undefined) {
+        continue;
+      }
+
+      const matchingAddition = changedExports.added.find(
+        (added) => added.symbol === removed.symbol
+      );
+
+      if (
+        matchingAddition !== undefined &&
+        matchingAddition.content.trim() !== removed.content.trim()
+      ) {
+        signals.push({
+          id: "signature-change",
+          title: "Public API signature changed",
+          message:
+            "The diff changes a snapshotted public API signature without changelog, changeset, migration, or snapshot evidence.",
+          repair:
+            "Confirm this public contract change and add a snapshot update plus changelog, changeset, migration note, or keep the previous signature.",
+          severity: "high",
+          confidence: 0.92,
+          path: file.path,
+          lineNumber: matchingAddition.lineNumber ?? removed.lineNumber,
+          symbol: removed.symbol,
+          content: matchingAddition.content,
+          data: {
+            signal: "signature-change",
+            snapshotSignature: snapshotExport.signature,
+            previousSignature: removed.content.trim()
+          }
+        });
+        continue;
+      }
+
+      signals.push({
+        id: "removed-export",
+        title: "Snapshotted public export removed",
+        message:
+          "The diff removes an export recorded in the public API snapshot without changelog, changeset, migration, or snapshot evidence.",
+        repair:
+          "Restore the export or include a snapshot update plus changelog, changeset, or migration note for the public contract change.",
+        severity: "high",
+        confidence: 0.94,
+        path: file.path,
+        lineNumber: removed.lineNumber,
+        symbol: removed.symbol,
+        content: removed.content,
+        data: {
+          signal: "snapshot-removed-export",
+          snapshotSignature: snapshotExport.signature
+        }
+      });
+    }
+
+    for (const added of changedExports.added) {
+      if (!snapshot.entrypoints.includes(file.path)) {
+        continue;
+      }
+
+      if (findSnapshotExport(snapshot, file.path, added.symbol ?? "unknown") !== undefined) {
+        continue;
+      }
+
+      signals.push({
+        id: "added-export",
+        title: "Public API added outside snapshot",
+        message:
+          "The diff adds an export to a snapshotted public entrypoint without snapshot or release-note evidence.",
+        repair:
+          "Update the public API snapshot and add changelog, changeset, or migration evidence, or keep the export internal.",
+        severity: "medium",
+        confidence: 0.88,
+        path: file.path,
+        lineNumber: added.lineNumber,
+        symbol: added.symbol,
+        content: added.content,
+        data: {
+          signal: "snapshot-added-export"
+        }
+      });
+    }
+
+    return signals;
+  });
+}
+
+function getChangedExports(file: DiffFile): {
+  added: Array<{ symbol?: string; lineNumber?: number; content: string }>;
+  removed: Array<{ symbol?: string; lineNumber?: number; content: string }>;
+} {
+  const added: Array<{ symbol?: string; lineNumber?: number; content: string }> = [];
+  const removed: Array<{ symbol?: string; lineNumber?: number; content: string }> = [];
+
+  for (const hunk of file.hunks) {
+    for (const line of hunk.lines) {
+      if (line.kind !== "add" && line.kind !== "delete") {
+        continue;
+      }
+
+      const exportInfo = getExportInfo(line);
+
+      if (exportInfo === undefined) {
+        continue;
+      }
+
+      const entry = {
+        symbol: exportInfo.symbol,
+        lineNumber: line.kind === "add" ? line.newLineNumber : line.oldLineNumber,
+        content: line.content.trim()
+      };
+
+      if (line.kind === "add") {
+        added.push(entry);
+      } else {
+        removed.push(entry);
+      }
+    }
+  }
+
+  return { added, removed };
 }
 
 function getExportInfo(
@@ -144,7 +311,8 @@ function toFinding(signal: ApiSurfaceSignal): Finding {
         symbol: signal.symbol,
         message: signal.content.trim(),
         data: {
-          signal: signal.id
+          signal: signal.id,
+          ...signal.data
         }
       }
     ],

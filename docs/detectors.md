@@ -76,6 +76,7 @@ Evidence:
 
 - Exported symbol additions, removals, renames, or signature changes.
 - API report diff.
+- Committed `.critical-gate/api-surface.json` public API snapshot.
 - Changelog, release note, docs, or explicit acknowledgement.
 
 Initial implementation:
@@ -83,6 +84,16 @@ Initial implementation:
 - Use TypeScript compiler APIs or API Extractor.
 - Compare public export surface before and after diff.
 - Flag public API changes without visible documentation or acknowledgement.
+
+Current snapshot behavior:
+
+- `critical-gate snapshot-api` generates a deterministic public export snapshot from package
+  entrypoints or explicit `--entrypoint` values.
+- Normal `check` runs load `.critical-gate/api-surface.json` when present.
+- Snapshotted export removals and signature changes require snapshot, changelog, changeset, or
+  migration evidence. Task wording alone is not enough for a committed public contract change.
+- Added exports to a snapshotted entrypoint are reported unless the snapshot or release evidence is
+  updated in the same diff.
 
 ### Test Weakening
 

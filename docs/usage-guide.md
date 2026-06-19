@@ -201,6 +201,27 @@ package owners, and root TypeScript `compilerOptions.paths` aliases when present
 This is ownership context, not a separate finding. It helps later detector and policy decisions
 judge whether a diff stayed inside one package or crossed workspace boundaries.
 
+## Public API Snapshots
+
+Libraries and shared packages can commit a deterministic public API snapshot:
+
+```bash
+critical-gate snapshot-api
+git add .critical-gate/api-surface.json
+```
+
+The command infers public entrypoints from `package.json` exports, `main`, `module`, or `types`
+fields and falls back to common index files. You can pin entrypoints explicitly:
+
+```bash
+critical-gate snapshot-api --entrypoint src/index.ts --entrypoint src/testing.ts
+```
+
+Once committed, normal checks load `.critical-gate/api-surface.json` automatically. If a diff removes
+a snapshotted export, changes a public signature, or adds an export to a snapshotted entrypoint, the
+gate expects visible contract evidence: a snapshot update, changelog, changeset, migration note, or
+similar documentation in the same diff.
+
 ## Common Examples
 
 ### Small Feature With Expected Source And Test Changes

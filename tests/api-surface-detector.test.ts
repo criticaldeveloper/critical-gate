@@ -5,10 +5,31 @@ import {
   summarizeFindings
 } from "../src/index.js";
 import type { GateResult, TaskIntent } from "../src/index.js";
+import type { ApiSurfaceSnapshot } from "../src/index.js";
 
 const task: TaskIntent = {
   source: "cli",
   text: "Update signup validation"
+};
+
+const apiSnapshot: ApiSurfaceSnapshot = {
+  schemaVersion: "1.0",
+  generatedAt: "2026-06-19T08:00:00.000Z",
+  entrypoints: ["src/index.ts"],
+  exports: [
+    {
+      path: "src/index.ts",
+      name: "validateSignup",
+      kind: "function",
+      signature: "export function validateSignup(input: SignupInput): boolean"
+    },
+    {
+      path: "src/index.ts",
+      name: "SignupOptions",
+      kind: "interface",
+      signature: "export interface SignupOptions {}"
+    }
+  ]
 };
 
 function parse(diffText: string): GateResult["diff"] {
@@ -144,6 +165,73 @@ index 57b22a0..cb3e0f1 100644
 `);
 
     expect(apiSurfaceDetector.run({ task, diff })).toEqual([]);
+  });
+
+  it("flags snapshotted public signature changes without contract evidence", () => {
+    const diff = parse(`diff --git a/src/index.ts b/src/index.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -1,2 +1,2 @@
+-export function validateSignup(input: SignupInput): boolean
++export function validateSignup(input: SignupInput, strict: boolean): boolean
+ export const existing = true;
+`);
+
+    const findings = apiSurfaceDetector.run({
+      task: {
+        source: "cli",
+        text: "Change public API for signup validation"
+      },
+      diff,
+      context: {
+        apiSurfaceSnapshot: apiSnapshot
+      }
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        severity: "high",
+        title: "Public API signature changed",
+        message:
+          "The diff changes a snapshotted public API signature without changelog, changeset, migration, or snapshot evidence."
+      })
+    ]);
+    expect(findings[0]?.evidence[0]).toMatchObject({
+      symbol: "validateSignup",
+      data: {
+        signal: "signature-change",
+        snapshotSignature: "export function validateSignup(input: SignupInput): boolean"
+      }
+    });
+  });
+
+  it("accepts snapshotted API changes when snapshot evidence changes too", () => {
+    const diff = parse(`diff --git a/src/index.ts b/src/index.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -1 +1 @@
+-export function validateSignup(input: SignupInput): boolean
++export function validateSignup(input: SignupInput, strict: boolean): boolean
+diff --git a/.critical-gate/api-surface.json b/.critical-gate/api-surface.json
+index 0000000..6bb83df
+--- a/.critical-gate/api-surface.json
++++ b/.critical-gate/api-surface.json
+@@ -1 +1 @@
+-{"exports":[]}
++{"exports":[{"name":"validateSignup"}]}
+`);
+
+    expect(
+      apiSurfaceDetector.run({
+        task,
+        diff,
+        context: {
+          apiSurfaceSnapshot: apiSnapshot
+        }
+      })
+    ).toEqual([]);
   });
 });
 

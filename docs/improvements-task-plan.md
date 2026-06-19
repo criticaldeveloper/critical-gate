@@ -79,7 +79,7 @@ root note.
       TypeScript paths.
     - Use package/workspace ownership in blast-radius scoring.
 
-12. Public API contract snapshots.
+12. Public API contract snapshots. Completed in `feature/api-contract-snapshots`.
     - Add a snapshot command for exported API surfaces.
     - Compare PR diffs against snapshots and require changeset/migration evidence.
 

@@ -69,6 +69,7 @@ Useful context includes:
 - Nearby symbols and exports.
 - Existing utility modules.
 - Public API reports.
+- Public API snapshots in `.critical-gate/api-surface.json`.
 - Git co-change history.
 - Existing documentation files.
 

@@ -69,6 +69,12 @@ describe("gate result schema", () => {
         configFiles: ["tsconfig.json"],
         testFrameworks: ["vitest"],
         publicEntrypoints: ["src/index.ts"],
+        apiSnapshot: {
+          path: ".critical-gate/api-surface.json",
+          schemaVersion: "1.0",
+          exportCount: 2,
+          entrypoints: ["src/index.ts"]
+        },
         git: {
           baseRef: "main",
           headRef: "feature/signup-validation"

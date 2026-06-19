@@ -1,4 +1,19 @@
 export {
+  API_SURFACE_SNAPSHOT_PATH,
+  buildApiSurfaceSnapshot,
+  extractApiSurfaceExports,
+  findSnapshotExport,
+  getApiSnapshotOutputDirectory,
+  getApiSnapshotOutputPath,
+  hasApiSnapshotEvidence,
+  loadApiSurfaceSnapshot,
+  summarizeApiSurfaceSnapshot,
+  type ApiSnapshotReader,
+  type ApiSurfaceExport,
+  type ApiSurfaceSnapshot,
+  type BuildApiSurfaceSnapshotOptions
+} from "./api-snapshot.js";
+export {
   buildRepositoryProfile,
   parseNameOnlyLog,
   type BuildRepositoryProfileOptions,

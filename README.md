@@ -78,6 +78,17 @@ node dist/cli.js check --task "Add signup validation" --format sarif --output cr
 node dist/cli.js check --task "Add signup validation" --format repair
 ```
 
+Create a public API contract snapshot for repositories that expose TS/JS entrypoints:
+
+```bash
+node dist/cli.js snapshot-api
+git add .critical-gate/api-surface.json
+```
+
+After the snapshot is committed, normal `check` runs compare export removals, additions, and
+signature changes against it. Public contract changes should include snapshot, changelog, changeset,
+or migration evidence.
+
 Exit codes:
 
 - `0`: gate passed.

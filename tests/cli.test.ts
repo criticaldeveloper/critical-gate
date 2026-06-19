@@ -208,6 +208,76 @@ describe("cli", () => {
     });
   });
 
+  it("writes a public API snapshot", () => {
+    const { io, stdout, writes, files } = createTestIo();
+
+    files.set(
+      "C:\\dev\\critical-gate\\package.json",
+      JSON.stringify({
+        exports: {
+          ".": "./src/index.ts"
+        }
+      })
+    );
+    files.set(
+      "C:\\dev\\critical-gate\\src\\index.ts",
+      "export function validateSignup(): boolean { return true; }\n"
+    );
+
+    expect(main(["snapshot-api"], io)).toBe(ExitCode.Pass);
+
+    const output = writes.get("C:\\dev\\critical-gate\\.critical-gate\\api-surface.json");
+    expect(output).toBeDefined();
+    expect(JSON.parse(output ?? "{}")).toMatchObject({
+      schemaVersion: "1.0",
+      entrypoints: ["src/index.ts"],
+      exports: [
+        {
+          path: "src/index.ts",
+          name: "validateSignup",
+          kind: "function"
+        }
+      ]
+    });
+    expect(stdout[0]).toContain("Wrote public API snapshot");
+  });
+
+  it("includes public API snapshot context in json output", () => {
+    const { io, stdout, files } = createTestIo();
+
+    files.set(
+      "C:\\dev\\critical-gate\\.critical-gate\\api-surface.json",
+      JSON.stringify({
+        schemaVersion: "1.0",
+        generatedAt: "2026-06-19T08:00:00.000Z",
+        entrypoints: ["src/index.ts"],
+        exports: [
+          {
+            path: "src/index.ts",
+            name: "validateSignup",
+            kind: "function",
+            signature: "export function validateSignup(): boolean"
+          }
+        ]
+      })
+    );
+
+    expect(main(["check", "--task", "Add signup validation", "--format", "json"], io)).toBe(
+      ExitCode.Pass
+    );
+
+    expect(JSON.parse(stdout[0] ?? "")).toMatchObject({
+      context: {
+        apiSnapshot: {
+          path: ".critical-gate/api-surface.json",
+          schemaVersion: "1.0",
+          exportCount: 1,
+          entrypoints: ["src/index.ts"]
+        }
+      }
+    });
+  });
+
   it("includes monorepo ownership context in json output", () => {
     const { io, stdout, files } = createTestIo();
     const monorepoIo = {

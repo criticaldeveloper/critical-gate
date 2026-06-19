@@ -60,6 +60,7 @@ export interface RepoContext {
   testFrameworks?: string[];
   frameworkPacks?: string[];
   publicEntrypoints?: string[];
+  apiSnapshot?: ApiSurfaceSnapshotSummary;
   repositoryProfile?: RepositoryProfile;
   utilityIndex?: UtilityIndex;
   git?: {
@@ -79,6 +80,13 @@ export interface MonorepoContext {
 export interface MonorepoPackage {
   path: string;
   name?: string;
+}
+
+export interface ApiSurfaceSnapshotSummary {
+  path: string;
+  schemaVersion: string;
+  exportCount: number;
+  entrypoints: string[];
 }
 
 export interface RepositoryProfile {
