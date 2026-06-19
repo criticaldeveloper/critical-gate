@@ -4,6 +4,7 @@ import {
   renderMarkdownReport,
   renderRepairReport,
   renderSarifReport,
+  type Finding,
   type GateResult
 } from "../src/index.js";
 
@@ -152,6 +153,13 @@ describe("reporters", () => {
             {
               ruleId: "test-weakening",
               level: "error",
+              partialFingerprints: {
+                criticalGateFinding: expect.any(String)
+              },
+              properties: {
+                detector: "test-weakening",
+                category: "tests"
+              },
               locations: [
                 {
                   physicalLocation: {
@@ -169,6 +177,63 @@ describe("reporters", () => {
           ]
         }
       ]
+    });
+    expect(sarif.runs[0].tool.driver.rules[0]).toMatchObject({
+      id: "test-weakening",
+      properties: {
+        detector: "test-weakening",
+        category: "tests",
+        tags: ["test"]
+      }
+    });
+    expect(sarif.runs[0].invocations[0].properties).toMatchObject({
+      resultCount: 1,
+      emittedResultCount: 1,
+      truncated: false
+    });
+  });
+
+  it("renders stable SARIF sub-rules, fingerprints, and truncation metadata", () => {
+    const manyFindings: Finding[] = Array.from({ length: 505 }, (_, index) => ({
+      id: `blast-radius:unexpected-cluster-${index}:src/file-${index}.ts`,
+      detector: "blast-radius",
+      severity: "low" as const,
+      confidence: 0.74,
+      title: "Unexpected changed-file cluster",
+      message: "The diff includes a separate changed-file cluster.",
+      evidence: [
+        {
+          kind: "file" as const,
+          path: `src/file-${index}.ts`,
+          message: "Cluster role(s): source."
+        }
+      ],
+      repair: "Confirm this separate cluster belongs to the current task.",
+      tags: ["scope"]
+    }));
+    const sarif = JSON.parse(renderSarifReport({ ...result, findings: manyFindings }));
+
+    expect(sarif.runs[0].results).toHaveLength(500);
+    expect(sarif.runs[0].results[0]).toMatchObject({
+      ruleId: "blast-radius:unexpected-cluster",
+      partialFingerprints: {
+        criticalGateFinding: expect.any(String)
+      },
+      properties: {
+        detector: "blast-radius",
+        category: "scope"
+      }
+    });
+    expect(sarif.runs[0].tool.driver.rules[0]).toMatchObject({
+      id: "blast-radius:unexpected-cluster",
+      properties: {
+        category: "scope"
+      }
+    });
+    expect(sarif.runs[0].invocations[0].properties).toMatchObject({
+      resultCount: 505,
+      emittedResultCount: 500,
+      truncated: true
     });
   });
 });
