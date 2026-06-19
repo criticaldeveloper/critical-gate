@@ -222,6 +222,14 @@ a snapshotted export, changes a public signature, or adds an export to a snapsho
 gate expects visible contract evidence: a snapshot update, changelog, changeset, migration note, or
 similar documentation in the same diff.
 
+## Reviewer Checklist
+
+Markdown and PR-comment reports include a concise reviewer checklist derived from findings, changed
+file roles, intent quality, and coherence scores. The checklist is not a generic review template; it
+is a short handoff of evidence-backed prompts such as resolving blocking findings, checking changed
+tests still assert behavior, confirming dependency changes, or verifying config changes include
+operational context.
+
 ## Common Examples
 
 ### Small Feature With Expected Source And Test Changes

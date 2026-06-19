@@ -1,4 +1,5 @@
 import type { DiffFile, Finding, GateResult } from "../schema/index.js";
+import { renderReviewerChecklist } from "./reviewer-checklist.js";
 
 export function renderMarkdownReport(result: GateResult): string {
   const metrics = getDiffMetrics(result.diff.files);
@@ -72,6 +73,8 @@ export function renderMarkdownReport(result: GateResult): string {
     }
     lines.push("");
   }
+
+  lines.push(...renderReviewerChecklist(result, "## Reviewer Checklist"));
 
   if (result.findings.length > 0) {
     lines.push("## Findings", "");

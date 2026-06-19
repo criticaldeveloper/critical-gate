@@ -1,5 +1,6 @@
 import { calibrateFindingConfidence } from "../detectors/confidence-calibration.js";
 import type { DiffFile, Finding, GateResult } from "../schema/index.js";
+import { renderReviewerChecklist } from "./reviewer-checklist.js";
 
 export function renderPrCommentReport(result: GateResult): string {
   const metrics = getDiffMetrics(result.diff.files);
@@ -69,6 +70,8 @@ export function renderPrCommentReport(result: GateResult): string {
     }
     lines.push("");
   }
+
+  lines.push(...renderReviewerChecklist(result, "### Reviewer checklist"));
 
   lines.push(
     "<sub>Critical Gate reports evidence-backed diff integrity signals; review the full Markdown or SARIF output for complete evidence.</sub>",

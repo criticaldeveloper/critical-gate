@@ -92,7 +92,7 @@ root note.
     - Include exported name, parameter shape, return shape, folder role, and import count in
       existing-solution findings.
 
-15. Reviewer checklist.
+15. Reviewer checklist. Completed in `feature/reviewer-checklist`.
     - Generate a concise human-review checklist from non-blocking and blocking findings.
 
 16. Local hook installers.

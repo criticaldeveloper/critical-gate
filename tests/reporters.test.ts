@@ -1,5 +1,6 @@
 import {
   GATE_RESULT_SCHEMA_VERSION,
+  buildReviewerChecklist,
   renderJsonReport,
   renderMarkdownReport,
   renderPrCommentReport,
@@ -175,6 +176,13 @@ describe("reporters", () => {
     expect(report).toContain("Task intent does not name a clear target area.");
     expect(report).toContain("- modified src/signup.ts (source, +3/-1)");
     expect(report).toContain("### Assertion removed from signup test");
+    expect(report).toContain("## Reviewer Checklist");
+    expect(report).toContain(
+      "- [ ] Resolve or explicitly accept Assertion removed from signup test."
+    );
+    expect(report).toContain(
+      "- [ ] Confirm changed tests still assert behavior, not only rendering or existence."
+    );
     expect(report).toContain("Reason Chain:");
     expect(report).toContain(
       "- Why suspicious: Agent changes can keep tests green while removing behavioral protection."
@@ -251,6 +259,32 @@ describe("reporters", () => {
     expect(report).toContain("- Config, manifest, or lockfile touched: +2");
     expect(report).toContain("### Task intent quality");
     expect(report).toContain("Mention the feature, module, file family, user flow, or public API");
+    expect(report).toContain("### Reviewer checklist");
+    expect(report).toContain(
+      "- [ ] Resolve or explicitly accept Assertion removed from signup test."
+    );
+  });
+
+  it("builds a concise evidence-backed reviewer checklist", () => {
+    expect(buildReviewerChecklist(result)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          source: "blocking-finding",
+          findingId: "test-weakening-001",
+          text: "Resolve or explicitly accept Assertion removed from signup test.",
+          evidence: 'tests/signup.test.ts:24: Removed expect(error.message).toContain("email")'
+        }),
+        expect.objectContaining({
+          source: "changed-role",
+          text: "Confirm changed tests still assert behavior, not only rendering or existence.",
+          evidence: "tests/signup.test.ts"
+        }),
+        expect.objectContaining({
+          source: "intent",
+          text: "Confirm the task intent is specific enough to bound the diff."
+        })
+      ])
+    );
   });
 
   it("renders pass repair output without noisy instructions", () => {
