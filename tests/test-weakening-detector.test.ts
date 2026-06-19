@@ -100,6 +100,23 @@ index 57b22a0..cb3e0f1 100644
     ]);
   });
 
+  it("ignores skip markers added inside fixture strings", () => {
+    const diff = {
+      files: parseUnifiedDiff(`diff --git a/tests/diff-reader.test.ts b/tests/diff-reader.test.ts
+index 57b22a0..cb3e0f1 100644
+--- a/tests/diff-reader.test.ts
++++ b/tests/diff-reader.test.ts
+@@ -1,3 +1,4 @@
++const fixture = 'it.skip("keeps artist intro copy stable", () => {});';
+ test("reads untracked files", () => {
+   expect(true).toBe(true);
+ });
+`)
+    };
+
+    expect(testWeakeningDetector.run({ task, diff })).toEqual([]);
+  });
+
   it("ignores assertion-like changes outside test files", () => {
     const diff = {
       files: parseUnifiedDiff(`diff --git a/src/signup.ts b/src/signup.ts

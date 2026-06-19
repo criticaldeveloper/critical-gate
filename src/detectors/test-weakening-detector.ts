@@ -35,9 +35,9 @@ const assertionPatterns = [
 ];
 
 const skipPatterns = [
-  /\b(?:it|test|describe)\.skip\s*\(/,
-  /\b(?:it|test)\.todo\s*\(/,
-  /\b(?:it|test|describe)\.only\s*\(/
+  /\b(?:it|test|describe)\.skip\s*\(/g,
+  /\b(?:it|test)\.todo\s*\(/g,
+  /\b(?:it|test|describe)\.only\s*\(/g
 ];
 
 const genericMatcherPatterns = [
@@ -151,7 +151,44 @@ function isAssertionLine(line: DiffLine): boolean {
 }
 
 function isSkipLine(line: DiffLine): boolean {
-  return skipPatterns.some((pattern) => pattern.test(line.content));
+  return skipPatterns.some((pattern) => {
+    pattern.lastIndex = 0;
+    const match = pattern.exec(line.content);
+    return match !== null && !isInsideStringLiteral(line.content, match.index);
+  });
+}
+
+function isInsideStringLiteral(content: string, index: number): boolean {
+  let quote: "'" | '"' | "`" | undefined;
+  let escaped = false;
+
+  for (let position = 0; position < index; position += 1) {
+    const char = content[position];
+
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+
+    if (char === "\\") {
+      escaped = true;
+      continue;
+    }
+
+    if (quote !== undefined) {
+      if (char === quote) {
+        quote = undefined;
+      }
+
+      continue;
+    }
+
+    if (char === "'" || char === '"' || char === "`") {
+      quote = char;
+    }
+  }
+
+  return quote !== undefined;
 }
 
 function toAssertionSignal(line: DiffLine): AssertionSignal {
