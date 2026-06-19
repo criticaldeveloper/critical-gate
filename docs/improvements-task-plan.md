@@ -33,7 +33,7 @@ root note.
    - Support expected true-positive, false-positive, false-negative, and expected-clean outcomes.
    - Emit precision, recall, noisiest detector, and best detector summaries.
 
-2. Reason-chain evidence blocks.
+2. Reason-chain evidence blocks. Completed in `feature/reason-chain-evidence`.
    - Extend findings with structured reason chains: what happened, why suspicious, supporting
      signals, acceptability criteria, and repair guidance.
    - Render reason chains in Markdown, PR comments, and repair output.

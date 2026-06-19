@@ -115,6 +115,14 @@ export interface FindingEvidence {
   data?: Record<string, unknown>;
 }
 
+export interface FindingReasonChain {
+  whatHappened: string;
+  whySuspicious: string;
+  supportingSignals: string[];
+  acceptableIf: string[];
+  repairHint: string;
+}
+
 export interface Finding {
   id: string;
   detector: string;
@@ -123,6 +131,7 @@ export interface Finding {
   title: string;
   message: string;
   evidence: FindingEvidence[];
+  reasonChain?: FindingReasonChain;
   repair: string;
   tags: FindingTag[];
 }

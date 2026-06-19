@@ -47,8 +47,20 @@ function renderRepairFinding(finding: Finding, index: number): string[] {
   return [
     `${index}. ${finding.severity.toUpperCase()}: ${finding.title}`,
     `${finding.message}${location}`,
+    ...renderReasonChain(finding),
     `Repair: ${finding.repair}`,
     ""
+  ];
+}
+
+function renderReasonChain(finding: Finding): string[] {
+  if (finding.reasonChain === undefined) {
+    return [];
+  }
+
+  return [
+    `Why suspicious: ${finding.reasonChain.whySuspicious}`,
+    `Acceptable if: ${finding.reasonChain.acceptableIf[0] ?? "the change is explicitly justified."}`
   ];
 }
 

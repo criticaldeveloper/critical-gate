@@ -79,6 +79,20 @@ describe("gate result schema", () => {
               message: 'Removed expect(error.message).toContain("email")'
             }
           ],
+          reasonChain: {
+            whatHappened: "The diff removes a behavioral assertion from the signup test.",
+            whySuspicious:
+              "Agent changes can keep tests green while removing behavioral protection.",
+            supportingSignals: [
+              "Detector: test-weakening",
+              "tests/signup.test.ts:24: Removed assertion"
+            ],
+            acceptableIf: [
+              "The assertion is replaced by an equally specific behavioral assertion."
+            ],
+            repairHint:
+              "Restore the removed behavioral assertion or replace it with an equally specific assertion."
+          },
           repair:
             "Restore the removed behavioral assertion or replace it with an equally specific assertion.",
           tags: ["test"]

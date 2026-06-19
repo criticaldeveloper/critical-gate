@@ -56,6 +56,16 @@ const result: GateResult = {
           message: 'Removed expect(error.message).toContain("email")'
         }
       ],
+      reasonChain: {
+        whatHappened: "The diff removes a behavioral assertion from the signup test.",
+        whySuspicious: "Agent changes can keep tests green while removing behavioral protection.",
+        supportingSignals: [
+          "Detector: test-weakening",
+          "tests/signup.test.ts:24: Removed assertion"
+        ],
+        acceptableIf: ["The assertion is replaced by an equally specific behavioral assertion."],
+        repairHint: "Restore the removed behavioral assertion."
+      },
       repair: "Restore the removed behavioral assertion.",
       tags: ["test"]
     }
@@ -118,6 +128,10 @@ describe("reporters", () => {
     expect(report).toContain("Unexpected Classes: tests");
     expect(report).toContain("- modified src/signup.ts (source, +3/-1)");
     expect(report).toContain("### Assertion removed from signup test");
+    expect(report).toContain("Reason Chain:");
+    expect(report).toContain(
+      "- Why suspicious: Agent changes can keep tests green while removing behavioral protection."
+    );
     expect(report).toContain("Repair: Restore the removed behavioral assertion.");
   });
 
@@ -149,6 +163,12 @@ describe("reporters", () => {
     expect(report).toContain("Scope Expansion Score: 3/10");
     expect(report).toContain("- Config, manifest, or lockfile touched: +2");
     expect(report).toContain("1. HIGH: Assertion removed from signup test");
+    expect(report).toContain(
+      "Why suspicious: Agent changes can keep tests green while removing behavioral protection."
+    );
+    expect(report).toContain(
+      "Acceptable if: The assertion is replaced by an equally specific behavioral assertion."
+    );
     expect(report).toContain("Evidence: tests/signup.test.ts:24.");
   });
 

@@ -121,8 +121,26 @@ function renderFinding(finding: Finding): string {
     "Evidence:",
     evidence,
     "",
+    ...renderReasonChain(finding),
+    "",
     `Repair: ${finding.repair}`
   ].join("\n");
+}
+
+function renderReasonChain(finding: Finding): string[] {
+  const reasonChain = finding.reasonChain;
+
+  if (reasonChain === undefined) {
+    return [];
+  }
+
+  return [
+    "Reason Chain:",
+    `- What happened: ${reasonChain.whatHappened}`,
+    `- Why suspicious: ${reasonChain.whySuspicious}`,
+    ...reasonChain.supportingSignals.map((signal) => `- Signal: ${signal}`),
+    ...reasonChain.acceptableIf.map((condition) => `- Acceptable if: ${condition}`)
+  ];
 }
 
 function getDiffMetrics(files: DiffFile[]) {

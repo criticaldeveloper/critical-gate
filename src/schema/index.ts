@@ -8,6 +8,7 @@ export type {
   DiffLineKind,
   Finding,
   FindingEvidence,
+  FindingReasonChain,
   FindingSeverity,
   FindingTag,
   GateResult,

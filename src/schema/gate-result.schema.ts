@@ -214,6 +214,7 @@ export const gateResultJsonSchema = {
           minItems: 1,
           items: { $ref: "#/$defs/findingEvidence" }
         },
+        reasonChain: { $ref: "#/$defs/findingReasonChain" },
         repair: { type: "string", minLength: 1 },
         tags: {
           type: "array",
@@ -233,6 +234,24 @@ export const gateResultJsonSchema = {
             ]
           }
         }
+      }
+    },
+    findingReasonChain: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "whatHappened",
+        "whySuspicious",
+        "supportingSignals",
+        "acceptableIf",
+        "repairHint"
+      ],
+      properties: {
+        whatHappened: { type: "string", minLength: 1 },
+        whySuspicious: { type: "string", minLength: 1 },
+        supportingSignals: stringArraySchema,
+        acceptableIf: stringArraySchema,
+        repairHint: { type: "string", minLength: 1 }
       }
     },
     findingEvidence: {

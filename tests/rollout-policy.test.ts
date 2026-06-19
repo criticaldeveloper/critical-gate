@@ -1,4 +1,4 @@
-import { summarizeFindings, type Finding } from "../src/index.js";
+import { runDetectors, summarizeFindings, type Detector, type Finding } from "../src/index.js";
 
 const highObservationFinding: Finding = {
   id: "blast-radius:unexpected-cluster:test",
@@ -43,6 +43,53 @@ describe("rollout decision policy", () => {
     ).toMatchObject({
       decision: "fail",
       highCount: 1
+    });
+  });
+
+  it("enriches detector findings with reason chains", () => {
+    const detector: Detector = {
+      name: "test-detector",
+      run: () => [
+        {
+          id: "scope:src/other.ts",
+          detector: "scope",
+          severity: "medium",
+          confidence: 0.7,
+          title: "Unexpected file changed for small task",
+          message: "src/other.ts changed during a small task.",
+          evidence: [
+            {
+              kind: "file",
+              path: "src/other.ts",
+              message: "Changed file role: source."
+            }
+          ],
+          repair: "Remove unrelated edits.",
+          tags: ["scope"]
+        }
+      ]
+    };
+
+    expect(
+      runDetectors({ source: "cli", text: "Fix signup validation" }, { files: [] }, undefined, [
+        detector
+      ])[0]
+    ).toMatchObject({
+      reasonChain: {
+        whatHappened: "src/other.ts changed during a small task.",
+        whySuspicious:
+          "The changed files or historical relationships do not clearly fit the task's expected blast radius.",
+        supportingSignals: expect.arrayContaining([
+          "Detector: scope",
+          "Severity: medium",
+          "Confidence: 70%",
+          "src/other.ts: Changed file role: source."
+        ]),
+        acceptableIf: expect.arrayContaining([
+          "The task intent explicitly covers this file or support area."
+        ]),
+        repairHint: "Remove unrelated edits."
+      }
     });
   });
 });
