@@ -15,7 +15,7 @@ interface SecretPathSignal {
 }
 
 const secretAssignmentPattern =
-  /[A-Za-z0-9_-]*(?:api[_-]?key|secret|token|password|passwd|private[_-]?key|client[_-]?secret)[A-Za-z0-9_-]*\s*[:=]\s*["']?([A-Za-z0-9_./+=:-]{12,})/i;
+  /[A-Za-z0-9_-]*(?:api[_-]?key|secret|token|password|passwd|private[_-]?key|client[_-]?secret)[A-Za-z0-9_-]*\s*[:=]\s*(["']?)([A-Za-z0-9_./+=:-]{12,})/i;
 const providerTokenPatterns = [
   /\bsk-[A-Za-z0-9_-]{16,}\b/,
   /\bghp_[A-Za-z0-9_]{20,}\b/,
@@ -45,6 +45,13 @@ function detectSecretAssignment(file: DiffFile, line: DiffLine): SecretPathSigna
   const match = secretAssignmentPattern.exec(line.content);
 
   if (match === null) {
+    return undefined;
+  }
+
+  const quote = match[1] ?? "";
+  const value = match[2] ?? "";
+
+  if (quote.length === 0 && !/[0-9_./+=:-]/.test(value)) {
     return undefined;
   }
 
@@ -136,7 +143,7 @@ function isExampleOrTestFile(file: DiffFile): boolean {
 
 function redactLine(content: string): string {
   return content
-    .replace(secretAssignmentPattern, (match, secret: string) =>
+    .replace(secretAssignmentPattern, (match, _quote: string, secret: string) =>
       match.replace(secret, redact(secret))
     )
     .replace(/\bsk-[A-Za-z0-9_-]{16,}\b/g, (value) => redact(value))

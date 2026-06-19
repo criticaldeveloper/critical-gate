@@ -147,6 +147,20 @@ index 57b22a0..cb3e0f1 100644
     expect(secretPathDetector.run({ task, diff })).toEqual([]);
   });
 
+  it("ignores token-like variable names assigned from local identifiers", () => {
+    const diff = parse(`diff --git a/src/intent/intent-model.ts b/src/intent/intent-model.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/intent/intent-model.ts
++++ b/src/intent/intent-model.ts
+@@ -1 +1,3 @@
++const targetTokens = extractTaskKeywords(normalizedText);
++const importTokens = extractImportTokens(sourceText);
++domainTokens: pathToDomainTokens(path, exportedName)
+`);
+
+    expect(secretPathDetector.run({ task, diff })).toEqual([]);
+  });
+
   it("still emits blocker token findings in documentation", () => {
     const fakeToken = ["ghp_", "abcdefghijklmnopqrstuvwxyz123456"].join("");
     const diff = parse(`diff --git a/readme.md b/readme.md
