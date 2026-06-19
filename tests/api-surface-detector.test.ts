@@ -114,6 +114,46 @@ index 57b22a0..cb3e0f1 100644
     expect(findings[1]?.evidence[0]).toMatchObject({ symbol: "default" });
   });
 
+  it("emits high severity framework contract findings without an API snapshot", () => {
+    const diff = parse(`diff --git a/src/content.config.ts b/src/content.config.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/content.config.ts
++++ b/src/content.config.ts
+@@ -1,3 +1,3 @@
+ import { defineCollection } from "astro:content";
+-export const collections = { releases: defineCollection({}) };
++const collections = { releases: defineCollection({}) };
+`);
+
+    const findings = apiSurfaceDetector.run({
+      task: {
+        source: "cli",
+        text: "Refactor content config internals"
+      },
+      diff
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        detector: "api-surface",
+        severity: "high",
+        confidence: 0.9,
+        title: "Framework contract export removed",
+        message: "The diff removes an exported framework contract without visible acknowledgement.",
+        repair:
+          "Restore the framework contract export, or document the migration and update the task/PR to acknowledge the contract change."
+      })
+    ]);
+    expect(findings[0]?.evidence[0]).toMatchObject({
+      path: "src/content.config.ts",
+      symbol: "collections",
+      data: {
+        signal: "removed-contract-export",
+        contract: "framework"
+      }
+    });
+  });
+
   it("does not emit when task text acknowledges API work", () => {
     const diff = parse(`diff --git a/src/index.ts b/src/index.ts
 index 57b22a0..cb3e0f1 100644

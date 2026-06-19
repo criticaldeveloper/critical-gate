@@ -43,6 +43,11 @@ const exportDeclarationPattern =
   /^\s*export\s+(?:async\s+)?(?:declare\s+)?(?:function|class|interface|type|enum|const|let|var)\s+([A-Za-z_$][\w$]*)/;
 const namedExportPattern = /^\s*export\s*\{([^}]+)\}/;
 const defaultExportPattern = /^\s*export\s+default\s+/;
+const frameworkContractPathPatterns = [
+  /(^|\/)(?:src\/)?content\.config\.[cm]?[jt]s$/i,
+  /(^|\/)(?:src\/)?middleware\.[cm]?[jt]s$/i,
+  /(^|\/)(?:src\/)?hooks(?:\.[\w-]+)?\.[cm]?[jt]s$/i
+];
 
 export const apiSurfaceDetector: Detector = {
   name: "api-surface",
@@ -107,27 +112,55 @@ function extractSignals(file: DiffFile): ApiSurfaceSignal[] {
       }
 
       const isRemoval = line.kind === "delete";
+      const isFrameworkContract = isFrameworkContractFile(file.path);
 
       return [
         {
-          id: isRemoval ? "removed-export" : "added-export",
-          title: isRemoval ? "Public export removed" : "Public export added",
+          id: isRemoval
+            ? isFrameworkContract
+              ? "removed-contract-export"
+              : "removed-export"
+            : isFrameworkContract
+              ? "added-contract-export"
+              : "added-export",
+          title: isRemoval
+            ? isFrameworkContract
+              ? "Framework contract export removed"
+              : "Public export removed"
+            : isFrameworkContract
+              ? "Framework contract export added"
+              : "Public export added",
           message: isRemoval
-            ? "The diff removes an exported symbol without visible API acknowledgement."
+            ? isFrameworkContract
+              ? "The diff removes an exported framework contract without visible acknowledgement."
+              : "The diff removes an exported symbol without visible API acknowledgement."
             : "The diff adds an exported symbol without visible API acknowledgement.",
           repair: isRemoval
-            ? "Confirm this is an intended public API change and add changelog, release note, docs, or explicit task/PR acknowledgement."
+            ? isFrameworkContract
+              ? "Restore the framework contract export, or document the migration and update the task/PR to acknowledge the contract change."
+              : "Confirm this is an intended public API change and add changelog, release note, docs, or explicit task/PR acknowledgement."
             : "Confirm the new export is intended public API and document it or keep it internal.",
           severity: isRemoval ? "high" : "medium",
-          confidence: exportInfo.kind === "named" ? 0.78 : 0.86,
+          confidence: isFrameworkContract ? 0.9 : exportInfo.kind === "named" ? 0.78 : 0.86,
           path: file.path,
           lineNumber: line.kind === "add" ? line.newLineNumber : line.oldLineNumber,
           symbol: exportInfo.symbol,
-          content: line.content
+          content: line.content,
+          data: isFrameworkContract
+            ? {
+                signal: isRemoval ? "removed-contract-export" : "added-contract-export",
+                contract: "framework"
+              }
+            : undefined
         }
       ];
     })
   );
+}
+
+function isFrameworkContractFile(path: string): boolean {
+  const normalizedPath = path.replace(/\\/g, "/");
+  return frameworkContractPathPatterns.some((pattern) => pattern.test(normalizedPath));
 }
 
 function extractSnapshotSignals(

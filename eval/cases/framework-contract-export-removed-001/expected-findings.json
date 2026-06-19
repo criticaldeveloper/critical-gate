@@ -1,0 +1,10 @@
+{
+  "shouldBlock": true,
+  "expectedFindings": [
+    {
+      "detector": "api-surface",
+      "severity": "high",
+      "file": "src/content.config.ts"
+    }
+  ]
+}
