@@ -36,6 +36,157 @@ Current detectors focus on TypeScript and JavaScript repositories:
 Every finding includes severity, confidence, evidence, tags, and a repair hint that another agent or
 developer can act on.
 
+## Concrete Examples
+
+Critical Gate is most useful when an AI-generated diff looks plausible at a glance but breaks the
+shape of the task.
+
+### Dependency Drift
+
+Task:
+
+```text
+Add CSV export using the existing file writer utilities.
+```
+
+Risky diff:
+
+- Adds `papaparse` or another production dependency.
+- Changes `package.json` and the lockfile.
+- Does not document why the existing repository utilities are insufficient.
+
+What Critical Gate reports:
+
+- The manifest changed.
+- A dependency was added.
+- The task did not ask for a dependency.
+- Repair guidance asks the agent to remove the package, use existing utilities, or add explicit
+  justification.
+
+### Test Weakening
+
+Task:
+
+```text
+Refactor signup validation internals without changing behavior.
+```
+
+Risky diff:
+
+```diff
+- expect(result.error.message).toContain("email is required");
++ expect(result.error).toBeDefined();
+```
+
+What Critical Gate reports:
+
+- A behavioral assertion became a generic existence assertion.
+- The replacement is less specific even though the test still passes.
+- Repair guidance asks for an equally specific behavioral assertion.
+
+### Unrelated Edits
+
+Task:
+
+```text
+Fix font weight in the profile heading.
+```
+
+Risky diff:
+
+- Changes the intended stylesheet.
+- Also rewrites unrelated layout files.
+- Touches CI config or package metadata.
+
+What Critical Gate reports:
+
+- The changed files do not fit the small task boundary.
+- Diff Cost Score and Scope Expansion Score increase.
+- Repair guidance asks to split unrelated edits or expand the task explicitly.
+
+### Utility Reinvention
+
+Task:
+
+```text
+Add signup date formatting.
+```
+
+Risky diff:
+
+```ts
+export function formatDateForSignup(value: Date): string {
+  return value.toISOString();
+}
+```
+
+when the repository already has:
+
+```ts
+export function formatDate(value: Date): string;
+```
+
+What Critical Gate reports:
+
+- A similar exported helper already exists.
+- Evidence includes existing export name, signature shape, folder role, path, and import count.
+- Repair guidance points the agent toward reuse instead of another local abstraction.
+
+### Public API Changes
+
+Task:
+
+```text
+Improve internal validation.
+```
+
+Risky diff:
+
+```diff
+- export interface SignupOptions {}
++ interface SignupOptions {}
+```
+
+What Critical Gate reports:
+
+- A public export was removed without task or release evidence.
+- If `.critical-gate/api-surface.json` exists, the finding cites the snapshotted public contract.
+- Repair guidance asks for restore, migration notes, changelog/changeset evidence, or an updated API
+  snapshot.
+
+### Clean Diff Certification
+
+When the gate passes, the Markdown report still explains what was checked:
+
+- Changed file count and churn.
+- Diff Coherence Score.
+- Dependency discipline.
+- Test integrity.
+- Public API surface.
+- Secret/path checks.
+
+This makes clean runs useful in PRs and agent handoffs instead of just saying “no findings.”
+
+## Positioning
+
+Critical Gate is adjacent to linters, test suites, security scanners, and AI code review tools, but
+it is not trying to replace them.
+
+- **Linters and formatters** enforce code style and static rules. Critical Gate checks whether the
+  diff stayed inside the task and repository contract.
+- **Test suites** prove selected behavior still passes. Critical Gate looks for tests that were
+  weakened, skipped, or changed to assert less meaningful behavior.
+- **Security scanners** look for known vulnerabilities or secrets. Critical Gate includes lightweight
+  diff-only secret/path checks but focuses on agent failure patterns beyond security.
+- **AI code reviewers** often produce broad suggestions. Critical Gate is deterministic-first and
+  evidence-first; optional model help is for explanation, not primary detection.
+- **CI checks** usually answer whether the project builds. Critical Gate answers whether the diff is
+  acceptable for the task before it is merged.
+
+The category is a **diff integrity gate for AI-assisted development**: a cheap, local, repository-
+aware enforcement layer that catches high-risk agent behavior before humans have to infer it from a
+large patch.
+
 ## Surfaces
 
 Critical Gate has one analysis core and multiple surfaces:

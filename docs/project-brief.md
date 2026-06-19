@@ -18,6 +18,18 @@ Do not position this as another AI code reviewer. Position it as:
 
 The value is not in writing prettier PR comments. The value is in stopping agent-created changes that compile but violate task scope, repository conventions, test integrity, dependency discipline, or public API contracts.
 
+Critical Gate sits beside existing quality tools:
+
+- Linters enforce local style and static code rules.
+- Test suites validate known behavior.
+- Security scanners detect known vulnerabilities, secrets, and risky dependencies.
+- AI review assistants summarize or critique patches.
+
+Critical Gate's category is narrower: it is a diff integrity gate. It checks whether the final
+agent-produced patch is acceptable for the stated task and this repository's contracts. It should
+prefer concrete evidence over broad advice, deterministic checks over model judgment, and repairable
+findings over commentary.
+
 ## Primary Users
 
 - Developers using Codex, Cursor, Claude Code, Aider, OpenHands, Windsurf, or similar coding agents.

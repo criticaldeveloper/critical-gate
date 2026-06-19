@@ -103,7 +103,7 @@ root note.
     - Add a YAML/JSON policy file for thresholds, detector overrides, expected companions, and
       allowed support files.
 
-18. Examples and positioning.
+18. Examples and positioning. Completed in `feature/examples-and-positioning`.
     - Expand the README with concrete examples of dependency drift, test weakening, unrelated
       edits, utility reinvention, public API changes, and clean diff certification.
     - Add calm competitor positioning that explains Critical Gate's category.
