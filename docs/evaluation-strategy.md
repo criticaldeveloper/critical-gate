@@ -55,6 +55,45 @@ Use deterministic fixtures for:
 
 Each fixture should have positive and negative variants.
 
+## Local Harness
+
+Run the current fixture-level harness with:
+
+```bash
+pnpm evaluate
+```
+
+The command builds the CLI, runs `tests/e2e-fixtures.test.ts` once with the knowledge cache disabled
+and once with normal cache behavior, then writes:
+
+- `artifacts/evaluation/critical-gate-evaluation.json`
+- `artifacts/evaluation/critical-gate-evaluation.md`
+
+The first harness tracks fixture-level proxy metrics:
+
+- Unexpected-actions precision.
+- Existing-solution precision.
+- Expected-companion recall.
+- Cold run time.
+- Warm run time.
+
+The precision/recall values currently mean that the curated E2E fixture suite passed. They are not a
+substitute for dogfood labels from real repositories; they are a stable baseline to catch regressions
+while the labeled dataset grows.
+
+## Current Baselines
+
+Use these baselines when dogfooding Critical Gate on real repositories:
+
+- Cold runtime: compare against the `coldRunMs` value in the latest evaluation artifact.
+- Warm runtime: compare against `warmRunMs`; warm runs should not be materially slower than cold
+  runs.
+- Unexpected-actions precision: review findings from the intent mismatch fixture and real PRs for
+  false positives.
+- Existing-solution precision: confirm reuse findings point to genuinely reusable local solutions.
+- Expected-companion recall: confirm historically paired tests, fixtures, lockfiles, or docs are
+  detected when omitted.
+
 ## Detector Quality Bar
 
 A detector should not become a blocker until:
