@@ -1,0 +1,10 @@
+{
+  "shouldBlock": true,
+  "expectedFindings": [
+    {
+      "detector": "rewrite",
+      "severity": "high",
+      "file": "src/components/HeroVideo.astro"
+    }
+  ]
+}

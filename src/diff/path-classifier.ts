@@ -55,7 +55,11 @@ export function classifyPath(path: string): DiffFileRole {
     return "docs";
   }
 
-  if (/\.[cm]?[jt]sx?$/.test(normalizedPath) || /\.(css|scss|sass|less)$/.test(normalizedPath)) {
+  if (
+    /\.[cm]?[jt]sx?$/.test(normalizedPath) ||
+    /\.(astro|vue|svelte)$/.test(normalizedPath) ||
+    /\.(css|scss|sass|less)$/.test(normalizedPath)
+  ) {
     return "source";
   }
 
@@ -77,6 +81,12 @@ export function detectLanguage(path: string): string | undefined {
       return "javascript";
     case "jsx":
       return "javascript-react";
+    case "astro":
+      return "astro";
+    case "vue":
+      return "vue";
+    case "svelte":
+      return "svelte";
     case "json":
       return "json";
     case "md":

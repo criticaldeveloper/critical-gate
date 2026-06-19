@@ -1,4 +1,4 @@
-import { analyzeTaskIntent } from "../intent/index.js";
+import { analyzeTaskIntent, getTaskIntentQualityWarnings } from "../intent/index.js";
 import type { DiffFile, Finding, FindingSeverity } from "../schema/index.js";
 
 import type { Detector } from "./types.js";
@@ -18,9 +18,20 @@ export const rewriteDetector: Detector = {
 
     return diff.files
       .filter(isRewriteCandidate)
-      .map((file) => toFinding(file, analysis.complexity === "small" ? "high" : "medium"));
+      .map((file) =>
+        toFinding(
+          file,
+          analysis.complexity === "small" || hasWeakIntentBoundary(task) ? "high" : "medium"
+        )
+      );
   }
 };
+
+function hasWeakIntentBoundary(task: Parameters<Detector["run"]>[0]["task"]): boolean {
+  return getTaskIntentQualityWarnings(task).some(
+    (warning) => warning.code === "vague-task" || warning.code === "generic-only"
+  );
+}
 
 function isRewriteCandidate(file: DiffFile): boolean {
   if (file.role !== "source" || file.status === "added" || file.status === "deleted") {

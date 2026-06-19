@@ -21,6 +21,11 @@ const largeTask: TaskIntent = {
   text: "Refactor signup validation architecture"
 };
 
+const vagueTask: TaskIntent = {
+  source: "cli",
+  text: "Update project"
+};
+
 function parse(diffText: string): GateResult["diff"] {
   return {
     files: parseUnifiedDiff(diffText)
@@ -86,6 +91,19 @@ describe("rewriteDetector", () => {
 
     expect(rewriteDetector.run({ task: smallTask, diff })).toEqual([]);
   });
+
+  it("emits high severity for Astro component rewrites under vague task intent", () => {
+    const diff = parse(createRewriteDiff("src/components/HeroVideo.astro", 219, 187));
+
+    expect(rewriteDetector.run({ task: vagueTask, diff })).toEqual([
+      expect.objectContaining({
+        detector: "rewrite",
+        severity: "high",
+        message:
+          "src/components/HeroVideo.astro has 406 changed lines with balanced additions and deletions, which looks like a rewrite."
+      })
+    ]);
+  });
 });
 
 describe("detector runner with rewrites", () => {
@@ -96,6 +114,16 @@ describe("detector runner with rewrites", () => {
     expect(summarizeFindings(findings, smallTask, diff)).toMatchObject({
       decision: "fail",
       findingCount: 1,
+      highCount: 1
+    });
+  });
+
+  it("fails vague task text with a large component rewrite", () => {
+    const diff = parse(createRewriteDiff("src/components/HeroVideo.astro", 219, 187));
+    const findings = runDetectors(vagueTask, diff);
+
+    expect(summarizeFindings(findings, vagueTask, diff)).toMatchObject({
+      decision: "fail",
       highCount: 1
     });
   });

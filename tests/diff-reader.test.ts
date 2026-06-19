@@ -3,6 +3,7 @@ import { join } from "node:path";
 
 import {
   classifyPath,
+  detectLanguage,
   getKnowledgeCacheRoot,
   parseUnifiedDiff,
   readGitDiff,
@@ -100,6 +101,9 @@ describe("parseUnifiedDiff", () => {
 describe("classifyPath", () => {
   it.each([
     ["src/app.ts", "source"],
+    ["src/components/HeroVideo.astro", "source"],
+    ["src/components/HeroVideo.vue", "source"],
+    ["src/components/HeroVideo.svelte", "source"],
     ["tests/app.test.ts", "test"],
     ["package.json", "manifest"],
     ["pnpm-lock.yaml", "lockfile"],
@@ -108,6 +112,14 @@ describe("classifyPath", () => {
     ["dist/bundle.js", "generated"]
   ] as const)("classifies %s as %s", (path, role) => {
     expect(classifyPath(path)).toBe(role);
+  });
+
+  it.each([
+    ["src/components/HeroVideo.astro", "astro"],
+    ["src/components/HeroVideo.vue", "vue"],
+    ["src/components/HeroVideo.svelte", "svelte"]
+  ] as const)("detects %s as %s", (path, language) => {
+    expect(detectLanguage(path)).toBe(language);
   });
 });
 

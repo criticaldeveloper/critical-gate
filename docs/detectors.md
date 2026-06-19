@@ -190,6 +190,8 @@ Output:
 
 - Diff Cost Score contribution.
 - High severity when combined with unrelated files or deleted tests.
+- High severity for balanced rewrites under vague or generic task text such as `Update project`,
+  because the task intent does not provide a reliable boundary for broad component churn.
 
 ### Existing Utility Already Available
 
