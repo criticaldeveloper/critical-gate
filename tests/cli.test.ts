@@ -23,15 +23,27 @@ function createTestIo() {
   const stdout: string[] = [];
   const stderr: string[] = [];
   const files = new Map<string, string>();
+  const pathVariants = (path: string): string[] => [
+    path,
+    path.replaceAll("/", "\\"),
+    path.replaceAll("\\", "/")
+  ];
 
   return {
     io: {
       stdout: (message: string) => stdout.push(message),
       stderr: (message: string) => stderr.push(message),
-      writeFile: (path: string, content: string) => writes.set(path, content),
+      writeFile: (path: string, content: string) => {
+        for (const variant of pathVariants(path)) {
+          writes.set(variant, content);
+        }
+      },
       chmodFile: () => undefined,
-      exists: (path: string) => files.has(path),
-      readFile: (path: string) => files.get(path) ?? "",
+      exists: (path: string) => pathVariants(path).some((variant) => files.has(variant)),
+      readFile: (path: string) =>
+        pathVariants(path)
+          .map((variant) => files.get(variant))
+          .find((content): content is string => content !== undefined) ?? "",
       now: () => new Date("2026-06-17T21:20:00.000Z"),
       readDiff: () => testDiffResult
     },
