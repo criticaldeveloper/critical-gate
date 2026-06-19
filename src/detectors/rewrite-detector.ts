@@ -34,7 +34,7 @@ function hasWeakIntentBoundary(task: Parameters<Detector["run"]>[0]["task"]): bo
 }
 
 function isRewriteCandidate(file: DiffFile): boolean {
-  if (file.role !== "source" || file.status === "added" || file.status === "deleted") {
+  if (!isRewriteEligibleFile(file) || file.status === "added" || file.status === "deleted") {
     return false;
   }
 
@@ -47,6 +47,18 @@ function isRewriteCandidate(file: DiffFile): boolean {
     smallerSide >= minimumBalancedSide &&
     smallerSide / largerSide >= minimumBalanceRatio
   );
+}
+
+function isRewriteEligibleFile(file: DiffFile): boolean {
+  if (file.role === "test" || file.role === "docs" || file.role === "generated") {
+    return false;
+  }
+
+  return file.role === "source" || isSourceLikePath(file.path);
+}
+
+function isSourceLikePath(path: string): boolean {
+  return /\.(?:[cm]?[jt]sx?|astro|vue|svelte|css|scss|sass|less)$/i.test(path);
 }
 
 function toFinding(file: DiffFile, severity: FindingSeverity): Finding {

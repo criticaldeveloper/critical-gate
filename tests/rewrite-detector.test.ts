@@ -104,6 +104,25 @@ describe("rewriteDetector", () => {
       })
     ]);
   });
+
+  it("emits high severity for source-like rewrites even when role metadata is unknown", () => {
+    const diff = parse(createRewriteDiff("src/components/HeroVideo.astro", 219, 187));
+    diff.files[0] = {
+      ...diff.files[0]!,
+      role: "unknown"
+    };
+
+    expect(
+      rewriteDetector.run({ task: { source: "cli", text: "Update hero copy" }, diff })
+    ).toEqual([
+      expect.objectContaining({
+        detector: "rewrite",
+        severity: "high",
+        message:
+          "src/components/HeroVideo.astro has 406 changed lines with balanced additions and deletions, which looks like a rewrite."
+      })
+    ]);
+  });
 });
 
 describe("detector runner with rewrites", () => {
@@ -123,6 +142,17 @@ describe("detector runner with rewrites", () => {
     const findings = runDetectors(vagueTask, diff);
 
     expect(summarizeFindings(findings, vagueTask, diff)).toMatchObject({
+      decision: "fail",
+      highCount: 1
+    });
+  });
+
+  it("fails copy tasks implemented as large component rewrites", () => {
+    const diff = parse(createRewriteDiff("src/components/HeroVideo.astro", 219, 187));
+    const task: TaskIntent = { source: "cli", text: "Update hero copy to be clearer" };
+    const findings = runDetectors(task, diff);
+
+    expect(summarizeFindings(findings, task, diff)).toMatchObject({
       decision: "fail",
       highCount: 1
     });
