@@ -2,6 +2,12 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.1.1 - 2026-06-19
+
+Patch release aligned with Critical Gate 2.1.1.
+
+- Bundle the CLI entrypoint fix for pnpm global installs and symlinked package paths.
+
 ## 2.1.0 - 2026-06-19
 
 Marketplace release aligned with Critical Gate 2.1.0.

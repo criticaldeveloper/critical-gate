@@ -4,6 +4,15 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## 2.1.1 - 2026-06-19
+
+Patch release for global CLI installs.
+
+### Fixed
+
+- Normalize CLI entrypoint paths through real paths so pnpm global shims and symlinked package
+  paths execute the CLI instead of exiting silently.
+
 ## 2.1.0 - 2026-06-19
 
 Trust and calibration release based on real-project dogfooding.

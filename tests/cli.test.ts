@@ -1,4 +1,9 @@
-import { ExitCode, main } from "../src/cli.js";
+import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { pathToFileURL } from "node:url";
+
+import { ExitCode, isCliEntrypoint, main } from "../src/cli.js";
 import type { GitDiffResult } from "../src/index.js";
 
 const testDiffResult: GitDiffResult = {
@@ -67,8 +72,32 @@ describe("cli", () => {
     const { io, stdout, stderr } = createTestIo();
 
     expect(main(["--version"], io)).toBe(ExitCode.Pass);
-    expect(stdout).toEqual(["critical-gate 2.1.0"]);
+    expect(stdout).toEqual(["critical-gate 2.1.1"]);
     expect(stderr).toEqual([]);
+  });
+
+  it("recognizes CLI entrypoints invoked through symlinked package paths", () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "critical-gate-cli-"));
+    const realCliPath = join(tempDir, "dist-cli.js");
+    const shimCliPath = join(tempDir, "critical-gate.js");
+
+    try {
+      writeFileSync(realCliPath, "");
+      try {
+        symlinkSync(realCliPath, shimCliPath);
+      } catch (error) {
+        if (error instanceof Error && "code" in error && error.code === "EPERM") {
+          expect(isCliEntrypoint(pathToFileURL(realCliPath).href, realCliPath)).toBe(true);
+          return;
+        }
+
+        throw error;
+      }
+
+      expect(isCliEntrypoint(pathToFileURL(realCliPath).href, shimCliPath)).toBe(true);
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
   });
 
   it("requires task intent for check", () => {

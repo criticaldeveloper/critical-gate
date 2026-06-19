@@ -1,6 +1,13 @@
 #!/usr/bin/env node
 
-import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  realpathSync,
+  writeFileSync
+} from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -33,7 +40,7 @@ import {
   type ReportFormat
 } from "./index.js";
 
-export const CLI_VERSION = "2.1.0";
+export const CLI_VERSION = "2.1.1";
 
 export const ExitCode = {
   Pass: 0,
@@ -934,9 +941,25 @@ function upsertById<T extends { id: string }>(entries: T[], next: T): T[] {
   return [...entries.filter((entry) => entry.id !== next.id), next];
 }
 
-const isDirectRun =
-  process.argv[1] !== undefined && fileURLToPath(import.meta.url) === resolve(process.argv[1]);
+export function isCliEntrypoint(importMetaUrl: string, argvPath = process.argv[1]): boolean {
+  return (
+    argvPath !== undefined &&
+    normalizeExecutablePath(fileURLToPath(importMetaUrl)) === normalizeExecutablePath(argvPath)
+  );
+}
 
-if (isDirectRun) {
+function normalizeExecutablePath(path: string): string {
+  let normalized = resolve(path);
+
+  try {
+    normalized = realpathSync.native(normalized);
+  } catch {
+    // Fall back to the resolved path when the target is virtual or has already been removed.
+  }
+
+  return process.platform === "win32" ? normalized.toLowerCase() : normalized;
+}
+
+if (isCliEntrypoint(import.meta.url)) {
   process.exitCode = main();
 }
