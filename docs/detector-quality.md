@@ -1,0 +1,426 @@
+# Detector Quality
+
+This document explains what Critical Gate detectors actually prove, where they are intentionally
+quiet, and what tests or evaluation cases protect their behavior.
+
+The goal is not to make every detector block more often. The goal is to keep findings evidence-backed
+and low-noise enough to use in local checks, CI, and Codex repair loops.
+
+## Quality Standard
+
+Every blocker-capable detector should have:
+
+- Clear deterministic signals.
+- Evidence that points to paths, lines, symbols, manifest keys, config files, or measured churn.
+- A "will flag" boundary.
+- A "will not flag" boundary.
+- Known blind spots.
+- Focused tests or labeled eval cases.
+
+Uncertain detector families should remain observation-friendly until dogfood and evaluation evidence
+support promotion.
+
+## Blocking-Capable Detectors
+
+### Dependency Addition
+
+Detector: `dependency-addition`
+
+Signals used:
+
+- Added entries in `dependencies`, `devDependencies`, or related package manifest sections.
+- Lockfile companion changes.
+- Task intent wording that does or does not justify adding a package.
+
+Evidence emitted:
+
+- Manifest path.
+- Dependency name, version, and section.
+- Repair guidance to remove, justify, or use existing/native utilities.
+
+Will flag:
+
+- A production dependency added when task intent does not ask for or justify a dependency.
+- A dev dependency added for a narrow task when there is no visible tooling/test justification.
+
+Will not flag:
+
+- Version-only package manifest changes for release/version tasks.
+- Dependency changes explicitly requested by task intent.
+- Lockfile companion observations by themselves when the manifest change is already expected.
+
+Known blind spots:
+
+- It does not yet prove an existing local utility fully replaces the new package.
+- It does not run vulnerability analysis for the dependency.
+
+Coverage:
+
+- Unit tests: `tests/dependency-detector.test.ts`.
+- Evaluation case: `eval/cases/dependency-prod-001`.
+
+### Test Weakening
+
+Detector: `test-weakening`
+
+Signals used:
+
+- Removed assertions.
+- Added `.skip`, `.only`, or `todo`.
+- Assertion specificity changes from behavior/value checks to generic existence checks.
+- Snapshot or broad matcher changes when visible in changed hunks.
+
+Evidence emitted:
+
+- Test path and line evidence.
+- Matcher or assertion text where available.
+- Repair guidance to restore equivalent behavioral coverage.
+
+Will flag:
+
+- Removed assertions in test files.
+- Newly skipped or todo tests.
+- Replacing specific behavior assertions with generic existence assertions.
+
+Will not flag:
+
+- Adding tests.
+- Refactoring test code while preserving equivalent assertion specificity.
+- Non-test files unless classified as tests.
+
+Known blind spots:
+
+- It does not execute tests to measure mutation score.
+- It cannot always infer semantic equivalence between custom assertion helpers.
+
+Coverage:
+
+- Unit tests: `tests/test-weakening-detector.test.ts`.
+- Evaluation cases: `eval/cases/test-weakening-001`, `eval/cases/skipped-test-added-001`.
+
+### Secret And Path
+
+Detector: `secret-path`
+
+Signals used:
+
+- Added token-like strings.
+- Absolute local paths.
+- Internal hostnames or URLs.
+- Provider-token patterns.
+
+Evidence emitted:
+
+- File and line ranges.
+- Redacted messages; secret values must not be printed in full.
+
+Will flag:
+
+- Added provider-token-looking values.
+- Added local absolute paths in source/config contexts.
+- Added internal hosts in risky contexts.
+
+Will not flag:
+
+- Normal documentation or test fixture examples unless they look like blocker-grade secrets.
+- Existing secrets outside the diff.
+
+Known blind spots:
+
+- It is a lightweight diff-only scanner, not a full secret-scanning replacement.
+- It may miss custom token formats until explicitly added.
+
+Coverage:
+
+- Unit tests: `tests/secret-path-detector.test.ts`.
+- Dogfood evidence: `docs/dogfood-ky-2026-06-18.md`.
+
+### Public API Surface
+
+Detector: `api-surface`
+
+Signals used:
+
+- Export removals, additions, and signature changes.
+- `.critical-gate/api-surface.json` snapshots.
+- Framework contract fallbacks for known public surfaces.
+- Release evidence such as changelog, changeset, migration docs, or snapshot updates.
+
+Evidence emitted:
+
+- Entrypoint or framework contract path.
+- Exported symbol name.
+- Change type.
+- Missing release/snapshot evidence when relevant.
+
+Will flag:
+
+- Snapshotted export removals without release evidence.
+- Signature changes against a committed API snapshot.
+- Added exports to a snapshotted entrypoint when the snapshot or release evidence is missing.
+- Known framework contract export removals covered by fixtures.
+
+Will not flag:
+
+- Internal non-exported symbol changes.
+- Intentional public contract changes with matching snapshot/release evidence.
+
+Known blind spots:
+
+- Entrypoint discovery still needs hardening for complex package `exports`.
+- Policy-defined public entrypoints are not supported yet.
+
+Coverage:
+
+- Unit tests: `tests/api-surface-detector.test.ts`, `tests/api-snapshot.test.ts`.
+- Evaluation cases: `eval/cases/framework-contract-export-removed-001`.
+
+### Config Change
+
+Detector: `config-change`
+
+Signals used:
+
+- Config-file classification.
+- Build, lint, test, bundler, Docker, CI, runtime, TypeScript, or package-manager config changes.
+- Task intent and documentation/changelog companion changes.
+
+Evidence emitted:
+
+- Config path.
+- Changed role.
+- Missing task/doc acknowledgement.
+
+Will flag:
+
+- Operational config changed during a task that does not mention config.
+- Runtime/tooling pin changes during unrelated UI or source tasks.
+- Config changes without visible operational documentation when docs are expected.
+
+Will not flag:
+
+- Config changes requested by task intent.
+- Config changes paired with relevant docs/changelog evidence.
+
+Known blind spots:
+
+- It does not deeply parse every config format.
+- It cannot know every organization's operational review process without policy/docs evidence.
+
+Coverage:
+
+- Unit tests: `tests/config-change-detector.test.ts`.
+- Evaluation case: `eval/cases/config-runtime-pin-drift-001`.
+
+### Scope And Unrelated Files
+
+Detector: `scope`
+
+Signals used:
+
+- Task intent terms.
+- Changed file paths and roles.
+- Small-task classification.
+- High-risk roles such as config, manifest, lockfile, and deleted source files.
+
+Evidence emitted:
+
+- Unexpected file path.
+- Role and task-boundary rationale.
+- Repair guidance to split or justify unrelated edits.
+
+Will flag:
+
+- Config/package/source changes unrelated to a narrow task.
+- Unrelated file deletions during small tasks.
+- High-risk file roles changed without matching task intent.
+
+Will not flag:
+
+- Expected source/test/doc companions when task intent supports them.
+- Version-only manifest changes during release tasks.
+- Tiny legitimate stylesheet/token changes when task intent is explicitly stylistic.
+
+Known blind spots:
+
+- Task-to-path matching is deterministic and can miss domain synonyms not in the repository.
+- It does not understand product semantics beyond paths, roles, history, and intent tokens.
+
+Coverage:
+
+- Unit tests: `tests/scope-detector.test.ts`, `tests/task-analysis.test.ts`.
+- Evaluation cases: `eval/cases/config-runtime-pin-drift-001`, `eval/cases/typography-clean-001`.
+
+### Intent Coverage
+
+Detector: `intent-coverage`
+
+Signals used:
+
+- Strong implementation verbs.
+- UI/content target terms.
+- Changed file roles and churn.
+- Trivial stylesheet-only edits.
+
+Evidence emitted:
+
+- Requested class of work.
+- Observed changed roles/classes.
+- Explanation of underimplementation.
+
+Will flag:
+
+- A visible feature request satisfied only by trivial style/token edits.
+- Task intent that clearly asks for UI/source implementation but observes no meaningful matching
+  implementation class.
+
+Will not flag:
+
+- Explicit style-tuning tasks.
+- Docs-only tasks that only change docs.
+- Tasks where observed file roles match the requested work.
+
+Known blind spots:
+
+- It does not render UI or execute the app.
+- It relies on conservative task wording and changed-file signals.
+
+Coverage:
+
+- Unit tests: `tests/intent-verification-detector.test.ts`.
+- Evaluation case: `eval/cases/ui-undercoverage-001`.
+
+### Rewrite
+
+Detector: `rewrite`
+
+Signals used:
+
+- Added/deleted line balance.
+- Churn compared with task complexity.
+- File rewrite percentage and structural similarity proxies.
+- Vague or small task wording.
+
+Evidence emitted:
+
+- File path.
+- Churn metrics.
+- Task-size mismatch explanation.
+
+Will flag:
+
+- Large balanced rewrites for small or vague tasks.
+- Broad component rewrites when the requested change is copy, style, or narrowly scoped behavior.
+
+Will not flag:
+
+- Legitimate broad refactors with task intent that names the refactor scope.
+- Larger changes where file roles and task scope are coherent.
+
+Known blind spots:
+
+- It does not prove semantic equivalence of removed and added code.
+- It can be conservative for generated or heavily formatted files and should rely on path/exclude
+  policy when appropriate.
+
+Coverage:
+
+- Unit tests: `tests/rewrite-detector.test.ts`.
+- Evaluation cases: `eval/cases/copy-component-rewrite-001`,
+  `eval/cases/vague-component-rewrite-001`.
+
+## Observation-Friendly Detectors
+
+These detectors provide useful evidence but should generally stay non-blocking until policy or
+dogfood evidence promotes them.
+
+### Blast Radius
+
+Detector: `blast-radius`
+
+Signals used:
+
+- Changed-file clusters.
+- File roles and package/workspace ownership.
+- Diff coherence and scope expansion drivers.
+
+Quality boundary:
+
+- Useful for review and scoring.
+- Should not block by default unless the repository has tuned policy and repeated evidence.
+
+Coverage:
+
+- Unit tests: `tests/blast-radius-detector.test.ts`.
+
+### Expected Companions
+
+Detector: `expected-companions`
+
+Signals used:
+
+- Git co-change history.
+- Normal change model.
+- Framework packs.
+- Policy-taught expected support files.
+
+Quality boundary:
+
+- Useful for missing support-file observations.
+- Should remain observation-friendly for immature repositories or tiny edits.
+
+Coverage:
+
+- Unit tests: `tests/expected-companions-detector.test.ts`,
+  `tests/normal-change-model.test.ts`.
+
+### Existing Solution And Utility Reinvention
+
+Detectors: `existing-solution`, `utility-reinvention`
+
+Signals used:
+
+- Utility-like modules.
+- Exported helper names.
+- Parameter and return-shape evidence.
+- Import counts and folder roles.
+
+Quality boundary:
+
+- Good repair-loop guidance when symbol evidence is strong.
+- Should avoid blocking until repository utility history is rich enough.
+
+Coverage:
+
+- Unit tests: `tests/existing-solution-detector.test.ts`,
+  `tests/utility-reinvention-detector.test.ts`, `tests/utility-index.test.ts`.
+
+### Pattern Violation And Repository Intelligence
+
+Detectors: `pattern-violation`, `repository-intelligence`
+
+Signals used:
+
+- Local naming profiles.
+- Framework packs.
+- Repository history and normal patterns.
+
+Quality boundary:
+
+- Useful as repo-aware context.
+- Should stay observational unless policy-enabled after dogfooding.
+
+Coverage:
+
+- Unit tests: `tests/pattern-violation-detector.test.ts`,
+  `tests/repository-intelligence-detector.test.ts`, `tests/repository-profile.test.ts`.
+
+## Promotion Checklist
+
+Before promoting an observation-friendly detector to blocking in `.critical-gate.json`:
+
+1. Add or identify positive and negative fixtures.
+2. Run `pnpm evaluate` and confirm no unexpected blocking regressions.
+3. Dogfood on the target repository for several clean runs.
+4. Document false-positive boundaries in this file or `docs/detectors.md`.
+5. Add a policy reason explaining why the detector is ready to block for that repository.

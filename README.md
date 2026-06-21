@@ -433,6 +433,8 @@ Branch and commit conventions for this repository:
 - [docs/project-brief.md](docs/project-brief.md): product thesis, users, positioning, and scope.
 - [docs/architecture.md](docs/architecture.md): core architecture and data flow.
 - [docs/detectors.md](docs/detectors.md): detector catalog, severities, evidence, and implementation notes.
+- [docs/detector-quality.md](docs/detector-quality.md): detector quality boundaries, blind spots,
+  and coverage expectations.
 - [docs/usage-guide.md](docs/usage-guide.md): practical usage examples and troubleshooting.
 - [docs/installation.md](docs/installation.md): CLI, GitHub Action, Codex hook, and VSIX installation.
 - [docs/editor-surface.md](docs/editor-surface.md): VS Code dashboard and diagnostics behavior.

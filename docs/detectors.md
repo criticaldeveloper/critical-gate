@@ -1,5 +1,8 @@
 # Detector Catalog
 
+For detector-specific quality boundaries, known blind spots, and coverage expectations, see
+[detector-quality.md](detector-quality.md).
+
 ## Severity Levels
 
 - `blocker`: should fail the gate by default.

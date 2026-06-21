@@ -74,6 +74,8 @@ Validation:
 
 ### Task 1.3: Add Detector Quality Sheets
 
+Status: Done.
+
 Goal: document what each detector actually proves and where it is intentionally quiet.
 
 Implementation:
