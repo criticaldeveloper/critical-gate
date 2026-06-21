@@ -30,3 +30,49 @@ jobs:
 
       - name: Verify
         run: pnpm verify
+
+  quality-evidence:
+    name: Coverage and evaluation evidence
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.1.2
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run coverage
+        run: pnpm coverage
+
+      - name: Run evaluation
+        run: pnpm evaluate
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: critical-gate-coverage
+          path: |
+            coverage/index.html
+            coverage/coverage-summary.json
+          if-no-files-found: error
+
+      - name: Upload evaluation artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: critical-gate-evaluation
+          path: |
+            artifacts/evaluation/critical-gate-evaluation.json
+            artifacts/evaluation/critical-gate-evaluation.md
+          if-no-files-found: error

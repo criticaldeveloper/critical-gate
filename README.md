@@ -398,6 +398,13 @@ the VS Code surface. Configure `criticalGate.cliPath` only when testing a custom
 For a fuller walkthrough with examples, rollout advice, report interpretation, and troubleshooting,
 read [docs/usage-guide.md](docs/usage-guide.md).
 
+## Quality Evidence
+
+The CI workflow publishes coverage and deterministic evaluation reports as GitHub Actions artifacts:
+`critical-gate-coverage` and `critical-gate-evaluation`. See
+[docs/evaluation-strategy.md](docs/evaluation-strategy.md) for artifact paths, thresholds, and the
+current limits of the internal evaluation corpus.
+
 ## Development
 
 Useful commands:

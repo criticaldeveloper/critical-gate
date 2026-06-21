@@ -48,6 +48,8 @@ False-positive boundary:
 
 ### Task 1.2: Publish Evaluation And Coverage Artifacts In CI
 
+Status: Done.
+
 Goal: make quality evidence visible without adding a third-party coverage service.
 
 Implementation:

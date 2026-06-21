@@ -146,6 +146,9 @@ The command runs the TypeScript test suite with V8 coverage and writes:
 - `coverage/coverage-summary.json`
 - terminal coverage summary output
 
+CI uploads `coverage/index.html` and `coverage/coverage-summary.json` as the
+`critical-gate-coverage` workflow artifact.
+
 Initial thresholds are deliberately moderate so they catch major coverage regressions without
 creating churn while detector heuristics are still changing:
 
@@ -155,6 +158,17 @@ creating churn while detector heuristics are still changing:
 - Branches: 65%
 
 Raise thresholds only after coverage is stable across detector and reporter changes.
+
+## CI Evidence Artifacts
+
+The CI workflow publishes quality evidence without requiring a hosted coverage service:
+
+- `critical-gate-coverage`: `coverage/index.html` and `coverage/coverage-summary.json`.
+- `critical-gate-evaluation`: `artifacts/evaluation/critical-gate-evaluation.json` and
+  `artifacts/evaluation/critical-gate-evaluation.md`.
+
+These artifacts are the public proof point for the latest test coverage and deterministic evaluation
+run. Keep exact coverage percentages out of README unless they are generated automatically.
 
 ## Detector Quality Bar
 

@@ -7,6 +7,7 @@ describe("GitHub integration", () => {
     join(process.cwd(), ".github", "workflows", "critical-gate.yml"),
     "utf8"
   );
+  const ciWorkflow = readFileSync(join(process.cwd(), ".github", "workflows", "ci.yml"), "utf8");
   const sarifTemplate = readFileSync(
     join(process.cwd(), "docs", "workflows", "critical-gate-sarif.yml"),
     "utf8"
@@ -31,6 +32,18 @@ describe("GitHub integration", () => {
     expect(workflow).toContain("uses: github/codeql-action/upload-sarif@v4");
     expect(workflow).toContain("sarif_file: critical-gate.sarif");
     expect(workflow).toContain("continue-on-error: true");
+  });
+
+  it("publishes coverage and evaluation evidence from CI", () => {
+    expect(ciWorkflow).toContain("pnpm coverage");
+    expect(ciWorkflow).toContain("pnpm evaluate");
+    expect(ciWorkflow).toContain("uses: actions/upload-artifact@v6");
+    expect(ciWorkflow).toContain("name: critical-gate-coverage");
+    expect(ciWorkflow).toContain("coverage/coverage-summary.json");
+    expect(ciWorkflow).toContain("coverage/index.html");
+    expect(ciWorkflow).toContain("name: critical-gate-evaluation");
+    expect(ciWorkflow).toContain("artifacts/evaluation/critical-gate-evaluation.json");
+    expect(ciWorkflow).toContain("artifacts/evaluation/critical-gate-evaluation.md");
   });
 
   it("ships reusable SARIF and summary workflow templates", () => {
