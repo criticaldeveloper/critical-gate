@@ -37,7 +37,7 @@ describe("release version metadata", () => {
       },
       diff: {
         baseRef: "main",
-        headRef: "release/2.2.0",
+        headRef: "release/2.3.0",
         files: []
       },
       findings: [],

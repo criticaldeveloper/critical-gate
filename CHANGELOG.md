@@ -4,6 +4,24 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## 2.3.0 - 2026-06-21
+
+Agent onboarding and evaluation hardening release.
+
+### Added
+
+- Add `critical-gate init-agent` to create or update a managed Critical Gate section in `AGENTS.md`
+  while preserving existing repository instructions.
+- Add grouped evaluation metrics by source repository and case type.
+- Expand the sanitized evaluation corpus to 22 cases across generic fixtures, mv-ft dogfood
+  regressions, `sindresorhus/ky`, and `withastro/docs`.
+
+### Changed
+
+- Improve clean Markdown reports with compact why-passed evidence.
+- Harden LLM artifact redaction and document the maximum model artifact shape.
+- Add release checklist guardrails for product non-goals.
+
 ## 2.2.0 - 2026-06-19
 
 Dogfood-backed detector release based on the `mv-ft` real-repository evaluation pass.

@@ -2,6 +2,13 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.3.0 - 2026-06-21
+
+### Added
+
+- Add `Critical Gate: Initialize Agent Instructions` to initialize the managed Critical Gate
+  section in `AGENTS.md` from VS Code.
+
 ## 2.2.0 - 2026-06-19
 
 Marketplace release aligned with Critical Gate 2.2.0.
