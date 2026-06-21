@@ -1,0 +1,128 @@
+# Policy File
+
+Critical Gate reads optional repository policy from `.critical-gate.json` at the repository root.
+The policy file is reviewable policy-as-code: it should explain team-specific rollout choices and
+normal support-file relationships without hiding risky diffs globally.
+
+Create a starter policy with:
+
+```bash
+node dist/cli.js init-policy
+git add .critical-gate.json
+```
+
+CLI flags still override policy for a single run. For example, `--fail-on blocker` is stricter or
+looser than the stored policy only for that invocation.
+
+## Top-Level Keys
+
+### `policy`
+
+Primary review policy for teams.
+
+Fields:
+
+- `failOn`: one of `blocker`, `high`, or `medium`. Defaults to the CLI decision model when omitted.
+- `detectorOverrides`: reviewable detector rollout choices.
+- `expectedCompanions`: expected support-file rules that can make companion files normal for a
+  repository.
+- `allowedSupportFiles`: support-file allowances for known operational patterns such as config docs
+  or lockfile updates.
+
+Prefer `policy` for durable team defaults.
+
+### `rollout`
+
+Legacy rollout controls still supported for compatibility.
+
+Fields:
+
+- `observationDetectors`: detector ids to keep non-blocking.
+- `blockingDetectors`: detector ids to promote when confidence and severity allow it.
+- `failOn`: one of `blocker`, `high`, or `medium`.
+
+When both `policy` and `rollout` are present, policy helpers merge detector overrides with rollout
+lists. `policy.failOn` takes precedence over `rollout.failOn`.
+
+### `learning`
+
+Reviewable local learning entries, usually written by CLI commands.
+
+Fields:
+
+- `acceptedFindings`: exact finding ids accepted after review.
+- `expectedSupportFiles`: support-file rules taught with `critical-gate teach`.
+
+Use `learning` for repository-specific exceptions or conventions. Do not use it to hide one-off
+risky changes that should be fixed, split, or documented.
+
+### Repository Shape Keys
+
+These keys tune deterministic repository understanding:
+
+- `frameworkPacks`: force framework packs such as `react`, `astro`, `vite`, or `storybook`.
+- `patternAliases`: map local path vocabulary to common project concepts.
+- `featureRoots`: folders that contain feature-oriented code.
+- `serviceRoots`: folders that contain service or backend logic.
+- `validatorRoots`: folders that contain validation helpers.
+- `excludePatterns`: generated or low-signal path patterns to exclude from repository intelligence.
+
+## Rule Shapes
+
+### Detector Overrides
+
+```json
+{
+  "detector": "expected-companions",
+  "mode": "observation",
+  "reason": "Companion findings are useful during rollout but should not block yet."
+}
+```
+
+Fields:
+
+- `detector`: detector id.
+- `mode`: `blocking` or `observation`.
+- `reason`: reviewable explanation for the override.
+
+Promotion does not bypass confidence calibration. A detector still needs a finding with sufficient
+severity and confidence to fail the gate.
+
+### Support-File Rules
+
+```json
+{
+  "id": "docs-for-config",
+  "whenChanged": ".github/workflows/**",
+  "allow": ["docs/**/*.md", "README.md", "CHANGELOG.md"],
+  "reason": "Workflow changes may include visible operational documentation.",
+  "createdAt": "2026-06-21T00:00:00.000Z"
+}
+```
+
+Fields:
+
+- `id`: stable rule id.
+- `whenChanged`: changed-file glob that activates the rule.
+- `allow`: support-file globs accepted when the rule is active.
+- `reason`: reviewable explanation.
+- `createdAt`: ISO timestamp.
+
+## Example Policies
+
+Validated examples live under `docs/examples/policies/`.
+
+- `conservative-rollout.json`: default-style rollout for early adoption.
+- `strict-rollout.json`: stricter policy after dogfooding and clean runs.
+- `library-api-snapshot-rollout.json`: library policy for committed public API snapshots.
+- `monorepo-ownership-tuning.json`: package/workspace vocabulary and support-file tuning.
+
+These examples are loaded by `tests/config.test.ts`, so docs and parser behavior stay aligned.
+
+## Current Limits
+
+- Policy-defined public API entrypoints are not supported yet. Public API entrypoints are currently
+  supplied through `critical-gate snapshot-api --entrypoint <path>` or package metadata discovery.
+- `excludePatterns` tunes repository intelligence. It is not a security boundary and should not be
+  used to hide sensitive files from other tools.
+- `acceptedFindings` match exact finding ids. They are not broad suppressions.

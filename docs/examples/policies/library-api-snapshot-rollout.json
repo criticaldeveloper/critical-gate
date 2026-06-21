@@ -1,0 +1,21 @@
+{
+  "policy": {
+    "failOn": "high",
+    "detectorOverrides": [
+      {
+        "detector": "api-surface",
+        "mode": "blocking",
+        "reason": "This package publishes public TypeScript entrypoints with a committed API snapshot."
+      }
+    ],
+    "allowedSupportFiles": [
+      {
+        "id": "release-docs-for-api-snapshot",
+        "whenChanged": ".critical-gate/api-surface.json",
+        "allow": ["CHANGELOG.md", ".changeset/*.md", "docs/migration/**/*.md"],
+        "reason": "Public API snapshot changes should include release or migration evidence.",
+        "createdAt": "2026-06-21T00:00:00.000Z"
+      }
+    ]
+  }
+}

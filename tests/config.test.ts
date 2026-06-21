@@ -1,3 +1,6 @@
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+
 import {
   applyLearningPolicy,
   createDefaultPolicyConfig,
@@ -246,6 +249,55 @@ describe("loadCriticalGateConfig", () => {
     });
   });
 
+  it("loads every documented policy example without warnings", () => {
+    const examplesDir = join(process.cwd(), "docs", "examples", "policies");
+    const examples = readdirSync(examplesDir).filter((fileName) => fileName.endsWith(".json"));
+
+    expect(examples).toEqual(
+      expect.arrayContaining([
+        "conservative-rollout.json",
+        "strict-rollout.json",
+        "library-api-snapshot-rollout.json",
+        "monorepo-ownership-tuning.json"
+      ])
+    );
+
+    for (const fileName of examples) {
+      const result = loadCriticalGateConfig("C:/repo", {
+        exists: (path) => path.endsWith(".critical-gate.json"),
+        readFile: () => readFileSync(join(examplesDir, fileName), "utf8")
+      });
+
+      expect(result.warnings, fileName).toEqual([]);
+      expect(result.config, fileName).not.toEqual({});
+    }
+  });
+
+  it("derives helper values from documented policy examples", () => {
+    const examplesDir = join(process.cwd(), "docs", "examples", "policies");
+    const strict = loadExamplePolicy(examplesDir, "strict-rollout.json");
+    const conservative = loadExamplePolicy(examplesDir, "conservative-rollout.json");
+    const library = loadExamplePolicy(examplesDir, "library-api-snapshot-rollout.json");
+    const monorepo = loadExamplePolicy(examplesDir, "monorepo-ownership-tuning.json");
+
+    expect(getConfiguredFailOn(strict)).toBe("medium");
+    expect(getPolicyBlockingDetectors(strict)).toEqual([
+      "expected-companions",
+      "existing-solution"
+    ]);
+    expect(getPolicyObservationDetectors(conservative)).toEqual([
+      "expected-companions",
+      "blast-radius",
+      "existing-solution"
+    ]);
+    expect(getPolicyBlockingDetectors(library)).toEqual(["api-surface"]);
+    expect(getConfiguredExpectedSupportFiles(library)?.map((rule) => rule.id)).toEqual([
+      "release-docs-for-api-snapshot"
+    ]);
+    expect(monorepo.frameworkPacks).toEqual(["react", "vite"]);
+    expect(monorepo.excludePatterns).toEqual(["**/generated/**", "**/__generated__/**"]);
+  });
+
   it("updates config as reviewable JSON", () => {
     const writes = new Map<string, string>();
     const updated = updateCriticalGateConfig(
@@ -349,3 +401,14 @@ describe("loadCriticalGateConfig", () => {
     expect(result.appliedExpectedSupportRules).toEqual(["i18n-for-login-ui"]);
   });
 });
+
+function loadExamplePolicy(examplesDir: string, fileName: string) {
+  const result = loadCriticalGateConfig("C:/repo", {
+    exists: (path) => path.endsWith(".critical-gate.json"),
+    readFile: () => readFileSync(join(examplesDir, fileName), "utf8")
+  });
+
+  expect(result.warnings, fileName).toEqual([]);
+
+  return result.config;
+}

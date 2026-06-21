@@ -1,0 +1,35 @@
+{
+  "policy": {
+    "failOn": "high",
+    "detectorOverrides": [
+      {
+        "detector": "expected-companions",
+        "mode": "observation",
+        "reason": "Companion findings are useful during rollout but should not block yet."
+      },
+      {
+        "detector": "blast-radius",
+        "mode": "observation",
+        "reason": "Blast-radius findings need local calibration before blocking."
+      },
+      {
+        "detector": "existing-solution",
+        "mode": "observation",
+        "reason": "Reuse findings should be reviewed before becoming merge-blocking."
+      }
+    ],
+    "allowedSupportFiles": [
+      {
+        "id": "docs-for-config",
+        "whenChanged": ".github/workflows/**",
+        "allow": ["docs/**/*.md", "README.md", "CHANGELOG.md"],
+        "reason": "Workflow changes may include visible operational documentation.",
+        "createdAt": "2026-06-21T00:00:00.000Z"
+      }
+    ]
+  },
+  "learning": {
+    "acceptedFindings": [],
+    "expectedSupportFiles": []
+  }
+}

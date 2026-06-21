@@ -1,0 +1,24 @@
+{
+  "frameworkPacks": ["react", "vite"],
+  "patternAliases": {
+    "packages": "src",
+    "apps": "src",
+    "workspace": "package"
+  },
+  "featureRoots": ["apps/web/src/features", "packages/ui/src"],
+  "serviceRoots": ["apps/api/src/services", "packages/data/src"],
+  "validatorRoots": ["packages/validation/src"],
+  "excludePatterns": ["**/generated/**", "**/__generated__/**"],
+  "policy": {
+    "failOn": "high",
+    "allowedSupportFiles": [
+      {
+        "id": "package-config-docs",
+        "whenChanged": "packages/*/package.json",
+        "allow": ["docs/**/*.md", "CHANGELOG.md", "pnpm-lock.yaml"],
+        "reason": "Package metadata changes normally include lockfile or visible documentation support.",
+        "createdAt": "2026-06-21T00:00:00.000Z"
+      }
+    ]
+  }
+}

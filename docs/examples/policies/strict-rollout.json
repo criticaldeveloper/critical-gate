@@ -1,0 +1,26 @@
+{
+  "policy": {
+    "failOn": "medium",
+    "detectorOverrides": [
+      {
+        "detector": "expected-companions",
+        "mode": "blocking",
+        "reason": "This repository has enough history for companion findings to be actionable."
+      },
+      {
+        "detector": "existing-solution",
+        "mode": "blocking",
+        "reason": "The local utility index has been dogfooded and reuse findings are reliable."
+      }
+    ],
+    "expectedCompanions": [
+      {
+        "id": "source-test-companion",
+        "whenChanged": "src/**/*.ts",
+        "allow": ["tests/**/*.test.ts", "src/**/*.test.ts"],
+        "reason": "Source behavior changes normally require behavior tests.",
+        "createdAt": "2026-06-21T00:00:00.000Z"
+      }
+    ]
+  }
+}

@@ -437,6 +437,8 @@ Branch and commit conventions for this repository:
 - [docs/installation.md](docs/installation.md): CLI, GitHub Action, Codex hook, and VSIX installation.
 - [docs/editor-surface.md](docs/editor-surface.md): VS Code dashboard and diagnostics behavior.
 - [docs/github-integration.md](docs/github-integration.md): GitHub Action, SARIF, and threshold guidance.
+- [docs/policy-file.md](docs/policy-file.md): `.critical-gate.json` policy-as-code reference and
+  validated examples.
 - [docs/codex-integration.md](docs/codex-integration.md): Codex hook and repair-loop guidance.
 - [docs/dogfood-evidence-plan.md](docs/dogfood-evidence-plan.md): real-repository dogfood automation,
   repair-loop metrics, and screenshot proof plan.

@@ -208,6 +208,8 @@ The policy section controls reviewable defaults:
 
 CLI flags such as `--fail-on blocker` still override policy for a single run. Use policy for team
 defaults and use `accept` or `teach` commands for reviewable local exceptions.
+See [policy-file.md](policy-file.md) for supported keys, validated examples, and current policy
+limits.
 
 ## Framework Packs
 

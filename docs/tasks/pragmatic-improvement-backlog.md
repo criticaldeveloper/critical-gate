@@ -98,6 +98,8 @@ Validation:
 
 ### Task 2.1: Formalize `.critical-gate.json` Schema Documentation
 
+Status: Done.
+
 Goal: make repository-specific configuration reviewable and predictable.
 
 Implementation:
