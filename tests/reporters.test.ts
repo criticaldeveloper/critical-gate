@@ -133,7 +133,27 @@ const result: GateResult = {
     observedClasses: ["source", "tests"],
     unexpectedClasses: ["tests"],
     coverage: "partial",
-    explanationCodes: ["matched:source", "unexpected:tests"]
+    explanationCodes: ["matched:source", "unexpected:tests"],
+    requestedCategories: ["source-behavior"],
+    observedCategories: ["source-behavior", "test-coverage"],
+    missingCategories: [],
+    unexpectedCategories: ["test-coverage"],
+    categoryAssessments: [
+      {
+        category: "source-behavior",
+        expected: true,
+        observed: true,
+        confidence: 0.9,
+        evidence: ["src/signup.ts: Source file changed."]
+      },
+      {
+        category: "test-coverage",
+        expected: false,
+        observed: true,
+        confidence: 0.72,
+        evidence: ["tests/signup.test.ts: Test file changed."]
+      }
+    ]
   },
   intentQuality: {
     score: 70,
@@ -172,6 +192,9 @@ describe("reporters", () => {
     expect(report).toContain("## Intent Verification");
     expect(report).toContain("Requested Classes: source");
     expect(report).toContain("Unexpected Classes: tests");
+    expect(report).toContain("Requested Categories: source-behavior");
+    expect(report).toContain("Observed Categories: source-behavior, test-coverage");
+    expect(report).toContain("Unexpected Categories: test-coverage");
     expect(report).toContain("## Task Intent Quality");
     expect(report).toContain("Score: 70/100");
     expect(report).toContain("Task intent does not name a clear target area.");

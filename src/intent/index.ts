@@ -11,7 +11,9 @@ export {
 export { analyzeTaskIntentQuality, getTaskIntentQualityWarnings } from "./task-intent-quality.js";
 export {
   buildIntentModel,
+  mapChangeClassToIntentCategory,
   type ChangeClass,
+  type IntentCoverageCategory,
   type IntentModel,
   type IntentVerb,
   type TargetArea

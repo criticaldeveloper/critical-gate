@@ -1,7 +1,9 @@
 import {
   buildIntentModel,
   classifyObservedDiffActions,
-  type ChangeClass
+  mapChangeClassToIntentCategory,
+  type ChangeClass,
+  type IntentCoverageCategory
 } from "../intent/index.js";
 import type { Finding, FindingEvidence } from "../schema/index.js";
 import type { Detector } from "./types.js";
@@ -11,14 +13,19 @@ export const intentVerificationDetector: Detector = {
   run: ({ task, diff }) => {
     const intent = buildIntentModel(task);
     const observed = classifyObservedDiffActions(diff.files);
+    const observedCategories = [...new Set(observed.classes.map(mapChangeClassToIntentCategory))];
     const unexpectedClasses = observed.classes
       .filter((changeClass) => !intent.allowedChangeClasses.includes(changeClass))
       .filter(isReportableIntentMismatch);
+    const missingCategories = intent.expectedCategories
+      .filter((category) => !observedCategories.includes(category))
+      .filter(isReportableMissingCategory);
 
     return [
       ...unexpectedClasses.map((changeClass) =>
         toFinding(changeClass, intent.allowedChangeClasses, observed.evidence)
       ),
+      ...missingCategories.map((category) => toMissingCategoryFinding(category, task.text)),
       ...detectIntentUndercoverage(task.text, diff.files)
     ];
   }
@@ -34,6 +41,10 @@ const stylePathPattern = /\.(?:css|scss|sass|less|styl)$/i;
 
 function isReportableIntentMismatch(changeClass: ChangeClass): boolean {
   return changeClass === "ci" || changeClass === "source";
+}
+
+function isReportableMissingCategory(category: IntentCoverageCategory): boolean {
+  return category !== "source-behavior" && category !== "ui-content";
 }
 
 function detectIntentUndercoverage(taskText: string, files: GateResultDiffFile[]): Finding[] {
@@ -153,6 +164,30 @@ function toFinding(
     evidence,
     repair:
       "Remove the unrelated change, split it into a separate task, or update the task intent with explicit justification.",
+    tags: ["scope"]
+  };
+}
+
+function toMissingCategoryFinding(category: IntentCoverageCategory, taskText: string): Finding {
+  return {
+    id: `intent-verification:missing-${category}`,
+    detector: "intent-verification",
+    severity: "medium",
+    confidence: category === "test-coverage" ? 0.72 : 0.8,
+    title: `Expected ${category} change not observed`,
+    message: `The task intent asks for ${category} work, but the diff does not include that category.`,
+    evidence: [
+      {
+        kind: "metric",
+        message: `Requested category: ${category}.`,
+        data: {
+          requestedCategory: category,
+          task: taskText
+        }
+      }
+    ],
+    repair:
+      "Add the requested category of work, or update the task intent if the current diff is intentionally narrower.",
     tags: ["scope"]
   };
 }

@@ -250,6 +250,19 @@ export interface IntentVerificationSummary {
   unexpectedClasses: string[];
   coverage: "none" | "partial" | "matched";
   explanationCodes: string[];
+  requestedCategories?: string[];
+  observedCategories?: string[];
+  missingCategories?: string[];
+  unexpectedCategories?: string[];
+  categoryAssessments?: IntentCoverageCategoryAssessment[];
+}
+
+export interface IntentCoverageCategoryAssessment {
+  category: string;
+  expected: boolean;
+  observed: boolean;
+  confidence: number;
+  evidence: string[];
 }
 
 export interface TaskIntentQualitySummary {

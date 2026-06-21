@@ -185,6 +185,8 @@ Non-goal:
 
 ### Task 3.2: Add Intent Coverage Categories
 
+Status: Done.
+
 Goal: reduce both underimplementation misses and noisy broad-scope findings.
 
 Implementation:
@@ -382,7 +384,7 @@ Validation:
 4. Task 3.1: repository token index. Done.
 5. Task 4.1: public entrypoint discovery hardening. Done.
 6. Task 5.1: prebuilt action artifact path. Done.
-7. Task 3.2: intent coverage categories.
+7. Task 3.2: intent coverage categories. Done.
 8. Task 2.2: policy explanation to reports.
 9. Task 4.2: API snapshot release evidence.
 10. Task 5.2: minimal CI matrix.

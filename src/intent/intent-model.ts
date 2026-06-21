@@ -27,6 +27,15 @@ export type ChangeClass =
   | "data-model"
   | "source";
 
+export type IntentCoverageCategory =
+  | "source-behavior"
+  | "test-coverage"
+  | "docs"
+  | "config-tooling"
+  | "dependency"
+  | "public-api"
+  | "ui-content";
+
 export interface TargetArea {
   token: string;
   kind: "path" | "domain" | "symbol";
@@ -38,6 +47,7 @@ export interface IntentModel {
   targetTokens: string[];
   allowedChangeClasses: ChangeClass[];
   forbiddenChangeClasses: ChangeClass[];
+  expectedCategories: IntentCoverageCategory[];
   targetAreas: TargetArea[];
 }
 
@@ -97,7 +107,8 @@ const classTerms: Array<{ changeClass: ChangeClass; terms: string[] }> = [
   { changeClass: "i18n", terms: ["i18n", "locale", "translation"] },
   { changeClass: "telemetry", terms: ["telemetry", "analytics", "tracking"] },
   { changeClass: "build", terms: ["build", "bundle", "compile"] },
-  { changeClass: "data-model", terms: ["schema", "model", "database", "migration"] }
+  { changeClass: "data-model", terms: ["schema", "model", "database", "migration"] },
+  { changeClass: "source", terms: ["source", "behavior", "implementation"] }
 ];
 
 const highRiskClasses: ChangeClass[] = ["config", "dependency", "api-surface", "ci", "build"];
@@ -115,11 +126,40 @@ export function buildIntentModel(task: TaskIntent): IntentModel {
     forbiddenChangeClasses: highRiskClasses.filter(
       (changeClass) => !allowedChangeClasses.includes(changeClass)
     ),
+    expectedCategories: inferExpectedCategories(normalizedText, allowedChangeClasses),
     targetAreas: targetTokens.map((token) => ({
       token,
       kind: token.includes("/") ? "path" : "domain"
     }))
   };
+}
+
+export function mapChangeClassToIntentCategory(changeClass: ChangeClass): IntentCoverageCategory {
+  if (changeClass === "tests") {
+    return "test-coverage";
+  }
+
+  if (changeClass === "docs") {
+    return "docs";
+  }
+
+  if (changeClass === "config" || changeClass === "ci" || changeClass === "build") {
+    return "config-tooling";
+  }
+
+  if (changeClass === "dependency") {
+    return "dependency";
+  }
+
+  if (changeClass === "api-surface") {
+    return "public-api";
+  }
+
+  if (changeClass === "ui" || changeClass === "i18n") {
+    return "ui-content";
+  }
+
+  return "source-behavior";
 }
 
 function inferIntentVerbs(normalizedText: string): IntentVerb[] {
@@ -149,6 +189,35 @@ function inferAllowedChangeClasses(normalizedText: string): ChangeClass[] {
   return [...classes].sort();
 }
 
+function inferExpectedCategories(
+  normalizedText: string,
+  allowedChangeClasses: ChangeClass[]
+): IntentCoverageCategory[] {
+  const categories = new Set<IntentCoverageCategory>();
+
+  for (const changeClass of allowedChangeClasses) {
+    if (changeClass === "source" && !mentionsCodeWork(normalizedText)) {
+      continue;
+    }
+
+    if (
+      changeClass === "docs" &&
+      isReleaseManagementIntent(normalizedText) &&
+      !mentionsDocsWork(normalizedText)
+    ) {
+      continue;
+    }
+
+    categories.add(mapChangeClassToIntentCategory(changeClass));
+  }
+
+  if (categories.size === 0) {
+    categories.add("source-behavior");
+  }
+
+  return [...categories].sort();
+}
+
 function isReleaseManagementIntent(normalizedText: string): boolean {
   return (
     hasTerm(normalizedText, "version") ||
@@ -160,6 +229,24 @@ function isReleaseManagementIntent(normalizedText: string): boolean {
 function hasCodeBearingClass(classes: Set<ChangeClass>): boolean {
   return ["api-surface", "data-model", "i18n", "telemetry", "ui"].some((changeClass) =>
     classes.has(changeClass as ChangeClass)
+  );
+}
+
+function mentionsCodeWork(normalizedText: string): boolean {
+  return (
+    /\b(?:fix|bugfix|repair|resolve|add|create|introduce|implement|build|wire|connect|integrate|update|change|adjust|improve|refactor|rewrite|migrate)\b/i.test(
+      normalizedText
+    ) ||
+    classTerms.some(
+      (entry) =>
+        entry.changeClass === "ui" && entry.terms.some((term) => hasTerm(normalizedText, term))
+    )
+  );
+}
+
+function mentionsDocsWork(normalizedText: string): boolean {
+  return ["doc", "docs", "document", "documentation", "readme", "changelog", "release note"].some(
+    (term) => hasTerm(normalizedText, term)
   );
 }
 

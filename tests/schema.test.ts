@@ -190,7 +190,20 @@ describe("gate result schema", () => {
         observedClasses: ["source", "tests"],
         unexpectedClasses: ["tests"],
         coverage: "partial",
-        explanationCodes: ["matched:source", "unexpected:tests"]
+        explanationCodes: ["matched:source", "unexpected:tests"],
+        requestedCategories: ["source-behavior"],
+        observedCategories: ["source-behavior", "test-coverage"],
+        missingCategories: [],
+        unexpectedCategories: ["test-coverage"],
+        categoryAssessments: [
+          {
+            category: "source-behavior",
+            expected: true,
+            observed: true,
+            confidence: 0.9,
+            evidence: ["src/signup.ts: Source file changed."]
+          }
+        ]
       },
       intentQuality: {
         score: 100,

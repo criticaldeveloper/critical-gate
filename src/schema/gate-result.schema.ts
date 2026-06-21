@@ -494,7 +494,27 @@ export const gateResultJsonSchema = {
         coverage: {
           enum: ["none", "partial", "matched"]
         },
-        explanationCodes: stringArraySchema
+        explanationCodes: stringArraySchema,
+        requestedCategories: stringArraySchema,
+        observedCategories: stringArraySchema,
+        missingCategories: stringArraySchema,
+        unexpectedCategories: stringArraySchema,
+        categoryAssessments: {
+          type: "array",
+          items: { $ref: "#/$defs/intentCoverageCategoryAssessment" }
+        }
+      }
+    },
+    intentCoverageCategoryAssessment: {
+      type: "object",
+      additionalProperties: false,
+      required: ["category", "expected", "observed", "confidence", "evidence"],
+      properties: {
+        category: { type: "string", minLength: 1 },
+        expected: { type: "boolean" },
+        observed: { type: "boolean" },
+        confidence: { type: "number", minimum: 0, maximum: 1 },
+        evidence: stringArraySchema
       }
     },
     taskIntentQualitySummary: {

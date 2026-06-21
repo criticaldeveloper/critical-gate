@@ -1,5 +1,5 @@
-import { classifyObservedDiffActions } from "../src/index.js";
-import type { DiffFile } from "../src/index.js";
+import { classifyObservedDiffActions, summarizeIntentVerification } from "../src/index.js";
+import type { DiffFile, TaskIntent } from "../src/index.js";
 
 describe("classifyObservedDiffActions", () => {
   it("maps GitHub workflow changes to ci and config", () => {
@@ -70,7 +70,104 @@ describe("classifyObservedDiffActions", () => {
       ]).classes
     ).toEqual(["build", "config", "source", "ui"]);
   });
+
+  it("summarizes matched source and test coverage categories", () => {
+    const summary = summarizeIntentVerification(
+      createTask("Add signup validation implementation and tests"),
+      [createFile("src/signup.ts", "source"), createFile("tests/signup.test.ts", "test")]
+    );
+
+    expect(summary).toMatchObject({
+      requestedCategories: ["source-behavior", "test-coverage"],
+      observedCategories: ["source-behavior", "test-coverage"],
+      missingCategories: [],
+      unexpectedCategories: [],
+      coverage: "matched"
+    });
+    expect(summary.categoryAssessments).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          category: "source-behavior",
+          expected: true,
+          observed: true,
+          confidence: 0.9
+        }),
+        expect.objectContaining({
+          category: "test-coverage",
+          expected: true,
+          observed: true,
+          confidence: 0.9
+        })
+      ])
+    );
+  });
+
+  it("separates missing docs from unexpected source work", () => {
+    const summary = summarizeIntentVerification(createTask("Update README documentation"), [
+      createFile("src/signup.ts", "source")
+    ]);
+
+    expect(summary).toMatchObject({
+      requestedCategories: ["docs"],
+      observedCategories: ["source-behavior"],
+      missingCategories: ["docs"],
+      unexpectedCategories: ["source-behavior"],
+      coverage: "none"
+    });
+    expect(summary.explanationCodes).toEqual(
+      expect.arrayContaining(["missing-category:docs", "unexpected-category:source-behavior"])
+    );
+  });
+
+  it("summarizes config, dependency, public API, and UI content categories", () => {
+    const summary = summarizeIntentVerification(
+      createTask("Update package dependency, public API, config, and UI"),
+      [
+        createFile("package.json", "manifest"),
+        createFile("vite.config.ts", "config"),
+        {
+          ...createFile("src/index.ts", "source"),
+          hunks: [
+            {
+              oldStart: 1,
+              oldLines: 1,
+              newStart: 1,
+              newLines: 2,
+              lines: [
+                {
+                  kind: "add",
+                  content: "export function validateSignup() {}",
+                  newLineNumber: 2
+                }
+              ]
+            }
+          ]
+        },
+        createFile("src/components/LoginForm.tsx", "source")
+      ]
+    );
+
+    expect(summary.requestedCategories).toEqual(
+      expect.arrayContaining(["config-tooling", "dependency", "public-api", "ui-content"])
+    );
+    expect(summary.observedCategories).toEqual(
+      expect.arrayContaining([
+        "config-tooling",
+        "dependency",
+        "public-api",
+        "source-behavior",
+        "ui-content"
+      ])
+    );
+  });
 });
+
+function createTask(text: string): TaskIntent {
+  return {
+    source: "cli",
+    text
+  };
+}
 
 function createFile(path: string, role: DiffFile["role"]): DiffFile {
   return {

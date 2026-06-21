@@ -69,6 +69,7 @@ describe("task analysis", () => {
       targetTokens: ["signup", "validation"],
       allowedChangeClasses: ["source"],
       forbiddenChangeClasses: ["config", "dependency", "api-surface", "ci", "build"],
+      expectedCategories: ["source-behavior"],
       targetAreas: [
         { token: "signup", kind: "domain" },
         { token: "validation", kind: "domain" }
@@ -83,6 +84,7 @@ describe("task analysis", () => {
     });
 
     expect(model.allowedChangeClasses).toEqual(["ci", "docs"]);
+    expect(model.expectedCategories).toEqual(["config-tooling", "docs"]);
     expect(model.forbiddenChangeClasses).not.toContain("ci");
   });
 
@@ -94,6 +96,7 @@ describe("task analysis", () => {
 
     expect(model.verbs).toEqual(["bump"]);
     expect(model.allowedChangeClasses).toEqual(["dependency", "docs"]);
+    expect(model.expectedCategories).toEqual(["dependency"]);
   });
 
   it("does not treat release UI wording as release management", () => {
@@ -103,6 +106,7 @@ describe("task analysis", () => {
     });
 
     expect(model.allowedChangeClasses).toEqual(["source"]);
+    expect(model.expectedCategories).toEqual(["source-behavior"]);
   });
 
   it("calculates higher diff cost for broad small-task diffs", () => {

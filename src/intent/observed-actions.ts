@@ -1,6 +1,11 @@
 import type { DiffFile, DiffLine } from "../schema/index.js";
 import type { IntentVerificationSummary, TaskIntent } from "../schema/index.js";
-import { buildIntentModel, type ChangeClass } from "./intent-model.js";
+import {
+  buildIntentModel,
+  mapChangeClassToIntentCategory,
+  type ChangeClass,
+  type IntentCoverageCategory
+} from "./intent-model.js";
 
 export interface ObservedChangeClassEvidence {
   changeClass: ChangeClass;
@@ -40,6 +45,13 @@ export function summarizeIntentVerification(
 ): IntentVerificationSummary {
   const intent = buildIntentModel(task);
   const observed = classifyObservedDiffActions(files);
+  const observedCategories = getObservedCategories(observed.classes);
+  const missingCategories = intent.expectedCategories.filter(
+    (category) => !observedCategories.includes(category)
+  );
+  const unexpectedCategories = observedCategories.filter(
+    (category) => !intent.expectedCategories.includes(category)
+  );
   const unexpectedClasses = observed.classes.filter(
     (changeClass) => !intent.allowedChangeClasses.includes(changeClass)
   );
@@ -52,11 +64,76 @@ export function summarizeIntentVerification(
     observedClasses: observed.classes,
     unexpectedClasses,
     coverage: getCoverage(observed.classes, unexpectedClasses, matchedClasses),
+    requestedCategories: intent.expectedCategories,
+    observedCategories,
+    missingCategories,
+    unexpectedCategories,
+    categoryAssessments: getCategoryAssessments(
+      intent.expectedCategories,
+      observedCategories,
+      observed
+    ),
     explanationCodes: [
       ...matchedClasses.map((changeClass) => `matched:${changeClass}`),
-      ...unexpectedClasses.map((changeClass) => `unexpected:${changeClass}`)
+      ...unexpectedClasses.map((changeClass) => `unexpected:${changeClass}`),
+      ...missingCategories.map((category) => `missing-category:${category}`),
+      ...unexpectedCategories.map((category) => `unexpected-category:${category}`)
     ]
   };
+}
+
+function getObservedCategories(classes: ChangeClass[]): IntentCoverageCategory[] {
+  return [...new Set(classes.map(mapChangeClassToIntentCategory))].sort();
+}
+
+function getCategoryAssessments(
+  expectedCategories: IntentCoverageCategory[],
+  observedCategories: IntentCoverageCategory[],
+  observed: ObservedDiffActions
+): NonNullable<IntentVerificationSummary["categoryAssessments"]> {
+  const categories = [...new Set([...expectedCategories, ...observedCategories])].sort();
+
+  return categories.map((category) => {
+    const expected = expectedCategories.includes(category);
+    const observedCategory = observedCategories.includes(category);
+
+    return {
+      category,
+      expected,
+      observed: observedCategory,
+      confidence: getCategoryConfidence(category, expected, observedCategory),
+      evidence: getCategoryEvidence(category, observed)
+    };
+  });
+}
+
+function getCategoryConfidence(
+  category: IntentCoverageCategory,
+  expected: boolean,
+  observed: boolean
+): number {
+  if (expected && observed) {
+    return 0.9;
+  }
+
+  if (expected) {
+    return category === "test-coverage" ? 0.62 : 0.78;
+  }
+
+  return 0.72;
+}
+
+function getCategoryEvidence(
+  category: IntentCoverageCategory,
+  observed: ObservedDiffActions
+): string[] {
+  return observed.evidence
+    .filter((entry) => mapChangeClassToIntentCategory(entry.changeClass) === category)
+    .map((entry) =>
+      entry.symbol === undefined
+        ? `${entry.path}: ${entry.reason}`
+        : `${entry.path}:${entry.lineNumber ?? "unknown"} ${entry.symbol}: ${entry.reason}`
+    );
 }
 
 function getCoverage(

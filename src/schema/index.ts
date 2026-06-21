@@ -19,6 +19,7 @@ export type {
   GateResult,
   GateSummary,
   IntentVerificationSummary,
+  IntentCoverageCategoryAssessment,
   MonorepoContext,
   MonorepoPackage,
   PublicApiEntrypointSummary,

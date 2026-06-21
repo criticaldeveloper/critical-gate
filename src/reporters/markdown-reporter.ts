@@ -43,6 +43,10 @@ export function renderMarkdownReport(result: GateResult): string {
       `Requested Classes: ${formatClasses(result.intentVerification.requestedClasses)}`,
       `Observed Classes: ${formatClasses(result.intentVerification.observedClasses)}`,
       `Unexpected Classes: ${formatClasses(result.intentVerification.unexpectedClasses)}`,
+      `Requested Categories: ${formatClasses(result.intentVerification.requestedCategories ?? [])}`,
+      `Observed Categories: ${formatClasses(result.intentVerification.observedCategories ?? [])}`,
+      `Missing Categories: ${formatClasses(result.intentVerification.missingCategories ?? [])}`,
+      `Unexpected Categories: ${formatClasses(result.intentVerification.unexpectedCategories ?? [])}`,
       `Coverage: ${result.intentVerification.coverage}`,
       ""
     );

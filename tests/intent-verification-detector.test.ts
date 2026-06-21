@@ -53,6 +53,36 @@ index 57b22a0..cb3e0f1 100644
       expect.objectContaining({
         title: "Unexpected source change for task intent",
         message: "The diff includes source changes, but the task intent only allows: docs."
+      }),
+      expect.objectContaining({
+        id: "intent-verification:missing-docs",
+        title: "Expected docs change not observed"
+      })
+    ]);
+  });
+
+  it("reports missing explicitly requested test coverage", () => {
+    const task: TaskIntent = {
+      source: "cli",
+      text: "Add signup validation tests"
+    };
+    const diff = parse(`diff --git a/src/signup.ts b/src/signup.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/signup.ts
++++ b/src/signup.ts
+@@ -1 +1,2 @@
++export const signup = true;
+`);
+
+    expect(intentVerificationDetector.run({ task, diff })).toEqual([
+      expect.objectContaining({
+        id: "intent-verification:unexpected-source"
+      }),
+      expect.objectContaining({
+        id: "intent-verification:missing-test-coverage",
+        detector: "intent-verification",
+        severity: "medium",
+        title: "Expected test-coverage change not observed"
       })
     ]);
   });

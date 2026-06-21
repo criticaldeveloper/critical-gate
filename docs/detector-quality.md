@@ -266,13 +266,18 @@ Signals used:
 
 - Strong implementation verbs.
 - UI/content target terms.
+- Requested intent categories such as source behavior, tests, docs, config/tooling, dependency,
+  public API, and UI/content.
 - Changed file roles and churn.
+- Observed change categories derived from file roles, paths, package manifests, workflows, and
+  changed exports.
 - Trivial stylesheet-only edits.
 
 Evidence emitted:
 
 - Requested class of work.
 - Observed changed roles/classes.
+- Missing expected categories and unexpected extra categories in the intent summary.
 - Explanation of underimplementation.
 
 Will flag:
@@ -280,17 +285,22 @@ Will flag:
 - A visible feature request satisfied only by trivial style/token edits.
 - Task intent that clearly asks for UI/source implementation but observes no meaningful matching
   implementation class.
+- Explicitly requested non-source categories such as docs or test coverage when the diff contains
+  work but not that category.
 
 Will not flag:
 
 - Explicit style-tuning tasks.
 - Docs-only tasks that only change docs.
 - Tasks where observed file roles match the requested work.
+- Missing tests for ordinary source tasks unless task wording explicitly asks for tests or coverage.
 
 Known blind spots:
 
 - It does not render UI or execute the app.
 - It relies on conservative task wording and changed-file signals.
+- Category confidence is deterministic evidence strength, not a proof that implementation is
+  semantically complete.
 
 Coverage:
 

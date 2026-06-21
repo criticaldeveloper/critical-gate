@@ -92,15 +92,11 @@ describe("e2e fixture repositories", () => {
         },
         {
           "decision": "pass",
-          "detectors": [
-            "intent-verification",
-          ],
+          "detectors": [],
           "exitCode": 0,
           "name": "legitimate broad refactor",
           "score": 0,
-          "unexpectedClasses": [
-            "source",
-          ],
+          "unexpectedClasses": [],
         },
       ]
     `);
