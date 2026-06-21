@@ -2,7 +2,7 @@ import { join } from "node:path";
 
 import * as vscode from "vscode";
 
-import { runCli } from "./cli-adapter.js";
+import { runCli, runInitAgent } from "./cli-adapter.js";
 import { applyDiagnostics } from "./diagnostics.js";
 import { renderReport, showReport, writeReport } from "./report-view.js";
 import {
@@ -127,6 +127,25 @@ export async function openSettings(): Promise<void> {
     "workbench.action.openSettings",
     "@ext:criticaldeveloper.critical-gate-vscode"
   );
+}
+
+export async function initializeAgentInstructions(state: RefreshState): Promise<void> {
+  const folder = vscode.workspace.workspaceFolders?.[0];
+
+  if (folder === undefined) {
+    vscode.window.showWarningMessage("Critical Gate requires an open workspace folder.");
+    return;
+  }
+
+  try {
+    const message = (await runInitAgent(folder, state.extensionUri)).trim();
+    vscode.window.showInformationMessage(
+      message.length > 0 ? message : "Critical Gate agent instructions initialized."
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown Critical Gate error.";
+    vscode.window.showErrorMessage(`Critical Gate could not initialize AGENTS.md: ${message}`);
+  }
 }
 
 export function getCommandPayload(input: unknown): CriticalGateDiagnosticPayload | undefined {

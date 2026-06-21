@@ -20,6 +20,17 @@ Use `AGENTS.md` for durable repository guidance:
 
 This repository includes `AGENTS.md` for that purpose.
 
+Consumer repositories can initialize a managed Critical Gate section without replacing their
+existing instructions:
+
+```bash
+critical-gate init-agent
+```
+
+Use `--cli <command>` when Codex should call a repository-local wrapper or built CLI path. The
+generated block is safe to rerun: Critical Gate replaces only the section between its managed
+markers and preserves the rest of `AGENTS.md`.
+
 ### CLI
 
 The CLI is the canonical integration surface. Other integrations should call the CLI instead of reimplementing analysis.

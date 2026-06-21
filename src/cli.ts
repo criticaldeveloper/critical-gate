@@ -26,6 +26,7 @@ import {
   getConfiguredExpectedSupportFiles,
   getConfiguredFailOn,
   getConfiguredPublicApiEntrypoints,
+  initAgentInstructions,
   getPolicyBlockingDetectors,
   getPolicyObservationDetectors,
   loadApiSurfaceSnapshot,
@@ -83,7 +84,8 @@ type CommandName =
   | "teach"
   | "snapshot-api"
   | "install-hooks"
-  | "init-policy";
+  | "init-policy"
+  | "init-agent";
 
 const defaultIo: CliIo = {
   stdout: (message) => console.log(message),
@@ -151,6 +153,10 @@ function runCli(argv: string[], io: CliIo): ExitCode {
 
   if (command === "init-policy") {
     return runInitPolicyCommand(args, io);
+  }
+
+  if (command === "init-agent") {
+    return runInitAgentCommand(args, io);
   }
 
   const parsed = parseCheckArgs(args, command);
@@ -474,6 +480,33 @@ function runInitPolicyCommand(args: string[], io: CliIo): ExitCode {
   return ExitCode.Pass;
 }
 
+function runInitAgentCommand(args: string[], io: CliIo): ExitCode {
+  const parsed = parseInitAgentArgs(args);
+
+  if (!parsed.ok) {
+    io.stderr(parsed.error);
+    io.stderr("Run critical-gate init-agent --help for usage.");
+    return ExitCode.UsageError;
+  }
+
+  const root = io.readDiff().root;
+  const result = initAgentInstructions({
+    root,
+    cliCommand: parsed.options.cli,
+    io
+  });
+
+  if (result.updated) {
+    io.stdout(
+      `${result.created ? "Created" : "Updated"} ${result.path} with Critical Gate agent instructions.`
+    );
+  } else {
+    io.stdout(`${result.path} already contains the current Critical Gate agent instructions.`);
+  }
+
+  return ExitCode.Pass;
+}
+
 function readOptionalPackageJson(root: string, io: Pick<CliIo, "exists" | "readFile">): unknown {
   const path = join(root, "package.json");
 
@@ -604,6 +637,7 @@ function getHelpText(): string {
     "  critical-gate snapshot-api [--entrypoint <path>] [--output <path>]",
     "  critical-gate install-hooks [--hook pre-commit|pre-push|all] [--cli <command>] [--force]",
     "  critical-gate init-policy [--force]",
+    "  critical-gate init-agent [--cli <command>]",
     "  critical-gate --version",
     "  critical-gate --help",
     ""
@@ -633,6 +667,10 @@ function getCommandHelpText(command: CommandName): string {
 
   if (command === "init-policy") {
     return getInitPolicyHelpText();
+  }
+
+  if (command === "init-agent") {
+    return getInitAgentHelpText();
   }
 
   return getCheckHelpText();
@@ -739,6 +777,20 @@ function getInitPolicyHelpText(): string {
   ].join("\n");
 }
 
+function getInitAgentHelpText(): string {
+  return [
+    "critical-gate init-agent",
+    "",
+    "Creates or updates the managed Critical Gate section in AGENTS.md.",
+    "",
+    "Options:",
+    "  --cli <command>     Critical Gate command/path agents should run; defaults to critical-gate",
+    "",
+    "The command preserves existing AGENTS.md content and replaces only the managed Critical Gate block.",
+    ""
+  ].join("\n");
+}
+
 function isCommandName(value: string): value is CommandName {
   return (
     value === "check" ||
@@ -747,7 +799,8 @@ function isCommandName(value: string): value is CommandName {
     value === "teach" ||
     value === "snapshot-api" ||
     value === "install-hooks" ||
-    value === "init-policy"
+    value === "init-policy" ||
+    value === "init-agent"
   );
 }
 
@@ -923,6 +976,41 @@ function parseInitPolicyArgs(args: string[]):
     }
 
     options.force = true;
+  }
+
+  return { ok: true, options };
+}
+
+function parseInitAgentArgs(args: string[]):
+  | {
+      ok: true;
+      options: {
+        cli: string;
+      };
+    }
+  | {
+      ok: false;
+      error: string;
+    } {
+  const options = {
+    cli: "critical-gate"
+  };
+
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+
+    if (arg !== "--cli") {
+      return { ok: false, error: `Unknown option: ${arg}.` };
+    }
+
+    const value = args[index + 1];
+
+    if (value === undefined || value.startsWith("--")) {
+      return { ok: false, error: `Missing value for ${arg}.` };
+    }
+
+    options.cli = value;
+    index += 1;
   }
 
   return { ok: true, options };

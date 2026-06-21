@@ -26,6 +26,16 @@ export async function runCli(
   return JSON.parse(stdout) as GateResult;
 }
 
+export async function runInitAgent(
+  folder: vscode.WorkspaceFolder,
+  extensionUri: vscode.Uri
+): Promise<string> {
+  const config = vscode.workspace.getConfiguration("criticalGate");
+  const cliPath = resolveCliPath(folder, extensionUri, config.get<string>("cliPath", "").trim());
+
+  return execCriticalGate([cliPath, "init-agent"], folder.uri.fsPath);
+}
+
 export async function execCriticalGate(args: string[], cwd: string): Promise<string> {
   try {
     const { stdout } = await execFileAsync(process.execPath, args, {

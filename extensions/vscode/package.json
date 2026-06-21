@@ -92,6 +92,10 @@
         "title": "Critical Gate: Open Settings"
       },
       {
+        "command": "criticalGate.initializeAgentInstructions",
+        "title": "Critical Gate: Initialize Agent Instructions"
+      },
+      {
         "command": "criticalGate.openEvidence",
         "title": "Critical Gate: Open Evidence"
       },

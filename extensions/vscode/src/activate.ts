@@ -7,6 +7,7 @@ import {
   copyRepair,
   getCommandPayload,
   acceptBlastRadiusExpansion,
+  initializeAgentInstructions,
   openClusterReport,
   openExistingSolution,
   openExpectedCompanion,
@@ -73,6 +74,12 @@ export function activate(context: vscode.ExtensionContext): void {
     "criticalGate.openSettings",
     openSettings
   );
+  const initAgentCommand = vscode.commands.registerCommand(
+    "criticalGate.initializeAgentInstructions",
+    async () => {
+      await initializeAgentInstructions(refreshState);
+    }
+  );
   const openEvidenceCommand = vscode.commands.registerCommand(
     "criticalGate.openEvidence",
     async (payloadOrTreeItem: unknown) => {
@@ -137,6 +144,7 @@ export function activate(context: vscode.ExtensionContext): void {
     showReportCommand,
     clearCommand,
     settingsCommand,
+    initAgentCommand,
     openEvidenceCommand,
     copyRepairCommand,
     openExistingSolutionCommand,

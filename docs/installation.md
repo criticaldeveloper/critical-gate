@@ -73,6 +73,7 @@ node dist/cli.js check --task "Add signup validation" --format repair
 node dist/cli.js snapshot-api
 node dist/cli.js install-hooks
 node dist/cli.js init-policy
+node dist/cli.js init-agent
 ```
 
 Exit codes:
@@ -114,6 +115,26 @@ At runtime, hooks accept:
 
 - `CRITICAL_GATE_TASK`: overrides the task intent.
 - `CRITICAL_GATE_BASE`: overrides the pre-push base branch.
+
+## Agent Instructions
+
+Initialize durable agent instructions in a consumer repository:
+
+```bash
+critical-gate init-agent
+```
+
+This creates or updates a managed Critical Gate section in `AGENTS.md`. Existing user instructions
+are preserved, and repeated runs replace only the managed Critical Gate block. Use `--cli <command>`
+when agents should run a project-local command:
+
+```bash
+critical-gate init-agent --cli "node ./node_modules/critical-gate/dist/cli.js"
+```
+
+The generated section tells agents how to run `check`, `hook`, `snapshot-api`, `init-policy`, and
+`install-hooks`, and it explicitly keeps Critical Gate scoped to evidence-backed diff integrity
+rather than generic review or automatic fixes.
 
 ## GitHub Action
 

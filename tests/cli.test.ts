@@ -168,6 +168,51 @@ describe("cli", () => {
     expect(stderr[0]).toContain("Refusing to overwrite existing .critical-gate.json");
   });
 
+  it("creates AGENTS.md with Critical Gate agent instructions", () => {
+    const { io, stdout, writes } = createTestIo();
+
+    expect(main(["init-agent", "--cli", "node ./node_modules/.bin/critical-gate"], io)).toBe(
+      ExitCode.Pass
+    );
+
+    const output = writes.get("C:\\dev\\critical-gate\\AGENTS.md");
+    expect(output).toContain("## Critical Gate Agent Instructions");
+    expect(output).toContain(
+      'node ./node_modules/.bin/critical-gate check --task "<task intent>" --base <base-ref>'
+    );
+    expect(output).toContain("<!-- critical-gate:start -->");
+    expect(stdout[0]).toContain("Created");
+  });
+
+  it("updates only the managed Critical Gate block in existing AGENTS.md", () => {
+    const { io, stdout, writes, files } = createTestIo();
+
+    files.set(
+      "C:\\dev\\critical-gate\\AGENTS.md",
+      [
+        "# AGENTS.md",
+        "",
+        "Keep this local rule.",
+        "",
+        "<!-- critical-gate:start -->",
+        "old generated content",
+        "<!-- critical-gate:end -->",
+        "",
+        "Keep this trailing rule.",
+        ""
+      ].join("\n")
+    );
+
+    expect(main(["init-agent"], io)).toBe(ExitCode.Pass);
+
+    const output = writes.get("C:\\dev\\critical-gate\\AGENTS.md");
+    expect(output).toContain("Keep this local rule.");
+    expect(output).toContain("Keep this trailing rule.");
+    expect(output).not.toContain("old generated content");
+    expect(output).toContain("critical-gate check --task");
+    expect(stdout[0]).toContain("Updated");
+  });
+
   it("records accepted findings in .critical-gate.json", () => {
     const { io, stdout, writes } = createTestIo();
 
