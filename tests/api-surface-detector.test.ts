@@ -316,7 +316,7 @@ index 57b22a0..cb3e0f1 100644
     });
   });
 
-  it("accepts snapshotted API changes when snapshot evidence changes too", () => {
+  it("flags API snapshot updates without release evidence", () => {
     const diff = parse(`diff --git a/src/index.ts b/src/index.ts
 index 57b22a0..cb3e0f1 100644
 --- a/src/index.ts
@@ -333,9 +333,77 @@ index 0000000..6bb83df
 +{"exports":[{"name":"validateSignup"}]}
 `);
 
+    const findings = apiSurfaceDetector.run({
+      task,
+      diff,
+      context: {
+        apiSurfaceSnapshot: apiSnapshot
+      }
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        id: "api-surface:.critical-gate/api-surface.json:snapshot-update-missing-release-evidence:unknown:1",
+        detector: "api-surface",
+        severity: "high",
+        title: "API snapshot updated without release evidence",
+        message:
+          "The public API snapshot changed without changelog, changeset, migration, or explicit API release task evidence."
+      })
+    ]);
+  });
+
+  it("accepts snapshotted API changes when snapshot update has changelog evidence", () => {
+    const diff = parse(`diff --git a/src/index.ts b/src/index.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -1 +1 @@
+-export function validateSignup(input: SignupInput): boolean
++export function validateSignup(input: SignupInput, strict: boolean): boolean
+diff --git a/.critical-gate/api-surface.json b/.critical-gate/api-surface.json
+index 0000000..6bb83df
+--- a/.critical-gate/api-surface.json
++++ b/.critical-gate/api-surface.json
+@@ -1 +1 @@
+-{"exports":[]}
++{"exports":[{"name":"validateSignup"}]}
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 0000000..6bb83df
+--- /dev/null
++++ b/CHANGELOG.md
+@@ -0,0 +1 @@
++Document signup API signature migration.
+`);
+
     expect(
       apiSurfaceDetector.run({
         task,
+        diff,
+        context: {
+          apiSurfaceSnapshot: apiSnapshot
+        }
+      })
+    ).toEqual([]);
+  });
+
+  it("accepts snapshot updates for explicit API release tasks", () => {
+    const diff =
+      parse(`diff --git a/.critical-gate/api-surface.json b/.critical-gate/api-surface.json
+index 0000000..6bb83df
+--- a/.critical-gate/api-surface.json
++++ b/.critical-gate/api-surface.json
+@@ -1 +1 @@
+-{"exports":[]}
++{"exports":[{"name":"validateSignup"}]}
+`);
+
+    expect(
+      apiSurfaceDetector.run({
+        task: {
+          source: "cli",
+          text: "Prepare public API release for signup exports"
+        },
         diff,
         context: {
           apiSurfaceSnapshot: apiSnapshot

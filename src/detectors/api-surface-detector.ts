@@ -59,13 +59,18 @@ export const apiSurfaceDetector: Detector = {
   name: "api-surface",
   run: ({ task, diff, context }) => {
     const snapshot = context?.apiSurfaceSnapshot;
+    const hasReleaseEvidence = hasContractReleaseEvidence(task.text, diff.files);
+    const snapshotUpdateSignals =
+      hasApiSnapshotEvidence(diff.files) && !hasReleaseEvidence
+        ? extractSnapshotUpdateSignals(diff.files)
+        : [];
     const snapshotSignals =
-      snapshot !== undefined && !hasContractChangeEvidence(diff.files)
+      snapshot !== undefined && !hasApiSnapshotEvidence(diff.files) && !hasReleaseEvidence
         ? extractSnapshotSignals(diff.files, snapshot)
         : [];
 
     if (hasVisibleApiAcknowledgement(task.text, diff.files)) {
-      return snapshotSignals.map(toFinding);
+      return [...snapshotUpdateSignals, ...snapshotSignals].map(toFinding);
     }
 
     const snapshotSignalKeys = new Set(
@@ -76,7 +81,7 @@ export const apiSurfaceDetector: Detector = {
       .flatMap((file) => extractSignals(file, context?.publicApiEntrypoints))
       .filter((signal) => !snapshotSignalKeys.has(`${signal.path}:${signal.symbol ?? "unknown"}`));
 
-    return [...snapshotSignals, ...lineSignals].map(toFinding);
+    return [...snapshotUpdateSignals, ...snapshotSignals, ...lineSignals].map(toFinding);
   }
 };
 
@@ -97,11 +102,47 @@ function hasVisibleApiAcknowledgement(taskText: string, files: DiffFile[]): bool
   );
 }
 
-function hasContractChangeEvidence(files: DiffFile[]): boolean {
+function hasContractReleaseEvidence(taskText: string, files: DiffFile[]): boolean {
   return (
-    hasApiSnapshotEvidence(files) ||
+    hasApiReleaseTaskIntent(taskText) ||
     files.some((file) => contractEvidencePathPattern.test(file.path))
   );
+}
+
+function hasApiReleaseTaskIntent(taskText: string): boolean {
+  const normalizedTask = taskText.toLowerCase();
+
+  return (
+    /\b(?:release|publish|breaking|migration|migrate|major|minor|version)\b/.test(normalizedTask) &&
+    /\b(?:api|public api|contract|surface|export|exports)\b/.test(normalizedTask)
+  );
+}
+
+function extractSnapshotUpdateSignals(files: DiffFile[]): ApiSurfaceSignal[] {
+  return files
+    .filter((file) => file.path.replace(/\\/g, "/") === API_SURFACE_SNAPSHOT_PATH)
+    .map((file) => {
+      const firstChangedLine = file.hunks
+        .flatMap((hunk) => hunk.lines)
+        .find((line) => line.kind === "add" || line.kind === "delete");
+
+      return {
+        id: "snapshot-update-missing-release-evidence",
+        title: "API snapshot updated without release evidence",
+        message:
+          "The public API snapshot changed without changelog, changeset, migration, or explicit API release task evidence.",
+        repair:
+          "Add release evidence for the public contract change, or revert the API snapshot update.",
+        severity: "high",
+        confidence: 0.93,
+        path: file.path,
+        lineNumber: firstChangedLine?.newLineNumber ?? firstChangedLine?.oldLineNumber,
+        content: firstChangedLine?.content ?? file.path,
+        data: {
+          signal: "snapshot-update-missing-release-evidence"
+        }
+      };
+    });
 }
 
 function extractSignals(

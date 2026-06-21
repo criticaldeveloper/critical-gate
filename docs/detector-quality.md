@@ -146,7 +146,8 @@ Signals used:
 - Public entrypoint provenance from package metadata, `bin`, policy entrypoints, or fallback index
   files.
 - Framework contract fallbacks for known public surfaces.
-- Release evidence such as changelog, changeset, migration docs, or snapshot updates.
+- Release evidence such as changelog, changeset, migration docs, or explicit API release task
+  intent.
 
 Evidence emitted:
 
@@ -155,18 +156,23 @@ Evidence emitted:
 - Change type.
 - Public entrypoint source when package or policy metadata proves the file is public.
 - Missing release/snapshot evidence when relevant.
+- API snapshot updates without changelog, changeset, migration, or explicit API release task
+  evidence.
 
 Will flag:
 
 - Snapshotted export removals without release evidence.
 - Signature changes against a committed API snapshot.
 - Added exports to a snapshotted entrypoint when the snapshot or release evidence is missing.
+- `.critical-gate/api-surface.json` updates that are not paired with release evidence.
 - Known framework contract export removals covered by fixtures.
 
 Will not flag:
 
 - Internal non-exported symbol changes.
 - Intentional public contract changes with matching snapshot/release evidence.
+- API snapshot updates paired with changelog, changeset, migration notes, or explicit API release
+  task intent.
 
 Known blind spots:
 

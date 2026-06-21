@@ -241,6 +241,8 @@ Validation:
 
 ### Task 4.2: Require Release Evidence For API Snapshot Changes
 
+Status: Done.
+
 Goal: allow intentional API changes while blocking silent ones.
 
 Implementation:
@@ -388,7 +390,7 @@ Validation:
 6. Task 5.1: prebuilt action artifact path. Done.
 7. Task 3.2: intent coverage categories. Done.
 8. Task 2.2: policy explanation to reports. Done.
-9. Task 4.2: API snapshot release evidence.
+9. Task 4.2: API snapshot release evidence. Done.
 10. Task 5.2: minimal CI matrix.
 11. Task 6.1: finding stability tests.
 12. Task 6.2: compact "why passed" report section.
