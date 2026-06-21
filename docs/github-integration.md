@@ -61,6 +61,19 @@ For push workflows, make the task intent cover the same range as the selected ba
 contains multiple commits, join all commit messages from the push payload instead of using only the
 head commit message.
 
+## Maintainer CI Runtime Matrix
+
+Critical Gate supports Node 22 and Node 24. The maintained CI workflow runs core verification on
+both versions on Ubuntu, because most analyzer behavior is platform-independent and should stay
+stable across supported Node runtimes.
+
+The CI workflow also keeps a focused Windows CLI smoke job on Node 24. That job builds the CLI,
+checks help output, and writes a JSON report through a Windows-style output path so path handling is
+covered without duplicating the full verification suite on every operating system.
+
+VS Code extension packaging intentionally stays in `.github/workflows/vscode-extension.yml`. It runs
+only on relevant paths or manual dispatch so the normal CI path remains fast.
+
 ## SARIF Upload Workflow
 
 Use full git history so repository intelligence and base comparisons have enough context.

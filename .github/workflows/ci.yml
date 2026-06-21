@@ -8,7 +8,41 @@ on:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    name: Verify Node ${{ matrix.node-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+        node-version:
+          - 22
+          - 24
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.1.2
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify
+        run: pnpm verify
+
+  windows-cli-smoke:
+    name: Windows CLI smoke
+    runs-on: windows-latest
 
     steps:
       - name: Checkout
@@ -28,8 +62,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Verify
-        run: pnpm verify
+      - name: Build CLI
+        run: pnpm build
+
+      - name: Smoke CLI help
+        run: node dist/cli.js --help
+
+      - name: Smoke CLI report output path
+        shell: pwsh
+        run: node dist/cli.js check --task "Windows CLI path smoke" --base HEAD --format json --output "artifacts\ci\windows-smoke.json"
 
   quality-evidence:
     name: Coverage and evaluation evidence

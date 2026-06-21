@@ -294,6 +294,8 @@ Non-goal:
 
 ### Task 5.2: Add A Minimal CI Matrix
 
+Status: Done.
+
 Goal: catch platform/runtime issues without overbuilding CI.
 
 Implementation:
@@ -391,7 +393,7 @@ Validation:
 7. Task 3.2: intent coverage categories. Done.
 8. Task 2.2: policy explanation to reports. Done.
 9. Task 4.2: API snapshot release evidence. Done.
-10. Task 5.2: minimal CI matrix.
+10. Task 5.2: minimal CI matrix. Done.
 11. Task 6.1: finding stability tests.
 12. Task 6.2: compact "why passed" report section.
 13. Task 7.1: LLM boundary test suite.
