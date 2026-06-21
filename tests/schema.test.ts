@@ -161,6 +161,15 @@ describe("gate result schema", () => {
           observationModeCount: 0,
           confidenceSuppressedCount: 0
         },
+        policyApplied: {
+          failOn: "high",
+          observationDetectors: ["blast-radius"],
+          blockingDetectors: ["api-surface"],
+          acceptedFindingIds: ["scope:accepted-fixture"],
+          blockingFindingIds: ["test-weakening-001"],
+          observationFindingIds: [],
+          confidenceSuppressedFindingIds: []
+        },
         diffCostScore: 32,
         diffCoherenceScore: {
           score: 86,

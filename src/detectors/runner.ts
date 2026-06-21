@@ -28,6 +28,7 @@ export interface FindingDecisionPolicy {
   observationDetectors?: string[];
   blockingDetectors?: string[];
   failOn?: "blocker" | "high" | "medium";
+  acceptedFindingIds?: string[];
 }
 
 const defaultObservationDetectors = [
@@ -85,6 +86,7 @@ export function summarizeFindings(
     lowCount: countSeverity(findings, "low"),
     infoCount: countSeverity(findings, "info"),
     confidenceCalibration: summarizeConfidenceCalibration(findings, policy),
+    policyApplied: summarizePolicyApplied(findings, policy),
     diffCostScore:
       task !== undefined && diff !== undefined ? calculateDiffCostScore(task, diff.files) : 0,
     scopeExpansionScore:
@@ -95,6 +97,31 @@ export function summarizeFindings(
       task !== undefined && diff !== undefined
         ? calculateDiffCoherenceScore(task, diff.files, findings)
         : undefined
+  };
+}
+
+function summarizePolicyApplied(
+  findings: Finding[],
+  policy: FindingDecisionPolicy
+): NonNullable<GateResult["summary"]["policyApplied"]> {
+  const failOn = policy.failOn ?? "high";
+  const observationDetectors = policy.observationDetectors ?? defaultObservationDetectors;
+  const blockingDetectors = policy.blockingDetectors ?? [];
+
+  return {
+    failOn,
+    observationDetectors,
+    blockingDetectors,
+    acceptedFindingIds: policy.acceptedFindingIds ?? [],
+    blockingFindingIds: findings
+      .filter((finding) => isBlockingFinding(finding, policy))
+      .map((finding) => finding.id),
+    observationFindingIds: findings
+      .filter((finding) => isObservationModeFinding(finding, policy))
+      .map((finding) => finding.id),
+    confidenceSuppressedFindingIds: findings
+      .filter(isConfidenceSuppressedFinding)
+      .map((finding) => finding.id)
   };
 }
 

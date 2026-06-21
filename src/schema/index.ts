@@ -22,6 +22,7 @@ export type {
   IntentCoverageCategoryAssessment,
   MonorepoContext,
   MonorepoPackage,
+  PolicyAppliedSummary,
   PublicApiEntrypointSummary,
   RepositoryCoChange,
   RepositoryProfile,

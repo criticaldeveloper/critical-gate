@@ -4,8 +4,8 @@ import { renderReviewerChecklist } from "./reviewer-checklist.js";
 
 export function renderPrCommentReport(result: GateResult): string {
   const metrics = getDiffMetrics(result.diff.files);
-  const blockingFindings = result.findings.filter(isBlockingFinding);
-  const observations = result.findings.filter((finding) => !isBlockingFinding(finding));
+  const blockingFindings = getPolicyFindingGroup(result, "blocking");
+  const observations = getPolicyFindingGroup(result, "observation");
   const expectedSupportFiles = getExpectedSupportFiles(result.diff.files);
   const lines = [
     `## Critical Gate: ${result.summary.decision === "pass" ? "pass" : "fail"}`,
@@ -41,6 +41,21 @@ export function renderPrCommentReport(result: GateResult): string {
     appendTruncation(lines, observations.length, 5);
   }
   lines.push("");
+
+  if (result.summary.policyApplied !== undefined) {
+    lines.push("### Policy applied", "");
+    lines.push(`- Fail threshold: ${result.summary.policyApplied.failOn}.`);
+    lines.push(
+      `- Observation detectors: ${formatList(result.summary.policyApplied.observationDetectors)}.`
+    );
+    lines.push(
+      `- Blocking detector overrides: ${formatList(result.summary.policyApplied.blockingDetectors)}.`
+    );
+    lines.push(
+      `- Accepted findings applied: ${formatList(result.summary.policyApplied.acceptedFindingIds)}.`
+    );
+    lines.push("");
+  }
 
   lines.push("### Expected support changes", "");
   if (expectedSupportFiles.length === 0) {
@@ -81,8 +96,22 @@ export function renderPrCommentReport(result: GateResult): string {
   return `${lines.join("\n").trimEnd()}\n`;
 }
 
-function isBlockingFinding(finding: Finding): boolean {
-  return calibrateFindingConfidence(finding).blockingEligible;
+function getPolicyFindingGroup(result: GateResult, group: "blocking" | "observation"): Finding[] {
+  const policy = result.summary.policyApplied;
+
+  if (policy === undefined) {
+    return group === "blocking"
+      ? result.findings.filter((finding) => calibrateFindingConfidence(finding).blockingEligible)
+      : result.findings.filter((finding) => !calibrateFindingConfidence(finding).blockingEligible);
+  }
+
+  const blockingIds = new Set(policy.blockingFindingIds);
+
+  if (group === "observation") {
+    return result.findings.filter((finding) => !blockingIds.has(finding.id));
+  }
+
+  return result.findings.filter((finding) => blockingIds.has(finding.id));
 }
 
 function renderFindingBullet(finding: Finding): string {
@@ -115,6 +144,10 @@ function appendTruncation(lines: string[], count: number, limit: number): void {
   if (count > limit) {
     lines.push(`- ${count - limit} more not shown in compact PR mode.`);
   }
+}
+
+function formatList(values: string[]): string {
+  return values.length === 0 ? "none" : values.join(", ");
 }
 
 function getDiffMetrics(files: DiffFile[]) {

@@ -130,6 +130,8 @@ Validation:
 
 ### Task 2.2: Add Policy Explanation To Reports
 
+Status: Done.
+
 Goal: make pass/fail decisions explain why a detector blocked or stayed observational.
 
 Implementation:
@@ -385,7 +387,7 @@ Validation:
 5. Task 4.1: public entrypoint discovery hardening. Done.
 6. Task 5.1: prebuilt action artifact path. Done.
 7. Task 3.2: intent coverage categories. Done.
-8. Task 2.2: policy explanation to reports.
+8. Task 2.2: policy explanation to reports. Done.
 9. Task 4.2: API snapshot release evidence.
 10. Task 5.2: minimal CI matrix.
 11. Task 6.1: finding stability tests.

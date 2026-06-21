@@ -93,6 +93,21 @@ const result: GateResult = {
     mediumCount: 0,
     lowCount: 0,
     infoCount: 0,
+    policyApplied: {
+      failOn: "high",
+      observationDetectors: [
+        "intent-verification",
+        "blast-radius",
+        "existing-solution",
+        "pattern-violation",
+        "expected-companions"
+      ],
+      blockingDetectors: [],
+      acceptedFindingIds: ["scope:accepted-fixture"],
+      blockingFindingIds: ["test-weakening-001"],
+      observationFindingIds: [],
+      confidenceSuppressedFindingIds: []
+    },
     diffCostScore: 42,
     diffCoherenceScore: {
       score: 71,
@@ -189,6 +204,10 @@ describe("reporters", () => {
     expect(report).toContain("- Config, manifest, or lockfile touched: +2 (high-risk-roles)");
     expect(report).toContain("## Diff Coherence Drivers");
     expect(report).toContain("- Tests changed with source: +10 (tests-move-with-source)");
+    expect(report).toContain("## Policy Applied");
+    expect(report).toContain("Fail threshold: high.");
+    expect(report).toContain("Blocking findings after policy: test-weakening-001.");
+    expect(report).toContain("Accepted findings applied: scope:accepted-fixture.");
     expect(report).toContain("## Intent Verification");
     expect(report).toContain("Requested Classes: source");
     expect(report).toContain("Unexpected Classes: tests");
@@ -277,6 +296,9 @@ describe("reporters", () => {
     expect(report).toContain("Evidence: tests/signup.test.ts:24");
     expect(report).toContain("### Observations");
     expect(report).toContain("- None.");
+    expect(report).toContain("### Policy applied");
+    expect(report).toContain("- Fail threshold: high.");
+    expect(report).toContain("- Accepted findings applied: scope:accepted-fixture.");
     expect(report).toContain("### Expected support changes");
     expect(report).toContain("- modified tests/signup.test.ts (test, +0/-1)");
     expect(report).toContain("### Scope drivers");
@@ -287,6 +309,40 @@ describe("reporters", () => {
     expect(report).toContain(
       "- [ ] Resolve or explicitly accept Assertion removed from signup test."
     );
+  });
+
+  it("uses applied rollout policy when grouping PR comment findings", () => {
+    const observationFinding: Finding = {
+      id: "blast-radius:unexpected-cluster:test",
+      detector: "blast-radius",
+      severity: "high",
+      confidence: 0.9,
+      title: "Unexpected changed-file cluster",
+      message: "A separate cluster changed outside the expected task scope.",
+      evidence: [{ kind: "file", path: "src/other.ts", message: "Unexpected cluster." }],
+      repair: "Split the unrelated cluster or document why it belongs.",
+      tags: ["scope"]
+    };
+
+    const report = renderPrCommentReport({
+      ...result,
+      findings: [observationFinding],
+      summary: {
+        ...result.summary,
+        decision: "pass",
+        findingCount: 1,
+        highCount: 1,
+        policyApplied: {
+          ...result.summary.policyApplied!,
+          blockingFindingIds: [],
+          observationFindingIds: [observationFinding.id]
+        }
+      }
+    });
+
+    expect(report).toContain("### Blocking findings\n\n- None.");
+    expect(report).toContain("### Observations");
+    expect(report).toContain("Unexpected changed-file cluster");
   });
 
   it("builds a concise evidence-backed reviewer checklist", () => {

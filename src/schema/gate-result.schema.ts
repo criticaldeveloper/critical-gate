@@ -418,7 +418,8 @@ export const gateResultJsonSchema = {
         diffCostScore: { type: "number", minimum: 0, maximum: 100 },
         scopeExpansionScore: { $ref: "#/$defs/scopeExpansionScore" },
         diffCoherenceScore: { $ref: "#/$defs/diffCoherenceScore" },
-        confidenceCalibration: { $ref: "#/$defs/confidenceCalibrationSummary" }
+        confidenceCalibration: { $ref: "#/$defs/confidenceCalibrationSummary" },
+        policyApplied: { $ref: "#/$defs/policyAppliedSummary" }
       }
     },
     confidenceCalibrationSummary: {
@@ -429,6 +430,28 @@ export const gateResultJsonSchema = {
         blockingEligibleCount: { type: "integer", minimum: 0 },
         observationModeCount: { type: "integer", minimum: 0 },
         confidenceSuppressedCount: { type: "integer", minimum: 0 }
+      }
+    },
+    policyAppliedSummary: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "failOn",
+        "observationDetectors",
+        "blockingDetectors",
+        "acceptedFindingIds",
+        "blockingFindingIds",
+        "observationFindingIds",
+        "confidenceSuppressedFindingIds"
+      ],
+      properties: {
+        failOn: { enum: ["blocker", "high", "medium"] },
+        observationDetectors: stringArraySchema,
+        blockingDetectors: stringArraySchema,
+        acceptedFindingIds: stringArraySchema,
+        blockingFindingIds: stringArraySchema,
+        observationFindingIds: stringArraySchema,
+        confidenceSuppressedFindingIds: stringArraySchema
       }
     },
     scopeExpansionScore: {

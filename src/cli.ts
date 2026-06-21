@@ -366,7 +366,8 @@ function createGateResult(
     summary: summarizeFindings(findings, task, diff, {
       observationDetectors: getPolicyObservationDetectors(configResult.config),
       blockingDetectors: getPolicyBlockingDetectors(configResult.config),
-      failOn: options.failOn ?? getConfiguredFailOn(configResult.config)
+      failOn: options.failOn ?? getConfiguredFailOn(configResult.config),
+      acceptedFindingIds: learningResult.appliedAcceptedFindings
     }),
     intentVerification: summarizeIntentVerification(task, diff.files),
     intentQuality: analyzeTaskIntentQuality(task),

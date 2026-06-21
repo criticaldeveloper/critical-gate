@@ -36,6 +36,14 @@ export function renderMarkdownReport(result: GateResult): string {
     lines.push("");
   }
 
+  if (result.summary.policyApplied !== undefined) {
+    lines.push("## Policy Applied", "");
+    for (const policyLine of renderPolicyAppliedLines(result)) {
+      lines.push(`- ${policyLine}`);
+    }
+    lines.push("");
+  }
+
   if (result.intentVerification !== undefined) {
     lines.push(
       "## Intent Verification",
@@ -88,6 +96,24 @@ export function renderMarkdownReport(result: GateResult): string {
   }
 
   return `${lines.join("\n").trimEnd()}\n`;
+}
+
+function renderPolicyAppliedLines(result: GateResult): string[] {
+  const policy = result.summary.policyApplied;
+
+  if (policy === undefined) {
+    return [];
+  }
+
+  return [
+    `Fail threshold: ${policy.failOn}.`,
+    `Observation detectors: ${formatClasses(policy.observationDetectors)}.`,
+    `Blocking detector overrides: ${formatClasses(policy.blockingDetectors)}.`,
+    `Blocking findings after policy: ${formatClasses(policy.blockingFindingIds)}.`,
+    `Observation findings after policy: ${formatClasses(policy.observationFindingIds)}.`,
+    `Confidence-suppressed findings: ${formatClasses(policy.confidenceSuppressedFindingIds)}.`,
+    `Accepted findings applied: ${formatClasses(policy.acceptedFindingIds)}.`
+  ];
 }
 
 function getCleanDiffCertificate(result: GateResult): string[] {

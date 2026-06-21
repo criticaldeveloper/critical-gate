@@ -212,12 +212,23 @@ export interface GateSummary {
   scopeExpansionScore?: ScopeExpansionScore;
   diffCoherenceScore?: DiffCoherenceScore;
   confidenceCalibration?: ConfidenceCalibrationSummary;
+  policyApplied?: PolicyAppliedSummary;
 }
 
 export interface ConfidenceCalibrationSummary {
   blockingEligibleCount: number;
   observationModeCount: number;
   confidenceSuppressedCount: number;
+}
+
+export interface PolicyAppliedSummary {
+  failOn: "blocker" | "high" | "medium";
+  observationDetectors: string[];
+  blockingDetectors: string[];
+  acceptedFindingIds: string[];
+  blockingFindingIds: string[];
+  observationFindingIds: string[];
+  confidenceSuppressedFindingIds: string[];
 }
 
 export interface ScopeExpansionScore {

@@ -21,6 +21,15 @@ describe("rollout decision policy", () => {
         blockingEligibleCount: 0,
         observationModeCount: 1,
         confidenceSuppressedCount: 0
+      },
+      policyApplied: {
+        failOn: "high",
+        observationDetectors: expect.arrayContaining(["blast-radius"]),
+        blockingDetectors: [],
+        acceptedFindingIds: [],
+        blockingFindingIds: [],
+        observationFindingIds: ["blast-radius:unexpected-cluster:test"],
+        confidenceSuppressedFindingIds: []
       }
     });
   });
@@ -37,6 +46,26 @@ describe("rollout decision policy", () => {
         blockingEligibleCount: 1,
         observationModeCount: 0,
         confidenceSuppressedCount: 0
+      },
+      policyApplied: {
+        failOn: "high",
+        blockingDetectors: ["blast-radius"],
+        blockingFindingIds: ["blast-radius:unexpected-cluster:test"],
+        observationFindingIds: []
+      }
+    });
+  });
+
+  it("records accepted finding ids in the applied policy summary", () => {
+    expect(
+      summarizeFindings([highObservationFinding], undefined, undefined, {
+        acceptedFindingIds: ["scope:accepted-fixture"],
+        failOn: "medium"
+      })
+    ).toMatchObject({
+      policyApplied: {
+        failOn: "medium",
+        acceptedFindingIds: ["scope:accepted-fixture"]
       }
     });
   });

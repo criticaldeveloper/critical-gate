@@ -14,6 +14,10 @@ git add .critical-gate.json
 CLI flags still override policy for a single run. For example, `--fail-on blocker` is stricter or
 looser than the stored policy only for that invocation.
 
+Markdown and PR-comment reports include a compact "Policy Applied" section showing the effective
+fail threshold, observation detectors, blocking detector overrides, and accepted findings applied to
+that run.
+
 ## Top-Level Keys
 
 ### `policy`
