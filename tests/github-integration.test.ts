@@ -2,6 +2,9 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 describe("GitHub integration", () => {
+  const packageJson = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as {
+    scripts: Record<string, string>;
+  };
   const action = readFileSync(join(process.cwd(), "action.yml"), "utf8");
   const workflow = readFileSync(
     join(process.cwd(), ".github", "workflows", "critical-gate.yml"),
@@ -24,6 +27,36 @@ describe("GitHub integration", () => {
     expect(action).toContain('node "$GITHUB_ACTION_PATH/dist/cli.js"');
     expect(action).toContain('--format "$CRITICAL_GATE_FORMAT"');
     expect(action).toContain('--output "$CRITICAL_GATE_OUTPUT"');
+  });
+
+  it("defines a prebuilt action artifact package path", () => {
+    const prepareScript = readFileSync(
+      join(process.cwd(), "scripts", "prepare-action-package.mjs"),
+      "utf8"
+    );
+    const smokeScript = readFileSync(
+      join(process.cwd(), "scripts", "smoke-action-package.mjs"),
+      "utf8"
+    );
+
+    expect(packageJson.scripts["package:action"]).toBe(
+      "pnpm build && node scripts/prepare-action-package.mjs"
+    );
+    expect(packageJson.scripts["smoke:action"]).toBe("node scripts/smoke-action-package.mjs");
+    expect(prepareScript).toContain('join(root, "artifacts", "action")');
+    expect(prepareScript).toContain('cpSync(join(root, "dist"), join(output, "dist")');
+    expect(prepareScript).toContain("ACTION_ARTIFACT.md");
+    expect(smokeScript).toContain('"dist/cli.js"');
+    expect(smokeScript).toContain("node_modules");
+    expect(smokeScript).toContain("--version");
+  });
+
+  it("documents prebuilt action mode", () => {
+    expect(docs).toContain("pnpm package:action");
+    expect(docs).toContain("pnpm smoke:action");
+    expect(docs).toContain('install: "false"');
+    expect(docs).toContain('build: "false"');
+    expect(docs).toContain("artifacts/action");
   });
 
   it("publishes SARIF from the example workflow", () => {

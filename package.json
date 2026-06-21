@@ -20,6 +20,8 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "package:action": "pnpm build && node scripts/prepare-action-package.mjs",
+    "smoke:action": "node scripts/smoke-action-package.mjs",
     "build:vscode": "tsc -p extensions/vscode/tsconfig.json",
     "build:vscode-tests": "tsc -p extensions/vscode/tsconfig.test.json",
     "package:vscode": "node scripts/prepare-vscode-package.mjs && pnpm build && pnpm build:vscode && node scripts/bundle-vscode-analyzer.mjs && pnpm --dir extensions/vscode exec vsce package --no-dependencies --out ../../artifacts/vscode/critical-gate-vscode.vsix",

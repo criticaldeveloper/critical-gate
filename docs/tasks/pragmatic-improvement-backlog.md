@@ -262,6 +262,8 @@ False-positive boundary:
 
 ### Task 5.1: Prebuilt Action Artifact Path
 
+Status: Done.
+
 Goal: let users run the action without installing dependencies and building in every workflow.
 
 Implementation:
@@ -374,12 +376,22 @@ Validation:
 
 ## Recommended Order
 
-1. Task 1.2: CI artifacts for coverage and evaluation.
-2. Task 2.1: policy file documentation and example validation.
-3. Task 1.3: detector quality sheets.
-4. Task 3.1: repository token index.
-5. Task 4.1: public entrypoint discovery hardening.
-6. Task 5.1: prebuilt action artifact path.
-7. Task 1.1: expanded real-repository evaluation corpus.
+1. Task 1.2: CI artifacts for coverage and evaluation. Done.
+2. Task 2.1: policy file documentation and example validation. Done.
+3. Task 1.3: detector quality sheets. Done.
+4. Task 3.1: repository token index. Done.
+5. Task 4.1: public entrypoint discovery hardening. Done.
+6. Task 5.1: prebuilt action artifact path. Done.
+7. Task 3.2: intent coverage categories.
+8. Task 2.2: policy explanation to reports.
+9. Task 4.2: API snapshot release evidence.
+10. Task 5.2: minimal CI matrix.
+11. Task 6.1: finding stability tests.
+12. Task 6.2: compact "why passed" report section.
+13. Task 7.1: LLM boundary test suite.
+14. Task 7.2: product non-goals release checklist.
+15. Task 1.1: expanded real-repository evaluation corpus.
 
-This order improves trust, observability, and adoption before adding more detection ambition.
+This order keeps distribution and core detector precision moving first, then hardens reporting,
+workflow coverage, repair-loop trust, and finally the broader real-repository corpus once behavior
+is more stable.

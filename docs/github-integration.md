@@ -29,6 +29,34 @@ For a published action, keep `dist/` available in the release package or leave `
 the composite action can compile before it runs. Only set `install: "false"` and `build: "false"`
 for an artifact that has been verified to contain everything the action needs at runtime.
 
+## Prebuilt Action Artifact
+
+Release builds can prepare a self-contained action directory without `node_modules`:
+
+```bash
+pnpm package:action
+pnpm smoke:action
+```
+
+The package script builds the CLI and writes `artifacts/action` with:
+
+- `action.yml`
+- `package.json`
+- `README.md` and `LICENSE`
+- `ACTION_ARTIFACT.md`
+- prebuilt `dist/`
+
+Use that artifact with:
+
+```yaml
+with:
+  install: "false"
+  build: "false"
+```
+
+Source checkouts should keep the defaults. The prebuilt mode is only for release artifacts that have
+passed `pnpm smoke:action`.
+
 For push workflows, make the task intent cover the same range as the selected base. If one push
 contains multiple commits, join all commit messages from the push payload instead of using only the
 head commit message.

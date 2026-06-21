@@ -23,11 +23,11 @@ inputs:
     required: false
     default: "false"
   install:
-    description: Install the action package dependencies with pnpm before running.
+    description: Install the action package dependencies with pnpm before running. Keep true for source checkouts; set false only for smoke-tested prebuilt action artifacts.
     required: false
     default: "true"
   build:
-    description: Build the action package before running.
+    description: Build the action package before running. Keep true for source checkouts; set false only for smoke-tested prebuilt action artifacts.
     required: false
     default: "true"
 

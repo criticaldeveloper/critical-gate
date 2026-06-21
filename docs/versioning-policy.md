@@ -77,8 +77,8 @@ Before cutting any release:
 6. Run `pnpm audit`.
 7. Run `pnpm test:vscode` when the editor extension is included.
 8. Run `pnpm package:vscode` when publishing or attaching a VSIX artifact.
-9. If publishing a prebuilt GitHub Action artifact, verify it runs with `install: "false"` and
-   `build: "false"`.
+9. If publishing a prebuilt GitHub Action artifact, run `pnpm package:action` and
+   `pnpm smoke:action`, then verify release consumers use `install: "false"` and `build: "false"`.
 10. Run Critical Gate against the release diff with release notes as task context.
 11. Tag the release after all checks pass.
 

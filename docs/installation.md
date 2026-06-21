@@ -120,9 +120,19 @@ At runtime, hooks accept:
 Until the action is published under a remote slug, use it from this repository checkout or from the
 same repository with `uses: ./`.
 
-The composite action installs dependencies and builds by default. The `install: "false"` and
-`build: "false"` inputs are only for release artifacts that already include `node_modules` or a
-prebuilt `dist/cli.js`; source checkouts should keep the defaults.
+The composite action installs dependencies and builds by default. Source checkouts should keep the
+defaults.
+
+For release artifacts, build and smoke-test the prebuilt action directory:
+
+```bash
+pnpm package:action
+pnpm smoke:action
+```
+
+That writes `artifacts/action` with `action.yml`, required package metadata, and prebuilt `dist/`
+output. It intentionally excludes `node_modules`. Only use `install: "false"` and `build: "false"`
+with an artifact that has passed the smoke check.
 
 Minimal workflow:
 
