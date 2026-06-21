@@ -1,0 +1,11 @@
+diff --git a/source/core/retry.ts b/source/core/retry.ts
+index 57b22a0..cb3e0f1 100644
+--- a/source/core/retry.ts
++++ b/source/core/retry.ts
+@@ -8,7 +8,7 @@ export function normalizeRetryLimit(value: number | undefined): number {
+   if (value === undefined) {
+     return 2;
+   }
+-  return Math.max(0, value);
++  return Math.max(0, Math.floor(value));
+ }

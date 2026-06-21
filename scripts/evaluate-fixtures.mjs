@@ -86,6 +86,12 @@ function validateExpected(id, value) {
     throw new Error(`${id}: expected-findings.json requires expectedFindings array.`);
   }
 
+  for (const key of ["sourceRepository", "caseType", "labelSource"]) {
+    if (typeof value[key] !== "string" || value[key].trim().length === 0) {
+      throw new Error(`${id}: expected-findings.json requires non-empty ${key}.`);
+    }
+  }
+
   if (
     !value.expectedFindings.every(
       (finding) =>
@@ -102,6 +108,9 @@ function validateExpected(id, value) {
   }
 
   return {
+    sourceRepository: value.sourceRepository,
+    caseType: value.caseType,
+    labelSource: value.labelSource,
     shouldBlock: value.shouldBlock,
     expectedFindings: value.expectedFindings,
     allowedExtraDetectors: Array.isArray(value.allowedExtraDetectors)
@@ -151,6 +160,9 @@ function evaluateCase(evaluationCase) {
     outcome: classifyOutcome(expectedBlock, actualBlock, missingExpectedFindings),
     task: evaluationCase.task,
     notes: evaluationCase.notes,
+    sourceRepository: evaluationCase.expected.sourceRepository,
+    caseType: evaluationCase.expected.caseType,
+    labelSource: evaluationCase.expected.labelSource,
     summary,
     expectedFindings: evaluationCase.expected.expectedFindings,
     matchedExpectedFindings,
@@ -236,9 +248,50 @@ function calculateMetrics(results) {
     findingPrecision: divide(matchedFindingCount, matchedFindingCount + unexpectedBlockingCount),
     findingRecall: divide(matchedFindingCount, expectedFindingCount),
     detectorMetrics: getDetectorMetrics(results),
+    repositoryMetrics: getGroupedMetrics(results, "sourceRepository"),
+    caseTypeMetrics: getGroupedMetrics(results, "caseType"),
     noisiestDetector: getNoisiestDetector(results),
     bestDetector: getBestDetector(results)
   };
+}
+
+function getGroupedMetrics(results, key) {
+  const groups = new Map();
+
+  for (const result of results) {
+    const group = result[key];
+    const entries = groups.get(group) ?? [];
+    entries.push(result);
+    groups.set(group, entries);
+  }
+
+  return [...groups.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([group, groupResults]) => {
+      const truePositives = groupResults.filter(
+        (result) => result.outcome === "true-positive"
+      ).length;
+      const trueNegatives = groupResults.filter(
+        (result) => result.outcome === "true-negative"
+      ).length;
+      const falsePositives = groupResults.filter(
+        (result) => result.outcome === "false-positive"
+      ).length;
+      const falseNegatives = groupResults.filter(
+        (result) => result.outcome === "false-negative"
+      ).length;
+
+      return {
+        group,
+        cases: groupResults.length,
+        truePositives,
+        trueNegatives,
+        falsePositives,
+        falseNegatives,
+        casePrecision: divide(truePositives, truePositives + falsePositives),
+        caseRecall: divide(truePositives, truePositives + falseNegatives)
+      };
+    });
 }
 
 function getDetectorMetrics(results) {
@@ -354,6 +407,18 @@ function renderMarkdown(evaluation) {
         `| ${metric.detector} | ${metric.expected} | ${metric.matched} | ${metric.unexpectedBlocking} | ${formatPercent(metric.precision)} | ${formatPercent(metric.recall)} | ${metric.evidenceLevel} |`
     ),
     "",
+    "## Repository Metrics",
+    "",
+    "| Repository | Cases | TP | TN | FP | FN | Precision | Recall |",
+    "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ...metrics.repositoryMetrics.map((metric) => renderGroupedMetricRow(metric)),
+    "",
+    "## Case Type Metrics",
+    "",
+    "| Case Type | Cases | TP | TN | FP | FN | Precision | Recall |",
+    "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ...metrics.caseTypeMetrics.map((metric) => renderGroupedMetricRow(metric)),
+    "",
     "## Cases",
     "",
     ...evaluation.cases.flatMap((result) => renderCase(result)),
@@ -369,10 +434,17 @@ function renderCase(result) {
     `- Passed: ${result.passed ? "yes" : "no"}`,
     `- Expected Block: ${result.expectedBlock ? "yes" : "no"}`,
     `- Actual Block: ${result.actualBlock ? "yes" : "no"}`,
+    `- Source Repository: ${result.sourceRepository}`,
+    `- Case Type: ${result.caseType}`,
+    `- Label Source: ${result.labelSource}`,
     `- Findings: ${result.summary.findingCount}`,
     `- Notes: ${result.notes}`,
     ""
   ];
+}
+
+function renderGroupedMetricRow(metric) {
+  return `| ${metric.group} | ${metric.cases} | ${metric.truePositives} | ${metric.trueNegatives} | ${metric.falsePositives} | ${metric.falseNegatives} | ${formatPercent(metric.casePrecision)} | ${formatPercent(metric.caseRecall)} |`;
 }
 
 function formatDetectorCount(value) {

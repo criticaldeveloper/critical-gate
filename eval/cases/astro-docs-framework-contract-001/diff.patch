@@ -1,0 +1,9 @@
+diff --git a/src/content.config.ts b/src/content.config.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/content.config.ts
++++ b/src/content.config.ts
+@@ -1,4 +1,3 @@
+ import {defineCollection} from 'astro:content';
+ 
+-export const collections = {docs: defineCollection({})};
+ export const docsSchema = {};

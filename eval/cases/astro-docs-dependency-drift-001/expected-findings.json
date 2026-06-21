@@ -1,17 +1,12 @@
 {
-  "sourceRepository": "generic-ts-library",
+  "sourceRepository": "withastro/docs",
   "caseType": "dependency-drift",
-  "labelSource": "synthetic-regression",
+  "labelSource": "sanitized-public-repo-fixture",
   "shouldBlock": true,
   "expectedFindings": [
     {
       "detector": "dependency-addition",
       "severity": "blocker",
-      "file": "package.json"
-    },
-    {
-      "detector": "scope",
-      "severity": "high",
       "file": "package.json"
     }
   ]

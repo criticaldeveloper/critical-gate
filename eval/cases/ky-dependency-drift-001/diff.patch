@@ -1,0 +1,12 @@
+diff --git a/package.json b/package.json
+index 57b22a0..cb3e0f1 100644
+--- a/package.json
++++ b/package.json
+@@ -2,6 +2,7 @@
+   "name": "ky",
+   "type": "module",
+   "dependencies": {
++    "qs": "^6.12.0",
+     "type-fest": "^4.0.0"
+   }
+ }

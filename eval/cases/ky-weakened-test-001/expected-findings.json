@@ -1,13 +1,13 @@
 {
-  "sourceRepository": "generic-ts-library",
+  "sourceRepository": "sindresorhus/ky",
   "caseType": "weakened-test",
-  "labelSource": "synthetic-regression",
+  "labelSource": "sanitized-public-repo-fixture",
   "shouldBlock": true,
   "expectedFindings": [
     {
       "detector": "test-weakening",
       "severity": "high",
-      "file": "tests/login.test.ts"
+      "file": "test/retry.ts"
     }
   ]
 }

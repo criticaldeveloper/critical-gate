@@ -1,0 +1,10 @@
+diff --git a/readme.md b/readme.md
+index 57b22a0..cb3e0f1 100644
+--- a/readme.md
++++ b/readme.md
+@@ -12,6 +12,7 @@ import ky from 'ky';
+ 
+ ## Timeout
+ 
++The timeout option controls the request deadline in milliseconds.
+ Use `timeout: false` to disable the request deadline.

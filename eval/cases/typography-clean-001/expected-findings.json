@@ -1,4 +1,7 @@
 {
+  "sourceRepository": "mv-ft",
+  "caseType": "clean-narrow-task",
+  "labelSource": "dogfood-regression",
   "shouldBlock": false,
   "expectedFindings": []
 }

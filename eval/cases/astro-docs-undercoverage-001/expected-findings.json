@@ -1,13 +1,13 @@
 {
-  "sourceRepository": "mv-ft",
+  "sourceRepository": "withastro/docs",
   "caseType": "underimplementation",
-  "labelSource": "synthetic-regression",
+  "labelSource": "sanitized-public-repo-fixture",
   "shouldBlock": true,
   "expectedFindings": [
     {
       "detector": "intent-coverage",
       "severity": "high",
-      "file": "src/styles/typography.scss"
+      "file": "src/styles/theme.css"
     }
   ]
 }

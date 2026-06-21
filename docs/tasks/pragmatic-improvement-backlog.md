@@ -17,6 +17,8 @@ The common standard for every task:
 
 ### Task 1.1: Expand The Real-Repository Evaluation Corpus
 
+Status: Done.
+
 Goal: move from internal regression confidence to broader product confidence.
 
 Implementation:
@@ -406,7 +408,7 @@ Validation:
 12. Task 6.2: compact "why passed" report section. Done.
 13. Task 7.1: LLM boundary test suite. Done.
 14. Task 7.2: product non-goals release checklist. Done.
-15. Task 1.1: expanded real-repository evaluation corpus.
+15. Task 1.1: expanded real-repository evaluation corpus. Done.
 
 This order keeps distribution and core detector precision moving first, then hardens reporting,
 workflow coverage, repair-loop trust, and finally the broader real-repository corpus once behavior

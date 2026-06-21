@@ -1,4 +1,7 @@
 {
+  "sourceRepository": "mv-ft",
+  "caseType": "unrelated-rewrite",
+  "labelSource": "dogfood-regression",
   "shouldBlock": true,
   "expectedFindings": [
     {

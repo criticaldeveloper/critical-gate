@@ -1,4 +1,7 @@
 {
+  "sourceRepository": "generic-ts-library",
+  "caseType": "clean-narrow-task",
+  "labelSource": "synthetic-regression",
   "shouldBlock": false,
   "expectedFindings": []
 }

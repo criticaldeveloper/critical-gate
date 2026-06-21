@@ -1,0 +1,9 @@
+diff --git a/src/content/docs/en/install-and-setup.mdx b/src/content/docs/en/install-and-setup.mdx
+index 57b22a0..cb3e0f1 100644
+--- a/src/content/docs/en/install-and-setup.mdx
++++ b/src/content/docs/en/install-and-setup.mdx
+@@ -3,6 +3,7 @@ title: Install and setup
+ ---
+ 
+ Start by creating a new Astro project.
++This guide walks through the supported package managers.

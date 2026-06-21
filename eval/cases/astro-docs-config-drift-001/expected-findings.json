@@ -1,7 +1,7 @@
 {
-  "sourceRepository": "mv-ft",
+  "sourceRepository": "withastro/docs",
   "caseType": "config-drift",
-  "labelSource": "dogfood-regression",
+  "labelSource": "sanitized-public-repo-fixture",
   "shouldBlock": true,
   "expectedFindings": [
     {
@@ -10,5 +10,5 @@
       "file": ".node-version"
     }
   ],
-  "allowedExtraDetectors": ["config-change", "blast-radius"]
+  "allowedExtraDetectors": ["config-change"]
 }

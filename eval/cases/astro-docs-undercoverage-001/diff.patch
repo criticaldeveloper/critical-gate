@@ -1,0 +1,9 @@
+diff --git a/src/styles/theme.css b/src/styles/theme.css
+index 57b22a0..cb3e0f1 100644
+--- a/src/styles/theme.css
++++ b/src/styles/theme.css
+@@ -1,4 +1,4 @@
+ :root {
+-  --hero-gap: 2rem;
++  --hero-gap: 2.25rem;
+ }

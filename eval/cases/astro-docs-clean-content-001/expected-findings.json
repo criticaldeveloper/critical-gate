@@ -1,0 +1,7 @@
+{
+  "sourceRepository": "withastro/docs",
+  "caseType": "clean-narrow-task",
+  "labelSource": "sanitized-public-repo-fixture",
+  "shouldBlock": false,
+  "expectedFindings": []
+}

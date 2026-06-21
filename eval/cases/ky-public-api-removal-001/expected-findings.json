@@ -1,13 +1,13 @@
 {
-  "sourceRepository": "mv-ft",
+  "sourceRepository": "sindresorhus/ky",
   "caseType": "public-api-change",
-  "labelSource": "dogfood-regression",
+  "labelSource": "sanitized-public-repo-fixture",
   "shouldBlock": true,
   "expectedFindings": [
     {
       "detector": "api-surface",
       "severity": "high",
-      "file": "src/content.config.ts"
+      "file": "source/index.ts"
     }
   ]
 }
