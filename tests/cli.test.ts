@@ -5,6 +5,7 @@ import { pathToFileURL } from "node:url";
 
 import { ExitCode, isCliEntrypoint, main } from "../src/cli.js";
 import type { GitDiffResult } from "../src/index.js";
+import { CRITICAL_GATE_VERSION } from "../src/version.js";
 
 const testDiffResult: GitDiffResult = {
   root: "C:/dev/critical-gate",
@@ -72,7 +73,7 @@ describe("cli", () => {
     const { io, stdout, stderr } = createTestIo();
 
     expect(main(["--version"], io)).toBe(ExitCode.Pass);
-    expect(stdout).toEqual(["critical-gate 2.1.1"]);
+    expect(stdout).toEqual([`critical-gate ${CRITICAL_GATE_VERSION}`]);
     expect(stderr).toEqual([]);
   });
 
@@ -505,7 +506,8 @@ describe("cli", () => {
         {
           tool: {
             driver: {
-              name: "Critical Gate"
+              name: "Critical Gate",
+              semanticVersion: CRITICAL_GATE_VERSION
             }
           },
           results: []

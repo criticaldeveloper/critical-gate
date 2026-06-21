@@ -39,8 +39,9 @@ import {
   type GitDiffResult,
   type ReportFormat
 } from "./index.js";
+import { CRITICAL_GATE_VERSION } from "./version.js";
 
-export const CLI_VERSION = "2.1.1";
+export const CLI_VERSION = CRITICAL_GATE_VERSION;
 
 export const ExitCode = {
   Pass: 0,

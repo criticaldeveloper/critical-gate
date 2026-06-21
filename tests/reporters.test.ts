@@ -9,6 +9,7 @@ import {
   type Finding,
   type GateResult
 } from "../src/index.js";
+import { CRITICAL_GATE_VERSION } from "../src/version.js";
 
 const result: GateResult = {
   schemaVersion: GATE_RESULT_SCHEMA_VERSION,
@@ -302,7 +303,8 @@ describe("reporters", () => {
         {
           tool: {
             driver: {
-              name: "Critical Gate"
+              name: "Critical Gate",
+              semanticVersion: CRITICAL_GATE_VERSION
             }
           },
           results: [

@@ -1,8 +1,8 @@
 # Installation
 
 Critical Gate currently supports source-based CLI and action installation, local Codex hook setup,
-and a self-contained VS Code extension VSIX. The root CLI package remains on the alpha release line
-while the VS Code extension uses Marketplace-compatible numeric versions.
+and a self-contained VS Code extension VSIX. The root CLI package and VS Code extension use aligned
+numeric dogfood release versions, but the project has not declared a stable public API contract yet.
 
 ## Requirements
 

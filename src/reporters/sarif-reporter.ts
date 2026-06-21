@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 
 import type { Finding, GateResult } from "../schema/index.js";
+import { CRITICAL_GATE_VERSION } from "../version.js";
 
 const maxSarifResults = 500;
 const maxLocationsPerResult = 20;
@@ -28,6 +29,7 @@ export function renderSarifReport(result: GateResult): string {
         tool: {
           driver: {
             name: "Critical Gate",
+            semanticVersion: CRITICAL_GATE_VERSION,
             informationUri: "https://critical-gate.dev",
             rules: getRules(emittedFindings)
           }

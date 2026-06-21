@@ -1,8 +1,9 @@
 # Versioning Policy
 
-Critical Gate uses SemVer for release artifacts once a public `1.0.0` contract exists. Before
-`1.0.0`, minor versions may change public behavior, but every release must still document breaking
-changes clearly.
+Critical Gate currently publishes numeric dogfood releases for the root CLI and VS Code extension.
+These releases use SemVer-style numbers for artifact ordering, but they are still pre-stable:
+finding behavior, CLI options, output fields, and extension settings may change until the project
+declares a stable public contract.
 
 ## Current Release Stage
 
@@ -10,7 +11,7 @@ The current target is `2.2.0`.
 
 This means:
 
-- Suitable for internal alpha use and dogfooding.
+- Suitable for internal alpha use, dogfooding, and explicitly scoped public trials.
 - Not a stable public API promise.
 - Finding behavior, CLI options, output fields, and extension settings may still change.
 - Release artifacts should be produced and tested, but Marketplace or package-registry publishing
@@ -22,6 +23,8 @@ Keep these versions aligned for a release:
 
 - Root CLI package version in `package.json`.
 - VS Code extension version in `extensions/vscode/package.json`.
+- Runtime version constant in `src/version.ts`, which backs `critical-gate --version`, JSON
+  metadata, and SARIF tool metadata.
 - Project changelog entry in `CHANGELOG.md`.
 - VS Code extension changelog entry in `extensions/vscode/CHANGELOG.md`.
 - Public output schema version only when the `GateResult` JSON contract changes.
@@ -29,17 +32,18 @@ Keep these versions aligned for a release:
 The public schema version is not the same thing as the package version. Patch releases can change
 implementation details without changing `schemaVersion`.
 
-## SemVer Rules
+## SemVer-Style Rules
 
-Before `1.0.0`:
+While the project is pre-stable:
 
 - Patch: bug fixes, docs, test improvements, packaging fixes, and detector false-positive tuning
   that does not intentionally change public contracts.
 - Minor: new detectors, new report fields, new CLI flags, new integration surfaces, or intentional
   changes to gate decisions.
-- Major: reserved for the eventual stable `1.0.0` contract.
+- Major: broad compatibility resets across CLI behavior, output contracts, detector defaults, or
+  integration packaging.
 
-After `1.0.0`:
+After a stable public contract is declared:
 
 - Patch: backward-compatible fixes and precision improvements.
 - Minor: backward-compatible features, detectors, reporters, or extension capabilities.
@@ -87,9 +91,9 @@ Examples:
 
 Do not tag directly from a dirty working tree.
 
-## Public Release Gate
+## Stable Release Gate
 
-Before a public `0.1.0` release, complete:
+Before declaring a stable public release, complete:
 
 - Add real repository, issue, and homepage metadata.
 - Run all GitHub workflows remotely.

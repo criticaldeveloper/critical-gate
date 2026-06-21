@@ -73,6 +73,18 @@ When changing code later:
 - Keep output schemas backward compatible unless the task explicitly changes them.
 - Run the narrowest relevant verification commands before handing off.
 
+## Release And Versioning
+
+When changing package versions, release docs, distribution behavior, or tool metadata:
+
+- Keep the root `package.json`, `extensions/vscode/package.json`, `src/version.ts`, CLI
+  `--version` output, JSON metadata, SARIF tool metadata, `CHANGELOG.md`, and relevant installation
+  or versioning docs aligned.
+- Do not treat SARIF top-level `version` as the product version; it is the SARIF schema version.
+  Product version belongs in SARIF tool metadata.
+- Run or update `tests/release-version.test.ts` for any version-related change.
+- Build the CLI and verify `node dist/cli.js --version` before handing off release-governance work.
+
 ## Git Workflow
 
 Use branch names that describe the work type:
