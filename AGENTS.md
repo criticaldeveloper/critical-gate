@@ -73,6 +73,14 @@ When changing code later:
 - Keep output schemas backward compatible unless the task explicitly changes them.
 - Run the narrowest relevant verification commands before handing off.
 
+Before completing any file-changing task:
+
+- Re-evaluate whether tests, detector fixtures, CI/GitHub workflows, user docs, and AI-facing docs
+  such as `AGENTS.md` need updates for the change.
+- Update those surfaces when the change alters behavior, public usage, release or distribution flow,
+  detector policy, agent workflow expectations, or validation requirements.
+- If no updates are needed, mention that in the final handoff.
+
 ## Release And Versioning
 
 When changing package versions, release docs, distribution behavior, or tool metadata:
