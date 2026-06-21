@@ -220,6 +220,8 @@ Signals used:
 
 - Task intent terms.
 - Changed file paths and roles.
+- Repository token index matches from paths, symbols, test names, Markdown headings, package names,
+  and nearby folders.
 - Small-task classification.
 - High-risk roles such as config, manifest, lockfile, and deleted source files.
 
@@ -227,6 +229,7 @@ Evidence emitted:
 
 - Unexpected file path.
 - Role and task-boundary rationale.
+- Matching repository tokens when they explain file alignment.
 - Repair guidance to split or justify unrelated edits.
 
 Will flag:

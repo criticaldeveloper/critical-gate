@@ -21,6 +21,12 @@ export {
 } from "./profile.js";
 export { detectMonorepoContext, type MonorepoReader } from "./monorepo.js";
 export {
+  buildRepositoryTokenIndex,
+  extractRepositoryTokens,
+  normalizeRepositoryToken,
+  type BuildRepositoryTokenIndexOptions
+} from "./token-index.js";
+export {
   buildUtilityIndex,
   extractExportedNames,
   type BuildUtilityIndexOptions,

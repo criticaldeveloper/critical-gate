@@ -1,5 +1,5 @@
 import { analyzeTaskIntent } from "../intent/index.js";
-import type { DiffFile, Finding } from "../schema/index.js";
+import type { DiffFile, Finding, RepositoryTokenIndex } from "../schema/index.js";
 
 import type { Detector } from "./types.js";
 
@@ -33,7 +33,7 @@ const manifestTaskTerms = [
 ];
 export const scopeDetector: Detector = {
   name: "scope",
-  run: ({ task, diff }) => {
+  run: ({ task, diff, context }) => {
     const analysis = analyzeTaskIntent(task);
 
     if (analysis.complexity !== "small" || isBroadTask(task.text)) {
@@ -41,8 +41,10 @@ export const scopeDetector: Detector = {
     }
 
     return diff.files
-      .filter((file) => isUnexpectedForSmallTask(file, analysis.keywords, task.text))
-      .map((file) => toFinding(file, analysis.keywords));
+      .filter((file) =>
+        isUnexpectedForSmallTask(file, analysis.keywords, task.text, context?.repositoryTokenIndex)
+      )
+      .map((file) => toFinding(file, analysis.keywords, context?.repositoryTokenIndex));
   }
 };
 
@@ -51,7 +53,12 @@ function isBroadTask(taskText: string): boolean {
   return broadTaskTerms.some((term) => normalizedTask.includes(term));
 }
 
-function isUnexpectedForSmallTask(file: DiffFile, keywords: string[], taskText: string): boolean {
+function isUnexpectedForSmallTask(
+  file: DiffFile,
+  keywords: string[],
+  taskText: string,
+  tokenIndex?: RepositoryTokenIndex
+): boolean {
   if (file.role === "docs" || file.role === "test") {
     return false;
   }
@@ -76,12 +83,23 @@ function isUnexpectedForSmallTask(file: DiffFile, keywords: string[], taskText: 
     return true;
   }
 
-  return keywords.length > 0 && !hasPathKeywordAlignment(file.path, keywords);
+  return keywords.length > 0 && !hasFileKeywordAlignment(file, keywords, tokenIndex);
 }
 
 function hasPathKeywordAlignment(path: string, keywords: string[]): boolean {
   const normalizedPath = path.toLowerCase();
   return keywords.some((keyword) => normalizedPath.includes(keyword));
+}
+
+function hasFileKeywordAlignment(
+  file: DiffFile,
+  keywords: string[],
+  tokenIndex?: RepositoryTokenIndex
+): boolean {
+  return (
+    hasPathKeywordAlignment(file.path, keywords) ||
+    getTokenKeywordMatches(file.path, keywords, tokenIndex).length > 0
+  );
 }
 
 function isRoleAlignedConfigOrManifestChange(
@@ -139,11 +157,12 @@ function isPackageVersionOnlyChange(file: DiffFile): boolean {
   );
 }
 
-function toFinding(file: DiffFile, keywords: string[]): Finding {
+function toFinding(file: DiffFile, keywords: string[], tokenIndex?: RepositoryTokenIndex): Finding {
   const firstChangedLine = file.hunks
     .flatMap((hunk) => hunk.lines)
     .find((line) => line.kind === "add" || line.kind === "delete");
   const lineNumber = firstChangedLine?.newLineNumber ?? firstChangedLine?.oldLineNumber;
+  const tokenMatches = getTokenKeywordMatches(file.path, keywords, tokenIndex);
 
   return {
     id: `scope:${file.path}`,
@@ -166,7 +185,8 @@ function toFinding(file: DiffFile, keywords: string[]): Finding {
           role: file.role,
           additions: file.additions,
           deletions: file.deletions,
-          keywords
+          keywords,
+          tokenMatches
         }
       }
     ],
@@ -174,4 +194,21 @@ function toFinding(file: DiffFile, keywords: string[]): Finding {
       "Remove unrelated edits or split them into a separate task with explicit justification.",
     tags: ["scope"]
   };
+}
+
+function getTokenKeywordMatches(
+  path: string,
+  keywords: string[],
+  tokenIndex?: RepositoryTokenIndex
+): Array<{ token: string; source: string; raw: string }> {
+  const fileTokens = tokenIndex?.files.find((file) => file.path === path)?.tokens ?? [];
+  const keywordSet = new Set(keywords.map((keyword) => keyword.toLowerCase()));
+
+  return fileTokens
+    .filter((token) => keywordSet.has(token.value))
+    .map((token) => ({
+      token: token.value,
+      source: token.source,
+      raw: token.raw
+    }));
 }

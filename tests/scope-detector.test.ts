@@ -1,5 +1,6 @@
 import type { GateResult, TaskIntent } from "../src/index.js";
 import { parseUnifiedDiff, runDetectors, scopeDetector, summarizeFindings } from "../src/index.js";
+import { buildRepositoryTokenIndex } from "../src/repository/index.js";
 
 const task: TaskIntent = {
   source: "cli",
@@ -206,6 +207,36 @@ index 57b22a0..cb3e0f1 100644
 `);
 
     expect(scopeDetector.run({ task, diff })).toEqual([]);
+  });
+
+  it("uses repository symbol tokens as task alignment evidence", () => {
+    const task: TaskIntent = {
+      source: "cli",
+      text: "Fix email validator"
+    };
+    const diff = parse(`diff --git a/src/rules/user.ts b/src/rules/user.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/rules/user.ts
++++ b/src/rules/user.ts
+@@ -1,2 +1,3 @@
++export function validateEmailAddress(value: string) { return value.includes("@"); }
+ export const user = true;
+`);
+    const repositoryTokenIndex = buildRepositoryTokenIndex({ files: diff.files });
+
+    expect(scopeDetector.run({ task, diff })).toEqual([
+      expect.objectContaining({
+        detector: "scope",
+        severity: "medium"
+      })
+    ]);
+    expect(
+      scopeDetector.run({
+        task,
+        diff,
+        context: { repositoryTokenIndex }
+      })
+    ).toEqual([]);
   });
 
   it("does not emit for broad refactor tasks", () => {

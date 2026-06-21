@@ -63,6 +63,7 @@ export interface RepoContext {
   apiSnapshot?: ApiSurfaceSnapshotSummary;
   repositoryProfile?: RepositoryProfile;
   utilityIndex?: UtilityIndex;
+  repositoryTokenIndex?: RepositoryTokenIndex;
   git?: {
     baseRef?: string;
     headRef?: string;
@@ -111,6 +112,29 @@ export interface UtilityIndex {
 export interface UtilityEntry {
   path: string;
   exportedNames: string[];
+}
+
+export interface RepositoryTokenIndex {
+  files: RepositoryTokenFile[];
+}
+
+export type RepositoryTokenSource =
+  | "path"
+  | "folder"
+  | "package-name"
+  | "symbol"
+  | "test-name"
+  | "markdown-heading";
+
+export interface RepositoryTokenFile {
+  path: string;
+  tokens: RepositoryToken[];
+}
+
+export interface RepositoryToken {
+  value: string;
+  source: RepositoryTokenSource;
+  raw: string;
 }
 
 export type FindingSeverity = "blocker" | "high" | "medium" | "low" | "info";

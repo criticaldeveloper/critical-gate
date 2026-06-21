@@ -17,6 +17,7 @@ import {
   applyLearningPolicy,
   analyzeTaskIntentQuality,
   buildApiSurfaceSnapshot,
+  buildRepositoryTokenIndex,
   createDefaultPolicyConfig,
   detectFrameworkPacks,
   detectMonorepoContext,
@@ -300,12 +301,17 @@ function createGateResult(
     headRef: diffResult.headRef,
     files: diffResult.files
   };
+  const packageJson = readOptionalPackageJson(diffResult.root, io);
   const frameworkPacks = detectFrameworkPacks({
     files: diff.files,
-    packageJson: readOptionalPackageJson(diffResult.root, io),
+    packageJson,
     config: configResult.config
   });
   const monorepo = detectMonorepoContext(diffResult.root, diff.files, io);
+  const repositoryTokenIndex = buildRepositoryTokenIndex({
+    files: diff.files,
+    packageJson
+  });
   const apiSnapshot = loadApiSurfaceSnapshot(diffResult.root, io);
   const context: GateResult["context"] = {
     root: diffResult.root,
@@ -315,6 +321,7 @@ function createGateResult(
     frameworkPacks: frameworkPacks.map((pack) => pack.id),
     repositoryProfile: diffResult.repositoryProfile,
     utilityIndex: diffResult.utilityIndex,
+    repositoryTokenIndex,
     git: {
       baseRef: diffResult.baseRef,
       headRef: diffResult.headRef

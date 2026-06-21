@@ -155,6 +155,8 @@ False-positive boundary:
 
 ### Task 3.1: Build A Repository Token Index
 
+Status: Done.
+
 Goal: improve task-to-file relevance without embeddings or LLM calls.
 
 Implementation:
