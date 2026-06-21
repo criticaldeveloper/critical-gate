@@ -85,9 +85,62 @@ const result: GateResult = {
 
 describe("optional LLM layer", () => {
   it("creates a compact artifact without diff hunks or repo-wide content", () => {
-    const artifact = createModelInputArtifact(result);
+    const artifact = createModelInputArtifact({
+      ...result,
+      context: {
+        repositoryTokenIndex: {
+          files: [
+            {
+              path: "src/unrelated.ts",
+              tokens: [
+                {
+                  value: "unrelated",
+                  source: "symbol",
+                  raw: "WHOLE_REPOSITORY_TREE_SHOULD_NOT_BE_SENT"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    });
     const serialized = JSON.stringify(artifact);
 
+    expect(Object.keys(artifact).sort()).toEqual([
+      "artifactVersion",
+      "diff",
+      "findings",
+      "summary",
+      "task"
+    ]);
+    expect(Object.keys(artifact.diff).sort()).toEqual(["baseRef", "files", "headRef", "totals"]);
+    expect(Object.keys(artifact.diff.files[0] ?? {}).sort()).toEqual([
+      "additions",
+      "deletions",
+      "language",
+      "path",
+      "role",
+      "status"
+    ]);
+    expect(Object.keys(artifact.findings[0] ?? {}).sort()).toEqual([
+      "confidence",
+      "detector",
+      "evidence",
+      "id",
+      "message",
+      "repair",
+      "severity",
+      "tags",
+      "title"
+    ]);
+    expect(Object.keys(artifact.findings[0]?.evidence[0] ?? {}).sort()).toEqual([
+      "endLine",
+      "kind",
+      "message",
+      "path",
+      "startLine",
+      "symbol"
+    ]);
     expect(artifact.diff.files).toEqual([
       {
         path: "src/signup.ts",
@@ -101,6 +154,9 @@ describe("optional LLM layer", () => {
     expect(serialized).not.toContain("hunks");
     expect(serialized).not.toContain("WHOLE_REPO_ONLY_SECRET");
     expect(serialized).not.toContain("never send this hunk body");
+    expect(serialized).not.toContain("repositoryTokenIndex");
+    expect(serialized).not.toContain("src/unrelated.ts");
+    expect(serialized).not.toContain("WHOLE_REPOSITORY_TREE_SHOULD_NOT_BE_SENT");
   });
 
   it("redacts sensitive values before building prompts", () => {
@@ -114,6 +170,59 @@ describe("optional LLM layer", () => {
     expect(serializedPrompt).not.toContain("sk-abcdefghijklmnopqrstuvwxyz");
     expect(serializedPrompt).not.toContain("/Users/marc/project");
     expect(serializedPrompt).not.toContain("marc@example.com");
+  });
+
+  it("redacts prompt-visible artifact identifiers, paths, refs, symbols, and repairs", () => {
+    const artifact = createModelInputArtifact({
+      ...result,
+      task: {
+        source: "cli",
+        text: "Fix signup for marc@example.com using api_key=abcdef1234567890"
+      },
+      diff: {
+        ...result.diff,
+        baseRef: "C:\\Users\\Marc\\repo",
+        headRef: "feature/marc@example.com",
+        files: [
+          {
+            ...result.diff.files[0]!,
+            path: "C:\\Users\\Marc\\repo\\src\\signup.ts"
+          }
+        ]
+      },
+      findings: [
+        {
+          ...result.findings[0]!,
+          id: "secret-path:C:\\Users\\Marc\\repo\\src\\signup.ts:token",
+          title: "Internal URL http://localhost:3000 added",
+          message: "Token from C:\\Users\\Marc\\repo\\.env sent to marc@example.com.",
+          repair: "Remove api_key=abcdef1234567890 and use an environment variable.",
+          evidence: [
+            {
+              kind: "symbol",
+              path: "C:\\Users\\Marc\\repo\\src\\signup.ts",
+              startLine: 2,
+              endLine: 2,
+              symbol: "notify_marc@example.com",
+              message:
+                "API_TOKEN=sk-abcdefghijklmnopqrstuvwxyz in C:\\Users\\Marc\\repo\\.env for marc@example.com"
+            }
+          ]
+        }
+      ]
+    });
+    const serializedPrompt = JSON.stringify(buildExplanationPrompt(artifact));
+
+    expect(serializedPrompt).toContain("[redacted-path]");
+    expect(serializedPrompt).toContain("[redacted-email]");
+    expect(serializedPrompt).toContain("[redacted-token]");
+    expect(serializedPrompt).toContain("api_key=[redacted]");
+    expect(serializedPrompt).toContain("[redacted-url]");
+    expect(serializedPrompt).not.toContain("C:\\Users\\Marc\\repo");
+    expect(serializedPrompt).not.toContain("marc@example.com");
+    expect(serializedPrompt).not.toContain("sk-abcdefghijklmnopqrstuvwxyz");
+    expect(serializedPrompt).not.toContain("abcdef1234567890");
+    expect(serializedPrompt).not.toContain("http://localhost:3000");
   });
 
   it("honors artifact and output budgets", async () => {

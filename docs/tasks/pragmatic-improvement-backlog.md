@@ -355,6 +355,8 @@ Validation:
 
 ### Task 7.1: Add An "LLM Boundary" Test Suite
 
+Status: Done.
+
 Goal: prove optional model support cannot become the detector of record.
 
 Implementation:
@@ -400,7 +402,7 @@ Validation:
 10. Task 5.2: minimal CI matrix. Done.
 11. Task 6.1: finding stability tests. Done.
 12. Task 6.2: compact "why passed" report section. Done.
-13. Task 7.1: LLM boundary test suite.
+13. Task 7.1: LLM boundary test suite. Done.
 14. Task 7.2: product non-goals release checklist.
 15. Task 1.1: expanded real-repository evaluation corpus.
 

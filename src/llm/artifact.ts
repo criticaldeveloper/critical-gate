@@ -17,12 +17,12 @@ export function createModelInputArtifact(
 ): ModelInputArtifact {
   const resolvedBudget = resolveModelBudget(budget);
   const files = result.diff.files.map((file) => ({
-    path: file.path,
+    path: redactForModel(file.path),
     status: file.status,
     role: file.role,
     additions: file.additions,
     deletions: file.deletions,
-    language: file.language
+    language: file.language === undefined ? undefined : redactForModel(file.language)
   }));
 
   const artifact: ModelInputArtifact = {
@@ -36,8 +36,8 @@ export function createModelInputArtifact(
       id: result.task.id
     },
     diff: {
-      baseRef: result.diff.baseRef,
-      headRef: result.diff.headRef,
+      baseRef: result.diff.baseRef === undefined ? undefined : redactForModel(result.diff.baseRef),
+      headRef: result.diff.headRef === undefined ? undefined : redactForModel(result.diff.headRef),
       files,
       totals: {
         files: files.length,
@@ -47,8 +47,8 @@ export function createModelInputArtifact(
     },
     summary: result.summary,
     findings: result.findings.slice(0, resolvedBudget.maxFindings).map((finding) => ({
-      id: finding.id,
-      detector: finding.detector,
+      id: redactForModel(finding.id),
+      detector: redactForModel(finding.detector),
       severity: finding.severity,
       confidence: finding.confidence,
       title: redactForModel(finding.title),
@@ -57,10 +57,10 @@ export function createModelInputArtifact(
       tags: finding.tags,
       evidence: finding.evidence.slice(0, resolvedBudget.maxEvidencePerFinding).map((evidence) => ({
         kind: evidence.kind,
-        path: evidence.path,
+        path: evidence.path === undefined ? undefined : redactForModel(evidence.path),
         startLine: evidence.startLine,
         endLine: evidence.endLine,
-        symbol: evidence.symbol,
+        symbol: evidence.symbol === undefined ? undefined : redactForModel(evidence.symbol),
         message: truncateForModel(
           redactForModel(evidence.message),
           resolvedBudget.maxEvidenceMessageChars

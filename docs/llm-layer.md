@@ -20,6 +20,60 @@ The artifact intentionally excludes:
 - Repository-wide source trees.
 - Dependency trees or package source.
 - Unbounded nearby context.
+- Repository token indexes, history indexes, caches, and learned policy internals.
+
+Maximum artifact shape:
+
+```ts
+{
+  artifactVersion: string;
+  task: {
+    source: string;
+    text: string;
+    id?: string;
+  };
+  diff: {
+    baseRef?: string;
+    headRef?: string;
+    files: Array<{
+      path: string;
+      status: string;
+      role: string;
+      additions: number;
+      deletions: number;
+      language?: string;
+    }>;
+    totals: {
+      files: number;
+      additions: number;
+      deletions: number;
+    };
+  };
+  summary: GateSummary;
+  findings: Array<{
+    id: string;
+    detector: string;
+    severity: FindingSeverity;
+    confidence: number;
+    title: string;
+    message: string;
+    repair: string;
+    tags: FindingTag[];
+    evidence: Array<{
+      kind: string;
+      path?: string;
+      startLine?: number;
+      endLine?: number;
+      symbol?: string;
+      message: string;
+    }>;
+  }>;
+}
+```
+
+All prompt-visible strings in this shape pass through model redaction. Repository-relative paths may
+remain visible because they are needed for repair guidance; absolute local paths, internal URLs,
+emails, provider tokens, and secret-like assignments are redacted.
 
 ## Redaction
 
