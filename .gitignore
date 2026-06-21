@@ -1,4 +1,5 @@
 node_modules/
+.pnpm-store/
 dist/
 extensions/vscode/dist/
 extensions/vscode/analyzer/

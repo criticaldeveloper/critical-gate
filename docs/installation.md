@@ -15,6 +15,9 @@ policy explicitly changes.
 - Git, with enough history for `--base` comparisons.
 - VS Code only when installing or testing the editor extension.
 
+Review [../SECURITY.md](../SECURITY.md) before enabling Critical Gate in shared CI, trusted Codex
+hooks, or editor workflows that may process private repositories.
+
 Enable pnpm with Corepack when needed:
 
 ```bash

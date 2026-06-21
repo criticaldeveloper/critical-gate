@@ -290,6 +290,9 @@ generated `pre-push` hook checks the branch against `${CRITICAL_GATE_BASE:-origi
 on high or blocker findings. The files are plain shell scripts under `.git/hooks` so teams can
 review and adapt them before relying on them.
 
+For vulnerability reporting and sensitive-data handling expectations, see
+[../SECURITY.md](../SECURITY.md).
+
 ## Common Examples
 
 ### Small Feature With Expected Source And Test Changes

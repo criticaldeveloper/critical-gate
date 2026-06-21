@@ -398,6 +398,7 @@ Branch and commit conventions for this repository:
   evidence, misses, fixes, and current evaluation baseline.
 - [docs/versioning-policy.md](docs/versioning-policy.md): release and versioning policy.
 - [docs/improvements-task-plan.md](docs/improvements-task-plan.md): trust and calibration roadmap.
+- [SECURITY.md](SECURITY.md): supported security policy and private vulnerability reporting path.
 - [CHANGELOG.md](CHANGELOG.md): project-level release notes.
 
 ## Project Status

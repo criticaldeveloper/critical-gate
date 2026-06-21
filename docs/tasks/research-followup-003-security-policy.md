@@ -2,7 +2,7 @@
 
 ## Status
 
-Open
+Done
 
 ## Why
 
@@ -18,10 +18,10 @@ The project should have a clear vulnerability reporting path before broader adop
 
 ## Tasks
 
-1. Add `SECURITY.md` with supported versions or release stages.
-2. Document responsible disclosure contact or GitHub private vulnerability reporting expectations.
-3. Clarify what should be reported: secret leakage, unsafe prompt content, action execution risks, hook behavior, and analyzer crashes that expose sensitive data.
-4. Link the policy from README and installation or usage docs where security posture is discussed.
+1. Add `SECURITY.md` with supported versions or release stages. Done.
+2. Document responsible disclosure contact or GitHub private vulnerability reporting expectations. Done: GitHub private vulnerability reporting is the expected path.
+3. Clarify what should be reported: secret leakage, unsafe prompt content, action execution risks, hook behavior, and analyzer crashes that expose sensitive data. Done.
+4. Link the policy from README and installation or usage docs where security posture is discussed. Done.
 
 ## Validation
 
