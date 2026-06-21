@@ -373,6 +373,8 @@ Validation:
 
 ### Task 7.2: Add Product Non-Goals To Release Checklist
 
+Status: Done.
+
 Goal: prevent well-intended releases from expanding scope accidentally.
 
 Implementation:
@@ -403,7 +405,7 @@ Validation:
 11. Task 6.1: finding stability tests. Done.
 12. Task 6.2: compact "why passed" report section. Done.
 13. Task 7.1: LLM boundary test suite. Done.
-14. Task 7.2: product non-goals release checklist.
+14. Task 7.2: product non-goals release checklist. Done.
 15. Task 1.1: expanded real-repository evaluation corpus.
 
 This order keeps distribution and core detector precision moving first, then hardens reporting,

@@ -73,14 +73,32 @@ Before cutting any release:
 2. Update `extensions/vscode/package.json` when the extension is included.
 3. Update `CHANGELOG.md`.
 4. Update `extensions/vscode/CHANGELOG.md` when the extension is included.
-5. Run `pnpm verify`.
-6. Run `pnpm audit`.
-7. Run `pnpm test:vscode` when the editor extension is included.
-8. Run `pnpm package:vscode` when publishing or attaching a VSIX artifact.
-9. If publishing a prebuilt GitHub Action artifact, run `pnpm package:action` and
-   `pnpm smoke:action`, then verify release consumers use `install: "false"` and `build: "false"`.
-10. Run Critical Gate against the release diff with release notes as task context.
-11. Tag the release after all checks pass.
+5. Complete the product non-goals checkpoint below.
+6. Run `pnpm verify`.
+7. Run `pnpm audit`.
+8. Run `pnpm test:vscode` when the editor extension is included.
+9. Run `pnpm package:vscode` when publishing or attaching a VSIX artifact.
+10. If publishing a prebuilt GitHub Action artifact, run `pnpm package:action` and
+    `pnpm smoke:action`, then verify release consumers use `install: "false"` and `build: "false"`.
+11. Run Critical Gate against the release diff with release notes as task context.
+12. Tag the release after all checks pass.
+
+## Product Non-Goals Checkpoint
+
+Before releasing, confirm the diff did not accidentally expand Critical Gate beyond its current
+product boundary:
+
+- Did this add repo-wide LLM review, whole-repository prompt construction, or model calls before
+  deterministic evidence exists? If yes, remove it or document a separate approved roadmap task.
+- Did this add auto-fix behavior that rewrites code without explicit evidence, an allowed repair
+  scope, and user intent? If yes, keep it out of the release.
+- Did this add generic code-review comments instead of evidence-backed diff integrity findings? If
+  yes, revise the behavior or keep it observational.
+- Did this add or promote a detector without deterministic signals, fixture coverage, and detector
+  quality documentation? If yes, block the release until evidence exists.
+- Did this weaken the V1 scope in `AGENTS.md` by adding chat-first review, broad repo scanning, or
+  multi-language deep semantic analysis before TS/JS precision is proven? If yes, split it from the
+  release.
 
 ## Tagging
 

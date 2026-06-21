@@ -92,6 +92,9 @@ When changing package versions, release docs, distribution behavior, or tool met
   Product version belongs in SARIF tool metadata.
 - Run or update `tests/release-version.test.ts` for any version-related change.
 - Build the CLI and verify `node dist/cli.js --version` before handing off release-governance work.
+- Complete the product non-goals checkpoint in `docs/versioning-policy.md` before releasing. Do not
+  ship repo-wide LLM review, evidence-free auto-fixes, generic code-review comments, or detectors
+  without deterministic evidence and fixtures as part of routine release work.
 
 ## Git Workflow
 
