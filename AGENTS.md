@@ -92,6 +92,15 @@ Use branch names that describe the work type:
 - `bugfix/example` for fixes.
 - `feature/example-two` for new implementations.
 
+For every completed task that changes files:
+
+1. Create a new task branch before committing, using the naming rules above.
+2. Stage only the task-related files.
+3. Commit with the required message format below.
+4. Switch back to `main`.
+5. Merge the task branch into `main` with a fast-forward merge when possible.
+6. Leave `main` checked out and clean so the user can push when ready.
+
 Commit messages must use this format:
 
 ```text
