@@ -2,6 +2,12 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.3.1 - 2026-06-22
+
+Patch release aligned with Critical Gate 2.3.1.
+
+- Keep extension metadata aligned with the npm package patch release.
+
 ## 2.3.0 - 2026-06-21
 
 ### Added

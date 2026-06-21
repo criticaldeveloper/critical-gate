@@ -1,1 +1,1 @@
-export const CRITICAL_GATE_VERSION = "2.3.0";
+export const CRITICAL_GATE_VERSION = "2.3.1";

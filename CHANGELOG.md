@@ -4,6 +4,14 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## 2.3.1 - 2026-06-22
+
+Patch release for npm package metadata.
+
+### Fixed
+
+- Prepare a patch republish so npm package README metadata can be regenerated for the registry page.
+
 ## 2.3.0 - 2026-06-21
 
 Agent onboarding and evaluation hardening release.
