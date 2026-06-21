@@ -25,12 +25,14 @@ import {
   getApiSnapshotOutputPath,
   getConfiguredExpectedSupportFiles,
   getConfiguredFailOn,
+  getConfiguredPublicApiEntrypoints,
   getPolicyBlockingDetectors,
   getPolicyObservationDetectors,
   loadApiSurfaceSnapshot,
   loadCriticalGateConfig,
   readGitDiff,
   renderReport,
+  resolvePublicApiEntrypoints,
   runDetectors,
   summarizeApiSurfaceSnapshot,
   summarizeFindings,
@@ -312,12 +314,21 @@ function createGateResult(
     files: diff.files,
     packageJson
   });
+  const publicApiEntrypoints = resolvePublicApiEntrypoints(
+    diffResult.root,
+    io,
+    getConfiguredPublicApiEntrypoints(configResult.config)
+  );
+  const publicApiEntrypointContext =
+    publicApiEntrypoints.length > 0 ? publicApiEntrypoints : undefined;
   const apiSnapshot = loadApiSurfaceSnapshot(diffResult.root, io);
   const context: GateResult["context"] = {
     root: diffResult.root,
     packageManager: "pnpm",
     monorepo,
     apiSnapshot: summarizeApiSurfaceSnapshot(apiSnapshot),
+    publicEntrypoints: publicApiEntrypointContext?.map((entrypoint) => entrypoint.path),
+    publicApiEntrypoints: publicApiEntrypointContext,
     frameworkPacks: frameworkPacks.map((pack) => pack.id),
     repositoryProfile: diffResult.repositoryProfile,
     utilityIndex: diffResult.utilityIndex,
@@ -330,6 +341,7 @@ function createGateResult(
   const detectorContext = {
     ...context,
     apiSurfaceSnapshot: apiSnapshot,
+    publicApiEntrypoints: publicApiEntrypointContext,
     knowledge: diffResult.knowledge
   };
   const detectorFindings = runDetectors(task, diff, detectorContext);
@@ -385,10 +397,15 @@ function runSnapshotApiCommand(args: string[], io: CliIo): ExitCode {
   }
 
   const root = io.readDiff().root;
+  const configResult = loadCriticalGateConfig(root, {
+    exists: io.exists,
+    readFile: io.readFile
+  });
   const snapshot = buildApiSurfaceSnapshot({
     root,
     generatedAt: io.now(),
     entrypoints: parsed.options.entrypoints,
+    policyEntrypoints: getConfiguredPublicApiEntrypoints(configResult.config),
     reader: io
   });
   const outputPath = getApiSnapshotOutputPath(root, parsed.options.output);

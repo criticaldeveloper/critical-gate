@@ -4,7 +4,13 @@ import {
   hasApiSnapshotEvidence,
   type ApiSurfaceSnapshot
 } from "../repository/index.js";
-import type { DiffFile, DiffLine, Finding, FindingSeverity } from "../schema/index.js";
+import type {
+  DiffFile,
+  DiffLine,
+  Finding,
+  FindingSeverity,
+  PublicApiEntrypointSummary
+} from "../schema/index.js";
 
 import type { Detector } from "./types.js";
 
@@ -67,7 +73,7 @@ export const apiSurfaceDetector: Detector = {
     );
     const lineSignals = diff.files
       .filter(isSourceFile)
-      .flatMap(extractSignals)
+      .flatMap((file) => extractSignals(file, context?.publicApiEntrypoints))
       .filter((signal) => !snapshotSignalKeys.has(`${signal.path}:${signal.symbol ?? "unknown"}`));
 
     return [...snapshotSignals, ...lineSignals].map(toFinding);
@@ -98,7 +104,21 @@ function hasContractChangeEvidence(files: DiffFile[]): boolean {
   );
 }
 
-function extractSignals(file: DiffFile): ApiSurfaceSignal[] {
+function extractSignals(
+  file: DiffFile,
+  publicApiEntrypoints?: PublicApiEntrypointSummary[]
+): ApiSurfaceSignal[] {
+  const publicEntrypoint = getPublicEntrypoint(file.path, publicApiEntrypoints);
+  const isFrameworkContract = isFrameworkContractFile(file.path);
+
+  if (
+    publicApiEntrypoints !== undefined &&
+    publicEntrypoint === undefined &&
+    !isFrameworkContract
+  ) {
+    return [];
+  }
+
   return file.hunks.flatMap((hunk) =>
     hunk.lines.flatMap((line) => {
       if (line.kind !== "add" && line.kind !== "delete") {
@@ -112,7 +132,6 @@ function extractSignals(file: DiffFile): ApiSurfaceSignal[] {
       }
 
       const isRemoval = line.kind === "delete";
-      const isFrameworkContract = isFrameworkContractFile(file.path);
 
       return [
         {
@@ -151,11 +170,25 @@ function extractSignals(file: DiffFile): ApiSurfaceSignal[] {
                 signal: isRemoval ? "removed-contract-export" : "added-contract-export",
                 contract: "framework"
               }
-            : undefined
+            : publicEntrypoint === undefined
+              ? undefined
+              : {
+                  signal: isRemoval ? "removed-export" : "added-export",
+                  publicEntrypoint
+                }
         }
       ];
     })
   );
+}
+
+function getPublicEntrypoint(
+  path: string,
+  publicApiEntrypoints?: PublicApiEntrypointSummary[]
+): PublicApiEntrypointSummary | undefined {
+  const normalizedPath = path.replace(/\\/g, "/");
+
+  return publicApiEntrypoints?.find((entrypoint) => entrypoint.path === normalizedPath);
 }
 
 function isFrameworkContractFile(path: string): boolean {

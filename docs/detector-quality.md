@@ -143,6 +143,8 @@ Signals used:
 
 - Export removals, additions, and signature changes.
 - `.critical-gate/api-surface.json` snapshots.
+- Public entrypoint provenance from package metadata, `bin`, policy entrypoints, or fallback index
+  files.
 - Framework contract fallbacks for known public surfaces.
 - Release evidence such as changelog, changeset, migration docs, or snapshot updates.
 
@@ -151,6 +153,7 @@ Evidence emitted:
 - Entrypoint or framework contract path.
 - Exported symbol name.
 - Change type.
+- Public entrypoint source when package or policy metadata proves the file is public.
 - Missing release/snapshot evidence when relevant.
 
 Will flag:
@@ -167,8 +170,9 @@ Will not flag:
 
 Known blind spots:
 
-- Entrypoint discovery still needs hardening for complex package `exports`.
-- Policy-defined public entrypoints are not supported yet.
+- Complex package `exports` conditions are flattened deterministically; it does not resolve runtime
+  condition priority.
+- Policy-defined public entrypoints require explicit files, not globs.
 
 Coverage:
 

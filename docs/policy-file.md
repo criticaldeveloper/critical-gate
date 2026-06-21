@@ -28,6 +28,8 @@ Fields:
   repository.
 - `allowedSupportFiles`: support-file allowances for known operational patterns such as config docs
   or lockfile updates.
+- `publicApi`: public API entrypoint policy used by API snapshot generation and unsnapshotted API
+  export checks.
 
 Prefer `policy` for durable team defaults.
 
@@ -108,6 +110,23 @@ Fields:
 - `reason`: reviewable explanation.
 - `createdAt`: ISO timestamp.
 
+### Public API Entrypoints
+
+```json
+{
+  "policy": {
+    "publicApi": {
+      "entrypoints": ["src/index.ts", "src/testing.ts"]
+    }
+  }
+}
+```
+
+Fields:
+
+- `entrypoints`: package public entrypoint files to treat as public API when package metadata is not
+  enough or the repository intentionally exposes additional files.
+
 ## Example Policies
 
 Validated examples live under `docs/examples/policies/`.
@@ -121,8 +140,8 @@ These examples are loaded by `tests/config.test.ts`, so docs and parser behavior
 
 ## Current Limits
 
-- Policy-defined public API entrypoints are not supported yet. Public API entrypoints are currently
-  supplied through `critical-gate snapshot-api --entrypoint <path>` or package metadata discovery.
+- Policy-defined public API entrypoints are supported through `policy.publicApi.entrypoints`, but
+  glob entrypoints are not supported. Use explicit files so the public contract stays reviewable.
 - `excludePatterns` tunes repository intelligence. It is not a security boundary and should not be
   used to hide sensitive files from other tools.
 - `acceptedFindings` match exact finding ids. They are not broad suppressions.

@@ -124,8 +124,13 @@ export const gateResultJsonSchema = {
         frameworkPacks: stringArraySchema,
         publicEntrypoints: stringArraySchema,
         apiSnapshot: { $ref: "#/$defs/apiSnapshotSummary" },
+        publicApiEntrypoints: {
+          type: "array",
+          items: { $ref: "#/$defs/publicApiEntrypointSummary" }
+        },
         repositoryProfile: { $ref: "#/$defs/repositoryProfile" },
         utilityIndex: { $ref: "#/$defs/utilityIndex" },
+        repositoryTokenIndex: { $ref: "#/$defs/repositoryTokenIndex" },
         git: {
           type: "object",
           additionalProperties: false,
@@ -174,6 +179,18 @@ export const gateResultJsonSchema = {
         schemaVersion: { type: "string", minLength: 1 },
         exportCount: { type: "integer", minimum: 0 },
         entrypoints: stringArraySchema
+      }
+    },
+    publicApiEntrypointSummary: {
+      type: "object",
+      additionalProperties: false,
+      required: ["path", "source"],
+      properties: {
+        path: { type: "string", minLength: 1 },
+        source: { type: "string", minLength: 1 },
+        packageKey: { type: "string", minLength: 1 },
+        exportKey: { type: "string", minLength: 1 },
+        condition: { type: "string", minLength: 1 }
       }
     },
     repositoryProfile: {
@@ -228,6 +245,41 @@ export const gateResultJsonSchema = {
       properties: {
         path: { type: "string", minLength: 1 },
         exportedNames: stringArraySchema
+      }
+    },
+    repositoryTokenIndex: {
+      type: "object",
+      additionalProperties: false,
+      required: ["files"],
+      properties: {
+        files: {
+          type: "array",
+          items: { $ref: "#/$defs/repositoryTokenFile" }
+        }
+      }
+    },
+    repositoryTokenFile: {
+      type: "object",
+      additionalProperties: false,
+      required: ["path", "tokens"],
+      properties: {
+        path: { type: "string", minLength: 1 },
+        tokens: {
+          type: "array",
+          items: { $ref: "#/$defs/repositoryToken" }
+        }
+      }
+    },
+    repositoryToken: {
+      type: "object",
+      additionalProperties: false,
+      required: ["value", "source", "raw"],
+      properties: {
+        value: { type: "string", minLength: 1 },
+        source: {
+          enum: ["path", "folder", "package-name", "symbol", "test-name", "markdown-heading"]
+        },
+        raw: { type: "string", minLength: 1 }
       }
     },
     finding: {

@@ -69,11 +69,33 @@ describe("gate result schema", () => {
         configFiles: ["tsconfig.json"],
         testFrameworks: ["vitest"],
         publicEntrypoints: ["src/index.ts"],
+        publicApiEntrypoints: [
+          {
+            path: "src/index.ts",
+            source: "package-exports",
+            packageKey: "exports",
+            exportKey: "."
+          }
+        ],
         apiSnapshot: {
           path: ".critical-gate/api-surface.json",
           schemaVersion: "1.0",
           exportCount: 2,
           entrypoints: ["src/index.ts"]
+        },
+        repositoryTokenIndex: {
+          files: [
+            {
+              path: "src/signup.ts",
+              tokens: [
+                {
+                  value: "signup",
+                  source: "path",
+                  raw: "signup"
+                }
+              ]
+            }
+          ]
         },
         git: {
           baseRef: "main",

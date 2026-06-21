@@ -3,6 +3,7 @@ export {
   createDefaultPolicyConfig,
   getConfiguredExpectedSupportFiles,
   getConfiguredFailOn,
+  getConfiguredPublicApiEntrypoints,
   getPolicyBlockingDetectors,
   getPolicyObservationDetectors,
   loadCriticalGateConfig,

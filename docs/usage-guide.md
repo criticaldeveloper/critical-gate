@@ -259,11 +259,24 @@ critical-gate snapshot-api
 git add .critical-gate/api-surface.json
 ```
 
-The command infers public entrypoints from `package.json` exports, `main`, `module`, or `types`
-fields and falls back to common index files. You can pin entrypoints explicitly:
+The command infers public entrypoints from `package.json` `exports`, `main`, `module`, `types`,
+`browser`, and `bin` fields, then falls back to common index files when package metadata does not
+declare a public surface. You can pin entrypoints explicitly:
 
 ```bash
 critical-gate snapshot-api --entrypoint src/index.ts --entrypoint src/testing.ts
+```
+
+Durable repository policy can also declare explicit public API entrypoints:
+
+```json
+{
+  "policy": {
+    "publicApi": {
+      "entrypoints": ["src/index.ts", "src/testing.ts"]
+    }
+  }
+}
 ```
 
 Once committed, normal checks load `.critical-gate/api-surface.json` automatically. If a diff removes

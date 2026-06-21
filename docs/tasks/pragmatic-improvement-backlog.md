@@ -215,6 +215,8 @@ False-positive boundary:
 
 ### Task 4.1: Harden Entrypoint Discovery
 
+Status: Done.
+
 Goal: reduce silent API drift misses and avoid false positives from private files.
 
 Implementation:

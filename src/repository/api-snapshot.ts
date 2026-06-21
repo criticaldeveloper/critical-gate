@@ -9,7 +9,26 @@ export interface ApiSurfaceSnapshot {
   schemaVersion: typeof API_SURFACE_SNAPSHOT_SCHEMA_VERSION;
   generatedAt: string;
   entrypoints: string[];
+  entrypointMetadata?: PublicApiEntrypoint[];
   exports: ApiSurfaceExport[];
+}
+
+export type PublicApiEntrypointSource =
+  | "package-exports"
+  | "package-main"
+  | "package-module"
+  | "package-types"
+  | "package-browser"
+  | "package-bin"
+  | "policy"
+  | "fallback";
+
+export interface PublicApiEntrypoint {
+  path: string;
+  source: PublicApiEntrypointSource;
+  packageKey?: string;
+  exportKey?: string;
+  condition?: string;
 }
 
 export interface ApiSurfaceExport {
@@ -45,10 +64,19 @@ export interface BuildApiSurfaceSnapshotOptions {
   root: string;
   generatedAt: Date;
   entrypoints?: string[];
+  policyEntrypoints?: string[];
   reader?: ApiSnapshotReader;
 }
 
 const packageEntrypointKeys = ["main", "module", "types", "typings", "browser"] as const;
+const packageKeySources: Record<(typeof packageEntrypointKeys)[number], PublicApiEntrypointSource> =
+  {
+    main: "package-main",
+    module: "package-module",
+    types: "package-types",
+    typings: "package-types",
+    browser: "package-browser"
+  };
 const fallbackEntrypoints = ["src/index.ts", "src/index.tsx", "index.ts", "index.tsx", "index.js"];
 
 const declaredExportPattern =
@@ -61,13 +89,19 @@ export function buildApiSurfaceSnapshot({
   root,
   generatedAt,
   entrypoints,
+  policyEntrypoints,
   reader = {}
 }: BuildApiSurfaceSnapshotOptions): ApiSurfaceSnapshot {
-  const resolvedEntrypoints = normalizeEntrypoints(
+  const entrypointMetadata =
     entrypoints !== undefined && entrypoints.length > 0
-      ? entrypoints
-      : inferPublicEntrypoints(root, reader)
-  );
+      ? normalizeEntrypointMetadata(
+          entrypoints.map((path) => ({
+            path,
+            source: "policy" as const
+          }))
+        )
+      : resolvePublicApiEntrypoints(root, reader, policyEntrypoints);
+  const resolvedEntrypoints = entrypointMetadata.map((entrypoint) => entrypoint.path);
 
   const exports = resolvedEntrypoints
     .flatMap((entrypoint) => {
@@ -91,6 +125,7 @@ export function buildApiSurfaceSnapshot({
     schemaVersion: API_SURFACE_SNAPSHOT_SCHEMA_VERSION,
     generatedAt: generatedAt.toISOString(),
     entrypoints: resolvedEntrypoints,
+    entrypointMetadata,
     exports
   };
 }
@@ -197,25 +232,52 @@ export function hasApiSnapshotEvidence(files: DiffFile[]): boolean {
   return files.some((file) => normalizePath(file.path) === API_SURFACE_SNAPSHOT_PATH);
 }
 
-function inferPublicEntrypoints(root: string, reader: ApiSnapshotReader): string[] {
+export function resolvePublicApiEntrypoints(
+  root: string,
+  reader: ApiSnapshotReader,
+  policyEntrypoints: string[] = []
+): PublicApiEntrypoint[] {
   const packageJson = readPackageJson(root, reader);
-  const entrypoints = new Set<string>();
+  const entrypoints: PublicApiEntrypoint[] = [];
+
+  for (const path of policyEntrypoints) {
+    addEntrypoint(entrypoints, {
+      path,
+      source: "policy"
+    });
+  }
 
   if (isRecord(packageJson)) {
     for (const key of packageEntrypointKeys) {
-      addEntrypointValue(entrypoints, packageJson[key]);
+      addEntrypointValue(entrypoints, packageJson[key], {
+        source: packageKeySources[key],
+        packageKey: key
+      });
     }
 
-    addEntrypointValue(entrypoints, packageJson.exports);
+    addEntrypointValue(entrypoints, packageJson.exports, {
+      source: "package-exports",
+      packageKey: "exports"
+    });
+
+    addEntrypointValue(entrypoints, packageJson.bin, {
+      source: "package-bin",
+      packageKey: "bin"
+    });
   }
 
-  for (const fallback of fallbackEntrypoints) {
-    if (reader.exists?.(join(root, fallback)) === true) {
-      entrypoints.add(fallback);
+  if (entrypoints.length === 0) {
+    for (const fallback of fallbackEntrypoints) {
+      if (reader.exists?.(join(root, fallback)) === true) {
+        addEntrypoint(entrypoints, {
+          path: fallback,
+          source: "fallback"
+        });
+      }
     }
   }
 
-  return [...entrypoints];
+  return normalizeEntrypointMetadata(entrypoints);
 }
 
 function readPackageJson(root: string, reader: ApiSnapshotReader): unknown {
@@ -232,34 +294,76 @@ function readPackageJson(root: string, reader: ApiSnapshotReader): unknown {
   }
 }
 
-function addEntrypointValue(entrypoints: Set<string>, value: unknown): void {
+function addEntrypointValue(
+  entrypoints: PublicApiEntrypoint[],
+  value: unknown,
+  metadata: Omit<PublicApiEntrypoint, "path">
+): void {
   if (typeof value === "string") {
-    const normalized = normalizeEntrypoint(value);
-
-    if (isSourceLikeEntrypoint(normalized)) {
-      entrypoints.add(normalized);
-    }
+    addEntrypoint(entrypoints, {
+      path: value,
+      ...metadata,
+      condition:
+        metadata.source === "package-exports" &&
+        metadata.exportKey !== undefined &&
+        metadata.condition === undefined
+          ? "default"
+          : metadata.condition
+    });
 
     return;
   }
 
   if (Array.isArray(value)) {
     for (const item of value) {
-      addEntrypointValue(entrypoints, item);
+      addEntrypointValue(entrypoints, item, metadata);
     }
 
     return;
   }
 
   if (isRecord(value)) {
-    for (const nested of Object.values(value)) {
-      addEntrypointValue(entrypoints, nested);
+    for (const [key, nested] of Object.entries(value)) {
+      addEntrypointValue(entrypoints, nested, {
+        ...metadata,
+        exportKey:
+          metadata.source === "package-exports" && key.startsWith(".") ? key : metadata.exportKey,
+        condition: key.startsWith(".") ? metadata.condition : key
+      });
     }
   }
 }
 
-function normalizeEntrypoints(entrypoints: string[]): string[] {
-  return [...new Set(entrypoints.map(normalizeEntrypoint).filter(Boolean))].sort();
+function addEntrypoint(entrypoints: PublicApiEntrypoint[], entrypoint: PublicApiEntrypoint): void {
+  const normalized = normalizeEntrypoint(entrypoint.path);
+
+  if (!isSourceLikeEntrypoint(normalized)) {
+    return;
+  }
+
+  entrypoints.push({
+    ...entrypoint,
+    path: normalized
+  });
+}
+
+function normalizeEntrypointMetadata(entrypoints: PublicApiEntrypoint[]): PublicApiEntrypoint[] {
+  const byPath = new Map<string, PublicApiEntrypoint>();
+
+  for (const entrypoint of entrypoints) {
+    const normalized = normalizeEntrypoint(entrypoint.path);
+
+    if (!isSourceLikeEntrypoint(normalized) || byPath.has(normalized)) {
+      continue;
+    }
+
+    byPath.set(normalized, {
+      ...entrypoint,
+      path: normalized
+    });
+  }
+
+  return [...byPath.values()].sort((left, right) => left.path.localeCompare(right.path));
 }
 
 function normalizeEntrypoint(path: string): string {

@@ -7,11 +7,14 @@ export {
   getApiSnapshotOutputPath,
   hasApiSnapshotEvidence,
   loadApiSurfaceSnapshot,
+  resolvePublicApiEntrypoints,
   summarizeApiSurfaceSnapshot,
   type ApiSnapshotReader,
   type ApiSurfaceExport,
   type ApiSurfaceSnapshot,
-  type BuildApiSurfaceSnapshotOptions
+  type BuildApiSurfaceSnapshotOptions,
+  type PublicApiEntrypoint,
+  type PublicApiEntrypointSource
 } from "./api-snapshot.js";
 export {
   buildRepositoryProfile,

@@ -207,6 +207,76 @@ index 57b22a0..cb3e0f1 100644
     expect(apiSurfaceDetector.run({ task, diff })).toEqual([]);
   });
 
+  it("ignores internal exports when public entrypoint context is available", () => {
+    const diff = parse(`diff --git a/src/internal/signup.ts b/src/internal/signup.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/internal/signup.ts
++++ b/src/internal/signup.ts
+@@ -1,2 +1,3 @@
++export function internalSignupHelper() {}
+ export const signup = true;
+`);
+
+    expect(
+      apiSurfaceDetector.run({
+        task,
+        diff,
+        context: {
+          publicApiEntrypoints: [
+            {
+              path: "src/index.ts",
+              source: "package-exports",
+              packageKey: "exports",
+              exportKey: "."
+            }
+          ]
+        }
+      })
+    ).toEqual([]);
+  });
+
+  it("emits public entrypoint evidence for unsnapshotted package exports", () => {
+    const diff = parse(`diff --git a/src/index.ts b/src/index.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -1,2 +1,3 @@
++export function validateSignup(input: SignupInput) {}
+ export const existing = true;
+`);
+
+    const findings = apiSurfaceDetector.run({
+      task,
+      diff,
+      context: {
+        publicApiEntrypoints: [
+          {
+            path: "src/index.ts",
+            source: "package-exports",
+            packageKey: "exports",
+            exportKey: "."
+          }
+        ]
+      }
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        detector: "api-surface",
+        severity: "medium"
+      })
+    ]);
+    expect(findings[0]?.evidence[0]?.data).toMatchObject({
+      signal: "added-export",
+      publicEntrypoint: {
+        path: "src/index.ts",
+        source: "package-exports",
+        packageKey: "exports",
+        exportKey: "."
+      }
+    });
+  });
+
   it("flags snapshotted public signature changes without contract evidence", () => {
     const diff = parse(`diff --git a/src/index.ts b/src/index.ts
 index 57b22a0..cb3e0f1 100644

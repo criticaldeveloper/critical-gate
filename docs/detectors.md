@@ -115,8 +115,10 @@ Initial implementation:
 Current snapshot behavior:
 
 - `critical-gate snapshot-api` generates a deterministic public export snapshot from package
-  entrypoints or explicit `--entrypoint` values.
+  entrypoints, policy entrypoints, or explicit `--entrypoint` values.
 - Normal `check` runs load `.critical-gate/api-surface.json` when present.
+- Without a committed snapshot, export findings are limited to resolved public entrypoints when
+  package metadata, policy, or fallback index discovery provides public-surface evidence.
 - Snapshotted export removals and signature changes require snapshot, changelog, changeset, or
   migration evidence. Task wording alone is not enough for a committed public contract change.
 - Added exports to a snapshotted entrypoint are reported unless the snapshot or release evidence is

@@ -6,6 +6,7 @@ import {
   createDefaultPolicyConfig,
   getConfiguredExpectedSupportFiles,
   getConfiguredFailOn,
+  getConfiguredPublicApiEntrypoints,
   getPolicyBlockingDetectors,
   getPolicyObservationDetectors,
   loadCriticalGateConfig,
@@ -64,7 +65,10 @@ describe("loadCriticalGateConfig", () => {
                   reason: "CI changes may include docs.",
                   createdAt: "2026-06-19T10:00:00.000Z"
                 }
-              ]
+              ],
+              publicApi: {
+                entrypoints: ["src/index.ts", "src/testing.ts"]
+              }
             },
             learning: {
               acceptedFindings: [
@@ -125,7 +129,10 @@ describe("loadCriticalGateConfig", () => {
               reason: "CI changes may include docs.",
               createdAt: "2026-06-19T10:00:00.000Z"
             }
-          ]
+          ],
+          publicApi: {
+            entrypoints: ["src/index.ts", "src/testing.ts"]
+          }
         },
         learning: {
           acceptedFindings: [
@@ -221,6 +228,7 @@ describe("loadCriticalGateConfig", () => {
       "docs-for-config",
       "source-tests"
     ]);
+    expect(getConfiguredPublicApiEntrypoints(config)).toBeUndefined();
   });
 
   it("creates a starter policy config", () => {

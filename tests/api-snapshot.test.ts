@@ -3,6 +3,7 @@ import {
   buildApiSurfaceSnapshot,
   extractApiSurfaceExports,
   loadApiSurfaceSnapshot,
+  resolvePublicApiEntrypoints,
   summarizeApiSurfaceSnapshot
 } from "../src/index.js";
 
@@ -75,6 +76,15 @@ describe("API surface snapshots", () => {
       schemaVersion: "1.0",
       generatedAt: "2026-06-19T08:00:00.000Z",
       entrypoints: ["src/index.ts"],
+      entrypointMetadata: [
+        {
+          path: "src/index.ts",
+          source: "package-exports",
+          packageKey: "exports",
+          exportKey: ".",
+          condition: "default"
+        }
+      ],
       exports: [
         {
           path: "src/index.ts",
@@ -83,6 +93,96 @@ describe("API surface snapshots", () => {
         }
       ]
     });
+  });
+
+  it("resolves public entrypoints from package exports, bin, and policy", () => {
+    const files = new Map<string, string>([
+      [
+        "C:/repo/package.json",
+        JSON.stringify({
+          exports: {
+            ".": {
+              types: "./dist/index.d.ts",
+              import: "./dist/index.js"
+            },
+            "./testing": "./src/testing.ts",
+            "./internal": "./src/internal.ts"
+          },
+          bin: {
+            "critical-gate": "./dist/cli.js"
+          }
+        })
+      ]
+    ]);
+
+    expect(
+      resolvePublicApiEntrypoints(
+        "C:/repo",
+        {
+          exists: (path) => files.has(path.replace(/\\/g, "/")),
+          readFile: (path) => files.get(path.replace(/\\/g, "/")) ?? ""
+        },
+        ["src/policy-entry.ts"]
+      )
+    ).toEqual([
+      {
+        path: "dist/cli.js",
+        source: "package-bin",
+        packageKey: "bin",
+        condition: "critical-gate"
+      },
+      {
+        path: "dist/index.d.ts",
+        source: "package-exports",
+        packageKey: "exports",
+        exportKey: ".",
+        condition: "types"
+      },
+      {
+        path: "dist/index.js",
+        source: "package-exports",
+        packageKey: "exports",
+        exportKey: ".",
+        condition: "import"
+      },
+      {
+        path: "src/internal.ts",
+        source: "package-exports",
+        packageKey: "exports",
+        exportKey: "./internal",
+        condition: "default"
+      },
+      {
+        path: "src/policy-entry.ts",
+        source: "policy"
+      },
+      {
+        path: "src/testing.ts",
+        source: "package-exports",
+        packageKey: "exports",
+        exportKey: "./testing",
+        condition: "default"
+      }
+    ]);
+  });
+
+  it("uses common index files only as fallback entrypoints", () => {
+    const files = new Map<string, string>([
+      ["C:/repo/package.json", JSON.stringify({ name: "example" })],
+      ["C:/repo/src/index.ts", "export const publicValue = true;\n"]
+    ]);
+
+    expect(
+      resolvePublicApiEntrypoints("C:/repo", {
+        exists: (path) => files.has(path.replace(/\\/g, "/")),
+        readFile: (path) => files.get(path.replace(/\\/g, "/")) ?? ""
+      })
+    ).toEqual([
+      {
+        path: "src/index.ts",
+        source: "fallback"
+      }
+    ]);
   });
 
   it("loads and summarizes a committed snapshot", () => {

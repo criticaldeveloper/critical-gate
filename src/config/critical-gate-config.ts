@@ -33,6 +33,9 @@ export interface CriticalGatePolicy {
   detectorOverrides?: DetectorPolicyOverride[];
   expectedCompanions?: ExpectedSupportFileRule[];
   allowedSupportFiles?: ExpectedSupportFileRule[];
+  publicApi?: {
+    entrypoints?: string[];
+  };
 }
 
 export interface CriticalGateConfig {
@@ -95,6 +98,12 @@ export function getConfiguredExpectedSupportFiles(
     config.policy?.expectedCompanions,
     config.policy?.allowedSupportFiles
   );
+}
+
+export function getConfiguredPublicApiEntrypoints(
+  config: CriticalGateConfig
+): string[] | undefined {
+  return config.policy?.publicApi?.entrypoints;
 }
 
 export function loadCriticalGateConfig(
@@ -244,7 +253,28 @@ function readPolicyConfig(
     failOn: readFailOn(rawValue, "policy.failOn", warnings),
     detectorOverrides: readDetectorPolicyOverrides(rawValue, warnings),
     expectedCompanions: readSupportRules(rawValue, "expectedCompanions", warnings),
-    allowedSupportFiles: readSupportRules(rawValue, "allowedSupportFiles", warnings)
+    allowedSupportFiles: readSupportRules(rawValue, "allowedSupportFiles", warnings),
+    publicApi: readPublicApiConfig(rawValue, warnings)
+  };
+}
+
+function readPublicApiConfig(
+  value: Record<string, unknown>,
+  warnings: string[]
+): CriticalGatePolicy["publicApi"] {
+  const rawValue = value.publicApi;
+
+  if (rawValue === undefined) {
+    return undefined;
+  }
+
+  if (!isRecord(rawValue)) {
+    warnings.push("policy.publicApi must be an object.");
+    return undefined;
+  }
+
+  return {
+    entrypoints: readStringArray(rawValue, "entrypoints", warnings)
   };
 }
 

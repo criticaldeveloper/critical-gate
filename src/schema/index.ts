@@ -21,6 +21,7 @@ export type {
   IntentVerificationSummary,
   MonorepoContext,
   MonorepoPackage,
+  PublicApiEntrypointSummary,
   RepositoryCoChange,
   RepositoryProfile,
   RepositoryToken,

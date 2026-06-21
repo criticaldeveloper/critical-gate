@@ -61,6 +61,7 @@ export interface RepoContext {
   frameworkPacks?: string[];
   publicEntrypoints?: string[];
   apiSnapshot?: ApiSurfaceSnapshotSummary;
+  publicApiEntrypoints?: PublicApiEntrypointSummary[];
   repositoryProfile?: RepositoryProfile;
   utilityIndex?: UtilityIndex;
   repositoryTokenIndex?: RepositoryTokenIndex;
@@ -88,6 +89,14 @@ export interface ApiSurfaceSnapshotSummary {
   schemaVersion: string;
   exportCount: number;
   entrypoints: string[];
+}
+
+export interface PublicApiEntrypointSummary {
+  path: string;
+  source: string;
+  packageKey?: string;
+  exportKey?: string;
+  condition?: string;
 }
 
 export interface RepositoryProfile {
