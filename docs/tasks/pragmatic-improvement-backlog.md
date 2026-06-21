@@ -333,6 +333,8 @@ Validation:
 
 ### Task 6.2: Add A Compact "Why Passed" Report Section
 
+Status: Done.
+
 Goal: make clean runs useful without sounding like a generic reviewer.
 
 Implementation:
@@ -397,7 +399,7 @@ Validation:
 9. Task 4.2: API snapshot release evidence. Done.
 10. Task 5.2: minimal CI matrix. Done.
 11. Task 6.1: finding stability tests. Done.
-12. Task 6.2: compact "why passed" report section.
+12. Task 6.2: compact "why passed" report section. Done.
 13. Task 7.1: LLM boundary test suite.
 14. Task 7.2: product non-goals release checklist.
 15. Task 1.1: expanded real-repository evaluation corpus.

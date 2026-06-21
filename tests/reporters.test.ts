@@ -242,17 +242,78 @@ describe("reporters", () => {
         decision: "pass",
         findingCount: 0,
         highCount: 0,
-        mediumCount: 0
+        mediumCount: 0,
+        policyApplied: {
+          ...result.summary.policyApplied!,
+          blockingFindingIds: [],
+          observationFindingIds: []
+        }
       }
     });
 
     expect(report).toContain("## Clean Diff Certificate");
     expect(report).toContain("- Gate passed with 2 changed files and 0 non-blocking findings.");
+    expect(report).toContain(
+      "- Detector families checked: dependency, test integrity, public API, configuration, secret/path, scope, rewrite, and repository convention signals."
+    );
     expect(report).toContain("- Diff coherence is 71/100.");
+    expect(report).toContain(
+      "- Policy applied: fail threshold high; 0 blocking findings and 0 observation findings after policy."
+    );
     expect(report).toContain("- No dependency changes were flagged.");
     expect(report).toContain("- No test weakening was detected.");
     expect(report).toContain("- No public API surface change was flagged.");
+    expect(report).toContain("- No configuration drift was flagged.");
     expect(report).toContain("- No hardcoded secrets, local paths, or internal URLs were flagged.");
+  });
+
+  it("renders a compact why-passed certificate for observation-only Markdown reports", () => {
+    const observationFinding: Finding = {
+      id: "config-change:vitest.config.ts",
+      detector: "config-change",
+      severity: "medium",
+      confidence: 0.78,
+      title: "Configuration changed",
+      message: "A project configuration file changed.",
+      evidence: [
+        {
+          kind: "file",
+          path: "vitest.config.ts",
+          message: "Configuration file changed."
+        }
+      ],
+      repair: "Document the operational effect of this configuration change.",
+      tags: ["config"]
+    };
+    const report = renderMarkdownReport({
+      ...result,
+      findings: [observationFinding],
+      summary: {
+        ...result.summary,
+        decision: "pass",
+        findingCount: 1,
+        blockerCount: 0,
+        highCount: 0,
+        mediumCount: 1,
+        policyApplied: {
+          ...result.summary.policyApplied!,
+          blockingFindingIds: [],
+          observationFindingIds: [observationFinding.id]
+        }
+      }
+    });
+
+    expect(report).toContain("## Clean Diff Certificate");
+    expect(report).toContain("- Gate passed with 2 changed files and 1 non-blocking finding.");
+    expect(report).toContain(
+      "- Policy applied: fail threshold high; 0 blocking findings and 1 observation finding after policy."
+    );
+    expect(report).toContain(
+      "- No blocker or high-severity findings failed the configured threshold."
+    );
+    expect(report).toContain("- Configuration checks emitted non-blocking observations.");
+    expect(report).toContain("## Findings");
+    expect(report).toContain("### Configuration changed");
   });
 
   it("renders compact repair output", () => {

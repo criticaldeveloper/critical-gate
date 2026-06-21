@@ -121,13 +121,20 @@ function getCleanDiffCertificate(result: GateResult): string[] {
   const hasDependencyFinding = findings.some((finding) => finding.tags.includes("dependency"));
   const hasTestWeakeningFinding = findings.some((finding) => finding.tags.includes("test"));
   const hasApiFinding = findings.some((finding) => finding.tags.includes("api"));
+  const hasConfigFinding = findings.some((finding) => finding.tags.includes("config"));
   const hasSecretFinding = findings.some((finding) => finding.tags.includes("secret"));
   const hasBlockingFindings = result.summary.blockerCount > 0 || result.summary.highCount > 0;
+  const policy = result.summary.policyApplied;
   const fileLabel = result.diff.files.length === 1 ? "file" : "files";
+  const blockingFindingCount = policy?.blockingFindingIds.length ?? 0;
+  const observationFindingCount =
+    policy?.observationFindingIds.length ?? result.summary.findingCount;
 
   return [
-    `Gate passed with ${result.diff.files.length} changed ${fileLabel} and ${result.summary.findingCount} non-blocking findings.`,
+    `Gate passed with ${result.diff.files.length} changed ${fileLabel} and ${formatCount(result.summary.findingCount, "non-blocking finding")}.`,
+    `Detector families checked: dependency, test integrity, public API, configuration, secret/path, scope, rewrite, and repository convention signals.`,
     `Diff coherence is ${result.summary.diffCoherenceScore?.score ?? 0}/100.`,
+    `Policy applied: fail threshold ${policy?.failOn ?? "high"}; ${formatCount(blockingFindingCount, "blocking finding")} and ${formatCount(observationFindingCount, "observation finding")} after policy.`,
     hasBlockingFindings
       ? "Blocking checks found high-risk findings, but rollout policy kept them observational."
       : "No blocker or high-severity findings failed the configured threshold.",
@@ -140,10 +147,17 @@ function getCleanDiffCertificate(result: GateResult): string[] {
     hasApiFinding
       ? "Public API checks emitted non-blocking observations."
       : "No public API surface change was flagged.",
+    hasConfigFinding
+      ? "Configuration checks emitted non-blocking observations."
+      : "No configuration drift was flagged.",
     hasSecretFinding
       ? "Secret/path checks emitted non-blocking observations."
       : "No hardcoded secrets, local paths, or internal URLs were flagged."
   ];
+}
+
+function formatCount(count: number, singularLabel: string): string {
+  return `${count} ${singularLabel}${count === 1 ? "" : "s"}`;
 }
 
 function formatClasses(classes: string[]): string {
