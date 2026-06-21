@@ -20,6 +20,19 @@ Every blocker-capable detector should have:
 Uncertain detector families should remain observation-friendly until dogfood and evaluation evidence
 support promotion.
 
+## Finding Stability Contract
+
+Finding ids, SARIF rule ids, SARIF fingerprints, and repair contract fields are user-facing output
+contracts. They affect CI annotations, SARIF deduplication, and automated repair loops.
+
+Only change these fields intentionally when detector semantics change enough that old annotations
+would be misleading. For an intentional change:
+
+- Update the detector or reporter implementation in the same task.
+- Update `tests/reporters.test.ts` stability expectations for representative blocking findings.
+- Update `tests/repair-contract.test.ts` when repair scope, instructions, or success criteria change.
+- Document the behavior change in detector quality docs or release notes when it affects users.
+
 ## Blocking-Capable Detectors
 
 ### Dependency Addition

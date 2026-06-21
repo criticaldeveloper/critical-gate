@@ -473,4 +473,312 @@ describe("reporters", () => {
       truncated: true
     });
   });
+
+  it("keeps representative blocking finding ids, SARIF rule ids, fingerprints, and repair fields stable", () => {
+    const stableFindings: Finding[] = [
+      {
+        id: "dependency-addition:package.json:dependencies:axios",
+        detector: "dependency-addition",
+        severity: "blocker",
+        confidence: 0.9,
+        title: "Unjustified production dependency added",
+        message: "axios@^1.7.0 was added to dependencies without visible task justification.",
+        evidence: [
+          {
+            kind: "manifest",
+            path: "package.json",
+            startLine: 12,
+            endLine: 12,
+            message: "axios was added to dependencies."
+          }
+        ],
+        repair:
+          "Remove axios unless it is required, or update the task/PR context with a clear justification and alternatives considered.",
+        repairContract: {
+          instructions: [
+            "Remove axios unless it is required, or update the task/PR context with a clear justification and alternatives considered.",
+            "Keep the repair limited to the allowed files unless the task intent explicitly requires more."
+          ],
+          allowedFiles: ["package.json"],
+          forbiddenFiles: ["src/signup.ts"],
+          successCriteria: [
+            "The finding dependency-addition:package.json:dependencies:axios no longer appears after rerunning Critical Gate."
+          ]
+        },
+        tags: ["dependency"]
+      },
+      {
+        id: "secret-path:src/config.ts:provider-token:8",
+        detector: "secret-path",
+        severity: "blocker",
+        confidence: 0.94,
+        title: "Provider token pattern added",
+        message: "The diff adds a value matching a known provider token pattern.",
+        evidence: [
+          {
+            kind: "line",
+            path: "src/config.ts",
+            startLine: 8,
+            endLine: 8,
+            message: 'token: "ghp_abc...[redacted]...99"'
+          }
+        ],
+        repair:
+          "Remove the token, rotate it if it was real, and load it from a managed secret source.",
+        repairContract: {
+          instructions: [
+            "Remove the token, rotate it if it was real, and load it from a managed secret source.",
+            "Keep the repair limited to the allowed files unless the task intent explicitly requires more."
+          ],
+          allowedFiles: ["src/config.ts"],
+          forbiddenFiles: [],
+          successCriteria: [
+            "The finding secret-path:src/config.ts:provider-token:8 no longer appears after rerunning Critical Gate."
+          ]
+        },
+        tags: ["secret"]
+      },
+      {
+        id: "test-weakening:tests/signup.test.ts:focused-test:42",
+        detector: "test-weakening",
+        severity: "blocker",
+        confidence: 0.95,
+        title: "Focused test committed",
+        message: "The diff adds a focused test marker that can hide the rest of the suite.",
+        evidence: [
+          {
+            kind: "line",
+            path: "tests/signup.test.ts",
+            startLine: 42,
+            endLine: 42,
+            message: "it.only"
+          }
+        ],
+        repair: "Remove the focused test marker and ensure the full test suite runs.",
+        repairContract: {
+          instructions: [
+            "Remove the focused test marker and ensure the full test suite runs.",
+            "Keep the repair limited to the allowed files unless the task intent explicitly requires more."
+          ],
+          allowedFiles: ["tests/signup.test.ts"],
+          forbiddenFiles: [],
+          successCriteria: [
+            "The finding test-weakening:tests/signup.test.ts:focused-test:42 no longer appears after rerunning Critical Gate."
+          ]
+        },
+        tags: ["test"]
+      },
+      {
+        id: "api-surface:src/index.ts:snapshot-signature-change:validateSignup:3",
+        detector: "api-surface",
+        severity: "high",
+        confidence: 0.9,
+        title: "Public API signature changed without release evidence",
+        message: "validateSignup signature changed from the committed public API snapshot.",
+        evidence: [
+          {
+            kind: "symbol",
+            path: "src/index.ts",
+            startLine: 3,
+            endLine: 3,
+            symbol: "validateSignup",
+            message: "Signature differs from snapshot."
+          }
+        ],
+        repair:
+          "Add release evidence for the public contract change, update the API snapshot intentionally, or restore the previous signature.",
+        repairContract: {
+          instructions: [
+            "Add release evidence for the public contract change, update the API snapshot intentionally, or restore the previous signature.",
+            "Keep the repair limited to the allowed files unless the task intent explicitly requires more."
+          ],
+          allowedFiles: ["src/index.ts"],
+          forbiddenFiles: [],
+          successCriteria: [
+            "The finding api-surface:src/index.ts:snapshot-signature-change:validateSignup:3 no longer appears after rerunning Critical Gate."
+          ]
+        },
+        tags: ["api"]
+      },
+      {
+        id: "scope:package.json",
+        detector: "scope",
+        severity: "high",
+        confidence: 0.84,
+        title: "Unexpected file changed for small task",
+        message: "package.json changed during a small task but does not align with expected scope.",
+        evidence: [
+          {
+            kind: "file",
+            path: "package.json",
+            startLine: 5,
+            endLine: 5,
+            message: "Changed file role: manifest. Task keywords: signup."
+          }
+        ],
+        repair:
+          "Remove unrelated edits or split them into a separate task with explicit justification.",
+        repairContract: {
+          instructions: [
+            "Remove unrelated edits or split them into a separate task with explicit justification.",
+            "Keep the repair limited to the allowed files unless the task intent explicitly requires more."
+          ],
+          allowedFiles: ["package.json"],
+          forbiddenFiles: [],
+          successCriteria: [
+            "The finding scope:package.json no longer appears after rerunning Critical Gate."
+          ]
+        },
+        tags: ["scope"]
+      },
+      {
+        id: "rewrite:src/signup.ts",
+        detector: "rewrite",
+        severity: "high",
+        confidence: 0.86,
+        title: "Large balanced rewrite detected",
+        message:
+          "src/signup.ts has 100 changed lines with balanced additions and deletions, which looks like a rewrite.",
+        evidence: [
+          {
+            kind: "metric",
+            path: "src/signup.ts",
+            startLine: 10,
+            endLine: 10,
+            message: "Additions: 50, deletions: 50, rewrite balance: 100%."
+          }
+        ],
+        repair:
+          "Reduce the change to targeted edits, or split the rewrite into an explicit refactor task with tests and review notes.",
+        repairContract: {
+          instructions: [
+            "Reduce the change to targeted edits, or split the rewrite into an explicit refactor task with tests and review notes.",
+            "Keep the repair limited to the allowed files unless the task intent explicitly requires more."
+          ],
+          allowedFiles: ["src/signup.ts"],
+          forbiddenFiles: [],
+          successCriteria: [
+            "The finding rewrite:src/signup.ts no longer appears after rerunning Critical Gate."
+          ]
+        },
+        tags: ["rewrite"]
+      },
+      {
+        id: "intent-coverage:ui-implementation-not-observed",
+        detector: "intent-coverage",
+        severity: "high",
+        confidence: 0.88,
+        title: "Requested UI implementation not observed",
+        message:
+          "The task asks for visible UI implementation work, but the diff only changes trivial stylesheet values.",
+        evidence: [
+          {
+            kind: "file",
+            path: "src/App.css",
+            message: "src/App.css only contains small stylesheet value edits."
+          }
+        ],
+        repair:
+          "Add the requested UI/page/component changes, or revise the task intent if this diff is only a style adjustment.",
+        repairContract: {
+          instructions: [
+            "Add the requested UI/page/component changes, or revise the task intent if this diff is only a style adjustment.",
+            "Keep the repair limited to the allowed files unless the task intent explicitly requires more."
+          ],
+          allowedFiles: ["src/App.css"],
+          forbiddenFiles: [],
+          successCriteria: [
+            "The finding intent-coverage:ui-implementation-not-observed no longer appears after rerunning Critical Gate."
+          ]
+        },
+        tags: ["scope"]
+      }
+    ];
+
+    const sarif = JSON.parse(renderSarifReport({ ...result, findings: stableFindings }));
+    const stableContract = sarif.runs[0].results.map(
+      (sarifResult: {
+        ruleId: string;
+        partialFingerprints: { criticalGateFinding: string };
+        properties: {
+          id: string;
+          detector: string;
+          severity: string;
+          repair: string;
+        };
+      }) => ({
+        id: sarifResult.properties.id,
+        detector: sarifResult.properties.detector,
+        severity: sarifResult.properties.severity,
+        ruleId: sarifResult.ruleId,
+        fingerprint: sarifResult.partialFingerprints.criticalGateFinding,
+        repair: sarifResult.properties.repair
+      })
+    );
+
+    expect(stableContract).toEqual([
+      {
+        id: "dependency-addition:package.json:dependencies:axios",
+        detector: "dependency-addition",
+        severity: "blocker",
+        ruleId: "dependency-addition:package.json",
+        fingerprint: "a8c4d2cee5ac65fcb98406d5f419c10c",
+        repair:
+          "Remove axios unless it is required, or update the task/PR context with a clear justification and alternatives considered."
+      },
+      {
+        id: "secret-path:src/config.ts:provider-token:8",
+        detector: "secret-path",
+        severity: "blocker",
+        ruleId: "secret-path:src/config.ts",
+        fingerprint: "cd74e35d9cf4216b82f64b5fc8e5e3ba",
+        repair:
+          "Remove the token, rotate it if it was real, and load it from a managed secret source."
+      },
+      {
+        id: "test-weakening:tests/signup.test.ts:focused-test:42",
+        detector: "test-weakening",
+        severity: "blocker",
+        ruleId: "test-weakening:tests/signup.test.ts",
+        fingerprint: "1903c7c347e28aa43bfe3152f0e17eac",
+        repair: "Remove the focused test marker and ensure the full test suite runs."
+      },
+      {
+        id: "api-surface:src/index.ts:snapshot-signature-change:validateSignup:3",
+        detector: "api-surface",
+        severity: "high",
+        ruleId: "api-surface:src/index.ts",
+        fingerprint: "7dc59aca9f2c4c40ec64b0447f93c786",
+        repair:
+          "Add release evidence for the public contract change, update the API snapshot intentionally, or restore the previous signature."
+      },
+      {
+        id: "scope:package.json",
+        detector: "scope",
+        severity: "high",
+        ruleId: "scope:package.json",
+        fingerprint: "19a36af06dd1840527c5be6bbd74469a",
+        repair:
+          "Remove unrelated edits or split them into a separate task with explicit justification."
+      },
+      {
+        id: "rewrite:src/signup.ts",
+        detector: "rewrite",
+        severity: "high",
+        ruleId: "rewrite:src/signup.ts",
+        fingerprint: "0c578b247f48ce41da73c978737cda44",
+        repair:
+          "Reduce the change to targeted edits, or split the rewrite into an explicit refactor task with tests and review notes."
+      },
+      {
+        id: "intent-coverage:ui-implementation-not-observed",
+        detector: "intent-coverage",
+        severity: "high",
+        ruleId: "intent-coverage:ui-implementation-not-observed",
+        fingerprint: "4070c83d8da9f0c1d2295426a7963864",
+        repair:
+          "Add the requested UI/page/component changes, or revise the task intent if this diff is only a style adjustment."
+      }
+    ]);
+  });
 });
