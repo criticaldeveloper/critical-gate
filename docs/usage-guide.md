@@ -452,11 +452,12 @@ context.
 
 Good rollout sequence:
 
-1. Run locally on AI-generated diffs.
+1. Run locally on AI-generated diffs with specific task text.
 2. Add the VS Code extension for developer feedback.
-3. Add GitHub Action SARIF upload without strict mode.
-4. Review findings for noise and false positives.
-5. Add Codex hook enforcement where repair loops are useful.
+3. Add GitHub Action SARIF upload with default thresholds.
+4. Review noisy findings and tune task text, repository docs, or `.critical-gate.json` policy.
+5. Add Codex hook enforcement where compact repair loops are useful.
+6. Promote observation-friendly detector families only after dogfooding shows acceptable precision.
 
 New detector families start as observation-friendly by default. They still report evidence and
 repair guidance, but they do not fail the gate unless promoted. Promote a detector family in

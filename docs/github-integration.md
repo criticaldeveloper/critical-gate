@@ -133,5 +133,6 @@ Recommended rollout:
 1. Run on pull requests with SARIF upload and default thresholds.
 2. Review medium findings for one or two weeks without blocking merges.
 3. Add task text from PR titles, issue summaries, or release notes rather than generic workflow names.
-4. Enable strict mode only after noisy detectors have been tuned for the repository.
-5. Keep `fetch-depth: 0` for better base diffs, co-change history, and repository intelligence.
+4. Tune noisy findings with better task text, repository docs, or `.critical-gate.json` policy.
+5. Enable stricter thresholds only after noisy detectors have been tuned for the repository.
+6. Keep `fetch-depth: 0` for better base diffs, co-change history, and repository intelligence.

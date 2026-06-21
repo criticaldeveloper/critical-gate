@@ -36,6 +36,27 @@ Current detectors focus on TypeScript and JavaScript repositories:
 Every finding includes severity, confidence, evidence, tags, and a repair hint that another agent or
 developer can act on.
 
+## Supported Scope
+
+Current support is strongest for TypeScript and JavaScript repositories with Git history and
+package-manager metadata available. The best-covered ecosystems are Node-based projects using
+common TS/JS source, test, package manifest, lockfile, config, and CI patterns.
+
+Experimental support includes framework-aware heuristics for patterns seen in dogfooding, such as
+Astro-style content contracts and repository-specific history or utility reuse signals. These checks
+start conservatively and should stay in observation mode until a repository has enough clean runs.
+
+Out of scope for the current release stage:
+
+- Deep semantic analysis for non-TS/JS languages.
+- Whole-repository LLM scanning.
+- Broad vulnerability scanning beyond lightweight diff-only secret and path checks.
+- Treating current internal dogfood metrics as a broad external benchmark.
+
+Critical Gate is useful today as a pre-review integrity gate for agent-produced TS/JS diffs, but it
+is still pre-stable. Roll it out progressively before making it a hard organization-wide merge
+requirement.
+
 ## Concrete Examples
 
 Critical Gate is most useful when an AI-generated diff looks plausible at a glance but breaks the
@@ -199,6 +220,24 @@ Critical Gate has one analysis core and multiple surfaces:
 
 The CLI remains the source of truth. The editor and CI surfaces consume CLI output rather than
 reimplementing detector logic.
+
+## Recommended Team Rollout
+
+Start with report-only local runs and default thresholds. Treat medium, low, info, and
+observation-mode findings as calibration data until the repository has enough clean runs.
+
+Recommended sequence:
+
+1. Run the CLI locally on AI-generated diffs with specific task text.
+2. Add the VS Code extension for developer feedback where useful.
+3. Add GitHub Action SARIF upload with default blocking behavior for eligible blocker and high
+   findings.
+4. Review noisy findings and tune task text, repository docs, or `.critical-gate.json` policy.
+5. Add Codex hook enforcement only where compact repair loops are useful.
+6. Promote observation-friendly detector families only after dogfooding shows acceptable precision.
+
+See [docs/usage-guide.md](docs/usage-guide.md) for local rollout advice and
+[docs/github-integration.md](docs/github-integration.md) for CI thresholds.
 
 ## Quick Start From Source
 

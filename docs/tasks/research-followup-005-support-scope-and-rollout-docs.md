@@ -2,7 +2,7 @@
 
 ## Status
 
-Open
+Done
 
 ## Why
 
@@ -18,10 +18,10 @@ This is not a missing feature, but it is a documentation clarity task.
 
 ## Tasks
 
-1. Add a short "Supported Scope" section to README that distinguishes supported, experimental, and out-of-scope ecosystems.
-2. Add a short "Recommended Team Rollout" section to README that links to the deeper usage and GitHub docs.
-3. Keep detector rollout language consistent across README, `docs/usage-guide.md`, `docs/github-integration.md`, and `docs/detectors.md`.
-4. Avoid claiming broad production readiness until the release-governance, security-policy, coverage, and evaluation tasks are complete.
+1. Add a short "Supported Scope" section to README that distinguishes supported, experimental, and out-of-scope ecosystems. Done.
+2. Add a short "Recommended Team Rollout" section to README that links to the deeper usage and GitHub docs. Done.
+3. Keep detector rollout language consistent across README, `docs/usage-guide.md`, `docs/github-integration.md`, and `docs/detectors.md`. Done.
+4. Avoid claiming broad production readiness until the release-governance, security-policy, coverage, and evaluation tasks are complete. Done: README now describes the project as pre-stable and recommends progressive rollout.
 
 ## Validation
 
