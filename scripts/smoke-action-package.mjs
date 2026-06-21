@@ -1,7 +1,9 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import console from "node:console";
+import process from "node:process";
+import { fileURLToPath, URL } from "node:url";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const artifact = join(root, "artifacts", "action");

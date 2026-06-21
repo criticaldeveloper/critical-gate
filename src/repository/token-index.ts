@@ -1,7 +1,6 @@
 import type {
   DiffFile,
   RepositoryToken,
-  RepositoryTokenFile,
   RepositoryTokenIndex,
   RepositoryTokenSource
 } from "../schema/index.js";
