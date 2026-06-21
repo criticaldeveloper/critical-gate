@@ -2,7 +2,7 @@
 
 ## Status
 
-Open
+Partially done
 
 ## Why
 
@@ -20,12 +20,12 @@ The project is transparent about the small corpus, but public confidence would i
 
 ## Tasks
 
-1. Add a coverage command for the TypeScript test suite.
-2. Decide initial coverage thresholds that are useful without creating churn in detector-heavy code.
-3. Add CI coverage reporting or at least a generated local coverage artifact documented in contributor docs.
-4. Expand `eval/cases` beyond the current 10 cases with real false positives, false negatives, and clean diffs from more than one repository.
-5. Separate internal dogfood metrics from any public benchmark language in docs and release notes.
-6. Record per-detector precision/recall where the corpus is large enough; keep smaller detector families labeled as anecdotal.
+1. Add a coverage command for the TypeScript test suite. Done with `pnpm coverage`.
+2. Decide initial coverage thresholds that are useful without creating churn in detector-heavy code. Done: 70% lines/statements/functions and 65% branches.
+3. Add CI coverage reporting or at least a generated local coverage artifact documented in contributor docs. Done: documented local `coverage/` artifacts in `docs/evaluation-strategy.md`.
+4. Expand `eval/cases` beyond the current 10 cases with real false positives, false negatives, and clean diffs from more than one repository. Not done: requires additional real dogfood/evaluation data and should not be fabricated.
+5. Separate internal dogfood metrics from any public benchmark language in docs and release notes. Done in `docs/evaluation-strategy.md`.
+6. Record per-detector precision/recall where the corpus is large enough; keep smaller detector families labeled as anecdotal. Done in the evaluation harness output.
 
 ## Validation
 

@@ -235,9 +235,54 @@ function calculateMetrics(results) {
     caseRecall: divide(truePositives, truePositives + falseNegatives),
     findingPrecision: divide(matchedFindingCount, matchedFindingCount + unexpectedBlockingCount),
     findingRecall: divide(matchedFindingCount, expectedFindingCount),
+    detectorMetrics: getDetectorMetrics(results),
     noisiestDetector: getNoisiestDetector(results),
     bestDetector: getBestDetector(results)
   };
+}
+
+function getDetectorMetrics(results) {
+  const detectorNames = new Set();
+
+  for (const result of results) {
+    for (const expected of result.expectedFindings) {
+      detectorNames.add(expected.detector);
+    }
+
+    for (const finding of result.unexpectedBlockingFindings) {
+      detectorNames.add(finding.detector);
+    }
+  }
+
+  return [...detectorNames].sort().map((detector) => {
+    const expected = results.reduce(
+      (total, result) =>
+        total + result.expectedFindings.filter((finding) => finding.detector === detector).length,
+      0
+    );
+    const matched = results.reduce(
+      (total, result) =>
+        total +
+        result.matchedExpectedFindings.filter((finding) => finding.detector === detector).length,
+      0
+    );
+    const unexpectedBlocking = results.reduce(
+      (total, result) =>
+        total +
+        result.unexpectedBlockingFindings.filter((finding) => finding.detector === detector).length,
+      0
+    );
+
+    return {
+      detector,
+      expected,
+      matched,
+      unexpectedBlocking,
+      precision: divide(matched, matched + unexpectedBlocking),
+      recall: divide(matched, expected),
+      evidenceLevel: expected >= 3 ? "measured" : "anecdotal"
+    };
+  });
 }
 
 function getNoisiestDetector(results) {
@@ -299,6 +344,15 @@ function renderMarkdown(evaluation) {
     `- Finding Recall: ${formatPercent(metrics.findingRecall)}`,
     `- Noisiest Detector: ${formatDetectorCount(metrics.noisiestDetector)}`,
     `- Best Detector: ${formatDetectorCount(metrics.bestDetector)}`,
+    "",
+    "## Detector Metrics",
+    "",
+    "| Detector | Expected | Matched | Unexpected Blocking | Precision | Recall | Evidence |",
+    "| --- | ---: | ---: | ---: | ---: | ---: | --- |",
+    ...metrics.detectorMetrics.map(
+      (metric) =>
+        `| ${metric.detector} | ${metric.expected} | ${metric.matched} | ${metric.unexpectedBlocking} | ${formatPercent(metric.precision)} | ${formatPercent(metric.recall)} | ${metric.evidenceLevel} |`
+    ),
     "",
     "## Cases",
     "",

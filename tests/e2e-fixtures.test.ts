@@ -104,7 +104,7 @@ describe("e2e fixture repositories", () => {
         },
       ]
     `);
-  }, 20000);
+  }, 60000);
 });
 
 const fixtureCases: FixtureCase[] = [

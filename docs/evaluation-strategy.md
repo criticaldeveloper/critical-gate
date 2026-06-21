@@ -102,11 +102,15 @@ The harness reports:
 - False negatives.
 - Case precision and recall.
 - Finding precision and recall.
+- Per-detector precision and recall when enough labeled cases exist; smaller detector samples stay
+  labeled as anecdotal.
 - Noisiest detector based on unexpected blocking findings.
 - Best detector based on matched expected findings.
 
 The seed corpus intentionally starts small. Add one case for every real false positive, false
 negative, or valuable true positive found during dogfooding.
+Do not describe this corpus as an external benchmark until it contains cases from multiple unrelated
+repositories with independent labels.
 
 ## Current Baselines
 
@@ -123,6 +127,34 @@ The latest tracked real-repository proof report is
 precision, and 42.9% scenario recall. Four meaningful misses were converted into deterministic eval
 cases. The current case harness baseline after those fixes is 10 cases, 100% case precision, 100%
 case recall, 100% finding precision, and 100% finding recall.
+
+These current baseline numbers are internal regression evidence, not a broad public benchmark. The
+next evaluation milestone is to add labeled cases from at least one more real TypeScript/JavaScript
+repository, covering false positives, false negatives, and clean diffs.
+
+## Coverage Evidence
+
+Run coverage with:
+
+```bash
+pnpm coverage
+```
+
+The command runs the TypeScript test suite with V8 coverage and writes:
+
+- `coverage/index.html`
+- `coverage/coverage-summary.json`
+- terminal coverage summary output
+
+Initial thresholds are deliberately moderate so they catch major coverage regressions without
+creating churn while detector heuristics are still changing:
+
+- Lines: 70%
+- Statements: 70%
+- Functions: 70%
+- Branches: 65%
+
+Raise thresholds only after coverage is stable across detector and reporter changes.
 
 ## Detector Quality Bar
 
