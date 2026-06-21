@@ -2,7 +2,7 @@
 
 ## Status
 
-Open
+Done
 
 ## Why
 
@@ -19,11 +19,11 @@ This is acceptable for dogfooding, but it is not yet a low-friction public insta
 
 ## Tasks
 
-1. Add root package metadata: `repository`, `homepage`, `bugs`, and any missing discoverability keywords.
-2. Decide the official CLI distribution path: npm package, GitHub release artifact, prebuilt action bundle, or source-only alpha.
-3. If publishing is chosen, document `pnpm publish` / npm provenance expectations and update installation docs.
-4. If source-only remains intentional, make that explicit in README and installation docs as a temporary alpha constraint.
-5. Add a release checklist item that verifies the action can run with `install: "false"` and `build: "false"` when prebuilt artifacts are present.
+1. Add root package metadata: `repository`, `homepage`, `bugs`, and any missing discoverability keywords. Done.
+2. Decide the official CLI distribution path: npm package, GitHub release artifact, prebuilt action bundle, or source-only alpha. Done: source-based installation remains official for the current dogfood release stage.
+3. If publishing is chosen, document `pnpm publish` / npm provenance expectations and update installation docs. Not chosen for this release stage.
+4. If source-only remains intentional, make that explicit in README and installation docs as a temporary alpha constraint. Done.
+5. Add a release checklist item that verifies the action can run with `install: "false"` and `build: "false"` when prebuilt artifacts are present. Done.
 
 ## Validation
 

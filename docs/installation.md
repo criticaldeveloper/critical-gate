@@ -4,6 +4,10 @@ Critical Gate currently supports source-based CLI and action installation, local
 and a self-contained VS Code extension VSIX. The root CLI package and VS Code extension use aligned
 numeric dogfood release versions, but the project has not declared a stable public API contract yet.
 
+The official CLI path for this release stage is source-based installation. Do not assume an npm
+registry package, global install, or prebuilt GitHub Action artifact is available until the release
+policy explicitly changes.
+
 ## Requirements
 
 - Node.js 22.13 or newer. CI uses Node.js 24.
@@ -23,7 +27,7 @@ corepack prepare pnpm@11.1.2 --activate
 Clone the repository, install dependencies, and build:
 
 ```bash
-git clone <repository-url> critical-gate
+git clone https://github.com/criticaldeveloper/critical-gate.git critical-gate
 cd critical-gate
 pnpm install --frozen-lockfile
 pnpm build
@@ -112,6 +116,10 @@ At runtime, hooks accept:
 
 Until the action is published under a remote slug, use it from this repository checkout or from the
 same repository with `uses: ./`.
+
+The composite action installs dependencies and builds by default. The `install: "false"` and
+`build: "false"` inputs are only for release artifacts that already include `node_modules` or a
+prebuilt `dist/cli.js`; source checkouts should keep the defaults.
 
 Minimal workflow:
 

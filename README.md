@@ -202,6 +202,11 @@ reimplementing detector logic.
 
 ## Quick Start From Source
 
+Critical Gate's current CLI distribution path is source-based: clone, install, build, and run
+`node dist/cli.js`. Package-registry publishing and prebuilt action releases are intentionally held
+until repository metadata, external dogfooding, and release artifacts are stable enough for broader
+public use.
+
 Requirements:
 
 - Node.js 22.13 or newer.
@@ -398,7 +403,7 @@ Branch and commit conventions for this repository:
 ## Project Status
 
 The repository contains the TypeScript CLI implementation, deterministic detectors, Codex hook
-integration, GitHub Action integration, optional LLM explanation boundaries, npm package
+integration, GitHub Action integration, optional LLM explanation boundaries, source-based CLI
 distribution, and a VS Code Marketplace extension surface.
 
 ## License

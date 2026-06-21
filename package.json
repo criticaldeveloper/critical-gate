@@ -4,6 +4,14 @@
   "description": "Repository-aware diff integrity gate for AI-generated code changes.",
   "type": "module",
   "packageManager": "pnpm@11.1.2",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/criticaldeveloper/critical-gate.git"
+  },
+  "homepage": "https://github.com/criticaldeveloper/critical-gate#readme",
+  "bugs": {
+    "url": "https://github.com/criticaldeveloper/critical-gate/issues"
+  },
   "bin": {
     "critical-gate": "./dist/cli.js"
   },
@@ -30,10 +38,14 @@
   },
   "keywords": [
     "ai",
+    "ai-agents",
     "codex",
     "diff",
+    "diff-integrity",
     "quality-gate",
-    "code-review"
+    "code-review",
+    "sarif",
+    "static-analysis"
   ],
   "license": "MIT",
   "engines": {

@@ -26,7 +26,8 @@ node dist/cli.js check --task "<task>" --base "<base>" --format sarif --output c
 ```
 
 For a published action, keep `dist/` available in the release package or leave `build: "true"` so
-the composite action can compile before it runs.
+the composite action can compile before it runs. Only set `install: "false"` and `build: "false"`
+for an artifact that has been verified to contain everything the action needs at runtime.
 
 For push workflows, make the task intent cover the same range as the selected base. If one push
 contains multiple commits, join all commit messages from the push payload instead of using only the

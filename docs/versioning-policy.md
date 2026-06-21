@@ -77,8 +77,10 @@ Before cutting any release:
 6. Run `pnpm audit`.
 7. Run `pnpm test:vscode` when the editor extension is included.
 8. Run `pnpm package:vscode` when publishing or attaching a VSIX artifact.
-9. Run Critical Gate against the release diff with release notes as task context.
-10. Tag the release after all checks pass.
+9. If publishing a prebuilt GitHub Action artifact, verify it runs with `install: "false"` and
+   `build: "false"`.
+10. Run Critical Gate against the release diff with release notes as task context.
+11. Tag the release after all checks pass.
 
 ## Tagging
 
@@ -95,7 +97,7 @@ Do not tag directly from a dirty working tree.
 
 Before declaring a stable public release, complete:
 
-- Add real repository, issue, and homepage metadata.
+- Confirm package, repository, issue, homepage, and release artifact metadata are public-ready.
 - Run all GitHub workflows remotely.
 - Dogfood on at least one separate repository and document noisy findings.
 - Decide whether VS Code distribution remains artifact-only or moves to Marketplace publishing.
