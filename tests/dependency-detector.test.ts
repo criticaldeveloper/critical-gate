@@ -89,6 +89,46 @@ index 57b22a0..cb3e0f1 100644
       })
     ]);
   });
+
+  it("does not misclassify unchanged dependencies re-added after removing a neighbor", () => {
+    const diff = {
+      files: parseUnifiedDiff(`diff --git a/package.json b/package.json
+index 57b22a0..cb3e0f1 100644
+--- a/package.json
++++ b/package.json
+@@ -15,8 +15,7 @@
+   },
+   "dependencies": {
+     "@astrojs/sitemap": "^3.7.0",
+-    "astro": "^5.16.7",
+-    "material-symbols": "^0.40.2"
++    "astro": "^5.16.7"
+   },
+   "devDependencies": {
+     "critical-gate": "^2.4.0"
+diff --git a/bun.lock b/bun.lock
+index 57b22a0..cb3e0f1 100644
+--- a/bun.lock
++++ b/bun.lock
+@@ -7,7 +7,6 @@
+       "dependencies": {
+         "@astrojs/sitemap": "^3.7.0",
+         "astro": "^5.16.7",
+-        "material-symbols": "^0.40.2",
+       },
+`)
+    };
+
+    const findings = dependencyDetector.run({
+      task: {
+        source: "cli",
+        text: "Replace Material Symbols font with local SVG icons"
+      },
+      diff
+    });
+
+    expect(findings).toEqual([]);
+  });
 });
 
 describe("detector runner", () => {

@@ -44,6 +44,7 @@ function extractAddedDependencies(file: DiffFile): AddedDependency[] {
   }
 
   const dependencies: AddedDependency[] = [];
+  const removedDependencies = new Set<string>();
 
   for (const hunk of file.hunks) {
     let currentSection: DependencySection | undefined;
@@ -61,13 +62,22 @@ function extractAddedDependencies(file: DiffFile): AddedDependency[] {
         continue;
       }
 
-      if (line.kind !== "add" || currentSection === undefined) {
+      if (currentSection === undefined) {
         continue;
       }
 
       const dependency = dependencyLinePattern.exec(line.content);
 
       if (dependency === null) {
+        continue;
+      }
+
+      if (line.kind === "delete") {
+        removedDependencies.add(toDependencyKey(currentSection, dependency[1] ?? ""));
+        continue;
+      }
+
+      if (line.kind !== "add") {
         continue;
       }
 
@@ -81,7 +91,9 @@ function extractAddedDependencies(file: DiffFile): AddedDependency[] {
     }
   }
 
-  return dependencies;
+  return dependencies.filter(
+    (dependency) => !removedDependencies.has(toDependencyKey(dependency.section, dependency.name))
+  );
 }
 
 function getSection(line: DiffLine): DependencySection | undefined {
@@ -105,6 +117,10 @@ function hasVisibleJustification(taskText: string, dependencyName: string): bool
     normalizedTask.includes("install package") ||
     normalizedTask.includes("install dependency")
   );
+}
+
+function toDependencyKey(section: DependencySection, name: string): string {
+  return `${section}:${name}`;
 }
 
 function toFinding(dependency: AddedDependency): Finding {

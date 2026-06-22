@@ -4,6 +4,17 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## 2.4.1 - 2026-06-22
+
+Patch release for dogfood-backed detector calibration.
+
+### Fixed
+
+- Stop reporting unchanged package neighbors as newly added dependencies when a package is removed
+  and JSON comma normalization re-adds an existing dependency line.
+- Suppress noisy historical expected-companion findings for focused UI presentation and small
+  default-state changes when the diff is self-contained.
+
 ## 2.4.0 - 2026-06-22
 
 Installable distribution and CLI maintainability release.

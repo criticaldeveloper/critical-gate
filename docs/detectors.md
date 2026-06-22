@@ -267,6 +267,10 @@ Initial implementation:
   an unusual combination.
 - Suppress history-derived companion prompts for tiny stylesheet value-only edits, because a
   one-line typography token change should not require broad historical docs or component companions.
+- Suppress history-derived companion prompts for focused UI presentation and small default-state
+  changes when the diff is self-contained in styles, UI components, pages, or tiny client scripts.
+  This keeps visual polish and display-mode defaults from requiring historically paired route,
+  config, or unrelated style companions when no structural behavior changed.
 
 ### Task Intent Quality Warnings
 

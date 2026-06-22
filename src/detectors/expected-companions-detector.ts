@@ -16,7 +16,7 @@ const companionRelevantDataPattern =
 
 export const expectedCompanionsDetector: Detector = {
   name: "expected-companions",
-  run: ({ diff, context }) => {
+  run: ({ task, diff, context }) => {
     const history = context?.knowledge?.getHistoryIndex();
 
     const changedPaths = new Set(diff.files.map((file) => file.path));
@@ -29,7 +29,7 @@ export const expectedCompanionsDetector: Detector = {
                 changedPaths.has(rule.sourcePath) &&
                 !changedPaths.has(rule.expectedPath) &&
                 isStrongCompanionRule(rule) &&
-                !isLowRelevanceCompanionChange(rule.sourcePath, diff.files)
+                !isLowRelevanceCompanionChange(rule.sourcePath, diff.files, task.text)
             ),
             history.normalPatterns ?? []
           );
@@ -91,8 +91,12 @@ function isStrongCompanionRule(rule: CompanionRule): boolean {
   return rule.support >= minimumCompanionSupport;
 }
 
-function isLowRelevanceCompanionChange(path: string, files: DiffFile[]): boolean {
-  return isTrivialStylesheetChange(path, files) || isTinySelfContainedComponentChange(path, files);
+function isLowRelevanceCompanionChange(path: string, files: DiffFile[], taskText: string): boolean {
+  return (
+    isTrivialStylesheetChange(path, files) ||
+    isTinySelfContainedComponentChange(path, files) ||
+    isFocusedUiPresentationChange(path, files, taskText)
+  );
 }
 
 function isLowRelevanceFrameworkChange(file: DiffFile, files: DiffFile[]): boolean {
@@ -236,6 +240,53 @@ function isTrivialStylesheetChange(path: string, files: DiffFile[]): boolean {
   }
 
   return changedLines.every((line) => isStyleValueLine(line.content));
+}
+
+function isFocusedUiPresentationChange(path: string, files: DiffFile[], taskText: string): boolean {
+  const file = files.find((candidate) => candidate.path === path);
+
+  if (file === undefined || file.status === "deleted") {
+    return false;
+  }
+
+  if (!isFocusedUiPresentationTask(taskText) || !isUiPresentationDiff(files)) {
+    return false;
+  }
+
+  if (stylePathPattern.test(path)) {
+    return file.additions + file.deletions <= 120;
+  }
+
+  if (componentPathPattern.test(path)) {
+    return !hasCompanionRelevantLine(file);
+  }
+
+  return false;
+}
+
+function isFocusedUiPresentationTask(taskText: string): boolean {
+  const normalized = taskText.toLowerCase();
+
+  return (
+    /\b(?:style|styles|styling|visual|redesign|polish|spacing|sizing|grid|layout|mobile|css|scss|typography|drop cap|flicker)\b/.test(
+      normalized
+    ) || /\b(?:default|display|view|mode|list view|grid view)\b/.test(normalized)
+  );
+}
+
+function isUiPresentationDiff(files: DiffFile[]): boolean {
+  if (files.length === 0 || files.length > 6) {
+    return false;
+  }
+
+  return files.every(
+    (file) =>
+      file.status !== "added" &&
+      file.status !== "deleted" &&
+      (stylePathPattern.test(file.path) ||
+        componentPathPattern.test(file.path) ||
+        /^src\/scripts\/[^/]+\.[jt]s$/i.test(file.path))
+  );
 }
 
 function isStyleValueLine(content: string): boolean {

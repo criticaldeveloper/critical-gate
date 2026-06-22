@@ -2,6 +2,15 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.4.1 - 2026-06-22
+
+Patch release aligned with Critical Gate 2.4.1.
+
+- Bundle dogfood-backed dependency detector calibration so dependency removals do not appear as
+  unchanged dependency additions.
+- Bundle lower-noise expected-companion calibration for focused UI presentation and default-state
+  changes.
+
 ## 2.4.0 - 2026-06-22
 
 Marketplace release aligned with Critical Gate 2.4.0.

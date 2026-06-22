@@ -71,6 +71,72 @@ function knowledgeWithHistory(options: {
   };
 }
 
+function blogKnowledge(): KnowledgeProvider {
+  return {
+    getFileGraph: () => ({ nodes: [], edges: [] }),
+    getHistoryIndex: () => ({
+      profile: {
+        commitCount: 50,
+        minConfidenceCommitCount: 20,
+        coChanges: []
+      },
+      coChanges: [],
+      companionRules: [
+        {
+          sourcePath: "src/components/BlogHomePage.astro",
+          expectedPath: "src/pages/posts/[...slug].astro",
+          support: 7,
+          confidence: 0.7
+        },
+        {
+          sourcePath: "src/components/BlogHomePage.astro",
+          expectedPath: "astro.config.mjs",
+          support: 5,
+          confidence: 0.45
+        },
+        {
+          sourcePath: "src/pages/index.astro",
+          expectedPath: "src/pages/posts/[...slug].astro",
+          support: 9,
+          confidence: 0.9
+        },
+        {
+          sourcePath: "src/pages/index.astro",
+          expectedPath: "astro.config.mjs",
+          support: 8,
+          confidence: 0.75
+        },
+        {
+          sourcePath: "src/styles/home.scss",
+          expectedPath: "src/pages/posts/[...slug].astro",
+          support: 8,
+          confidence: 0.65
+        },
+        {
+          sourcePath: "src/styles/post.scss",
+          expectedPath: "src/components/BlogHomePage.astro",
+          support: 8,
+          confidence: 0.75
+        },
+        {
+          sourcePath: "src/styles/post.scss",
+          expectedPath: "src/styles/home.scss",
+          support: 7,
+          confidence: 0.65
+        },
+        {
+          sourcePath: "src/styles/post.scss",
+          expectedPath: "src/pages/posts/[...slug].astro",
+          support: 6,
+          confidence: 0.5
+        }
+      ]
+    }),
+    getPatternIndex: () => ({ patterns: [] }),
+    getSolutionIndex: () => ({ solutions: [] })
+  };
+}
+
 describe("expectedCompanionsDetector", () => {
   it("emits when a historically paired test companion is missing", () => {
     const diff = parse(`diff --git a/src/signup.ts b/src/signup.ts
@@ -285,6 +351,145 @@ index 57b22a0..cb3e0f1 100644
           getSolutionIndex: () => ({ solutions: [] })
         }
       }
+    });
+
+    expect(findings).toEqual([]);
+  });
+
+  it("does not emit historical companions for narrow multi-file UI presentation fixes", () => {
+    const diff =
+      parse(`diff --git a/src/components/BlogHomePage.astro b/src/components/BlogHomePage.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/BlogHomePage.astro
++++ b/src/components/BlogHomePage.astro
+@@ -1,6 +1,4 @@
+ <section class="blog-home">
+-  <span class="blog-home__badge">Signal archive</span>
+   <h1>Critical Developer</h1>
+-  <p class="blog-home__lede">Systems, notes, and field logs.</p>
+ </section>
+diff --git a/src/pages/index.astro b/src/pages/index.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/pages/index.astro
++++ b/src/pages/index.astro
+@@ -1,5 +1,5 @@
+ <BlogHomePage posts={posts} />
+-<link rel="stylesheet" href="/src/styles/home-critical.css" />
++<link rel="stylesheet" href="/src/styles/home.scss" />
+diff --git a/src/styles/home-critical.css b/src/styles/home-critical.css
+index 57b22a0..cb3e0f1 100644
+--- a/src/styles/home-critical.css
++++ b/src/styles/home-critical.css
+@@ -1,4 +1,2 @@
+-.blog-home__badge { display: inline-flex; }
+-.blog-home__lede { max-width: 48rem; }
+ .blog-home { min-height: 100vh; }
+diff --git a/src/styles/home.scss b/src/styles/home.scss
+index 57b22a0..cb3e0f1 100644
+--- a/src/styles/home.scss
++++ b/src/styles/home.scss
+@@ -1,8 +1,8 @@
+ .blog-home {
+-  display: block;
++  display: grid;
+   gap: 2rem;
+ }
+ .blog-home__featured-title {
+-  font-size: 6rem;
++  font-size: clamp(2.75rem, 8vw, 5rem);
+ }
+diff --git a/src/styles/post.scss b/src/styles/post.scss
+index 57b22a0..cb3e0f1 100644
+--- a/src/styles/post.scss
++++ b/src/styles/post.scss
+@@ -1,4 +1,4 @@
+ .post-card {
+-  margin-block: 2rem;
++  margin-block: 1.25rem;
+ }
+`);
+
+    const findings = expectedCompanionsDetector.run({
+      task: {
+        source: "cli",
+        text: "Fix homepage redesign grid, featured title sizing, reload flicker, and article mobile spacing"
+      },
+      diff,
+      context: { knowledge: blogKnowledge() }
+    });
+
+    expect(findings).toEqual([]);
+  });
+
+  it("does not emit historical companions for single-file article stylesheet polish", () => {
+    const diff = parse(`diff --git a/src/styles/post.scss b/src/styles/post.scss
+index 57b22a0..cb3e0f1 100644
+--- a/src/styles/post.scss
++++ b/src/styles/post.scss
+@@ -1,12 +1,7 @@
+ .article-meta {
+-  margin-block: 2rem;
+-  padding-block: 1rem;
+-  border-block: 1px solid currentColor;
++  margin-block: 1rem;
+ }
+-.article-content p:first-of-type::first-letter,
+-.article-content li:first-of-type::first-letter {
++.article-content > p:first-of-type::first-letter {
+   float: left;
+-  font-size: 5rem;
+-  line-height: 0.8;
++  font-size: 4.5rem;
+ }
+`);
+
+    const findings = expectedCompanionsDetector.run({
+      task: {
+        source: "cli",
+        text: "Polish article meta spacing and restrict drop cap styling"
+      },
+      diff,
+      context: { knowledge: blogKnowledge() }
+    });
+
+    expect(findings).toEqual([]);
+  });
+
+  it("does not emit historical companions for small default-state UI changes", () => {
+    const diff =
+      parse(`diff --git a/src/components/BlogHomePage.astro b/src/components/BlogHomePage.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/BlogHomePage.astro
++++ b/src/components/BlogHomePage.astro
+@@ -1,9 +1,9 @@
+ <div class="blog-home__view-toggle">
+-  <button class="blog-home__view-btn is-active" data-view="grid" aria-pressed="true">Grid</button>
+-  <button class="blog-home__view-btn" data-view="list" aria-pressed="false">List</button>
++  <button class="blog-home__view-btn" data-view="grid" aria-pressed="false">Grid</button>
++  <button class="blog-home__view-btn is-active" data-view="list" aria-pressed="true">List</button>
+ </div>
+-<ol class="blog-home__posts" data-view-current="grid">
++<ol class="blog-home__posts" data-view-current="list">
+   <li>Article</li>
+ </ol>
+diff --git a/src/scripts/blog-listing-view.ts b/src/scripts/blog-listing-view.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/scripts/blog-listing-view.ts
++++ b/src/scripts/blog-listing-view.ts
+@@ -1,3 +1,4 @@
+-const initialView = "grid";
++const initialView = "list";
++document.documentElement.dataset.blogView = initialView;
+ setView(initialView);
+`);
+
+    const findings = expectedCompanionsDetector.run({
+      task: {
+        source: "cli",
+        text: "Make homepage list view the default display mode"
+      },
+      diff,
+      context: { knowledge: blogKnowledge() }
     });
 
     expect(findings).toEqual([]);
