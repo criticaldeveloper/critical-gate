@@ -9,6 +9,7 @@ Marketplace release aligned with Critical Gate 2.4.0.
 - Keep the bundled analyzer aligned with the npm-first CLI distribution release.
 - Keep Marketplace installation documented as the primary VS Code install path.
 - Bundle CLI maintainability refactors with no intentional command, schema, or exit-code changes.
+- Bundle the analyzer CLI into a single file to avoid VSIX many-file packaging warnings.
 
 ## 2.3.1 - 2026-06-22
 

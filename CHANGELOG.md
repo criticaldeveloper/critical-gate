@@ -28,6 +28,8 @@ Installable distribution and CLI maintainability release.
 
 - Pin source development and CI to a Node 20-compatible pnpm release so the Node 20 workflow remains
   a real supported-runtime check.
+- Bundle the VS Code analyzer into a single CLI file so Marketplace packaging avoids the many-file
+  JavaScript warning.
 
 ## 2.3.1 - 2026-06-22
 
