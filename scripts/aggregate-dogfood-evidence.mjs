@@ -384,11 +384,11 @@ function renderMarkdown(summary) {
     "",
     "## Run Labels",
     "",
-    renderCountTable(summary.metrics.runLabels, "Run Label"),
+    renderCountTable(summary.metrics.runLabels),
     "",
     "## Detector Frequency",
     "",
-    renderCountTable(summary.metrics.detectorCounts, "Detector"),
+    renderCountTable(summary.metrics.detectorCounts),
     "",
     "## Repositories",
     "",
@@ -438,7 +438,7 @@ function renderReportList(reports) {
   return lines;
 }
 
-function renderCountTable(counts, label) {
+function renderCountTable(counts) {
   const entries = Object.entries(counts);
 
   if (entries.length === 0) {
