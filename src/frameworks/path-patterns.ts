@@ -1,12 +1,23 @@
 export function matchesPathPattern(pattern: string, path: string): boolean {
-  if (pattern === path) {
+  const normalizedPattern = normalizePath(pattern);
+  const normalizedPath = normalizePath(path);
+
+  if (normalizedPattern === normalizedPath) {
     return true;
   }
 
-  return globToRegExp(pattern).test(path);
+  return globToRegExp(normalizedPattern).test(normalizedPath);
 }
 
 export function globToRegExp(pattern: string): RegExp {
+  return new RegExp(`^${globToRegExpSource(normalizePath(pattern))}$`);
+}
+
+function globToRegExpSource(pattern: string): string {
+  if (pattern.endsWith("/**")) {
+    return `${globToRegExpSource(pattern.slice(0, -3))}(?:/.*)?`;
+  }
+
   const escaped = pattern
     .replaceAll(/[.+?^${}()|[\]\\]/g, "\\$&")
     .replaceAll("**/", "\0")
@@ -14,5 +25,9 @@ export function globToRegExp(pattern: string): RegExp {
     .replaceAll("*", "[^/]*")
     .replaceAll("\0", "(?:.*/)?");
 
-  return new RegExp(`^${escaped}$`);
+  return escaped;
+}
+
+function normalizePath(path: string): string {
+  return path.replaceAll("\\", "/").replace(/\/+/g, "/").replace(/\/$/u, "");
 }

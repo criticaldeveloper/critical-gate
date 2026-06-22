@@ -2,6 +2,12 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.4.4 - 2026-06-23
+
+Patch release aligned with Critical Gate 2.4.4.
+
+- Bundle the policy glob matching fix for trailing `/**` support-file rules.
+
 ## 2.4.3 - 2026-06-22
 
 Patch release aligned with Critical Gate 2.4.3.

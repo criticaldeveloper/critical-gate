@@ -37,6 +37,27 @@ describe("framework packs", () => {
     expect(matchesPathPattern("src/**/*.test.tsx", "src/components/Button.test.tsx")).toBe(true);
   });
 
+  it("matches trailing globstars as directory descendants", () => {
+    expect(
+      matchesPathPattern("docs/critical-gate-evidence/**", "docs/critical-gate-evidence")
+    ).toBe(true);
+    expect(
+      matchesPathPattern("docs/critical-gate-evidence/**", "docs/critical-gate-evidence/report.md")
+    ).toBe(true);
+    expect(
+      matchesPathPattern(
+        "docs/critical-gate-evidence/**",
+        "docs/critical-gate-evidence/2026-06-22/report.md"
+      )
+    ).toBe(true);
+    expect(
+      matchesPathPattern(
+        "docs\\critical-gate-evidence\\**",
+        "docs\\critical-gate-evidence\\2026-06-22\\report.md"
+      )
+    ).toBe(true);
+  });
+
   it("emits framework companion findings for active packs", () => {
     const diff = parse(`diff --git a/src/components/Button.tsx b/src/components/Button.tsx
 index 57b22a0..cb3e0f1 100644

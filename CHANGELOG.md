@@ -4,6 +4,17 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## 2.4.4 - 2026-06-23
+
+Patch release for policy glob matching semantics discovered during dogfooding.
+
+### Fixed
+
+- Treat trailing `/**` support-file policy globs as matching the directory itself and all nested
+  descendants, so rules such as `docs/critical-gate-evidence/**` cover dated evidence reports
+  without requiring the less intuitive `/**/*` form.
+- Normalize Windows path separators before policy/framework glob matching.
+
 ## 2.4.3 - 2026-06-22
 
 Patch release replacing the stale 2.4.2 artifact and covering the full `criticaldeveloper-blog`
