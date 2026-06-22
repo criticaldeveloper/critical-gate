@@ -415,6 +415,15 @@ The CI workflow publishes coverage and deterministic evaluation reports as GitHu
 [docs/evaluation-strategy.md](docs/evaluation-strategy.md) for artifact paths, thresholds, and the
 current limits of the internal evaluation corpus.
 
+Dogfood evidence labels from adopted repositories can be aggregated locally with:
+
+```bash
+pnpm dogfood:aggregate
+```
+
+This writes a Markdown summary to [docs/dogfood-evidence-summary.md](docs/dogfood-evidence-summary.md)
+and a JSON artifact under `artifacts/dogfood/evidence-summary.json`.
+
 ## Development
 
 Useful commands:
@@ -455,6 +464,8 @@ Branch and commit conventions for this repository:
 - [docs/codex-integration.md](docs/codex-integration.md): Codex hook and repair-loop guidance.
 - [docs/dogfood-evidence-plan.md](docs/dogfood-evidence-plan.md): real-repository dogfood automation,
   repair-loop metrics, and screenshot proof plan.
+- [docs/dogfood-evidence-summary.md](docs/dogfood-evidence-summary.md): latest aggregate summary from
+  human-labeled dogfood evidence reports.
 - [docs/dogfood-mv-ft-2026-06-19.md](docs/dogfood-mv-ft-2026-06-19.md): mv-ft dogfood
   evidence, misses, fixes, and current evaluation baseline.
 - [docs/versioning-policy.md](docs/versioning-policy.md): release and versioning policy.
