@@ -209,6 +209,8 @@ Compatibility boundary:
 
 ## Phase 5: Add Release Governance For Installable Channels
 
+Status: Done.
+
 Goal: keep npm, GitHub Action, Marketplace, docs, versions, and SARIF metadata aligned.
 
 Implementation tasks:

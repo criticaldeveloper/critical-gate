@@ -18,6 +18,26 @@ function readPackageVersion(path: string): string {
 describe("release version metadata", () => {
   const packageJsonPath = join(process.cwd(), "package.json");
   const actionYaml = readFileSync(join(process.cwd(), "action.yml"), "utf8");
+  const readme = readFileSync(join(process.cwd(), "README.md"), "utf8");
+  const changelog = readFileSync(join(process.cwd(), "CHANGELOG.md"), "utf8");
+  const vscodeChangelog = readFileSync(
+    join(process.cwd(), "extensions", "vscode", "CHANGELOG.md"),
+    "utf8"
+  );
+  const versioningPolicy = readFileSync(
+    join(process.cwd(), "docs", "versioning-policy.md"),
+    "utf8"
+  );
+  const installationDocs = readFileSync(join(process.cwd(), "docs", "installation.md"), "utf8");
+  const usageGuide = readFileSync(join(process.cwd(), "docs", "usage-guide.md"), "utf8");
+  const githubIntegrationDocs = readFileSync(
+    join(process.cwd(), "docs", "github-integration.md"),
+    "utf8"
+  );
+  const codexIntegrationDocs = readFileSync(
+    join(process.cwd(), "docs", "codex-integration.md"),
+    "utf8"
+  );
   const marketplaceDocs = readFileSync(
     join(process.cwd(), "docs", "vscode-marketplace-release.md"),
     "utf8"
@@ -30,6 +50,7 @@ describe("release version metadata", () => {
     scripts?: Record<string, string>;
   };
   const packageVersion = readPackageVersion(packageJsonPath);
+  const packageMajorTag = `v${packageVersion.split(".")[0]}`;
   const vscodeVersion = readPackageVersion(
     join(process.cwd(), "extensions", "vscode", "package.json")
   );
@@ -98,6 +119,32 @@ describe("release version metadata", () => {
 
   it("keeps the public GitHub Action default package version aligned", () => {
     expect(actionYaml).toContain(`default: "${packageVersion}"`);
+  });
+
+  it("keeps release policy and changelog entries aligned with the product version", () => {
+    expect(versioningPolicy).toContain(`The current target is \`${packageVersion}\`.`);
+    expect(versioningPolicy).toContain(
+      "keep the root CLI package and VS Code extension package on the same product version"
+    );
+    expect(changelog).toContain(`## ${packageVersion} -`);
+    expect(vscodeChangelog).toContain(`## ${packageVersion} -`);
+  });
+
+  it("keeps public install documentation on installable channels", () => {
+    for (const document of [readme, installationDocs, usageGuide]) {
+      expect(document).toContain("npx critical-gate");
+      expect(document).toContain(
+        "https://marketplace.visualstudio.com/items?itemName=criticaldeveloper.critical-gate-vscode"
+      );
+    }
+
+    for (const document of [readme, installationDocs, usageGuide, githubIntegrationDocs]) {
+      expect(document).toContain(`criticaldeveloper/critical-gate@${packageMajorTag}`);
+    }
+
+    expect(codexIntegrationDocs).toContain("npx critical-gate init-agent");
+    expect(codexIntegrationDocs).toContain("npx critical-gate hook --base main");
+    expect(githubIntegrationDocs).toContain(`version: "${packageVersion}"`);
   });
 
   it("keeps VS Code Marketplace identity and bundled analyzer defaults documented", () => {

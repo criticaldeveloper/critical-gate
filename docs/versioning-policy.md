@@ -31,6 +31,10 @@ Keep these versions aligned for a release:
 - VS Code extension changelog entry in `extensions/vscode/CHANGELOG.md`.
 - Public output schema version only when the `GateResult` JSON contract changes.
 
+Current policy: keep the root CLI package and VS Code extension package on the same product version
+while the extension bundles the analyzer. If a future release intentionally ships only one artifact,
+document the exception in both changelogs and in the release notes before publishing.
+
 The public schema version is not the same thing as the package version. Patch releases can change
 implementation details without changing `schemaVersion`.
 
@@ -83,12 +87,15 @@ Before cutting any release:
 10. If publishing the npm package, use npm provenance where the release environment supports it.
 11. Verify public GitHub Action examples use the current major tag and that `action.yml` defaults to
     the current npm CLI package version.
-12. Run `pnpm test:vscode` when the editor extension is included.
-13. Run `pnpm package:vscode` when publishing or attaching a VSIX artifact.
-14. If publishing a prebuilt GitHub Action artifact, run `pnpm package:action` and
+12. Verify README, installation, usage, GitHub integration, Codex integration, and Marketplace docs
+    point to public installable channels instead of source-only commands for end users.
+13. Run `pnpm test -- tests/release-version.test.ts`.
+14. Run `pnpm test:vscode` when the editor extension is included.
+15. Run `pnpm package:vscode` when publishing or attaching a VSIX artifact.
+16. If publishing a prebuilt GitHub Action artifact, run `pnpm package:action` and
     `pnpm smoke:action`, then verify release consumers use `install: "false"` and `build: "false"`.
-15. Run Critical Gate against the release diff with release notes as task context.
-16. Tag the release after all checks pass.
+17. Run Critical Gate against the release diff with release notes as task context.
+18. Tag the release after all checks pass.
 
 ## Product Non-Goals Checkpoint
 
