@@ -2,7 +2,7 @@
 
 ## Status
 
-In progress.
+Done.
 
 ## Why
 
@@ -243,8 +243,10 @@ Compatibility boundary:
 
 ## Phase 6: Refactor `src/cli.ts` By Responsibility
 
-Status: In progress. Initial extraction moved help text, git hook rendering, and CLI entrypoint
-path normalization into focused `src/cli/*` helper modules.
+Status: Done. `src/cli.ts` is now a thin compatibility entrypoint with the shebang and public
+exports. CLI behavior is split across focused `src/cli/*` modules for command dispatch, command
+implementations, argument parsing, help text, IO defaults, result construction, git hook rendering,
+entrypoint detection, and shared CLI types.
 
 Goal: make CLI work easier to review without changing behavior.
 
