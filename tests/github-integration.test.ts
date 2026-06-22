@@ -72,6 +72,9 @@ describe("GitHub integration", () => {
     expect(workflow).toContain("uses: github/codeql-action/upload-sarif@v4");
     expect(workflow).toContain("sarif_file: critical-gate.sarif");
     expect(workflow).toContain("continue-on-error: true");
+    expect(workflow).toMatch(
+      /Upload SARIF[\s\S]*continue-on-error: true[\s\S]*github\/codeql-action\/upload-sarif@v4/
+    );
     expect(workflow).toContain("version: local");
   });
 
@@ -93,6 +96,9 @@ describe("GitHub integration", () => {
     expect(sarifTemplate).toContain("format: sarif");
     expect(sarifTemplate).toContain("uses: github/codeql-action/upload-sarif@v4");
     expect(sarifTemplate).toContain("continue-on-error: true");
+    expect(sarifTemplate).toMatch(
+      /Upload Critical Gate SARIF[\s\S]*continue-on-error: true[\s\S]*github\/codeql-action\/upload-sarif@v4/
+    );
     expect(sarifTemplate).toContain("steps.critical-gate.outcome == 'failure'");
 
     expect(summaryTemplate).toContain("uses: criticaldeveloper/critical-gate@v2");

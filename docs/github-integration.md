@@ -128,6 +128,7 @@ jobs:
 
       - uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles('critical-gate.sarif') != ''
+        continue-on-error: true
         with:
           sarif_file: critical-gate.sarif
 
@@ -181,6 +182,11 @@ jobs:
 Start with the default threshold: fail the workflow on blocker and high findings, and report medium,
 low, and info findings without blocking. This matches the CLI decision model and keeps early rollout
 focused on high-confidence failures.
+
+Keep SARIF upload best-effort with `continue-on-error: true`. Code scanning ingestion can fail
+independently of the gate decision because of repository permissions, branch protection settings, or
+GitHub-side SARIF validation. The final `steps.critical-gate.outcome == 'failure'` step remains the
+blocking signal for Critical Gate findings.
 
 Use `strict: "true"` only after the repository has several clean runs and the team agrees that medium
 findings should become actionable. The current strict flag is passed through in metadata for

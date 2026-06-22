@@ -18,6 +18,8 @@ Material Symbols removal replay.
 - Keep package manifest and lockfile dependency removals non-blocking when the removed package is
   named by the task intent.
 - Add a full replay fixture for replacing Material Symbols with local SVG icons.
+- Keep SARIF upload best-effort in GitHub workflows so a passing gate is not failed by code scanning
+  ingestion.
 
 ## 2.4.2 - 2026-06-22
 
