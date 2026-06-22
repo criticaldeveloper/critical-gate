@@ -302,7 +302,7 @@ Goal: catch platform/runtime issues without overbuilding CI.
 
 Implementation:
 
-1. Run core verification on Node 22 and Node 24.
+1. Run core verification on Node 20, Node 22, and Node 24.
 2. Run at least one Windows job for CLI path behavior.
 3. Keep VS Code packaging in a separate workflow to avoid slowing every push.
 

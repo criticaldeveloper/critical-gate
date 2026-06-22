@@ -160,22 +160,8 @@ rather than generic review or automatic fixes.
 
 ## GitHub Action
 
-Until the action is published under a remote slug, use it from this repository checkout or from the
-same repository with `uses: ./`.
-
-The composite action installs dependencies and builds by default. Source checkouts should keep the
-defaults.
-
-For release artifacts, build and smoke-test the prebuilt action directory:
-
-```bash
-pnpm package:action
-pnpm smoke:action
-```
-
-That writes `artifacts/action` with `action.yml`, required package metadata, and prebuilt `dist/`
-output. It intentionally excludes `node_modules`. Only use `install: "false"` and `build: "false"`
-with an artifact that has passed the smoke check.
+Use the versioned public action in consumer repositories. The action runs the npm-published CLI by
+default, so workflows do not need to install pnpm or build Critical Gate from source.
 
 Minimal workflow:
 
@@ -199,7 +185,7 @@ jobs:
           fetch-depth: 0
 
       - id: critical-gate
-        uses: ./
+        uses: criticaldeveloper/critical-gate@v2
         continue-on-error: true
         with:
           task: ${{ github.event.pull_request.title }}
@@ -216,26 +202,39 @@ jobs:
         run: exit 1
 ```
 
-For external repositories before publication, checkout Critical Gate as a secondary path and call
-that path's action:
+Pin the CLI package version only when needed:
 
 ```yaml
-- name: Checkout project
-  uses: actions/checkout@v6
-  with:
-    fetch-depth: 0
+with:
+  version: "2.3.1"
+```
 
-- name: Checkout Critical Gate
-  uses: actions/checkout@v6
-  with:
-    repository: <owner>/critical-gate
-    path: .critical-gate
+Maintainers can run the action from a source checkout with local mode:
 
-- name: Run Critical Gate
-  uses: ./.critical-gate
+```yaml
+- id: critical-gate
+  uses: ./
   with:
+    version: local
     task: ${{ github.event.pull_request.title }}
-    base: ${{ github.event.pull_request.base.sha }}
+```
+
+For release artifacts, build and smoke-test the prebuilt action directory:
+
+```bash
+pnpm package:action
+pnpm smoke:action
+```
+
+That writes `artifacts/action` with `action.yml`, required package metadata, and prebuilt `dist/`
+output. It intentionally excludes `node_modules`. Only use `install: "false"` and `build: "false"`
+with local mode and an artifact that has passed the smoke check:
+
+```yaml
+with:
+  version: local
+  install: "false"
+  build: "false"
 ```
 
 ## Codex Hook

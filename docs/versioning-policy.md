@@ -26,6 +26,7 @@ Keep these versions aligned for a release:
 - VS Code extension version in `extensions/vscode/package.json`.
 - Runtime version constant in `src/version.ts`, which backs `critical-gate --version`, JSON
   metadata, and SARIF tool metadata.
+- Public GitHub Action default package version in `action.yml`.
 - Project changelog entry in `CHANGELOG.md`.
 - VS Code extension changelog entry in `extensions/vscode/CHANGELOG.md`.
 - Public output schema version only when the `GateResult` JSON contract changes.
@@ -80,12 +81,14 @@ Before cutting any release:
 8. Run `pnpm validate:npm-package`.
 9. Run `npm pack --dry-run`.
 10. If publishing the npm package, use npm provenance where the release environment supports it.
-11. Run `pnpm test:vscode` when the editor extension is included.
-12. Run `pnpm package:vscode` when publishing or attaching a VSIX artifact.
-13. If publishing a prebuilt GitHub Action artifact, run `pnpm package:action` and
+11. Verify public GitHub Action examples use the current major tag and that `action.yml` defaults to
+    the current npm CLI package version.
+12. Run `pnpm test:vscode` when the editor extension is included.
+13. Run `pnpm package:vscode` when publishing or attaching a VSIX artifact.
+14. If publishing a prebuilt GitHub Action artifact, run `pnpm package:action` and
     `pnpm smoke:action`, then verify release consumers use `install: "false"` and `build: "false"`.
-14. Run Critical Gate against the release diff with release notes as task context.
-15. Tag the release after all checks pass.
+15. Run Critical Gate against the release diff with release notes as task context.
+16. Tag the release after all checks pass.
 
 ## Product Non-Goals Checkpoint
 

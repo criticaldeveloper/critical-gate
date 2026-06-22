@@ -80,6 +80,7 @@ jobs:
         uses: ./
         continue-on-error: true
         with:
+          version: local
           task: ${{ steps.critical-gate-inputs.outputs.task }}
           base: ${{ steps.critical-gate-inputs.outputs.base }}
           format: sarif

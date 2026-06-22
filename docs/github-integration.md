@@ -5,13 +5,15 @@ recommended first integration is SARIF upload, because GitHub can attach finding
 while the workflow still fails on blocker or high-severity findings.
 Installation steps live in `docs/installation.md`.
 
-## Composite Action
+## Public Composite Action
 
-The repository exposes a composite action at `action.yml`.
+The repository exposes a composite action at `action.yml`. For third-party repositories, use the
+versioned public action. The action runs the npm-published CLI by default, so consumer workflows do
+not need pnpm, a Critical Gate source checkout, or a local TypeScript build.
 
 ```yaml
 - name: Run Critical Gate
-  uses: ./
+  uses: criticaldeveloper/critical-gate@v2
   with:
     task: ${{ github.event.pull_request.title }}
     base: ${{ github.event.pull_request.base.sha }}
@@ -19,15 +21,29 @@ The repository exposes a composite action at `action.yml`.
     output: critical-gate.sarif
 ```
 
-The action uses pnpm, builds the package when needed, and runs:
+By default, the action runs:
 
 ```bash
-node dist/cli.js check --task "<task>" --base "<base>" --format sarif --output critical-gate.sarif
+npx --yes critical-gate@<version> check --task "<task>" --base "<base>" --format sarif --output critical-gate.sarif
 ```
 
-For a published action, keep `dist/` available in the release package or leave `build: "true"` so
-the composite action can compile before it runs. Only set `install: "false"` and `build: "false"`
-for an artifact that has been verified to contain everything the action needs at runtime.
+The `version` input defaults to the package version declared by the release. Pin it only when a
+workflow needs to test a specific CLI package version:
+
+```yaml
+with:
+  version: "2.3.1"
+```
+
+Use `version: local` only for Critical Gate maintainer workflows, source checkouts, or smoke-tested
+prebuilt action artifacts. Local mode uses pnpm and runs:
+
+```bash
+node "$GITHUB_ACTION_PATH/dist/cli.js" check ...
+```
+
+The `install` and `build` inputs are ignored for npm package runs. They apply only when
+`version: local`.
 
 ## Prebuilt Action Artifact
 
@@ -46,16 +62,17 @@ The package script builds the CLI and writes `artifacts/action` with:
 - `ACTION_ARTIFACT.md`
 - prebuilt `dist/`
 
-Use that artifact with:
+Use that artifact with local mode:
 
 ```yaml
 with:
+  version: local
   install: "false"
   build: "false"
 ```
 
-Source checkouts should keep the defaults. The prebuilt mode is only for release artifacts that have
-passed `pnpm smoke:action`.
+Source checkouts should use `version: local` and keep the install/build defaults. The prebuilt mode
+is only for release artifacts that have passed `pnpm smoke:action`.
 
 For push workflows, make the task intent cover the same range as the selected base. If one push
 contains multiple commits, join all commit messages from the push payload instead of using only the
@@ -63,9 +80,9 @@ head commit message.
 
 ## Maintainer CI Runtime Matrix
 
-Critical Gate supports Node 22 and Node 24. The maintained CI workflow runs core verification on
-both versions on Ubuntu, because most analyzer behavior is platform-independent and should stay
-stable across supported Node runtimes.
+Critical Gate supports Node 20 and newer for the CLI. The maintained CI workflow runs core
+verification on Node 20, Node 22, and Node 24 on Ubuntu, because most analyzer behavior is
+platform-independent and should stay stable across supported Node runtimes.
 
 The CI workflow also keeps a focused Windows CLI smoke job on Node 24. That job builds the CLI,
 checks help output, and writes a JSON report through a Windows-style output path so path handling is
@@ -101,7 +118,7 @@ jobs:
           fetch-depth: 0
 
       - id: critical-gate
-        uses: criticaldeveloper/critical-gate@v1
+        uses: criticaldeveloper/critical-gate@v2
         continue-on-error: true
         with:
           task: ${{ github.event.pull_request.title }}
@@ -144,7 +161,7 @@ jobs:
           fetch-depth: 0
 
       - id: critical-gate
-        uses: criticaldeveloper/critical-gate@v1
+        uses: criticaldeveloper/critical-gate@v2
         continue-on-error: true
         with:
           task: ${{ github.event.pull_request.title }}

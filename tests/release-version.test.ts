@@ -17,6 +17,7 @@ function readPackageVersion(path: string): string {
 
 describe("release version metadata", () => {
   const packageJsonPath = join(process.cwd(), "package.json");
+  const actionYaml = readFileSync(join(process.cwd(), "action.yml"), "utf8");
   const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8")) as {
     version?: string;
     bin?: Record<string, string>;
@@ -77,5 +78,9 @@ describe("release version metadata", () => {
     expect(packageJson.scripts?.prepack).toBe(
       "pnpm build && node scripts/validate-npm-package.mjs"
     );
+  });
+
+  it("keeps the public GitHub Action default package version aligned", () => {
+    expect(actionYaml).toContain(`default: "${packageVersion}"`);
   });
 });

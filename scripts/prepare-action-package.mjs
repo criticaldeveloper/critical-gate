@@ -56,6 +56,7 @@ writeFileSync(
     "This artifact is intended for GitHub Action usage with:",
     "",
     "```yaml",
+    "version: local",
     'install: "false"',
     'build: "false"',
     "```",

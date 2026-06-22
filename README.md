@@ -353,7 +353,7 @@ jobs:
           fetch-depth: 0
 
       - id: critical-gate
-        uses: ./
+        uses: criticaldeveloper/critical-gate@v2
         continue-on-error: true
         with:
           task: ${{ github.event.pull_request.title }}

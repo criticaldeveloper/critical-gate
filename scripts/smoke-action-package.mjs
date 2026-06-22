@@ -28,11 +28,16 @@ if (existsSync(join(artifact, "node_modules"))) {
 }
 
 const action = readFileSync(join(artifact, "action.yml"), "utf8");
+const packageJson = JSON.parse(readFileSync(join(artifact, "package.json"), "utf8"));
 
 for (const expected of [
+  `default: "${packageJson.version}"`,
+  "if: ${{ inputs.version == 'local' }}",
+  "if: ${{ inputs.version != 'local' }}",
   'if [ "${{ inputs.install }}" = "true" ]; then',
   'if [ "${{ inputs.build }}" = "true" ] || [ ! -f "$GITHUB_ACTION_PATH/dist/cli.js" ]; then',
-  'node "$GITHUB_ACTION_PATH/dist/cli.js" "${args[@]}"'
+  'node "$GITHUB_ACTION_PATH/dist/cli.js" "${args[@]}"',
+  'npx --yes "critical-gate@$CRITICAL_GATE_VERSION" "${args[@]}"'
 ]) {
   if (!action.includes(expected)) {
     throw new Error(`Action artifact is missing expected runtime path: ${expected}`);

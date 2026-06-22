@@ -86,6 +86,8 @@ Compatibility boundary:
 
 ## Phase 2: Make The GitHub Action Public-Repo Friendly
 
+Status: Done.
+
 Goal: make third-party workflows use a versioned public action without compiling Critical Gate:
 
 ```yaml

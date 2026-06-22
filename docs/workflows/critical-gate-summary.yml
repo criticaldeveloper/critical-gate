@@ -21,7 +21,7 @@ jobs:
 
       - name: Run Critical Gate Markdown report
         id: critical-gate
-        uses: criticaldeveloper/critical-gate@v1
+        uses: criticaldeveloper/critical-gate@v2
         continue-on-error: true
         with:
           task: ${{ github.event.pull_request.title }}

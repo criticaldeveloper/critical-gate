@@ -437,7 +437,7 @@ For pull requests, run Critical Gate with SARIF upload and fail only after uploa
 
 ```yaml
 - id: critical-gate
-  uses: ./
+  uses: criticaldeveloper/critical-gate@v2
   continue-on-error: true
   with:
     task: ${{ github.event.pull_request.title }}

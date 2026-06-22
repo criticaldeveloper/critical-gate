@@ -18,16 +18,24 @@ inputs:
     description: Report file path, relative to the checked-out repository.
     required: false
     default: critical-gate.sarif
+  version:
+    description: Critical Gate npm package version to run. Use "local" only for checked-out source or smoke-tested prebuilt action artifacts.
+    required: false
+    default: "2.3.1"
+  fail-on:
+    description: "Minimum severity that fails the gate: blocker, high, or medium."
+    required: false
+    default: ""
   strict:
     description: Pass --strict through to the CLI.
     required: false
     default: "false"
   install:
-    description: Install the action package dependencies with pnpm before running. Keep true for source checkouts; set false only for smoke-tested prebuilt action artifacts.
+    description: Install action package dependencies with pnpm when version is "local". Ignored for npm package runs.
     required: false
     default: "true"
   build:
-    description: Build the action package before running. Keep true for source checkouts; set false only for smoke-tested prebuilt action artifacts.
+    description: Build the action package when version is "local". Ignored for npm package runs.
     required: false
     default: "true"
 
@@ -43,7 +51,8 @@ runs:
       shell: bash
       run: echo "report-path=${{ inputs.output }}" >> "$GITHUB_OUTPUT"
 
-    - name: Prepare Critical Gate
+    - name: Prepare local Critical Gate
+      if: ${{ inputs.version == 'local' }}
       shell: bash
       run: |
         set -euo pipefail
@@ -58,14 +67,21 @@ runs:
           pnpm --dir "$GITHUB_ACTION_PATH" build
         fi
 
+    - name: Select npm Critical Gate
+      if: ${{ inputs.version != 'local' }}
+      shell: bash
+      run: echo "Using critical-gate@${{ inputs.version }} from npm."
+
     - name: Run Critical Gate
       shell: bash
       working-directory: ${{ github.workspace }}
       env:
+        CRITICAL_GATE_VERSION: ${{ inputs.version }}
         CRITICAL_GATE_TASK: ${{ inputs.task }}
         CRITICAL_GATE_BASE: ${{ inputs.base }}
         CRITICAL_GATE_FORMAT: ${{ inputs.format }}
         CRITICAL_GATE_OUTPUT: ${{ inputs.output }}
+        CRITICAL_GATE_FAIL_ON: ${{ inputs.fail-on }}
         CRITICAL_GATE_STRICT: ${{ inputs.strict }}
       run: |
         set -euo pipefail
@@ -88,8 +104,16 @@ runs:
           args+=(--base "$CRITICAL_GATE_BASE")
         fi
 
+        if [ -n "$CRITICAL_GATE_FAIL_ON" ]; then
+          args+=(--fail-on "$CRITICAL_GATE_FAIL_ON")
+        fi
+
         if [ "$CRITICAL_GATE_STRICT" = "true" ]; then
           args+=(--strict)
         fi
 
-        node "$GITHUB_ACTION_PATH/dist/cli.js" "${args[@]}"
+        if [ "$CRITICAL_GATE_VERSION" = "local" ]; then
+          node "$GITHUB_ACTION_PATH/dist/cli.js" "${args[@]}"
+        else
+          npx --yes "critical-gate@$CRITICAL_GATE_VERSION" "${args[@]}"
+        fi
