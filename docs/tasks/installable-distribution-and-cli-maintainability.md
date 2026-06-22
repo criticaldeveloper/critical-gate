@@ -243,6 +243,9 @@ Compatibility boundary:
 
 ## Phase 6: Refactor `src/cli.ts` By Responsibility
 
+Status: In progress. Initial extraction moved help text, git hook rendering, and CLI entrypoint
+path normalization into focused `src/cli/*` helper modules.
+
 Goal: make CLI work easier to review without changing behavior.
 
 Proposed target structure:
