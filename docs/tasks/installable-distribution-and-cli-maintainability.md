@@ -36,8 +36,8 @@ metadata, and repair-loop semantics unless a task explicitly changes one of thos
 - `src/version.ts`, root `package.json`, and `extensions/vscode/package.json` are currently aligned
   at `2.3.1`.
 - The npm CLI package is now the intended primary public CLI install path.
-- `action.yml` is still a source-oriented composite action by default, with `install` and `build`
-  inputs that run pnpm unless disabled. The public action path remains a follow-up task.
+- `action.yml` runs the npm CLI by default and keeps `version: local` for source dogfooding or
+  smoke-tested prebuilt action artifacts.
 - The VS Code extension is already published on Marketplace as
   `criticaldeveloper.critical-gate-vscode`:
   <https://marketplace.visualstudio.com/items?itemName=criticaldeveloper.critical-gate-vscode>
@@ -170,6 +170,8 @@ Compatibility boundary:
 - Do not make the extension depend on a globally installed CLI when the bundled analyzer is present.
 
 ## Phase 4: Codex Hook And Agent Onboarding Install UX
+
+Status: Done.
 
 Goal: make Codex setup point at the installable CLI instead of a source checkout.
 

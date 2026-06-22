@@ -20,6 +20,7 @@ describe("agent onboarding instructions", () => {
 
     expect(next).toContain("# AGENTS.md\n\nKeep local instructions.");
     expect(next).toContain("## Critical Gate Agent Instructions");
+    expect(next).toContain('npx critical-gate check --task "<task intent>" --base <base-ref>');
   });
 
   it("replaces only the managed block on repeated runs", () => {

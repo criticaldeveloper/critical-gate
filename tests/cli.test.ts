@@ -209,7 +209,7 @@ describe("cli", () => {
     expect(output).toContain("Keep this local rule.");
     expect(output).toContain("Keep this trailing rule.");
     expect(output).not.toContain("old generated content");
-    expect(output).toContain("critical-gate check --task");
+    expect(output).toContain("npx critical-gate check --task");
     expect(stdout[0]).toContain("Updated");
   });
 
@@ -590,6 +590,15 @@ describe("cli", () => {
     expect(main(["hook", "--help"], io)).toBe(ExitCode.Pass);
     expect(stdout.join("\n")).toContain("critical-gate hook");
     expect(stdout.join("\n")).toContain("defaults to Codex completed feature implementation");
+    expect(stderr).toEqual([]);
+  });
+
+  it("prints init-agent help with the installable CLI default", () => {
+    const { io, stdout, stderr } = createTestIo();
+
+    expect(main(["init-agent", "--help"], io)).toBe(ExitCode.Pass);
+    expect(stdout.join("\n")).toContain("critical-gate init-agent");
+    expect(stdout.join("\n")).toContain("defaults to npx critical-gate");
     expect(stderr).toEqual([]);
   });
 

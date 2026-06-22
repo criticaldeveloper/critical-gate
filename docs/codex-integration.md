@@ -24,33 +24,58 @@ Consumer repositories can initialize a managed Critical Gate section without rep
 existing instructions:
 
 ```bash
-critical-gate init-agent
+npx critical-gate init-agent
 ```
 
-Use `--cli <command>` when Codex should call a repository-local wrapper or built CLI path. The
-generated block is safe to rerun: Critical Gate replaces only the section between its managed
-markers and preserves the rest of `AGENTS.md`.
+The generated block defaults to `npx critical-gate` so agents can use the installable CLI without a
+source checkout. Use `--cli <command>` when Codex should call a repository-local wrapper, such as
+`npm run critical-gate --`, or a custom built CLI path. The generated block is safe to rerun:
+Critical Gate replaces only the section between its managed markers and preserves the rest of
+`AGENTS.md`.
 
 ### CLI
 
 The CLI is the canonical integration surface. Other integrations should call the CLI instead of reimplementing analysis.
 
-Example future shape:
+Example:
 
 ```bash
-critical-gate check --task "Add signup validation" --base origin/main --format markdown
+npx critical-gate check --task "Add signup validation" --base origin/main --format markdown
 ```
 
 ### Codex Hook
 
 Use a Codex `Stop` hook after the CLI exists and findings are precise enough.
 
-This repository includes an example project hook at `.codex/hooks.json`. Codex discovers hooks
-from active config layers, and repo-local hooks must be reviewed and trusted before they run.
-Use `/hooks` in Codex CLI to review or trust the hook after changes.
+For consumer repositories, prefer the installable CLI in hook commands:
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx critical-gate hook --base main",
+            "timeout": 60,
+            "statusMessage": "Running Critical Gate"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+This repository also includes an example project hook at `.codex/hooks.json`. It is intentionally
+source-oriented for dogfooding Critical Gate itself: the hook builds the local checkout and runs
+`node dist/cli.js`. Codex discovers hooks from active config layers, and repo-local hooks must be
+reviewed and trusted before they run. Use `/hooks` in Codex CLI to review or trust the hook after
+changes.
 Installation steps live in `docs/installation.md`.
 
-Example shape:
+Repository dogfood hook shape:
 
 ```json
 {
@@ -79,7 +104,19 @@ The hook command should:
 - Avoid dumping long reports into the agent loop.
 - Avoid mutating files directly.
 
-Current local command:
+Consumer hook command:
+
+```bash
+npx critical-gate hook --base main
+```
+
+Project-local package-script alternative:
+
+```bash
+npm run critical-gate -- hook --base main
+```
+
+Current dogfood command in this repository:
 
 ```bash
 pnpm build

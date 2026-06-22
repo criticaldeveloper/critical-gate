@@ -29,7 +29,7 @@ export interface InitAgentInstructionsResult {
 
 export function initAgentInstructions({
   root,
-  cliCommand = "critical-gate",
+  cliCommand = "npx critical-gate",
   includePolicyReminder = true,
   io
 }: InitAgentInstructionsOptions): InitAgentInstructionsResult {
@@ -67,7 +67,7 @@ export function mergeCriticalGateAgentBlock(existing: string, block: string): st
 }
 
 export function renderCriticalGateAgentBlock(
-  cliCommand = "critical-gate",
+  cliCommand = "npx critical-gate",
   includePolicyReminder = true
 ): string {
   const lines = [

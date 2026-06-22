@@ -784,7 +784,7 @@ function getInitAgentHelpText(): string {
     "Creates or updates the managed Critical Gate section in AGENTS.md.",
     "",
     "Options:",
-    "  --cli <command>     Critical Gate command/path agents should run; defaults to critical-gate",
+    "  --cli <command>     Critical Gate command/path agents should run; defaults to npx critical-gate",
     "",
     "The command preserves existing AGENTS.md content and replaces only the managed Critical Gate block.",
     ""
@@ -993,7 +993,7 @@ function parseInitAgentArgs(args: string[]):
       error: string;
     } {
   const options = {
-    cli: "critical-gate"
+    cli: "npx critical-gate"
   };
 
   for (let index = 0; index < args.length; index += 1) {

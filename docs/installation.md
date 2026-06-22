@@ -1,7 +1,7 @@
 # Installation
 
 Critical Gate supports an npm-distributed CLI, source-based development setup, local Codex hook
-setup, a source-oriented GitHub Action, and a Marketplace VS Code extension. The root CLI package
+setup, an npm-backed GitHub Action, and a Marketplace VS Code extension. The root CLI package
 and VS Code extension use aligned numeric dogfood release versions, but the project has not declared
 a stable public API contract yet.
 
@@ -143,7 +143,7 @@ At runtime, hooks accept:
 Initialize durable agent instructions in a consumer repository:
 
 ```bash
-critical-gate init-agent
+npx critical-gate init-agent
 ```
 
 This creates or updates a managed Critical Gate section in `AGENTS.md`. Existing user instructions
@@ -151,7 +151,7 @@ are preserved, and repeated runs replace only the managed Critical Gate block. U
 when agents should run a project-local command:
 
 ```bash
-critical-gate init-agent --cli "npx critical-gate"
+npx critical-gate init-agent --cli "npx critical-gate"
 ```
 
 The generated section tells agents how to run `check`, `hook`, `snapshot-api`, `init-policy`, and
@@ -239,9 +239,40 @@ with:
 
 ## Codex Hook
 
-This repository includes a sample Codex project hook at `.codex/hooks.json`.
+For consumer repositories, run hook mode through the installable CLI:
 
-Install locally:
+```bash
+npx critical-gate hook --base main
+```
+
+A Codex `Stop` hook can call that command after the agent finishes a task:
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx critical-gate hook --base main",
+            "timeout": 60,
+            "statusMessage": "Running Critical Gate"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Review hook commands before trusting them. Hooks should report evidence-backed findings and compact
+repair guidance; they should not mutate files directly.
+
+This repository includes a source-oriented dogfood hook at `.codex/hooks.json`. It builds the local
+checkout and runs `node dist/cli.js`, so use it only when developing Critical Gate itself.
+
+To use this repository's dogfood hook locally:
 
 1. Build the CLI:
 
@@ -259,7 +290,7 @@ Install locally:
    node dist/cli.js hook --base main
    ```
 
-The sample `Stop` hook builds Critical Gate and runs compact repair output:
+The dogfood `Stop` hook builds Critical Gate and runs compact repair output:
 
 ```bash
 ROOT=$(git rev-parse --show-toplevel) && pnpm --dir "$ROOT" --silent build && node "$ROOT/dist/cli.js" hook --base main

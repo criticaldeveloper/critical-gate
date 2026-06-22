@@ -429,7 +429,10 @@ files, forbidden files, and success criteria. The allowed files come from findin
 forbidden files are other changed files that should not be touched while fixing that finding unless
 the task intent is expanded.
 
-Review `.codex/hooks.json` before trusting it in Codex CLI.
+For consumer repositories, configure the hook command to run `npx critical-gate hook --base main` or
+a project-local wrapper. This repository's `.codex/hooks.json` is a source-mode dogfood example that
+builds the local checkout before running the hook; review any hook command before trusting it in
+Codex CLI.
 
 ## GitHub Action Workflow
 

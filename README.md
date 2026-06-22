@@ -217,7 +217,7 @@ Critical Gate has one analysis core and multiple surfaces:
 - **Codex hook**: repair-oriented stop hook for agent workflows.
 - **VS Code extension**: Activity Bar dashboard, status bar state, Problems diagnostics, full report
   output, evidence navigation, and repair-copy actions.
-- **Agent onboarding**: `critical-gate init-agent` and the VS Code initialization command add a
+- **Agent onboarding**: `npx critical-gate init-agent` and the VS Code initialization command add a
   managed Critical Gate section to `AGENTS.md` while preserving existing repository instructions.
 
 The CLI remains the source of truth. The editor and CI surfaces consume CLI output rather than
