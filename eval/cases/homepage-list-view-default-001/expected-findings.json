@@ -1,0 +1,8 @@
+{
+  "sourceRepository": "criticaldeveloper-blog",
+  "caseType": "false-positive-regression",
+  "labelSource": "docs/critical-gate-evidence/2026-06-22/114047-make-homepage-list-view-the-default-display-mode.labels.json",
+  "shouldBlock": false,
+  "expectedFindings": [],
+  "allowedExtraDetectors": ["expected-companions", "repository-intelligence", "blast-radius"]
+}

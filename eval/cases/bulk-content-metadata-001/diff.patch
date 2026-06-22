@@ -1,0 +1,27 @@
+diff --git a/src/content/posts/a.md b/src/content/posts/a.md
+index 1d1bc22..d5098d0 100644
+--- a/src/content/posts/a.md
++++ b/src/content/posts/a.md
+@@ -1,5 +1,6 @@
+ ---
+ title: A
++related: ["b", "c"]
+ ---
+diff --git a/src/content/posts/b.md b/src/content/posts/b.md
+index 9489d0e..7ef31c2 100644
+--- a/src/content/posts/b.md
++++ b/src/content/posts/b.md
+@@ -1,5 +1,6 @@
+ ---
+ title: B
++related: ["a", "c"]
+ ---
+diff --git a/src/content/posts/c.md b/src/content/posts/c.md
+index 02dbcb9..aa828a5 100644
+--- a/src/content/posts/c.md
++++ b/src/content/posts/c.md
+@@ -1,5 +1,6 @@
+ ---
+ title: C
++related: ["a", "b"]
+ ---

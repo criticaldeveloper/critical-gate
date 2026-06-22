@@ -1,0 +1,23 @@
+diff --git a/package.json b/package.json
+index 9d4f7ad..c23a6db 100644
+--- a/package.json
++++ b/package.json
+@@ -4,7 +4,8 @@
+   "scripts": {
+     "build": "astro build"
+   },
+   "devDependencies": {
++    "critical-gate": "^2.4.3",
+     "typescript": "^5.8.3"
+   }
+ }
+diff --git a/bun.lock b/bun.lock
+index 0a18a54..c765e53 100644
+--- a/bun.lock
++++ b/bun.lock
+@@ -8,6 +8,7 @@
+   "packages": {
++    "critical-gate": ["critical-gate@2.4.3", "", {}, "sha512-critical-gate"],
+     "typescript": ["typescript@5.8.3", "", {}, "sha512-typescript"],
+   }
+ }

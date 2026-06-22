@@ -1,0 +1,8 @@
+{
+  "sourceRepository": "criticaldeveloper-blog",
+  "caseType": "false-positive-regression",
+  "labelSource": "docs/critical-gate-evidence/2026-06-22/111919-fix-homepage-redesign-grid-featured-title-sizing-reload-flicker-and-article-mobi.labels.json",
+  "shouldBlock": false,
+  "expectedFindings": [],
+  "allowedExtraDetectors": ["expected-companions", "repository-intelligence"]
+}

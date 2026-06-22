@@ -1,0 +1,28 @@
+diff --git a/src/components/BlogHomePage.astro b/src/components/BlogHomePage.astro
+index 2f1e2c9..df3719b 100644
+--- a/src/components/BlogHomePage.astro
++++ b/src/components/BlogHomePage.astro
+@@ -1,5 +1,4 @@
+ <section class="home">
+-  <span class="home__badge">Archive</span>
+   <h1 class="home__title">Signal archive</h1>
+ </section>
+diff --git a/src/styles/home.scss b/src/styles/home.scss
+index 6badd0f..76503d1 100644
+--- a/src/styles/home.scss
++++ b/src/styles/home.scss
+@@ -1,6 +1,6 @@
+ .home {
+-  display: block;
++  display: grid;
+   gap: 24px;
+ }
+diff --git a/src/styles/post.scss b/src/styles/post.scss
+index 2a03674..f0a7c1d 100644
+--- a/src/styles/post.scss
++++ b/src/styles/post.scss
+@@ -1,5 +1,5 @@
+ .post-list {
+-  margin: 32px 0;
++  margin: 24px 0;
+ }

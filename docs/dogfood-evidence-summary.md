@@ -10,7 +10,7 @@ Generated: 2026-06-22T20:18:20.625Z
 - False-positive finding instances: 77
 - Missed findings: 0
 - Fixture-needed reports: 11
-- Fixture-created reports: 0
+- Fixture-created reports: 11
 
 ## Run Labels
 

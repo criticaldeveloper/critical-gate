@@ -1,0 +1,26 @@
+diff --git a/AGENTS.md b/AGENTS.md
+index 8263f49..359c8fd 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -1,3 +1,5 @@
+ # AGENTS.md
++
++Use `.codex/skills/synapse-review` when changing post synapses.
+diff --git a/src/content/AGENTS.md b/src/content/AGENTS.md
+index d6f45f8..5a2f4bc 100644
+--- a/src/content/AGENTS.md
++++ b/src/content/AGENTS.md
+@@ -1,3 +1,5 @@
+ # Content Instructions
++
++Run the synapse review skill after bulk post metadata edits.
+diff --git a/.codex/skills/synapse-review/SKILL.md b/.codex/skills/synapse-review/SKILL.md
+new file mode 100644
+index 0000000..bcdf981
+--- /dev/null
++++ b/.codex/skills/synapse-review/SKILL.md
+@@ -0,0 +1,5 @@
++# Synapse Review
++
++Use this skill to inspect related post frontmatter and update reciprocal
++synapse links after post metadata changes.

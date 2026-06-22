@@ -1,0 +1,8 @@
+{
+  "sourceRepository": "criticaldeveloper-blog",
+  "caseType": "false-positive-regression",
+  "labelSource": "docs/critical-gate-evidence/2026-06-22/181051-create-synapse-review-skill-and-agent-instructions.labels.json",
+  "shouldBlock": false,
+  "expectedFindings": [],
+  "allowedExtraDetectors": ["blast-radius", "repository-intelligence"]
+}

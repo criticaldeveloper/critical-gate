@@ -1,0 +1,8 @@
+{
+  "sourceRepository": "criticaldeveloper-blog",
+  "caseType": "false-positive-regression",
+  "labelSource": "docs/critical-gate-evidence/2026-06-22/144040-upgrade-critical-gate-dogfood-dependency-to-2-4-3.labels.json",
+  "shouldBlock": false,
+  "expectedFindings": [],
+  "allowedExtraDetectors": ["dependency-addition", "expected-companions", "scope"]
+}

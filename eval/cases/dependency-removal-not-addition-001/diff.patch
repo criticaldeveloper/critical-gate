@@ -1,0 +1,23 @@
+diff --git a/package.json b/package.json
+index 3b3d02a..d2c62db 100644
+--- a/package.json
++++ b/package.json
+@@ -6,8 +6,7 @@
+   "dependencies": {
+     "@astrojs/node": "^9.5.0",
+     "astro": "^5.16.7",
+-    "material-symbols": "^0.34.0",
+     "sharp": "^0.33.5"
+   }
+ }
+diff --git a/bun.lock b/bun.lock
+index 8d5f0ca..0db7e7e 100644
+--- a/bun.lock
++++ b/bun.lock
+@@ -10,7 +10,6 @@
+     "@astrojs/node": ["@astrojs/node@9.5.0", "", {}, "sha512-node"],
+     "astro": ["astro@5.16.7", "", {}, "sha512-astro"],
+-    "material-symbols": ["material-symbols@0.34.0", "", {}, "sha512-icons"],
+     "sharp": ["sharp@0.33.5", "", {}, "sha512-sharp"],
+   }
+ }

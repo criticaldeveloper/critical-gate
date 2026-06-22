@@ -1,0 +1,14 @@
+{
+  "sourceRepository": "criticaldeveloper-blog",
+  "caseType": "false-positive-regression",
+  "labelSource": "docs/critical-gate-evidence/2026-06-22/103227-add-durable-critical-gate-evidence-export-workflow-for-future-dogfood-runs.labels.json",
+  "shouldBlock": false,
+  "expectedFindings": [
+    {
+      "detector": "dependency-addition",
+      "severity": "medium",
+      "file": "package.json"
+    }
+  ],
+  "allowedExtraDetectors": ["scope"]
+}

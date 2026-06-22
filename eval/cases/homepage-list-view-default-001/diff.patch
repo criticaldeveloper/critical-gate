@@ -1,0 +1,17 @@
+diff --git a/src/components/BlogHomePage.astro b/src/components/BlogHomePage.astro
+index 6d2f7c5..fa94ce2 100644
+--- a/src/components/BlogHomePage.astro
++++ b/src/components/BlogHomePage.astro
+@@ -1,5 +1,5 @@
+ <section class="home" data-view-mode="grid">
+-  <button data-view-option="grid" aria-pressed="true">Grid</button>
++  <button data-view-option="list" aria-pressed="true">List</button>
+ </section>
+diff --git a/src/scripts/home-view-mode.ts b/src/scripts/home-view-mode.ts
+index 560acbb..28f447a 100644
+--- a/src/scripts/home-view-mode.ts
++++ b/src/scripts/home-view-mode.ts
+@@ -1,3 +1,3 @@
+-const defaultViewMode = "grid";
++const defaultViewMode = "list";
+ document.documentElement.dataset.viewMode ??= defaultViewMode;

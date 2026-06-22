@@ -1,0 +1,11 @@
+diff --git a/src/styles/post.scss b/src/styles/post.scss
+index 61e75aa..ce2919d 100644
+--- a/src/styles/post.scss
++++ b/src/styles/post.scss
+@@ -1,6 +1,6 @@
+ .post-detail__article:before {
+   content: "";
+   display: block;
+-  background: linear-gradient(90deg, #111, #777);
++  background: linear-gradient(90deg, #111, #0ea5e9);
+ }

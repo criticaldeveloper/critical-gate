@@ -1,0 +1,8 @@
+{
+  "sourceRepository": "criticaldeveloper-blog",
+  "caseType": "false-positive-regression",
+  "labelSource": "docs/critical-gate-evidence/2026-06-22/150447-adjust-article-signal-line-gradient.labels.json",
+  "shouldBlock": false,
+  "expectedFindings": [],
+  "allowedExtraDetectors": ["scope"]
+}
