@@ -43,13 +43,27 @@ function extractAddedDependencies(file: DiffFile): AddedDependency[] {
     return [];
   }
 
-  const dependencies: AddedDependency[] = [];
-  const removedDependencies = new Set<string>();
+  const beforeDependencies = extractManifestDependencies(file, "before");
+  const afterDependencies = extractManifestDependencies(file, "after");
+
+  return [...afterDependencies.entries()]
+    .filter(([key]) => !beforeDependencies.has(key))
+    .map(([, dependency]) => dependency);
+}
+
+function extractManifestDependencies(
+  file: DiffFile,
+  side: "before" | "after"
+): Map<string, AddedDependency> {
+  const dependencies = new Map<string, AddedDependency>();
 
   for (const hunk of file.hunks) {
     let currentSection: DependencySection | undefined;
-
     for (const line of hunk.lines) {
+      if (!belongsToManifestSide(line, side)) {
+        continue;
+      }
+
       const section = getSection(line);
 
       if (section !== undefined) {
@@ -72,17 +86,9 @@ function extractAddedDependencies(file: DiffFile): AddedDependency[] {
         continue;
       }
 
-      if (line.kind === "delete") {
-        removedDependencies.add(toDependencyKey(currentSection, dependency[1] ?? ""));
-        continue;
-      }
-
-      if (line.kind !== "add") {
-        continue;
-      }
-
-      dependencies.push({
-        name: dependency[1] ?? "",
+      const name = dependency[1] ?? "";
+      dependencies.set(toDependencyKey(currentSection, name), {
+        name,
         version: dependency[2] ?? "",
         section: currentSection,
         path: file.path,
@@ -91,9 +97,15 @@ function extractAddedDependencies(file: DiffFile): AddedDependency[] {
     }
   }
 
-  return dependencies.filter(
-    (dependency) => !removedDependencies.has(toDependencyKey(dependency.section, dependency.name))
-  );
+  return dependencies;
+}
+
+function belongsToManifestSide(line: DiffLine, side: "before" | "after"): boolean {
+  if (line.kind === "context") {
+    return true;
+  }
+
+  return side === "before" ? line.kind === "delete" : line.kind === "add";
 }
 
 function getSection(line: DiffLine): DependencySection | undefined {

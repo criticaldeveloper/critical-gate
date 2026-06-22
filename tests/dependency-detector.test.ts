@@ -129,6 +129,34 @@ index 57b22a0..cb3e0f1 100644
 
     expect(findings).toEqual([]);
   });
+
+  it("does not flag the criticaldeveloper-blog local SVG icon dependency removal replay", () => {
+    const diff = {
+      files: parseUnifiedDiff(
+        readFileSync(
+          join(process.cwd(), "fixtures", "diffs", "blog-local-svg-icons-dependency-removal.diff"),
+          "utf8"
+        )
+      )
+    };
+
+    const findings = dependencyDetector.run({
+      task: {
+        source: "cli",
+        text: "Replace Material Symbols font with local SVG icons"
+      },
+      diff
+    });
+
+    expect(findings).toEqual([]);
+    expect(findings).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "dependency-addition:package.json:dependencies:astro"
+        })
+      ])
+    );
+  });
 });
 
 describe("detector runner", () => {

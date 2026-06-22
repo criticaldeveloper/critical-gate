@@ -1,0 +1,35 @@
+diff --git a/bun.lock b/bun.lock
+index 20c8297..2bc8f60 100644
+--- a/bun.lock
++++ b/bun.lock
+@@ -7,7 +7,6 @@
+       "dependencies": {
+         "@astrojs/sitemap": "^3.7.0",
+         "astro": "^5.16.7",
+-        "material-symbols": "^0.40.2",
+       },
+       "devDependencies": {
+         "critical-gate": "^2.4.0",
+@@ -458,8 +457,6 @@
+ 
+     "markdown-table": ["markdown-table@3.0.4", "", {}, "sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw=="],
+ 
+-    "material-symbols": ["material-symbols@0.40.2", "", {}, "sha512-QUJF1HztvcpP8pXHPPNESK05Thq/Zy8ub17T2xBDf4+gqx4KBs353lKHuVzE/eCYOtiB9JBlFOU7cjAI6vVMTQ=="],
+-
+     "mdast-util-definitions": ["mdast-util-definitions@6.0.0", "", { "dependencies": { "@types/mdast": "^4.0.0", "@types/unist": "^3.0.0", "unist-util-visit": "^5.0.0" } }, "sha512-scTllyX6pnYNZH/AIp/0ePz6s4cZtARxImwoPJ7kS42n+MnVsI4XbnG6d4ibehRIldYMWM2LD7ImQblVhUejVQ=="],
+ 
+     "mdast-util-find-and-replace": ["mdast-util-find-and-replace@3.0.2", "", { "dependencies": { "@types/mdast": "^4.0.0", "escape-string-regexp": "^5.0.0", "unist-util-is": "^6.0.0", "unist-util-visit-parents": "^6.0.0" } }, "sha512-Tmd1Vg/m3Xz43afeNxDIhWRtFZgM2VLyaf4vSTYwudTyeuTneoL3qtWMA5jeLyz/O1vDJmmV4QuScFCA2tBPwg=="],
+diff --git a/package.json b/package.json
+index 7a1ec54..2bf9560 100644
+--- a/package.json
++++ b/package.json
+@@ -15,8 +15,7 @@
+   },
+   "dependencies": {
+     "@astrojs/sitemap": "^3.7.0",
+-    "astro": "^5.16.7",
+-    "material-symbols": "^0.40.2"
++    "astro": "^5.16.7"
+   },
+   "devDependencies": {
+     "critical-gate": "^2.4.0",

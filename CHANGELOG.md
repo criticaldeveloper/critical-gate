@@ -4,6 +4,19 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## 2.4.2 - 2026-06-22
+
+Patch release for the `criticaldeveloper-blog` dependency-removal replay and package artifact
+version validation.
+
+### Fixed
+
+- Rebuild and validate published CLI runtime metadata so `critical-gate --version` matches the npm
+  package version.
+- Harden package validation to fail when `dist/version.js` is stale.
+- Compare before/after manifest dependency keys so dependency removals do not classify unchanged
+  neighboring dependencies as additions.
+
 ## 2.4.1 - 2026-06-22
 
 Patch release for dogfood-backed detector calibration.

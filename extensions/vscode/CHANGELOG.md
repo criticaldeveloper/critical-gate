@@ -2,6 +2,13 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.4.2 - 2026-06-22
+
+Patch release aligned with Critical Gate 2.4.2.
+
+- Bundle the dependency-removal replay fix for unchanged neighboring dependencies.
+- Bundle runtime version validation so the packaged analyzer reports the released version.
+
 ## 2.4.1 - 2026-06-22
 
 Patch release aligned with Critical Gate 2.4.1.

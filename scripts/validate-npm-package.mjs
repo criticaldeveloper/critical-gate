@@ -8,6 +8,7 @@ import { fileURLToPath, URL } from "node:url";
 const root = fileURLToPath(new URL("..", import.meta.url));
 const packageJsonPath = join(root, "package.json");
 const versionPath = join(root, "src", "version.ts");
+const distVersionPath = join(root, "dist", "version.js");
 const cliPath = join(root, "dist", "cli.js");
 const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
 
@@ -36,6 +37,13 @@ const versionMatch = versionSource.match(/CRITICAL_GATE_VERSION\s*=\s*"([^"]+)"/
 assert(
   versionMatch?.[1] === packageJson.version,
   "src/version.ts must match package.json version."
+);
+
+const distVersionSource = readFileSync(distVersionPath, "utf8");
+const distVersionMatch = distVersionSource.match(/CRITICAL_GATE_VERSION\s*=\s*"([^"]+)"/);
+assert(
+  distVersionMatch?.[1] === packageJson.version,
+  "dist/version.js must match package.json version."
 );
 
 const cliVersion = execFileSync(process.execPath, [cliPath, "--version"], {
