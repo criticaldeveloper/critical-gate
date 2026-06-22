@@ -1,31 +1,82 @@
 # Installation
 
-Critical Gate currently supports source-based CLI and action installation, local Codex hook setup,
-and a self-contained VS Code extension VSIX. The root CLI package and VS Code extension use aligned
-numeric dogfood release versions, but the project has not declared a stable public API contract yet.
+Critical Gate supports an npm-distributed CLI, source-based development setup, local Codex hook
+setup, a source-oriented GitHub Action, and a Marketplace VS Code extension. The root CLI package
+and VS Code extension use aligned numeric dogfood release versions, but the project has not declared
+a stable public API contract yet.
 
-The official CLI path for this release stage is source-based installation. Do not assume an npm
-registry package, global install, or prebuilt GitHub Action artifact is available until the release
-policy explicitly changes.
+The official CLI path for public alpha and beta users is the npm package. Source-based installation
+is for contributors, repository dogfooding, and release artifact testing.
 
 ## Requirements
 
-- Node.js 22.13 or newer. CI uses Node.js 24.
-- pnpm 11.1.2, via Corepack or a local pnpm install.
+- Node.js 20 or newer for the CLI.
+- pnpm 11.1.2, via Corepack or a local pnpm install, only when developing this repository from
+  source.
 - Git, with enough history for `--base` comparisons.
 - VS Code only when installing or testing the editor extension.
 
 Review [../SECURITY.md](../SECURITY.md) before enabling Critical Gate in shared CI, trusted Codex
 hooks, or editor workflows that may process private repositories.
 
-Enable pnpm with Corepack when needed:
+Enable pnpm with Corepack when working from source:
 
 ```bash
 corepack enable
 corepack prepare pnpm@11.1.2 --activate
 ```
 
-## From Source
+## CLI
+
+Run without installing:
+
+```bash
+npx critical-gate check --task "Add signup validation" --base main --format markdown
+```
+
+Or with pnpm:
+
+```bash
+pnpm dlx critical-gate check --task "Add signup validation" --base main --format markdown
+```
+
+Install in a repository for repeated local, hook, and CI use:
+
+```bash
+npm install -D critical-gate
+```
+
+With pnpm:
+
+```bash
+pnpm add -D critical-gate
+```
+
+Common commands:
+
+```bash
+npx critical-gate --version
+npx critical-gate check --task "Add signup validation" --base main --format markdown
+npx critical-gate check --task "Add signup validation" --format json --output critical-gate.json
+npx critical-gate check --task "Add signup validation" --format sarif --output critical-gate.sarif
+npx critical-gate check --task "Add signup validation" --format repair
+npx critical-gate snapshot-api
+npx critical-gate install-hooks
+npx critical-gate init-policy
+npx critical-gate init-agent
+```
+
+When `critical-gate` is installed as a dev dependency, package scripts and local git hooks can call
+`critical-gate` directly.
+
+Exit codes:
+
+- `0`: pass.
+- `1`: findings failed the configured threshold.
+- `2`: usage or configuration error.
+- `3`: internal error.
+
+## Development From Source
 
 Clone the repository, install dependencies, and build:
 
@@ -53,35 +104,6 @@ On Windows PowerShell:
 ```powershell
 function critical-gate { node C:\path\to\critical-gate\dist\cli.js @args }
 ```
-
-## CLI
-
-Build before running:
-
-```bash
-pnpm build
-```
-
-Common commands:
-
-```bash
-node dist/cli.js --version
-node dist/cli.js check --task "Add signup validation" --base main --format markdown
-node dist/cli.js check --task "Add signup validation" --format json --output critical-gate.json
-node dist/cli.js check --task "Add signup validation" --format sarif --output critical-gate.sarif
-node dist/cli.js check --task "Add signup validation" --format repair
-node dist/cli.js snapshot-api
-node dist/cli.js install-hooks
-node dist/cli.js init-policy
-node dist/cli.js init-agent
-```
-
-Exit codes:
-
-- `0`: pass.
-- `1`: findings failed the configured threshold.
-- `2`: usage or configuration error.
-- `3`: internal error.
 
 ## Local Git Hooks
 
@@ -129,7 +151,7 @@ are preserved, and repeated runs replace only the managed Critical Gate block. U
 when agents should run a project-local command:
 
 ```bash
-critical-gate init-agent --cli "node ./node_modules/critical-gate/dist/cli.js"
+critical-gate init-agent --cli "npx critical-gate"
 ```
 
 The generated section tells agents how to run `check`, `hook`, `snapshot-api`, `init-policy`, and
@@ -246,7 +268,29 @@ ROOT=$(git rev-parse --show-toplevel) && pnpm --dir "$ROOT" --silent build && no
 
 On Windows, the sample hook also includes `commandWindows` using PowerShell.
 
-## VS Code Extension VSIX
+## VS Code Extension
+
+Install the public Marketplace extension:
+
+<https://marketplace.visualstudio.com/items?itemName=criticaldeveloper.critical-gate-vscode>
+
+After installing:
+
+1. Open a local git repository in VS Code.
+2. Open the `Critical Gate` Activity Bar view or run `Critical Gate: Run Check`.
+
+The extension bundles the analyzer by default, so users do not need to clone this repository or
+install a global CLI for the editor surface.
+
+Optional settings:
+
+- `criticalGate.task`: task intent to avoid prompting.
+- `criticalGate.base`: git base ref or SHA.
+- `criticalGate.cliPath`: optional custom CLI path. Leave empty to use the bundled analyzer.
+- `criticalGate.refreshMode`: `manual` or `onSave`.
+- `criticalGate.refreshDebounceMs`: on-save debounce delay.
+
+## Development VSIX
 
 Build and package the local VSIX:
 
@@ -272,21 +316,8 @@ Or in VS Code:
 2. Choose `Install from VSIX...`.
 3. Select `artifacts/vscode/critical-gate-vscode.vsix`.
 
-After installing:
-
-1. Open a local git repository in VS Code.
-2. Open the `Critical Gate` Activity Bar view or run `Critical Gate: Run Check`.
-
 The extension provides a `Gate Runs` dashboard, Problems diagnostics, a `Critical Gate` output
 channel report, evidence navigation, repair-copy actions, and status bar pass/fail state.
-
-Optional settings:
-
-- `criticalGate.task`: task intent to avoid prompting.
-- `criticalGate.base`: git base ref or SHA.
-- `criticalGate.cliPath`: optional custom CLI path. Leave empty to use the bundled analyzer.
-- `criticalGate.refreshMode`: `manual` or `onSave`.
-- `criticalGate.refreshDebounceMs`: on-save debounce delay.
 
 ## Verification
 

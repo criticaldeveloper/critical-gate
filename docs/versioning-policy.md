@@ -1,7 +1,8 @@
 # Versioning Policy
 
-Critical Gate currently publishes numeric dogfood releases for the root CLI and VS Code extension.
-These releases use SemVer-style numbers for artifact ordering, but they are still pre-stable:
+Critical Gate currently publishes numeric pre-stable releases for the root CLI and VS Code
+extension. The npm CLI package is the canonical public CLI distribution channel for alpha and beta
+users. These releases use SemVer-style numbers for artifact ordering, but they are still pre-stable:
 finding behavior, CLI options, output fields, and extension settings may change until the project
 declares a stable public contract.
 
@@ -14,8 +15,8 @@ This means:
 - Suitable for internal alpha use, dogfooding, and explicitly scoped public trials.
 - Not a stable public API promise.
 - Finding behavior, CLI options, output fields, and extension settings may still change.
-- Release artifacts should be produced and tested, but Marketplace or package-registry publishing
-  should wait until repository metadata and external dogfooding are settled.
+- The npm CLI package and VS Code Marketplace extension are public installable channels for this
+  stage, with release notes and compatibility warnings reflecting the pre-stable contract.
 
 ## Versioned Artifacts
 
@@ -76,12 +77,15 @@ Before cutting any release:
 5. Complete the product non-goals checkpoint below.
 6. Run `pnpm verify`.
 7. Run `pnpm audit`.
-8. Run `pnpm test:vscode` when the editor extension is included.
-9. Run `pnpm package:vscode` when publishing or attaching a VSIX artifact.
-10. If publishing a prebuilt GitHub Action artifact, run `pnpm package:action` and
+8. Run `pnpm validate:npm-package`.
+9. Run `npm pack --dry-run`.
+10. If publishing the npm package, use npm provenance where the release environment supports it.
+11. Run `pnpm test:vscode` when the editor extension is included.
+12. Run `pnpm package:vscode` when publishing or attaching a VSIX artifact.
+13. If publishing a prebuilt GitHub Action artifact, run `pnpm package:action` and
     `pnpm smoke:action`, then verify release consumers use `install: "false"` and `build: "false"`.
-11. Run Critical Gate against the release diff with release notes as task context.
-12. Tag the release after all checks pass.
+14. Run Critical Gate against the release diff with release notes as task context.
+15. Tag the release after all checks pass.
 
 ## Product Non-Goals Checkpoint
 
@@ -118,4 +122,5 @@ Before declaring a stable public release, complete:
 - Confirm package, repository, issue, homepage, and release artifact metadata are public-ready.
 - Run all GitHub workflows remotely.
 - Dogfood on at least one separate repository and document noisy findings.
-- Decide whether VS Code distribution remains artifact-only or moves to Marketplace publishing.
+- Confirm npm package installation, GitHub Action examples, and Marketplace extension docs point to
+  public installable channels.

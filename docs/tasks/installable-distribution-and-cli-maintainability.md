@@ -2,7 +2,7 @@
 
 ## Status
 
-Planned.
+In progress.
 
 ## Why
 
@@ -35,15 +35,16 @@ metadata, and repair-loop semantics unless a task explicitly changes one of thos
 - `src/cli.ts` already includes a Node shebang.
 - `src/version.ts`, root `package.json`, and `extensions/vscode/package.json` are currently aligned
   at `2.3.1`.
+- The npm CLI package is now the intended primary public CLI install path.
 - `action.yml` is still a source-oriented composite action by default, with `install` and `build`
-  inputs that run pnpm unless disabled.
-- `docs/installation.md` still says source-based installation is the official CLI path for this
-  release stage.
+  inputs that run pnpm unless disabled. The public action path remains a follow-up task.
 - The VS Code extension is already published on Marketplace as
   `criticaldeveloper.critical-gate-vscode`:
   <https://marketplace.visualstudio.com/items?itemName=criticaldeveloper.critical-gate-vscode>
 
 ## Phase 1: Make npm CLI The Primary Install Path
+
+Status: Done.
 
 Goal: make this the first-class user path:
 
@@ -61,8 +62,7 @@ Implementation tasks:
    - `dist/cli.js` starts with `#!/usr/bin/env node`,
    - `node dist/cli.js --version` matches `package.json` and `src/version.ts`,
    - the npm package contains only intended publish files.
-3. Decide whether Node.js `>=20` is supportable by running the narrow runtime matrix locally or in
-   CI. If it passes, lower `engines.node`; if it does not, document the exact Node 22.13+ reason.
+3. Support Node.js `>=20` in package metadata and add Node 20 to the CI runtime matrix.
 4. Update `README.md` so "Quick Start" starts with `npx` / `pnpm dlx`, not source build steps.
 5. Update `docs/installation.md` so npm is the official CLI install path and source-based setup is
    under "Development From Source".

@@ -241,44 +241,44 @@ Recommended sequence:
 See [docs/usage-guide.md](docs/usage-guide.md) for local rollout advice and
 [docs/github-integration.md](docs/github-integration.md) for CI thresholds.
 
-## Quick Start From Source
+## Quick Start
 
-Critical Gate's current CLI distribution path is source-based: clone, install, build, and run
-`node dist/cli.js`. Package-registry publishing and prebuilt action releases are intentionally held
-until repository metadata, external dogfooding, and release artifacts are stable enough for broader
-public use.
+Run Critical Gate directly against the current repository diff:
 
 Requirements:
 
-- Node.js 22.13 or newer.
-- pnpm 11.1.2.
+- Node.js 20 or newer.
 - Git history for baseline comparisons.
 
 ```bash
-git clone git@github.com:criticaldeveloper/critical-gate.git
-cd critical-gate
-pnpm install --frozen-lockfile
-pnpm build
+npx critical-gate check --task "Add signup validation" --base main --format markdown
 ```
 
-Run a local check against `main`:
+With pnpm:
 
 ```bash
-node dist/cli.js check --task "Add signup validation" --base main --format markdown
+pnpm dlx critical-gate check --task "Add signup validation" --base main --format markdown
+```
+
+Install it in a repository for repeated local and CI use:
+
+```bash
+npm install -D critical-gate
+npx critical-gate check --task "Add signup validation" --base main
 ```
 
 Common output formats:
 
 ```bash
-node dist/cli.js check --task "Add signup validation" --format json --output critical-gate.json
-node dist/cli.js check --task "Add signup validation" --format sarif --output critical-gate.sarif
-node dist/cli.js check --task "Add signup validation" --format repair
+npx critical-gate check --task "Add signup validation" --format json --output critical-gate.json
+npx critical-gate check --task "Add signup validation" --format sarif --output critical-gate.sarif
+npx critical-gate check --task "Add signup validation" --format repair
 ```
 
 Create a public API contract snapshot for repositories that expose TS/JS entrypoints:
 
 ```bash
-node dist/cli.js snapshot-api
+npx critical-gate snapshot-api
 git add .critical-gate/api-surface.json
 ```
 
@@ -293,12 +293,29 @@ Exit codes:
 - `2`: usage or configuration error.
 - `3`: internal error.
 
+## Development From Source
+
+Contributors who are changing Critical Gate itself should use the source workflow:
+
+Requirements:
+
+- Node.js 20 or newer.
+- pnpm 11.1.2.
+
+```bash
+git clone git@github.com:criticaldeveloper/critical-gate.git
+cd critical-gate
+pnpm install --frozen-lockfile
+pnpm build
+node dist/cli.js check --task "Add signup validation" --base main --format markdown
+```
+
 ## Task Intent And Baselines
 
 The task intent tells the gate what the diff is supposed to satisfy. Good task text is specific:
 
 ```bash
-node dist/cli.js check \
+npx critical-gate check \
   --task "Add email validation to signup form without changing authentication flow" \
   --base origin/main \
   --format markdown
@@ -361,8 +378,7 @@ Critical Gate can run as a Codex `Stop` hook so an agent receives compact repair
 task is considered complete.
 
 ```bash
-pnpm build
-node dist/cli.js hook --base main
+npx critical-gate hook --base main
 ```
 
 This repository includes `.codex/hooks.json` as a reviewable project hook example. See
@@ -370,17 +386,9 @@ This repository includes `.codex/hooks.json` as a reviewable project hook exampl
 
 ## VS Code Extension
 
-Build and package the VSIX:
+Install the Marketplace extension:
 
-```bash
-pnpm package:vscode
-```
-
-Install locally:
-
-```bash
-code --install-extension artifacts/vscode/critical-gate-vscode.vsix --force
-```
+[Critical Gate for VS Code](https://marketplace.visualstudio.com/items?itemName=criticaldeveloper.critical-gate-vscode)
 
 The extension adds:
 
@@ -438,7 +446,8 @@ Branch and commit conventions for this repository:
 - [docs/detector-quality.md](docs/detector-quality.md): detector quality boundaries, blind spots,
   and coverage expectations.
 - [docs/usage-guide.md](docs/usage-guide.md): practical usage examples and troubleshooting.
-- [docs/installation.md](docs/installation.md): CLI, GitHub Action, Codex hook, and VSIX installation.
+- [docs/installation.md](docs/installation.md): CLI, GitHub Action, Codex hook, and VS Code
+  installation.
 - [docs/editor-surface.md](docs/editor-surface.md): VS Code dashboard and diagnostics behavior.
 - [docs/github-integration.md](docs/github-integration.md): GitHub Action, SARIF, and threshold guidance.
 - [docs/policy-file.md](docs/policy-file.md): `.critical-gate.json` policy-as-code reference and
@@ -458,8 +467,8 @@ Branch and commit conventions for this repository:
 ## Project Status
 
 The repository contains the TypeScript CLI implementation, deterministic detectors, Codex hook
-integration, GitHub Action integration, optional LLM explanation boundaries, source-based CLI
-distribution, and a VS Code Marketplace extension surface.
+integration, GitHub Action integration, optional LLM explanation boundaries, npm CLI distribution,
+and a VS Code Marketplace extension surface.
 
 ## License
 

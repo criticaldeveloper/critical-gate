@@ -39,10 +39,9 @@ Current public identity:
 
 - Publisher: `criticaldeveloper`
 - Extension name: `critical-gate-vscode`
-- Extension version: `2.2.0`
+- Extension version: `2.3.1`
 - Display name: `Critical-Gate`
 - Extension ID: `criticaldeveloper.critical-gate-vscode`
 - Icon: `extensions/vscode/resources/icon.png`
-
-Before the first public publish, confirm the extension ID because Marketplace extension names are
-effectively permanent once users install them.
+- Marketplace URL:
+  <https://marketplace.visualstudio.com/items?itemName=criticaldeveloper.critical-gate-vscode>

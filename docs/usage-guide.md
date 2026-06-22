@@ -22,17 +22,16 @@ signals:
 
 ## Local CLI Workflow
 
-Build the CLI:
+Run the CLI directly from npm:
 
 ```bash
-pnpm install --frozen-lockfile
-pnpm build
+npx critical-gate --version
 ```
 
 Run a Markdown report against the target branch:
 
 ```bash
-node dist/cli.js check \
+npx critical-gate check \
   --task "Add email validation to signup form" \
   --base main \
   --format markdown
@@ -41,7 +40,7 @@ node dist/cli.js check \
 Write JSON for automation:
 
 ```bash
-node dist/cli.js check \
+npx critical-gate check \
   --task "Add email validation to signup form" \
   --base main \
   --format json \
@@ -51,7 +50,7 @@ node dist/cli.js check \
 Write SARIF for code scanning:
 
 ```bash
-node dist/cli.js check \
+npx critical-gate check \
   --task "Add email validation to signup form" \
   --base main \
   --format sarif \
@@ -61,7 +60,7 @@ node dist/cli.js check \
 Write compact repair guidance for agents:
 
 ```bash
-node dist/cli.js check \
+npx critical-gate check \
   --task "Add email validation to signup form" \
   --base main \
   --format repair
@@ -70,7 +69,7 @@ node dist/cli.js check \
 Write a compact GitHub PR comment:
 
 ```bash
-node dist/cli.js check \
+npx critical-gate check \
   --task "Add email validation to signup form" \
   --base main \
   --format pr-comment \
@@ -87,7 +86,7 @@ Good examples:
 ```text
 Add email validation to signup form without changing authentication flow.
 Fix the VS Code Activity Bar icon so it renders visibly in dark themes.
-Document CLI, GitHub Action, Codex hook, and VSIX installation.
+Document CLI, GitHub Action, Codex hook, and VS Code installation.
 ```
 
 Weak examples:
@@ -142,7 +141,7 @@ Accept an exact finding when the team has reviewed it and wants future runs with
 to stay quiet:
 
 ```bash
-node dist/cli.js accept \
+npx critical-gate accept \
   --finding "scope:src/generated/client.ts" \
   --reason "Generated client file is expected for API schema refreshes."
 ```
@@ -151,7 +150,7 @@ Teach expected support files when a repository has a normal companion relationsh
 detectors do not know yet:
 
 ```bash
-node dist/cli.js teach \
+npx critical-gate teach \
   --id "i18n-for-ui-copy" \
   --when-changed "src/features/**/*.tsx" \
   --allow "src/i18n/**/*.json,locales/**/*.json" \
@@ -313,7 +312,7 @@ For vulnerability reporting and sensitive-data handling expectations, see
 ### Small Feature With Expected Source And Test Changes
 
 ```bash
-node dist/cli.js check \
+npx critical-gate check \
   --task "Add username length validation to signup form and cover it with tests" \
   --base origin/main \
   --format markdown
@@ -325,7 +324,7 @@ surprising unless the task explains it.
 ### Dependency Addition
 
 ```bash
-node dist/cli.js check \
+npx critical-gate check \
   --task "Add CSV export using the existing file writer utilities" \
   --base origin/main \
   --format markdown
@@ -338,7 +337,7 @@ the new package is necessary.
 ### Test Weakening
 
 ```bash
-node dist/cli.js check \
+npx critical-gate check \
   --task "Refactor signup validation internals without changing behavior" \
   --base origin/main \
   --format markdown
@@ -350,7 +349,7 @@ report test-integrity findings.
 ### Public API Change
 
 ```bash
-node dist/cli.js check \
+npx critical-gate check \
   --task "Expose a new parseReport helper and document the API change" \
   --base origin/main \
   --format markdown
@@ -361,11 +360,9 @@ changes should be flagged.
 
 ## VS Code Workflow
 
-Install the latest local VSIX:
+Install the Marketplace extension:
 
-```powershell
-code --install-extension C:\dev\critical-gate\artifacts\vscode\critical-gate-vscode.vsix --force
-```
+<https://marketplace.visualstudio.com/items?itemName=criticaldeveloper.critical-gate-vscode>
 
 Open any local git repository, then use:
 
@@ -421,7 +418,7 @@ Useful settings:
 The hook mode is designed for repair loops:
 
 ```bash
-node dist/cli.js hook --base main
+npx critical-gate hook --base main
 ```
 
 When findings fail the gate, the hook emits compact repair guidance instead of a long review. Codex
@@ -532,5 +529,5 @@ faster warm runs. The cache is keyed by refs and repository fingerprints, but yo
 debugging:
 
 ```bash
-CRITICAL_GATE_DISABLE_CACHE=true node dist/cli.js check --task "Fix signup validation"
+CRITICAL_GATE_DISABLE_CACHE=true npx critical-gate check --task "Fix signup validation"
 ```

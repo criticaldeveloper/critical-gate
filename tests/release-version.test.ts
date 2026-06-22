@@ -16,7 +16,15 @@ function readPackageVersion(path: string): string {
 }
 
 describe("release version metadata", () => {
-  const packageVersion = readPackageVersion(join(process.cwd(), "package.json"));
+  const packageJsonPath = join(process.cwd(), "package.json");
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8")) as {
+    version?: string;
+    bin?: Record<string, string>;
+    engines?: Record<string, string>;
+    files?: string[];
+    scripts?: Record<string, string>;
+  };
+  const packageVersion = readPackageVersion(packageJsonPath);
   const vscodeVersion = readPackageVersion(
     join(process.cwd(), "extensions", "vscode", "package.json")
   );
@@ -57,5 +65,17 @@ describe("release version metadata", () => {
     };
 
     expect(sarif.runs[0]?.tool.driver.semanticVersion).toBe(packageVersion);
+  });
+
+  it("keeps the npm CLI package installable without source checkout files", () => {
+    expect(packageJson.bin?.["critical-gate"]).toBe("./dist/cli.js");
+    expect(packageJson.files).toEqual(["dist", "README.md", "LICENSE"]);
+    expect(packageJson.engines?.node).toBe(">=20");
+    expect(packageJson.scripts?.["validate:npm-package"]).toBe(
+      "pnpm build && node scripts/validate-npm-package.mjs"
+    );
+    expect(packageJson.scripts?.prepack).toBe(
+      "pnpm build && node scripts/validate-npm-package.mjs"
+    );
   });
 });

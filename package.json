@@ -16,10 +16,14 @@
     "critical-gate": "./dist/cli.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "prepack": "pnpm build && node scripts/validate-npm-package.mjs",
+    "validate:npm-package": "pnpm build && node scripts/validate-npm-package.mjs",
     "package:action": "pnpm build && node scripts/prepare-action-package.mjs",
     "smoke:action": "node scripts/smoke-action-package.mjs",
     "build:vscode": "tsc -p extensions/vscode/tsconfig.json",
@@ -52,7 +56,7 @@
   ],
   "license": "MIT",
   "engines": {
-    "node": ">=22.13"
+    "node": ">=20"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
