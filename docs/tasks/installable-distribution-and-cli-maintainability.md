@@ -140,6 +140,8 @@ Compatibility boundary:
 
 ## Phase 3: Treat Marketplace As The Primary VS Code Install Path
 
+Status: Done.
+
 Goal: reflect the actual public extension path:
 
 <https://marketplace.visualstudio.com/items?itemName=criticaldeveloper.critical-gate-vscode>

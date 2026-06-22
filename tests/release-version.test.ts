@@ -18,6 +18,10 @@ function readPackageVersion(path: string): string {
 describe("release version metadata", () => {
   const packageJsonPath = join(process.cwd(), "package.json");
   const actionYaml = readFileSync(join(process.cwd(), "action.yml"), "utf8");
+  const marketplaceDocs = readFileSync(
+    join(process.cwd(), "docs", "vscode-marketplace-release.md"),
+    "utf8"
+  );
   const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8")) as {
     version?: string;
     bin?: Record<string, string>;
@@ -29,6 +33,18 @@ describe("release version metadata", () => {
   const vscodeVersion = readPackageVersion(
     join(process.cwd(), "extensions", "vscode", "package.json")
   );
+  const vscodePackageJson = JSON.parse(
+    readFileSync(join(process.cwd(), "extensions", "vscode", "package.json"), "utf8")
+  ) as {
+    name?: string;
+    displayName?: string;
+    publisher?: string;
+    contributes?: {
+      configuration?: {
+        properties?: Record<string, { default?: unknown; description?: string }>;
+      };
+    };
+  };
 
   it("keeps runtime version constants aligned with package manifests", () => {
     expect(CRITICAL_GATE_VERSION).toBe(packageVersion);
@@ -82,5 +98,20 @@ describe("release version metadata", () => {
 
   it("keeps the public GitHub Action default package version aligned", () => {
     expect(actionYaml).toContain(`default: "${packageVersion}"`);
+  });
+
+  it("keeps VS Code Marketplace identity and bundled analyzer defaults documented", () => {
+    expect(vscodePackageJson.publisher).toBe("criticaldeveloper");
+    expect(vscodePackageJson.name).toBe("critical-gate-vscode");
+    expect(vscodePackageJson.displayName).toBe("Critical-Gate");
+    expect(
+      vscodePackageJson.contributes?.configuration?.properties?.["criticalGate.cliPath"]?.default
+    ).toBe("");
+    expect(
+      vscodePackageJson.contributes?.configuration?.properties?.["criticalGate.cliPath"]
+        ?.description
+    ).toContain("Leave empty to use the analyzer bundled with the extension.");
+    expect(marketplaceDocs).toContain("criticaldeveloper.critical-gate-vscode");
+    expect(marketplaceDocs).toContain(`Extension version: \`${packageVersion}\``);
   });
 });

@@ -2,6 +2,13 @@
 
 Critical Gate publishes under the `criticaldeveloper` publisher.
 
+User-facing installation should point to the Marketplace listing, not local VSIX artifacts:
+
+<https://marketplace.visualstudio.com/items?itemName=criticaldeveloper.critical-gate-vscode>
+
+The Marketplace extension bundles the analyzer by default. Users only need `criticalGate.cliPath`
+when they are testing a custom local CLI build.
+
 ## Package
 
 ```bash
@@ -14,7 +21,8 @@ The VSIX is written to:
 artifacts/vscode/critical-gate-vscode.vsix
 ```
 
-The VS Code extension is packaged as a stable Marketplace release.
+The VS Code extension is packaged as a Marketplace release. Local VSIX installation is a
+development and release-verification path, not the primary user installation path.
 
 Visual Studio Marketplace requires the extension manifest version to be numeric. The VS Code
 extension is versioned independently from the root CLI package when needed so Marketplace releases
@@ -45,3 +53,6 @@ Current public identity:
 - Icon: `extensions/vscode/resources/icon.png`
 - Marketplace URL:
   <https://marketplace.visualstudio.com/items?itemName=criticaldeveloper.critical-gate-vscode>
+
+Keep README, `docs/installation.md`, `docs/usage-guide.md`, and `docs/editor-surface.md` pointed at
+the Marketplace URL when changing extension identity or release flow.

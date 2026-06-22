@@ -9,8 +9,16 @@ Installation steps live in `docs/installation.md`.
 The extension has two layers:
 
 - `src/editor`: dependency-free mapping from Critical Gate findings to editor diagnostic data.
-- `extensions/vscode`: VS Code extension scaffold that runs the built CLI, publishes diagnostics to
-  the Problems panel, and renders an Activity Bar dashboard for local gate runs.
+- `extensions/vscode`: Marketplace extension scaffold that runs the bundled analyzer by default,
+  publishes diagnostics to the Problems panel, and renders an Activity Bar dashboard for local gate
+  runs.
+
+Install the public Marketplace extension:
+
+<https://marketplace.visualstudio.com/items?itemName=criticaldeveloper.critical-gate-vscode>
+
+The Marketplace package bundles the analyzer, so users do not need to clone this repository, build
+the CLI, or install a global `critical-gate` command for the editor surface.
 
 The extension command is:
 
@@ -100,7 +108,8 @@ the latest report after a run, or starts a run when no result is available.
 
 ## Local Build
 
-Build the root CLI before running the extension:
+Local build steps are for extension development and release verification. Build the root CLI before
+running or packaging a local extension build:
 
 ```bash
 pnpm build
@@ -131,11 +140,6 @@ pnpm package:vscode
 ```
 
 The package command writes `artifacts/vscode/critical-gate-vscode.vsix`. The VS Code extension
-workflow builds, tests, packages, and uploads that VSIX as a GitHub Actions artifact. It does not
-publish to the Marketplace.
-
-## Later Work
-
-Before packaging this as a marketplace extension:
-
-1. Add Marketplace publishing credentials and a signed release flow.
+workflow builds, tests, packages, and uploads that VSIX as a GitHub Actions artifact for review.
+Marketplace publishing is handled by the release flow documented in
+`docs/vscode-marketplace-release.md`.
