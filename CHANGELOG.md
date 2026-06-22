@@ -24,6 +24,11 @@ Installable distribution and CLI maintainability release.
 - Split the CLI entrypoint into focused modules for argument parsing, command implementations,
   result construction, IO defaults, help text, git hook rendering, and public compatibility exports.
 
+### Fixed
+
+- Pin source development and CI to a Node 20-compatible pnpm release so the Node 20 workflow remains
+  a real supported-runtime check.
+
 ## 2.3.1 - 2026-06-22
 
 Patch release for npm package metadata.

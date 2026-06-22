@@ -44,6 +44,7 @@ describe("release version metadata", () => {
   );
   const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8")) as {
     version?: string;
+    packageManager?: string;
     bin?: Record<string, string>;
     engines?: Record<string, string>;
     files?: string[];
@@ -107,6 +108,7 @@ describe("release version metadata", () => {
 
   it("keeps the npm CLI package installable without source checkout files", () => {
     expect(packageJson.bin?.["critical-gate"]).toBe("./dist/cli.js");
+    expect(packageJson.packageManager).toBe("pnpm@10.34.4");
     expect(packageJson.files).toEqual(["dist", "README.md", "LICENSE"]);
     expect(packageJson.engines?.node).toBe(">=20");
     expect(packageJson.scripts?.["validate:npm-package"]).toBe(

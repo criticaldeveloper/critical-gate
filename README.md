@@ -300,7 +300,7 @@ Contributors who are changing Critical Gate itself should use the source workflo
 Requirements:
 
 - Node.js 20 or newer.
-- pnpm 11.1.2.
+- pnpm 10.34.4.
 
 ```bash
 git clone git@github.com:criticaldeveloper/critical-gate.git

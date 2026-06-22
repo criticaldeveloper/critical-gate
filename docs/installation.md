@@ -11,7 +11,7 @@ is for contributors, repository dogfooding, and release artifact testing.
 ## Requirements
 
 - Node.js 20 or newer for the CLI.
-- pnpm 11.1.2, via Corepack or a local pnpm install, only when developing this repository from
+- pnpm 10.34.4, via Corepack or a local pnpm install, only when developing this repository from
   source.
 - Git, with enough history for `--base` comparisons.
 - VS Code only when installing or testing the editor extension.
@@ -23,7 +23,7 @@ Enable pnpm with Corepack when working from source:
 
 ```bash
 corepack enable
-corepack prepare pnpm@11.1.2 --activate
+corepack prepare pnpm@10.34.4 --activate
 ```
 
 ## CLI
