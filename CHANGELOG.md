@@ -4,6 +4,26 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## 2.4.0 - 2026-06-22
+
+Installable distribution and CLI maintainability release.
+
+### Added
+
+- Make the npm CLI package the primary public install path with package validation for the built
+  executable.
+- Make the public GitHub Action run the versioned npm CLI by default while preserving local source
+  mode for dogfooding and release verification.
+- Document Marketplace installation as the primary VS Code extension path.
+- Add release governance checks for keeping npm, GitHub Action, VS Code Marketplace, docs, runtime
+  version output, and SARIF tool metadata aligned.
+
+### Changed
+
+- Update Codex hook and agent onboarding guidance to prefer installable CLI commands.
+- Split the CLI entrypoint into focused modules for argument parsing, command implementations,
+  result construction, IO defaults, help text, git hook rendering, and public compatibility exports.
+
 ## 2.3.1 - 2026-06-22
 
 Patch release for npm package metadata.

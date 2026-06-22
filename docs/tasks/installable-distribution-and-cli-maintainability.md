@@ -34,7 +34,7 @@ metadata, and repair-loop semantics unless a task explicitly changes one of thos
 - `package.json` already exposes the `critical-gate` binary through `bin`.
 - `src/cli.ts` already includes a Node shebang.
 - `src/version.ts`, root `package.json`, and `extensions/vscode/package.json` are currently aligned
-  at `2.3.1`.
+  at `2.4.0`.
 - The npm CLI package is now the intended primary public CLI install path.
 - `action.yml` runs the npm CLI by default and keeps `version: local` for source dogfooding or
   smoke-tested prebuilt action artifacts.
@@ -116,7 +116,7 @@ Implementation tasks:
 4. Update `docs/github-integration.md`, `docs/installation.md`, and README examples to use
    `criticaldeveloper/critical-gate@v2`.
 5. Document release tag policy:
-   - immutable tags such as `v2.3.1`,
+   - immutable tags such as `v2.4.0`,
    - moving major tag such as `v2`.
 6. Add a smoke workflow or script that proves the public action path runs without local package
    installation or build steps.

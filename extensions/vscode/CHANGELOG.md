@@ -2,6 +2,14 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.4.0 - 2026-06-22
+
+Marketplace release aligned with Critical Gate 2.4.0.
+
+- Keep the bundled analyzer aligned with the npm-first CLI distribution release.
+- Keep Marketplace installation documented as the primary VS Code install path.
+- Bundle CLI maintainability refactors with no intentional command, schema, or exit-code changes.
+
 ## 2.3.1 - 2026-06-22
 
 Patch release aligned with Critical Gate 2.3.1.

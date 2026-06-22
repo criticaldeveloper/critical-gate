@@ -206,7 +206,7 @@ Pin the CLI package version only when needed:
 
 ```yaml
 with:
-  version: "2.3.1"
+  version: "2.4.0"
 ```
 
 Maintainers can run the action from a source checkout with local mode:
