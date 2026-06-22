@@ -1,10 +1,10 @@
-import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { ExitCode, isCliEntrypoint, main } from "../src/cli.js";
-import type { GitDiffResult } from "../src/index.js";
+import { parseUnifiedDiff, type GitDiffResult } from "../src/index.js";
 import { CRITICAL_GATE_VERSION } from "../src/version.js";
 
 const testDiffResult: GitDiffResult = {
@@ -347,6 +347,43 @@ describe("cli", () => {
         findingCount: 0
       }
     });
+  });
+
+  it("passes the criticaldeveloper-blog local SVG icon dependency removal replay", () => {
+    const { io, stdout } = createTestIo();
+    const fixtureDiff = readFileSync(
+      join(process.cwd(), "fixtures", "diffs", "blog-local-svg-icons-dependency-removal.diff"),
+      "utf8"
+    );
+    const replayIo = {
+      ...io,
+      readDiff: () => ({
+        root: "C:/dev/criticaldeveloper-blog",
+        headRef: "6047886",
+        files: parseUnifiedDiff(fixtureDiff)
+      })
+    };
+
+    expect(
+      main(
+        [
+          "check",
+          "--task",
+          "Replace Material Symbols font with local SVG icons",
+          "--format",
+          "json"
+        ],
+        replayIo
+      )
+    ).toBe(ExitCode.Pass);
+
+    const result = JSON.parse(stdout[0] ?? "");
+    const findingIds = result.findings.map((finding: { id: string }) => finding.id);
+
+    expect(result.summary.decision).toBe("pass");
+    expect(findingIds).not.toContain("dependency-addition:package.json:dependencies:astro");
+    expect(findingIds).not.toContain("scope:package.json");
+    expect(findingIds).not.toContain("expected-companions:package.json:lockfile");
   });
 
   it("allows blocker-only checks to pass high findings for pre-commit style hooks", () => {

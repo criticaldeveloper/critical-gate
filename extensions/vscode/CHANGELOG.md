@@ -2,6 +2,13 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.4.3 - 2026-06-22
+
+Patch release aligned with Critical Gate 2.4.3.
+
+- Bundle the full Material Symbols dependency-removal replay fix.
+- Bundle the built CLI version validation fix.
+
 ## 2.4.2 - 2026-06-22
 
 Patch release aligned with Critical Gate 2.4.2.

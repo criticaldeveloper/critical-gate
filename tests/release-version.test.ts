@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -73,6 +74,32 @@ describe("release version metadata", () => {
     expect(CLI_VERSION).toBe(packageVersion);
     expect(vscodeVersion).toBe(packageVersion);
   });
+
+  it("keeps built CLI version output aligned with package manifests", () => {
+    const builtCliPath = join(process.cwd(), "dist", "cli.js");
+    const builtVersionPath = join(process.cwd(), "dist", "version.js");
+
+    execFileSync(
+      process.execPath,
+      [
+        join(process.cwd(), "node_modules", "typescript", "bin", "tsc"),
+        "-p",
+        "tsconfig.build.json"
+      ],
+      {
+        cwd: process.cwd(),
+        stdio: "pipe"
+      }
+    );
+
+    const distVersion = readFileSync(builtVersionPath, "utf8");
+    const cliVersion = execFileSync(process.execPath, [builtCliPath, "--version"], {
+      encoding: "utf8"
+    }).trim();
+
+    expect(distVersion).toContain(`CRITICAL_GATE_VERSION = "${packageVersion}"`);
+    expect(cliVersion).toBe(`critical-gate ${packageVersion}`);
+  }, 30000);
 
   it("emits the package version in SARIF tool metadata", () => {
     const result: GateResult = {

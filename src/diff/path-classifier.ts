@@ -33,7 +33,7 @@ const testPathPattern = /(^|\/)(tests?|__tests__)\/|[._-](test|spec)\.[cm]?[jt]s
 const docsPathPattern = /(^|\/)(docs?|adr)\//;
 const manifestPathPattern = /(^|\/)(package\.json|composer\.json|pyproject\.toml|Cargo\.toml)$/;
 const lockfilePathPattern =
-  /(^|\/)(pnpm-lock\.yaml|package-lock\.json|yarn\.lock|bun\.lockb|Cargo\.lock)$/;
+  /(^|\/)(pnpm-lock\.yaml|package-lock\.json|yarn\.lock|bun\.lock|bun\.lockb|Cargo\.lock)$/;
 
 export function classifyPath(path: string): DiffFileRole {
   const normalizedPath = normalizePath(path);

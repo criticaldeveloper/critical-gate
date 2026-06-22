@@ -141,7 +141,7 @@ function isPackageManifest(path: string): boolean {
 }
 
 function isPackageLockfile(path: string): boolean {
-  return /(^|\/)(pnpm-lock\.yaml|package-lock\.json|yarn\.lock|bun\.lockb)$/.test(path);
+  return /(^|\/)(pnpm-lock\.yaml|package-lock\.json|yarn\.lock|bun\.lock|bun\.lockb)$/.test(path);
 }
 
 function shareStem(left: string, right: string): boolean {

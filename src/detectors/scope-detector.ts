@@ -31,6 +31,10 @@ const manifestTaskTerms = [
   "pnpm",
   "runtime"
 ];
+const dependencyLinePattern = /^\s*"([^"]+)":\s*"([^"]+)"/;
+const dependencySectionPattern =
+  /^\s*"(dependencies|devDependencies|peerDependencies|optionalDependencies)":\s*\{/;
+
 export const scopeDetector: Detector = {
   name: "scope",
   run: ({ task, diff, context }) => {
@@ -42,7 +46,13 @@ export const scopeDetector: Detector = {
 
     return diff.files
       .filter((file) =>
-        isUnexpectedForSmallTask(file, analysis.keywords, task.text, context?.repositoryTokenIndex)
+        isUnexpectedForSmallTask(
+          file,
+          diff.files,
+          analysis.keywords,
+          task.text,
+          context?.repositoryTokenIndex
+        )
       )
       .map((file) => toFinding(file, analysis.keywords, context?.repositoryTokenIndex));
   }
@@ -55,6 +65,7 @@ function isBroadTask(taskText: string): boolean {
 
 function isUnexpectedForSmallTask(
   file: DiffFile,
+  files: DiffFile[],
   keywords: string[],
   taskText: string,
   tokenIndex?: RepositoryTokenIndex
@@ -64,6 +75,14 @@ function isUnexpectedForSmallTask(
   }
 
   if (file.role === "manifest" && isPackageVersionOnlyChange(file)) {
+    return false;
+  }
+
+  if (file.role === "manifest" && isAlignedDependencyRemoval(file, taskText)) {
+    return false;
+  }
+
+  if (file.role === "lockfile" && hasAlignedDependencyRemovalManifest(files, taskText)) {
     return false;
   }
 
@@ -84,6 +103,12 @@ function isUnexpectedForSmallTask(
   }
 
   return keywords.length > 0 && !hasFileKeywordAlignment(file, keywords, tokenIndex);
+}
+
+function hasAlignedDependencyRemovalManifest(files: DiffFile[], taskText: string): boolean {
+  return files.some(
+    (file) => file.role === "manifest" && isAlignedDependencyRemoval(file, taskText)
+  );
 }
 
 function hasPathKeywordAlignment(path: string, keywords: string[]): boolean {
@@ -155,6 +180,86 @@ function isPackageVersionOnlyChange(file: DiffFile): boolean {
     changedLines.length > 0 &&
     changedLines.every((line) => /^\s*"version":\s*"[^"]+"\s*,?\s*$/.test(line.content))
   );
+}
+
+function isAlignedDependencyRemoval(file: DiffFile, taskText: string): boolean {
+  if (file.path !== "package.json" && !file.path.endsWith("/package.json")) {
+    return false;
+  }
+
+  const beforeDependencies = extractChangedDependencyNames(file, "before");
+  const afterDependencies = extractChangedDependencyNames(file, "after");
+  const removedDependencies = [...beforeDependencies].filter(
+    (name) => !afterDependencies.has(name)
+  );
+  const addedDependencies = [...afterDependencies].filter((name) => !beforeDependencies.has(name));
+
+  return (
+    removedDependencies.length > 0 &&
+    addedDependencies.length === 0 &&
+    removedDependencies.some((dependency) => taskMentionsDependency(taskText, dependency))
+  );
+}
+
+function extractChangedDependencyNames(file: DiffFile, side: "before" | "after"): Set<string> {
+  const dependencies = new Set<string>();
+
+  for (const hunk of file.hunks) {
+    let inDependencySection = false;
+
+    for (const line of hunk.lines) {
+      if (!belongsToManifestSide(line.kind, side)) {
+        continue;
+      }
+
+      if (dependencySectionPattern.test(line.content)) {
+        inDependencySection = true;
+        continue;
+      }
+
+      if (line.kind === "context" && line.content.trim() === "}") {
+        inDependencySection = false;
+        continue;
+      }
+
+      if (!inDependencySection) {
+        continue;
+      }
+
+      const dependency = dependencyLinePattern.exec(line.content)?.[1];
+
+      if (dependency !== undefined) {
+        dependencies.add(dependency);
+      }
+    }
+  }
+
+  return dependencies;
+}
+
+function belongsToManifestSide(kind: "add" | "delete" | "context", side: "before" | "after") {
+  return kind === "context" || (side === "before" ? kind === "delete" : kind === "add");
+}
+
+function taskMentionsDependency(taskText: string, dependencyName: string): boolean {
+  const normalizedTask = normalizeDependencyText(taskText);
+  const normalizedDependency = normalizeDependencyText(dependencyName);
+
+  return (
+    normalizedTask.includes(normalizedDependency) ||
+    normalizedDependency
+      .split(" ")
+      .filter((part) => part.length > 2)
+      .every((part) => normalizedTask.includes(part))
+  );
+}
+
+function normalizeDependencyText(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[@/_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function toFinding(file: DiffFile, keywords: string[], tokenIndex?: RepositoryTokenIndex): Finding {

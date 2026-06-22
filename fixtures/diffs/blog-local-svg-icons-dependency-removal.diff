@@ -7,9 +7,293 @@ index 20c8297..2bc8f60 100644
          "@astrojs/sitemap": "^3.7.0",
          "astro": "^5.16.7",
 -        "material-symbols": "^0.40.2",
-       },
-       "devDependencies": {
-         "critical-gate": "^2.4.0",
+  },
+  "devDependencies": {
+    "critical-gate": "^2.4.0",
+diff --git a/src/components/BlogHomePage.astro b/src/components/BlogHomePage.astro
+index 17c8d03..cf939df 100644
+--- a/src/components/BlogHomePage.astro
++++ b/src/components/BlogHomePage.astro
+@@ -1,5 +1,6 @@
+ ﻿---
+ import type { CollectionEntry } from "astro:content";
++import Icon from "./Icon.astro";
+ import { CARD_IMAGE, HERO_IMAGE } from "../lib/image-presets";
+ import { getResponsiveExternalImage } from "../lib/external-images";
+ 
+@@ -46,7 +47,7 @@ const getReadMinutes = (body: string) => {
+   <nav class="blog-home__nav glass-panel">
+     <a class="brand" href="/">
+       <span class="brand__icon-wrap">
+-        <span class="material-symbols-outlined brand__icon">dataset</span>
++        <Icon name="dataset" class="brand__icon" />
+       </span>
+       <span class="brand__text">
+         <span class="brand__text-full"
+@@ -90,7 +91,7 @@ const getReadMinutes = (body: string) => {
+         </div>
+         <div class="blog-home__hero-content">
+           <p class="blog-home__eyebrow">
+-            <span class="material-symbols-outlined">bolt</span>
++            <Icon name="bolt" />
+             Featured Article
+           </p>
+           <h1
+@@ -130,7 +131,7 @@ const getReadMinutes = (body: string) => {
+ 
+           <span class="blog-home__cta" aria-hidden="true">
+             Read entire entry
+-            <span class="material-symbols-outlined">arrow_forward</span>
++            <Icon name="arrow-forward" />
+           </span>
+         </div>
+       </a>
+@@ -152,7 +153,7 @@ const getReadMinutes = (body: string) => {
+           aria-pressed="true"
+           aria-label="Grid view"
+         >
+-          <span class="material-symbols-outlined">grid_view</span>
++          <Icon name="grid-view" />
+         </button>
+         <button
+           class="blog-home__view-btn"
+@@ -161,7 +162,7 @@ const getReadMinutes = (body: string) => {
+           aria-pressed="false"
+           aria-label="List view"
+         >
+-          <span class="material-symbols-outlined">view_list</span>
++          <Icon name="view-list" />
+         </button>
+       </div>
+     </div>
+@@ -225,11 +226,11 @@ const getReadMinutes = (body: string) => {
+                   <p class="blog-home__card-description">{post.data.description}</p>
+                   <div class="blog-home__card-footer">
+                     <span class="blog-home__card-read">
+-                      <span class="material-symbols-outlined">timer</span>
++                      <Icon name="timer" />
+                       {getReadMinutes(post.body)}m Read
+                     </span>
+                     <span class="blog-home__card-link" aria-hidden="true">
+-                      <span class="material-symbols-outlined">arrow_outward</span>
++                      <Icon name="arrow-outward" />
+                     </span>
+                   </div>
+                 </div>
+@@ -300,7 +301,7 @@ const getReadMinutes = (body: string) => {
+ 
+   <footer class="blog-home__footer">
+     <div class="blog-home__status">
+-      <span class="material-symbols-outlined">check_circle</span>
++      <Icon name="check-circle" />
+       <span>System Status: Online</span>
+     </div>
+     <p class="blog-home__copyright">
+diff --git a/src/components/Icon.astro b/src/components/Icon.astro
+new file mode 100644
+index 0000000..c7e79a0
+--- /dev/null
++++ b/src/components/Icon.astro
+@@ -0,0 +1,57 @@
++---
++type IconName =
++  | "arrow-back"
++  | "arrow-forward"
++  | "arrow-outward"
++  | "bolt"
++  | "check-circle"
++  | "dataset"
++  | "grid-view"
++  | "psychology"
++  | "timer"
++  | "view-list";
++
++interface Props {
++  name: IconName;
++  class?: string;
++  label?: string;
++}
++
++const { name, class: className, label } = Astro.props;
++const ariaHidden = label ? undefined : "true";
++
++const iconPaths: Record<IconName, string> = {
++  "arrow-back":
++    '<path d="M19 12H5"/><path d="m12 5-7 7 7 7"/>',
++  "arrow-forward":
++    '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
++  "arrow-outward":
++    '<path d="M7 17 17 7"/><path d="M8 7h9v9"/>',
++  bolt: '<path d="m13 2-9 12h7l-1 8 9-12h-7l1-8Z"/>',
++  "check-circle":
++    '<path d="M21 12a9 9 0 1 1-5.27-8.2"/><path d="m9 12 2 2 7-7"/>',
++  dataset:
++    '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8h3v3H8z"/><path d="M13 8h3v3h-3z"/><path d="M8 13h3v3H8z"/><path d="M13 13h3v3h-3z"/>',
++  "grid-view":
++    '<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/>',
++  psychology:
++    '<path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.74V16h8v-1.26A7 7 0 0 0 12 2Z"/><path d="M9.5 9.5h.01"/><path d="M14.5 9.5h.01"/><path d="M10 13c1.4 1 2.6 1 4 0"/>',
++  timer:
++    '<path d="M10 2h4"/><path d="M12 14V8"/><path d="M4.93 4.93 7.05 7.05"/><circle cx="12" cy="14" r="8"/>',
++  "view-list":
++    '<path d="M8 6h12"/><path d="M8 12h12"/><path d="M8 18h12"/><path d="M4 6h.01"/><path d="M4 12h.01"/><path d="M4 18h.01"/>',
++};
++---
++
++<svg
++  class:list={["site-icon", className]}
++  viewBox="0 0 24 24"
++  fill="none"
++  stroke="currentColor"
++  stroke-width="2"
++  stroke-linecap="round"
++  stroke-linejoin="round"
++  aria-hidden={ariaHidden}
++  aria-label={label}
++  set:html={iconPaths[name]}
++/>
+diff --git a/src/pages/index.astro b/src/pages/index.astro
+index a232ed3..60485ed 100644
+--- a/src/pages/index.astro
++++ b/src/pages/index.astro
+@@ -1,7 +1,6 @@
+ ﻿---
+ import { getCollection } from "astro:content";
+ import { ClientRouter } from "astro:transitions";
+-import "material-symbols/outlined.css";
+ import BlogHomePage from "../components/BlogHomePage.astro";
+ import {
+   getDisplayPosts,
+diff --git a/src/pages/page/[page].astro b/src/pages/page/[page].astro
+index d771cb0..1a82d05 100644
+--- a/src/pages/page/[page].astro
++++ b/src/pages/page/[page].astro
+@@ -1,7 +1,6 @@
+ ﻿---
+ import { getCollection } from "astro:content";
+ import { ClientRouter } from "astro:transitions";
+-import "material-symbols/outlined.css";
+ import BlogHomePage from "../../components/BlogHomePage.astro";
+ import {
+   getDisplayPosts,
+diff --git a/src/pages/posts/[...slug].astro b/src/pages/posts/[...slug].astro
+index 133da65..8f723b6 100644
+--- a/src/pages/posts/[...slug].astro
++++ b/src/pages/posts/[...slug].astro
+@@ -1,7 +1,7 @@
+ ﻿---
+ import { getCollection } from "astro:content";
+ import { ClientRouter } from "astro:transitions";
+-import "material-symbols/outlined.css";
++import Icon from "../../components/Icon.astro";
+ import { POST_HERO_IMAGE } from "../../lib/image-presets";
+ import { getResponsiveExternalImage } from "../../lib/external-images";
+ import { getPostMeta, getSocialMeta, SEO_CONFIG } from "../../lib/seo";
+@@ -120,7 +120,7 @@ const postSchemaGraph = serializeSchemaGraph([
+       <nav class="post-detail__nav glass-panel">
+         <a class="brand" href="/">
+           <span class="brand__icon-wrap">
+-            <span class="material-symbols-outlined brand__icon">dataset</span>
++            <Icon name="dataset" class="brand__icon" />
+           </span>
+           <span class="brand__text">
+             <span class="brand__text-full"
+@@ -135,7 +135,7 @@ const postSchemaGraph = serializeSchemaGraph([
+             href="/"
+             aria-label="Return to home"
+           >
+-            <span class="material-symbols-outlined">arrow_back</span>
++            <Icon name="arrow-back" />
+             <span class="post-detail__back-label">Return To Core</span>
+           </a>
+           <a
+@@ -217,7 +217,7 @@ const postSchemaGraph = serializeSchemaGraph([
+ 
+         <article class="post-detail__article glass-panel">
+           <div class="post-detail__highlight">
+-            <span class="material-symbols-outlined">psychology_alt</span>
++            <Icon name="psychology" />
+             <span>Neural Highlight Active</span>
+           </div>
+           <p class="post-detail__lede">{post.data.description}</p>
+@@ -242,9 +242,7 @@ const postSchemaGraph = serializeSchemaGraph([
+                         <h4>{related.data.title}</h4>
+                         <div>
+                           <small>{related.data.tags[0] ?? "Core"}</small>
+-                          <span class="material-symbols-outlined">
+-                            arrow_forward
+-                          </span>
++                          <Icon name="arrow-forward" />
+                         </div>
+                       </a>
+                     ),
+@@ -265,7 +263,7 @@ const postSchemaGraph = serializeSchemaGraph([
+ 
+     <footer class="post-detail__footer">
+       <div class="post-detail__status">
+-        <span class="material-symbols-outlined">check_circle</span>
++        <Icon name="check-circle" />
+         <span>System Status: Online</span>
+       </div>
+       <p>© 2026 CRITICALDEVELOPER BLOG. ALL RIGHTS RESERVED.</p>
+diff --git a/src/styles/home-critical.css b/src/styles/home-critical.css
+index 7ca9a8f..fcd9073 100644
+--- a/src/styles/home-critical.css
++++ b/src/styles/home-critical.css
+@@ -69,7 +69,10 @@
+     transform 0.24s ease;
+ }
+ 
+-.material-symbols-outlined {
++.site-icon {
++  width: 1em;
++  height: 1em;
++  flex: 0 0 auto;
+   line-height: 1;
+ }
+ 
+diff --git a/src/styles/home.scss b/src/styles/home.scss
+index 8818e5a..dac241e 100644
+--- a/src/styles/home.scss
++++ b/src/styles/home.scss
+@@ -37,12 +37,10 @@
+   color-scheme: dark;
+ }
+ 
+-.material-symbols-outlined {
+-  font-variation-settings:
+-    "FILL" 0,
+-    "wght" 500,
+-    "GRAD" 0,
+-    "opsz" 24;
++.site-icon {
++  width: 1em;
++  height: 1em;
++  flex: 0 0 auto;
+   line-height: 1;
+ }
+ 
+diff --git a/src/styles/post.scss b/src/styles/post.scss
+index 471a95d..8ad18e2 100644
+--- a/src/styles/post.scss
++++ b/src/styles/post.scss
+@@ -36,12 +36,10 @@
+   color-scheme: dark;
+ }
+ 
+-.material-symbols-outlined {
+-  font-variation-settings:
+-    "FILL" 0,
+-    "wght" 500,
+-    "GRAD" 0,
+-    "opsz" 24;
++.site-icon {
++  width: 1em;
++  height: 1em;
++  flex: 0 0 auto;
+   line-height: 1;
+ }
+ 
 @@ -458,8 +457,6 @@
  
      "markdown-table": ["markdown-table@3.0.4", "", {}, "sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw=="],
@@ -23,7 +307,21 @@ diff --git a/package.json b/package.json
 index 7a1ec54..2bf9560 100644
 --- a/package.json
 +++ b/package.json
-@@ -15,8 +15,7 @@
+@@ -1,25 +1,24 @@
+ {
+   "name": "criticaldeveloper-blog",
+   "version": "0.1.0",
+   "private": true,
+   "type": "module",
+   "scripts": {
+     "dev": "astro dev",
+     "build": "astro build",
+     "preview": "astro preview",
+     "astro": "astro",
+     "gate": "critical-gate check --format markdown --fail-on blocker",
+     "gate:base": "critical-gate check --base main --format markdown --fail-on blocker",
+     "gate:sarif": "critical-gate check --format sarif --output critical-gate.sarif --fail-on blocker",
+     "gate:evidence": "node scripts/critical-gate-evidence.mjs"
    },
    "dependencies": {
      "@astrojs/sitemap": "^3.7.0",
@@ -33,3 +331,6 @@ index 7a1ec54..2bf9560 100644
    },
    "devDependencies": {
      "critical-gate": "^2.4.0",
+     "sass": "^1.97.2"
+   }
+ }

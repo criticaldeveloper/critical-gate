@@ -86,7 +86,7 @@ export function buildKnowledgeCacheKey(options: KnowledgeCacheKeyOptions): Knowl
       packageLock: hashOptionalFile(options, "package-lock.json"),
       pnpmLock: hashOptionalFile(options, "pnpm-lock.yaml"),
       yarnLock: hashOptionalFile(options, "yarn.lock"),
-      bunLock: hashOptionalFile(options, "bun.lockb"),
+      bunLock: hashOptionalFile(options, "bun.lock") ?? hashOptionalFile(options, "bun.lockb"),
       tsconfig: hashOptionalFile(options, "tsconfig.json"),
       trackedSources: hashString(
         getOptionalGitOutput(

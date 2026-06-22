@@ -52,6 +52,8 @@ Initial implementation:
 
 - Score changed files by path/topic similarity to task intent.
 - Flag unexpected config, dependency, or architecture files in small tasks.
+- Treat package manifest and lockfile removal-only changes as task-aligned support when the removed
+  dependency is explicitly named by the task.
 - Raise severity when unrelated changes combine with high LOC churn.
 
 ### Intent Coverage Underimplementation
@@ -91,6 +93,8 @@ Evidence:
 Initial implementation:
 
 - Parse package manifest deltas.
+- Compare before and after manifest dependency maps so unchanged neighboring dependencies are not
+  classified as additions after comma or line-context shifts.
 - Distinguish production and development dependencies.
 - Require stronger justification for production dependencies.
 - Detect common native alternatives and existing utilities later.

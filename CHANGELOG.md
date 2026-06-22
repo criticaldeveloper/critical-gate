@@ -4,6 +4,21 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## 2.4.3 - 2026-06-22
+
+Patch release replacing the stale 2.4.2 artifact and covering the full `criticaldeveloper-blog`
+Material Symbols removal replay.
+
+### Fixed
+
+- Ensure the built and published CLI reports the package version through `critical-gate --version`.
+- Add a built-artifact version test that verifies `dist/version.js` and `dist/cli.js --version`
+  match `package.json`.
+- Treat text `bun.lock` files as package lockfiles.
+- Keep package manifest and lockfile dependency removals non-blocking when the removed package is
+  named by the task intent.
+- Add a full replay fixture for replacing Material Symbols with local SVG icons.
+
 ## 2.4.2 - 2026-06-22
 
 Patch release for the `criticaldeveloper-blog` dependency-removal replay and package artifact

@@ -8,7 +8,7 @@ declares a stable public contract.
 
 ## Current Release Stage
 
-The current target is `2.4.2`.
+The current target is `2.4.3`.
 
 This means:
 

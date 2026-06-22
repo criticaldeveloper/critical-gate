@@ -371,7 +371,7 @@ function detectMissingLockfile(files: DiffFile[]): Finding | undefined {
   if (
     changedPackage === undefined ||
     [...changedPaths].some((path) =>
-      /(^|\/)(pnpm-lock\.yaml|package-lock\.json|yarn\.lock|bun\.lockb)$/.test(path)
+      /(^|\/)(pnpm-lock\.yaml|package-lock\.json|yarn\.lock|bun\.lock|bun\.lockb)$/.test(path)
     )
   ) {
     return undefined;
