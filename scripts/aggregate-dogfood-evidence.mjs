@@ -211,6 +211,7 @@ function readOptionalReport(reportPath) {
 
     return {
       summary: {
+        generatedAt: report.generatedAt,
         decision: report.summary?.decision,
         findingCount: report.summary?.findingCount,
         blockerCount: report.summary?.blockerCount,
@@ -248,7 +249,7 @@ function buildSummary(labels, repoPaths) {
 
   return {
     schemaVersion: 1,
-    generatedAt: new Date().toISOString(),
+    generatedAt: latestReportTimestamp(validLabels) ?? new Date().toISOString(),
     sources: repoPaths.map((repoPath) => repoPath.replaceAll("\\", "/")),
     metrics: {
       repositories: Object.keys(repos).length,
@@ -272,6 +273,15 @@ function buildSummary(labels, repoPaths) {
       .sort((left, right) => left.repo.localeCompare(right.repo)),
     reports: validLabels.map(summarizeLabel)
   };
+}
+
+function latestReportTimestamp(labels) {
+  const timestamps = labels
+    .map((label) => label.reportSummary?.generatedAt)
+    .filter((value) => typeof value === "string" && value.length > 0)
+    .sort();
+
+  return timestamps.at(-1);
 }
 
 function summarizeRepo(repo, labels) {
