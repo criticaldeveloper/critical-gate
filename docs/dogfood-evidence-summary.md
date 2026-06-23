@@ -1,36 +1,38 @@
 # Dogfood Evidence Summary
 
-Generated: 2026-06-22T22:21:03.208Z
+Generated: 2026-06-23T16:58:57.157Z
 
 ## Overview
 
 - Repositories: 3
-- Labeled reports: 31
+- Labeled reports: 38
 - Useful findings: 108
-- False-positive finding instances: 77
+- False-positive finding instances: 107
 - Missed findings: 0
 - Fixture-needed reports: 11
 - Fixture-created reports: 11
 - Repair attempts captured: 0
 - Repair reruns captured: 0
 - Repairs passing rerun: 0
-- Missed-finding reviews captured: 0
+- Missed-finding reviews captured: 7
 
 ## Run Labels
 
 - useful: 18
-- clean: 8
+- clean: 9
 - false-positive: 5
+- pass-with-reviewed-observations: 5
+- pass-with-reviewed-observation: 1
 
 ## Detector Frequency
 
-- expected-companions: 19
-- blast-radius: 16
-- repository-intelligence: 10
+- expected-companions: 25
+- blast-radius: 18
+- repository-intelligence: 11
 - dependency-addition: 4
 - intent-verification: 3
-- scope: 2
-- rewrite: 1
+- rewrite: 3
+- scope: 3
 
 ## Repair Loop Evidence
 
@@ -40,14 +42,14 @@ Generated: 2026-06-22T22:21:03.208Z
 - Repairs passing rerun: 0
 - Repairs scoped to task: 0
 - Repairs scoped to repair contract: 0
-- Missed-finding reviews captured: 0
+- Missed-finding reviews captured: 7
 - Reports still missing missed-finding review: 31
 
 ## Repositories
 
 - critical-components: 12 reports; useful findings 82; false-positive findings 0; missed findings 0; fixture-needed reports 0; repair attempts 0; missed-finding reviews 0.
 - criticaldeveloper-blog: 13 reports; useful findings 10; false-positive findings 77; missed findings 0; fixture-needed reports 11; repair attempts 0; missed-finding reviews 0.
-- criticaldeveloper-ft: 6 reports; useful findings 16; false-positive findings 0; missed findings 0; fixture-needed reports 0; repair attempts 0; missed-finding reviews 0.
+- criticaldeveloper-ft: 13 reports; useful findings 16; false-positive findings 30; missed findings 0; fixture-needed reports 0; repair attempts 0; missed-finding reviews 7.
 
 ## Reports
 
@@ -90,3 +92,10 @@ Generated: 2026-06-22T22:21:03.208Z
 - `201030-add-missing-legal-pages-to-sitemap`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed not recorded.
 - `201817-tune-critical-gate-policy-for-generated-evidence-companions`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed not recorded.
 - `222052-fix-critical-gate-project-detail-marketplace-and-npm-links`: useful; findings 5; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed not recorded.
+- `144028-update-about-information-cards-layout-and-remove-list-markers`: pass-with-reviewed-observations; findings 2; false positives 2; fixture needed no; repair attempted no; missed reviewed yes.
+- `144914-masonry-align-about-cards-and-fix-project-card-arrow`: pass-with-reviewed-observations; findings 10; false positives 10; fixture needed no; repair attempted no; missed reviewed yes.
+- `145601-move-about-cta-into-left-column-and-stabilize-about-layout`: pass-with-reviewed-observation; findings 1; false positives 1; fixture needed no; repair attempted no; missed reviewed yes.
+- `150132-set-about-cta-margin-and-show-consent-banner-globally`: pass-with-reviewed-observations; findings 5; false positives 5; fixture needed no; repair attempted no; missed reviewed yes.
+- `150801-match-contact-card-spacing-and-replace-now-playing-dot-with-rotating-vinyl`: pass-with-reviewed-observations; findings 9; false positives 9; fixture needed no; repair attempted no; missed reviewed yes.
+- `164848-update-now-playing-playlist-from-youtube-screenshot`: clean; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `165850-keep-now-playing-vinyl-spinning-continuously`: pass-with-reviewed-observations; findings 3; false positives 3; fixture needed no; repair attempted no; missed reviewed yes.
