@@ -21,7 +21,7 @@ inputs:
   version:
     description: Critical Gate npm package version to run. Use "local" only for checked-out source or smoke-tested prebuilt action artifacts.
     required: false
-    default: "2.4.4"
+    default: "2.5.0"
   fail-on:
     description: "Minimum severity that fails the gate: blocker, high, or medium."
     required: false
