@@ -23,6 +23,7 @@ async function activatesCommandContributions(): Promise<void> {
   assert.ok(commands.includes("criticalGate.showReport"));
   assert.ok(commands.includes("criticalGate.clearDiagnostics"));
   assert.ok(commands.includes("criticalGate.openSettings"));
+  assert.ok(commands.includes("criticalGate.initializeRepository"));
   assert.ok(commands.includes("criticalGate.openEvidence"));
   assert.ok(commands.includes("criticalGate.copyRepair"));
   assert.ok(commands.includes("criticalGate.openExistingSolution"));
@@ -44,6 +45,7 @@ async function contributesNativeAnalysisTree(): Promise<void> {
 
   const criticalGateViews = packageJson?.contributes?.views?.criticalGate ?? [];
   const contextMenuItems = packageJson?.contributes?.menus?.["view/item/context"] ?? [];
+  const titleMenuItems = packageJson?.contributes?.menus?.["view/title"] ?? [];
 
   assert.ok(
     criticalGateViews.some(
@@ -62,6 +64,13 @@ async function contributesNativeAnalysisTree(): Promise<void> {
       (item) =>
         item.command === "criticalGate.copyRepair" &&
         item.when?.includes("criticalGate.analysisTree")
+    )
+  );
+  assert.ok(
+    titleMenuItems.some(
+      (item) =>
+        item.command === "criticalGate.initializeRepository" &&
+        item.when?.includes("criticalGate.dashboard")
     )
   );
 }

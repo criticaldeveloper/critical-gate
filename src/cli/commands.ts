@@ -13,11 +13,13 @@ import {
 import {
   parseFlagArgs,
   parseInitAgentArgs,
+  parseInitProjectArgs,
   parseInitPolicyArgs,
   parseInstallHooksArgs,
   parseSnapshotApiArgs
 } from "./args.js";
 import { renderGitHookScript } from "./git-hooks.js";
+import { initProject } from "./init-project.js";
 import { ExitCode, type CliIo } from "./types.js";
 
 export function runSnapshotApiCommand(args: string[], io: CliIo): ExitCode {
@@ -104,6 +106,54 @@ export function runInitPolicyCommand(args: string[], io: CliIo): ExitCode {
   io.stdout(`Wrote reviewable Critical Gate policy to ${path}.`);
 
   return ExitCode.Pass;
+}
+
+export function runInitProjectCommand(args: string[], io: CliIo): ExitCode {
+  const parsed = parseInitProjectArgs(args);
+
+  if (!parsed.ok) {
+    io.stderr(parsed.error);
+    io.stderr("Run critical-gate init --help for usage.");
+    return ExitCode.UsageError;
+  }
+
+  const result = initProject(parsed.options, io);
+
+  if (!parsed.options.skipAgent) {
+    const agentResult = initAgentInstructions({
+      root: result.root,
+      cliCommand: "npx critical-gate",
+      io
+    });
+
+    if (agentResult.updated) {
+      result.written.push(relativeProjectPath(result.root, agentResult.path));
+    } else {
+      result.skipped.push(relativeProjectPath(result.root, agentResult.path));
+    }
+  }
+
+  io.stdout(
+    [
+      "Critical Gate initialized in observe-only mode.",
+      `Project: ${result.root}`,
+      `Package manager: ${result.packageManager.name}`,
+      `Dependency install: ${result.installed ? "yes" : "no"}`,
+      `Written: ${result.written.length === 0 ? "none" : result.written.join(", ")}`,
+      `Skipped existing files: ${result.skipped.length === 0 ? "none" : result.skipped.join(", ")}`
+    ].join("\n")
+  );
+
+  return ExitCode.Pass;
+}
+
+function relativeProjectPath(root: string, path: string): string {
+  const normalizedRoot = root.replaceAll("\\", "/");
+  const normalizedPath = path.replaceAll("\\", "/");
+
+  return normalizedPath.startsWith(normalizedRoot)
+    ? normalizedPath.slice(normalizedRoot.length + 1)
+    : normalizedPath;
 }
 
 export function runInitAgentCommand(args: string[], io: CliIo): ExitCode {

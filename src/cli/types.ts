@@ -25,6 +25,7 @@ export interface CliIo {
   writeFile: (path: string, content: string) => void;
   chmodFile?: (path: string, mode: number) => void;
   now: () => Date;
+  getRoot?: () => string;
   readDiff: (baseRef?: string, options?: { staged?: boolean }) => GitDiffResult;
   exists?: (path: string) => boolean;
   readFile?: (path: string) => string;

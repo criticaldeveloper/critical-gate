@@ -159,6 +159,99 @@ describe("cli", () => {
     expect(stdout[0]).toContain("Wrote reviewable Critical Gate policy");
   });
 
+  it("initializes observe-only project setup", () => {
+    const { io, stdout, writes, files } = createTestIo();
+
+    files.set(
+      "C:\\dev\\critical-gate\\package.json",
+      JSON.stringify({
+        name: "consumer-app",
+        scripts: {
+          test: "vitest"
+        },
+        dependencies: {
+          react: "^19.0.0",
+          vite: "^7.0.0"
+        }
+      })
+    );
+    files.set("C:\\dev\\critical-gate\\pnpm-lock.yaml", "");
+
+    expect(main(["init", "--skip-workflow"], io)).toBe(ExitCode.Pass);
+
+    const packageJson = JSON.parse(writes.get("C:\\dev\\critical-gate\\package.json") ?? "{}");
+    expect(packageJson.scripts).toMatchObject({
+      test: "vitest",
+      gate: "critical-gate check --format markdown --fail-on blocker",
+      "gate:evidence": "node scripts/critical-gate-evidence.mjs"
+    });
+
+    const policy = JSON.parse(writes.get("C:\\dev\\critical-gate\\.critical-gate.json") ?? "{}");
+    expect(policy).toMatchObject({
+      frameworkPacks: ["vite", "react"],
+      policy: {
+        failOn: "blocker",
+        detectorOverrides: expect.arrayContaining([
+          {
+            detector: "dependency",
+            mode: "observation",
+            reason:
+              "Phase 1 dogfood rollout: collect evidence and calibrate findings before enforcement."
+          }
+        ]),
+        allowedSupportFiles: expect.arrayContaining([
+          expect.objectContaining({
+            id: "critical-gate-dogfood-docs",
+            allow: expect.arrayContaining(["docs/critical-gate-evidence/**"])
+          })
+        ])
+      }
+    });
+    expect(writes.get("C:\\dev\\critical-gate\\scripts\\critical-gate-evidence.mjs")).toContain(
+      "Critical Gate evidence exported"
+    );
+    expect(writes.get("C:\\dev\\critical-gate\\docs\\critical-gate-dogfood.md")).toContain(
+      "pnpm run gate:evidence"
+    );
+    expect(writes.get("C:\\dev\\critical-gate\\AGENTS.md")).toContain(
+      "## Critical Gate Agent Instructions"
+    );
+    expect(writes.has("C:\\dev\\critical-gate\\.github\\workflows\\critical-gate.yml")).toBe(false);
+    expect(stdout[0]).toContain("Package manager: pnpm");
+  });
+
+  it("preserves existing init files unless forced", () => {
+    const { io, stdout, writes, files } = createTestIo();
+
+    files.set("C:\\dev\\critical-gate\\package.json", JSON.stringify({ name: "app" }));
+    files.set("C:\\dev\\critical-gate\\.critical-gate.json", "{}");
+    files.set("C:\\dev\\critical-gate\\docs\\critical-gate-dogfood.md", "# Existing\n");
+
+    expect(main(["init", "--skip-agent", "--skip-workflow"], io)).toBe(ExitCode.Pass);
+
+    expect(writes.get("C:\\dev\\critical-gate\\.critical-gate.json")).toBeUndefined();
+    expect(writes.get("C:\\dev\\critical-gate\\docs\\critical-gate-dogfood.md")).toBeUndefined();
+    expect(stdout[0]).toContain(
+      "Skipped existing files: .critical-gate.json, docs/critical-gate-dogfood.md"
+    );
+  });
+
+  it("initializes before the repository has a diffable HEAD", () => {
+    const { io, writes, files } = createTestIo();
+    const emptyRepoIo = {
+      ...io,
+      getRoot: () => "C:/dev/empty-repo",
+      readDiff: () => {
+        throw new Error("HEAD is not available.");
+      }
+    };
+
+    files.set("C:\\dev\\empty-repo\\package.json", JSON.stringify({ name: "empty-repo" }));
+
+    expect(main(["init", "--skip-agent", "--skip-workflow"], emptyRepoIo)).toBe(ExitCode.Pass);
+    expect(writes.get("C:\\dev\\empty-repo\\.critical-gate.json")).toBeDefined();
+  });
+
   it("refuses to overwrite an existing policy file without force", () => {
     const { io, stderr, files } = createTestIo();
 

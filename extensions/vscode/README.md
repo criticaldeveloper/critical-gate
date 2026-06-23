@@ -10,6 +10,8 @@ dependencies, and expected blast radius.
 
 - Use the Critical Gate Activity Bar view to run checks, inspect the latest run, review changed
   files, browse the native Analysis tree, and revisit recent gate runs.
+- Initialize the opened repository from the Critical Gate panel, with a choice between installing
+  the package dependency or writing setup files only.
 - Run Critical Gate from the Command Palette with `Critical Gate: Run Check`.
 - Show the full run report in the `Critical Gate` output channel.
 - See the highest-value latest-run signal in the VS Code status bar, including scope score,
@@ -28,6 +30,15 @@ the `critical-gate` repository.
 
 The opened workspace must be a local git repository. Configure `criticalGate.cliPath` only when you
 want to test a custom local Critical Gate CLI build.
+
+## Initialize A Repository
+
+Open the `Critical Gate` Activity Bar view and choose `Initialize`, or run
+`Critical Gate: Initialize Repository` from the Command Palette.
+
+The initializer can install `critical-gate` with the detected package manager, then add observe-only
+policy, package scripts, durable evidence export files, advisory GitHub workflow, and managed
+`AGENTS.md` instructions.
 
 ## Settings
 

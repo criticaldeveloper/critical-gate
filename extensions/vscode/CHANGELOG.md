@@ -2,6 +2,11 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## Unreleased
+
+- Add `Critical Gate: Initialize Repository` and visible panel actions to bootstrap observe-only
+  Critical Gate setup from VS Code.
+
 ## 2.4.4 - 2026-06-23
 
 Patch release aligned with Critical Gate 2.4.4.

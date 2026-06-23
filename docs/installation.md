@@ -56,6 +56,7 @@ Common commands:
 
 ```bash
 npx critical-gate --version
+npx critical-gate init --install
 npx critical-gate check --task "Add signup validation" --base main --format markdown
 npx critical-gate check --task "Add signup validation" --format json --output critical-gate.json
 npx critical-gate check --task "Add signup validation" --format sarif --output critical-gate.sarif
@@ -68,6 +69,38 @@ npx critical-gate init-agent
 
 When `critical-gate` is installed as a dev dependency, package scripts and local git hooks can call
 `critical-gate` directly.
+
+## Project Initializer
+
+Initialize Critical Gate in observe-only mode for an existing JavaScript or TypeScript repository:
+
+```bash
+npx critical-gate init --install
+```
+
+The initializer detects npm, pnpm, bun, or yarn from lockfiles. With `--install`, it adds
+`critical-gate` as a dev dependency using the detected package manager; without `--install`, it only
+writes reviewable setup files.
+
+Generated setup includes:
+
+- `gate`, `gate:base`, `gate:sarif`, and `gate:evidence` package scripts.
+- `.critical-gate.json` with detector families in observation mode and `failOn: "blocker"`.
+- `scripts/critical-gate-evidence.mjs` for durable Markdown and JSON evidence exports.
+- `docs/critical-gate-dogfood.md` and `docs/critical-gate-evidence/README.md`.
+- Advisory GitHub SARIF workflow at `.github/workflows/critical-gate.yml`.
+- Managed Critical Gate instructions in `AGENTS.md`.
+- Generated report/cache entries in `.gitignore`.
+
+Useful options:
+
+```bash
+npx critical-gate init --package-manager pnpm --install
+npx critical-gate init --version 2.4.4 --install
+npx critical-gate init --skip-workflow
+npx critical-gate init --skip-agent
+npx critical-gate init --force
+```
 
 Exit codes:
 

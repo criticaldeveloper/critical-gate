@@ -2,7 +2,7 @@ import { join } from "node:path";
 
 import * as vscode from "vscode";
 
-import { runCli, runInitAgent } from "./cli-adapter.js";
+import { runCli, runInitAgent, runInitProject } from "./cli-adapter.js";
 import { applyDiagnostics } from "./diagnostics.js";
 import { renderReport, showReport, writeReport } from "./report-view.js";
 import {
@@ -145,6 +145,63 @@ export async function initializeAgentInstructions(state: RefreshState): Promise<
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown Critical Gate error.";
     vscode.window.showErrorMessage(`Critical Gate could not initialize AGENTS.md: ${message}`);
+  }
+}
+
+export async function initializeRepository(state: RefreshState): Promise<void> {
+  const folder = vscode.workspace.workspaceFolders?.[0];
+
+  if (folder === undefined) {
+    vscode.window.showWarningMessage("Critical Gate requires an open workspace folder.");
+    return;
+  }
+
+  const installChoice = await vscode.window.showQuickPick(
+    [
+      {
+        label: "Install dependency and write setup files",
+        description: "Runs the detected package manager in this workspace.",
+        install: true
+      },
+      {
+        label: "Write setup files only",
+        description: "Skips package-manager installation.",
+        install: false
+      }
+    ],
+    {
+      title: "Initialize Critical Gate",
+      placeHolder: "Choose how much setup to perform.",
+      ignoreFocusOut: true
+    }
+  );
+
+  if (installChoice === undefined) {
+    return;
+  }
+
+  try {
+    state.statusBar.text = "$(sync~spin) Critical Gate";
+    state.statusBar.tooltip = "Critical Gate initialization is running.";
+    updateRunViews(state);
+
+    const message = (
+      await runInitProject(folder, state.extensionUri, {
+        install: installChoice.install
+      })
+    ).trim();
+    state.output.clear();
+    state.output.appendLine(message);
+    state.output.show(true);
+    vscode.window.showInformationMessage("Critical Gate repository setup completed.");
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown Critical Gate error.";
+    vscode.window.showErrorMessage(
+      `Critical Gate could not initialize this repository: ${message}`
+    );
+  } finally {
+    updateStatusBar(state);
+    updateRunViews(state);
   }
 }
 

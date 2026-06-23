@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
 import { getApiSnapshotOutputDirectory, readGitDiff } from "../index.js";
@@ -11,6 +12,10 @@ export const defaultIo: CliIo = {
     writeFileSync(path, content, "utf8");
   },
   now: () => new Date(),
+  getRoot: () =>
+    execFileSync("git", ["rev-parse", "--show-toplevel"], {
+      encoding: "utf8"
+    }).trim(),
   exists: (path) => existsSync(path),
   readFile: (path) => readFileSync(path, "utf8"),
   chmodFile: (path, mode) => chmodSync(path, mode),

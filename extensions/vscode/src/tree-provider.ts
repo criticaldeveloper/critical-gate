@@ -52,6 +52,8 @@ export class CriticalGateDashboardProvider implements vscode.WebviewViewProvider
       await vscode.commands.executeCommand("criticalGate.clearDiagnostics");
     } else if (message.command === "settings") {
       await vscode.commands.executeCommand("criticalGate.openSettings");
+    } else if (message.command === "initialize") {
+      await vscode.commands.executeCommand("criticalGate.initializeRepository");
     } else if (message.command === "openEvidence" && message.payload !== undefined) {
       await vscode.commands.executeCommand("criticalGate.openEvidence", message.payload);
     } else if (message.command === "copyRepair" && message.payload !== undefined) {
@@ -585,6 +587,7 @@ function renderDashboardHtml(state: DashboardState, nonce: string): string {
 <body>
   <div class="actions">
     <button data-command="run">${state.running ? "Running..." : "Run Gate"}</button>
+    <button class="secondary" data-command="initialize">Initialize</button>
     <button class="secondary" data-command="showReport">Show Report</button>
     <button class="secondary" data-command="clear">Clear</button>
     <button class="secondary" title="Open Critical Gate settings" data-command="settings">Settings</button>

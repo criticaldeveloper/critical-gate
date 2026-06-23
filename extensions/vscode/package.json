@@ -96,6 +96,11 @@
         "title": "Critical Gate: Initialize Agent Instructions"
       },
       {
+        "command": "criticalGate.initializeRepository",
+        "title": "Critical Gate: Initialize Repository",
+        "icon": "$(tools)"
+      },
+      {
         "command": "criticalGate.openEvidence",
         "title": "Critical Gate: Open Evidence"
       },
@@ -121,6 +126,18 @@
       }
     ],
     "menus": {
+      "view/title": [
+        {
+          "command": "criticalGate.initializeRepository",
+          "when": "view == criticalGate.dashboard",
+          "group": "navigation"
+        },
+        {
+          "command": "criticalGate.initializeRepository",
+          "when": "view == criticalGate.analysisTree",
+          "group": "navigation"
+        }
+      ],
       "view/item/context": [
         {
           "command": "criticalGate.openEvidence",

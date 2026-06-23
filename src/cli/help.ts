@@ -7,6 +7,7 @@ export type CommandName =
   | "teach"
   | "snapshot-api"
   | "install-hooks"
+  | "init"
   | "init-policy"
   | "init-agent";
 
@@ -21,6 +22,7 @@ export function getHelpText(): string {
     "  critical-gate teach --id <id> --when-changed <glob> --allow <glob[,glob]> --reason <text>",
     "  critical-gate snapshot-api [--entrypoint <path>] [--output <path>]",
     "  critical-gate install-hooks [--hook pre-commit|pre-push|all] [--cli <command>] [--force]",
+    "  critical-gate init [--mode observe] [--install] [--package-manager bun|pnpm|npm|yarn] [--version <npm-version>] [--skip-agent] [--skip-workflow] [--force]",
     "  critical-gate init-policy [--force]",
     "  critical-gate init-agent [--cli <command>]",
     "  critical-gate --version",
@@ -50,6 +52,10 @@ export function getCommandHelpText(command: CommandName): string {
     return getInstallHooksHelpText();
   }
 
+  if (command === "init") {
+    return getInitHelpText();
+  }
+
   if (command === "init-policy") {
     return getInitPolicyHelpText();
   }
@@ -59,6 +65,27 @@ export function getCommandHelpText(command: CommandName): string {
   }
 
   return getCheckHelpText();
+}
+
+function getInitHelpText(): string {
+  return [
+    "critical-gate init",
+    "",
+    "Initializes Critical Gate in observe-only mode for an existing repository.",
+    "",
+    "Options:",
+    "  --mode observe             Roll out as evidence collection without hard blocking",
+    "  --install                  Add critical-gate as a dev dependency",
+    "  --package-manager <name>   bun, pnpm, npm, or yarn; detected from lockfiles by default",
+    "  --version <npm-version>    Package/action version to install and write; defaults to the CLI version",
+    "  --skip-agent               Do not create or update AGENTS.md",
+    "  --skip-workflow            Do not add the advisory GitHub SARIF workflow",
+    "  --force                    Overwrite generated setup files that already exist",
+    "",
+    "Generated setup includes package scripts, observe-only policy, evidence export workflow,",
+    "dogfood evidence docs, advisory GitHub workflow, and managed agent instructions.",
+    ""
+  ].join("\n");
 }
 
 function getCheckHelpText(): string {

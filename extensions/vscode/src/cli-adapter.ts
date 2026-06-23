@@ -36,6 +36,22 @@ export async function runInitAgent(
   return execCriticalGate([cliPath, "init-agent"], folder.uri.fsPath);
 }
 
+export async function runInitProject(
+  folder: vscode.WorkspaceFolder,
+  extensionUri: vscode.Uri,
+  options: { install: boolean }
+): Promise<string> {
+  const config = vscode.workspace.getConfiguration("criticalGate");
+  const cliPath = resolveCliPath(folder, extensionUri, config.get<string>("cliPath", "").trim());
+  const args = [cliPath, "init"];
+
+  if (options.install) {
+    args.push("--install");
+  }
+
+  return execCriticalGate(args, folder.uri.fsPath);
+}
+
 export async function execCriticalGate(args: string[], cwd: string): Promise<string> {
   try {
     const { stdout } = await execFileAsync(process.execPath, args, {

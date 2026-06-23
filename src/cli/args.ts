@@ -114,6 +114,7 @@ export function isCommandName(value: string): value is CommandName {
     value === "teach" ||
     value === "snapshot-api" ||
     value === "install-hooks" ||
+    value === "init" ||
     value === "init-policy" ||
     value === "init-agent"
   );
@@ -311,6 +312,97 @@ export function parseInitAgentArgs(args: string[]):
     }
 
     options.cli = value;
+    index += 1;
+  }
+
+  return { ok: true, options };
+}
+
+export function parseInitProjectArgs(args: string[]):
+  | {
+      ok: true;
+      options: {
+        mode: "observe";
+        install: boolean;
+        packageManager?: "bun" | "pnpm" | "npm" | "yarn";
+        version?: string;
+        skipAgent: boolean;
+        skipWorkflow: boolean;
+        force: boolean;
+      };
+    }
+  | {
+      ok: false;
+      error: string;
+    } {
+  const options: {
+    mode: "observe";
+    install: boolean;
+    packageManager?: "bun" | "pnpm" | "npm" | "yarn";
+    version?: string;
+    skipAgent: boolean;
+    skipWorkflow: boolean;
+    force: boolean;
+  } = {
+    mode: "observe",
+    install: false,
+    skipAgent: false,
+    skipWorkflow: false,
+    force: false
+  };
+
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+
+    if (arg === "--install") {
+      options.install = true;
+      continue;
+    }
+
+    if (arg === "--skip-agent") {
+      options.skipAgent = true;
+      continue;
+    }
+
+    if (arg === "--skip-workflow") {
+      options.skipWorkflow = true;
+      continue;
+    }
+
+    if (arg === "--force") {
+      options.force = true;
+      continue;
+    }
+
+    if (arg !== "--mode" && arg !== "--package-manager" && arg !== "--version") {
+      return { ok: false, error: `Unknown option: ${arg}.` };
+    }
+
+    const value = args[index + 1];
+
+    if (value === undefined || value.startsWith("--")) {
+      return { ok: false, error: `Missing value for ${arg}.` };
+    }
+
+    if (arg === "--mode") {
+      if (value !== "observe") {
+        return { ok: false, error: "Invalid --mode value. Expected observe." };
+      }
+
+      options.mode = value;
+    } else if (arg === "--package-manager") {
+      if (value !== "bun" && value !== "pnpm" && value !== "npm" && value !== "yarn") {
+        return {
+          ok: false,
+          error: "Invalid --package-manager value. Expected bun, pnpm, npm, or yarn."
+        };
+      }
+
+      options.packageManager = value;
+    } else {
+      options.version = value;
+    }
+
     index += 1;
   }
 

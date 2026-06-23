@@ -5,6 +5,7 @@ import {
   runAcceptCommand,
   runInitAgentCommand,
   runInitPolicyCommand,
+  runInitProjectCommand,
   runInstallHooksCommand,
   runSnapshotApiCommand,
   runTeachCommand
@@ -64,6 +65,10 @@ function runCli(argv: string[], io: CliIo): ExitCode {
 
   if (command === "install-hooks") {
     return runInstallHooksCommand(args, io);
+  }
+
+  if (command === "init") {
+    return runInitProjectCommand(args, io);
   }
 
   if (command === "init-policy") {

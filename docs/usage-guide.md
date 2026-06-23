@@ -28,6 +28,16 @@ Run the CLI directly from npm:
 npx critical-gate --version
 ```
 
+Initialize a repository for observe-only rollout and evidence collection:
+
+```bash
+npx critical-gate init --install
+```
+
+This adds package scripts, an observe-only `.critical-gate.json`, durable evidence export files,
+advisory GitHub SARIF workflow, and managed `AGENTS.md` instructions. Omit `--install` when you want
+to review generated files without changing package dependencies.
+
 Run a Markdown report against the target branch:
 
 ```bash
@@ -467,12 +477,13 @@ context.
 
 Good rollout sequence:
 
-1. Run locally on AI-generated diffs with specific task text.
-2. Add the VS Code extension for developer feedback.
-3. Add GitHub Action SARIF upload with default thresholds.
-4. Review noisy findings and tune task text, repository docs, or `.critical-gate.json` policy.
-5. Add Codex hook enforcement where compact repair loops are useful.
-6. Promote observation-friendly detector families only after dogfooding shows acceptable precision.
+1. Run `npx critical-gate init --install` to create observe-only setup and evidence exports.
+2. Run locally on AI-generated diffs with specific task text.
+3. Add the VS Code extension for developer feedback and one-click repository initialization.
+4. Add GitHub Action SARIF upload with default thresholds.
+5. Review noisy findings and tune task text, repository docs, or `.critical-gate.json` policy.
+6. Add Codex hook enforcement where compact repair loops are useful.
+7. Promote observation-friendly detector families only after dogfooding shows acceptable precision.
 
 New detector families start as observation-friendly by default. They still report evidence and
 repair guidance, but they do not fail the gate unless promoted. Promote a detector family in

@@ -4,6 +4,16 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## Unreleased
+
+### Added
+
+- Add `critical-gate init` for first-class observe-only repository setup with package scripts,
+  evidence export files, advisory GitHub workflow, managed agent instructions, package-manager
+  detection, and optional dev-dependency installation.
+- Add a VS Code `Critical Gate: Initialize Repository` command and visible Activity Bar panel action
+  for running the same repository setup flow from the editor.
+
 ## 2.4.4 - 2026-06-23
 
 Patch release for policy glob matching semantics discovered during dogfooding.

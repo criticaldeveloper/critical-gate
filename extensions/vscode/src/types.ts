@@ -61,7 +61,7 @@ export interface DashboardState {
 }
 
 export type DashboardMessage =
-  | { command: "run" | "showReport" | "clear" | "settings" }
+  | { command: "run" | "showReport" | "clear" | "settings" | "initialize" }
   | { command: "openEvidence" | "copyRepair"; payload?: CriticalGateDiagnosticPayload };
 
 export type RunReason = "manual" | "onSave";

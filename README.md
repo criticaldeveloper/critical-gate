@@ -217,8 +217,8 @@ Critical Gate has one analysis core and multiple surfaces:
 - **Codex hook**: repair-oriented stop hook for agent workflows.
 - **VS Code extension**: Activity Bar dashboard, status bar state, Problems diagnostics, full report
   output, evidence navigation, and repair-copy actions.
-- **Agent onboarding**: `npx critical-gate init-agent` and the VS Code initialization command add a
-  managed Critical Gate section to `AGENTS.md` while preserving existing repository instructions.
+- **Project onboarding**: `npx critical-gate init --install` adds repository setup, package scripts,
+  observe-only policy, evidence exports, advisory CI, and managed agent instructions.
 
 The CLI remains the source of truth. The editor and CI surfaces consume CLI output rather than
 reimplementing detector logic.
@@ -266,6 +266,17 @@ Install it in a repository for repeated local and CI use:
 npm install -D critical-gate
 npx critical-gate check --task "Add signup validation" --base main
 ```
+
+Initialize observe-only dogfood setup in an existing repository:
+
+```bash
+npx critical-gate init --install
+```
+
+Use `npx critical-gate init` without `--install` to write setup files only. The initializer detects
+npm, pnpm, bun, or yarn from lockfiles, adds `gate`, `gate:base`, `gate:sarif`, and `gate:evidence`
+package scripts, writes `.critical-gate.json`, creates durable evidence docs, adds an advisory
+GitHub SARIF workflow, and updates `AGENTS.md`.
 
 Common output formats:
 
@@ -393,7 +404,7 @@ Install the Marketplace extension:
 The extension adds:
 
 - `Critical Gate` Activity Bar view with the `Gate Runs` dashboard.
-- `Run Gate`, `Show Report`, `Clear`, and `Settings` actions.
+- `Initialize`, `Run Gate`, `Show Report`, `Clear`, and `Settings` actions.
 - Latest run decision, changed files, findings, Diff Cost Score, and recent runs.
 - Problems diagnostics mapped from findings.
 - Evidence navigation and repair-copy actions.
