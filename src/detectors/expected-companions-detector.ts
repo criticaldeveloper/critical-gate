@@ -103,7 +103,8 @@ function isLowRelevanceFrameworkChange(file: DiffFile, files: DiffFile[]): boole
   return (
     isTinySelfContainedComponentChange(file.path, files) ||
     isSelfContainedAddedComponent(file) ||
-    isSelfContainedComponentWiringChange(file, files)
+    isSelfContainedComponentWiringChange(file, files) ||
+    isSelfContainedAstroStyleChange(file)
   );
 }
 
@@ -161,6 +162,10 @@ function isSelfContainedComponentWiringChange(file: DiffFile, files: DiffFile[])
   );
 }
 
+function isSelfContainedAstroStyleChange(file: DiffFile): boolean {
+  return /\.astro$/i.test(file.path) && file.status === "modified" && hasAstroStyleSignal(file);
+}
+
 function getAddedSelfContainedComponentNames(files: DiffFile[]): string[] {
   return files
     .filter(isSelfContainedAddedComponent)
@@ -200,6 +205,16 @@ function hasAddedLine(file: DiffFile, pattern: RegExp): boolean {
   return file.hunks
     .flatMap((hunk) => hunk.lines)
     .some((line) => line.kind === "add" && pattern.test(line.content));
+}
+
+function hasAstroStyleSignal(file: DiffFile): boolean {
+  return file.hunks
+    .flatMap((hunk) => hunk.lines)
+    .some(
+      (line) =>
+        (line.kind === "add" || line.kind === "delete") &&
+        (/<\/?style\b/i.test(line.content) || isStyleValueLine(line.content))
+    );
 }
 
 function extractRelevantDataHooks(content: string): string[] {
@@ -268,7 +283,7 @@ function isFocusedUiPresentationTask(taskText: string): boolean {
   const normalized = taskText.toLowerCase();
 
   return (
-    /\b(?:style|styles|styling|visual|redesign|polish|spacing|sizing|grid|layout|mobile|css|scss|typography|drop cap|flicker)\b/.test(
+    /\b(?:style|styles|styling|visual|redesign|polish|spacing|sizing|grid|layout|align|masonry|card|cards|cta|arrow|icon|indicator|vinyl|animation|animated|mobile|css|scss|typography|drop cap|flicker)\b/.test(
       normalized
     ) || /\b(?:default|display|view|mode|list view|grid view)\b/.test(normalized)
   );

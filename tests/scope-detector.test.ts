@@ -456,6 +456,34 @@ index 57b22a0..cb3e0f1 100644
       })
     ]);
   });
+
+  it("does not flag explicitly requested multi-area UI presentation files", () => {
+    const diff = parse(`diff --git a/src/views/AboutView.astro b/src/views/AboutView.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/views/AboutView.astro
++++ b/src/views/AboutView.astro
+@@ -1 +1 @@
+-<article class="about-card">
++<article class="about-card about-card--wide">
+diff --git a/src/views/ProjectsView.astro b/src/views/ProjectsView.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/views/ProjectsView.astro
++++ b/src/views/ProjectsView.astro
+@@ -1 +1 @@
+-<span class="project-card__arrow">-></span>
++<span class="project-card__arrow" aria-hidden="true">-></span>
+`);
+
+    expect(
+      scopeDetector.run({
+        task: {
+          source: "cli",
+          text: "Masonry-align about cards and fix project card arrow"
+        },
+        diff
+      })
+    ).toEqual([]);
+  });
 });
 
 describe("detector runner with scope findings", () => {

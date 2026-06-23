@@ -123,6 +123,25 @@ describe("rewriteDetector", () => {
       })
     ]);
   });
+
+  it("downgrades focused Astro layout rewrites out of blocking severity", () => {
+    const diff = parse(createRewriteDiff("src/views/AboutView.astro", 107, 89));
+
+    expect(
+      rewriteDetector.run({
+        task: {
+          source: "cli",
+          text: "Masonry-align about cards and fix project card arrow"
+        },
+        diff
+      })
+    ).toEqual([
+      expect.objectContaining({
+        detector: "rewrite",
+        severity: "medium"
+      })
+    ]);
+  });
 });
 
 describe("detector runner with rewrites", () => {

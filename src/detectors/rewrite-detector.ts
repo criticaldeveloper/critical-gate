@@ -6,6 +6,14 @@ import type { Detector } from "./types.js";
 const minimumRewriteChurn = 80;
 const minimumBalancedSide = 30;
 const minimumBalanceRatio = 0.55;
+const focusedUiPresentationTaskPattern =
+  /\b(?:style|styles|styling|visual|redesign|polish|spacing|sizing|grid|layout|align|masonry|card|cards|cta|arrow|icon|indicator|vinyl|animation|animated|mobile|css|scss|typography|display|view|mode)\b/i;
+const uiSourcePathPattern =
+  /(^|\/)(components?|views?|pages?|screens?|styles?|theme|themes)\/|\.astro$|\.(?:css|scss|sass|less)$/i;
+const structuralLinePattern =
+  /^\s*(?:import\s|export\s|interface\s+Props\b|type\s+Props\b|const\s+\{\s*[^}]+\s*\}\s*=\s*Astro\.props\b)/;
+const companionRelevantDataPattern =
+  /\bdata-(?:frame|scroll|release|artist|hero|outro|cursor|sequence)-[a-z0-9-]+/i;
 
 export const rewriteDetector: Detector = {
   name: "rewrite",
@@ -18,14 +26,21 @@ export const rewriteDetector: Detector = {
 
     return diff.files
       .filter(isRewriteCandidate)
-      .map((file) =>
-        toFinding(
-          file,
-          analysis.complexity === "small" || hasWeakIntentBoundary(task) ? "high" : "medium"
-        )
-      );
+      .map((file) => toFinding(file, getRewriteSeverity(file, task, analysis.complexity)));
   }
 };
+
+function getRewriteSeverity(
+  file: DiffFile,
+  task: Parameters<Detector["run"]>[0]["task"],
+  complexity: ReturnType<typeof analyzeTaskIntent>["complexity"]
+): FindingSeverity {
+  if (isFocusedUiPresentationRewrite(file, task.text)) {
+    return "medium";
+  }
+
+  return complexity === "small" || hasWeakIntentBoundary(task) ? "high" : "medium";
+}
 
 function hasWeakIntentBoundary(task: Parameters<Detector["run"]>[0]["task"]): boolean {
   return getTaskIntentQualityWarnings(task).some(
@@ -55,6 +70,21 @@ function isRewriteEligibleFile(file: DiffFile): boolean {
   }
 
   return file.role === "source" || isSourceLikePath(file.path);
+}
+
+function isFocusedUiPresentationRewrite(file: DiffFile, taskText: string): boolean {
+  if (!focusedUiPresentationTaskPattern.test(taskText) || !uiSourcePathPattern.test(file.path)) {
+    return false;
+  }
+
+  return !file.hunks
+    .flatMap((hunk) => hunk.lines)
+    .some(
+      (line) =>
+        (line.kind === "add" || line.kind === "delete") &&
+        (structuralLinePattern.test(line.content) ||
+          companionRelevantDataPattern.test(line.content))
+    );
 }
 
 function isSourceLikePath(path: string): boolean {

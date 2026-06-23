@@ -9,7 +9,7 @@ interface ChangedCluster {
 
 export const blastRadiusDetector: Detector = {
   name: "blast-radius",
-  run: ({ diff, context }) => {
+  run: ({ task, diff, context }) => {
     const graph = context?.knowledge?.getFileGraph();
 
     if (graph === undefined || diff.files.length < 2) {
@@ -27,9 +27,16 @@ export const blastRadiusDetector: Detector = {
     return clusters
       .slice(1)
       .filter((cluster) => cluster !== primaryCluster)
+      .filter((cluster) => !isAllowedFocusedUiCluster(cluster, diff.files, task.text))
       .map((cluster, index) => toFinding(cluster, index + 1));
   }
 };
+
+const focusedUiPresentationTaskPattern =
+  /\b(?:style|styles|styling|visual|redesign|polish|spacing|sizing|grid|layout|align|masonry|card|cards|cta|arrow|icon|indicator|vinyl|animation|animated|mobile|css|scss|typography|display|view|mode)\b/i;
+const uiPresentationPathPattern =
+  /(^|\/)(components?|views?|pages?|screens?|styles?|theme|themes|scripts?)\/|\.astro$|\.(?:css|scss|sass|less)$/i;
+const visualAssetPathPattern = /(^|\/)(public|assets?)\/.+\.(?:png|jpe?g|webp|gif|svg|avif)$/i;
 
 function clusterChangedFiles(files: DiffFile[], graph: FileGraph): ChangedCluster[] {
   const changedByPath = new Map(files.map((file) => [file.path, file]));
@@ -95,6 +102,29 @@ function walkCluster(
   }
 
   return cluster;
+}
+
+function isAllowedFocusedUiCluster(
+  cluster: ChangedCluster,
+  files: DiffFile[],
+  taskText: string
+): boolean {
+  if (files.length === 0 || files.length > 6 || !focusedUiPresentationTaskPattern.test(taskText)) {
+    return false;
+  }
+
+  const changedByPath = new Map(files.map((file) => [file.path, file]));
+
+  return cluster.paths.every((path) => {
+    const file = changedByPath.get(path);
+
+    return (
+      file !== undefined &&
+      file.status !== "deleted" &&
+      (file.role === "source" || file.role === "unknown") &&
+      (uiPresentationPathPattern.test(path) || visualAssetPathPattern.test(path))
+    );
+  });
 }
 
 function toFinding(cluster: ChangedCluster, index: number): Finding {

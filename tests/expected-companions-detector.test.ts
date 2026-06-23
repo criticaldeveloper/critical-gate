@@ -495,6 +495,67 @@ index 57b22a0..cb3e0f1 100644
     expect(findings).toEqual([]);
   });
 
+  it("does not emit historical companions for explicitly scoped Astro presentation changes", () => {
+    const diff = parse(`diff --git a/src/views/AboutView.astro b/src/views/AboutView.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/views/AboutView.astro
++++ b/src/views/AboutView.astro
+@@ -1,13 +1,13 @@
+ <section class="about-cards">
+-  <article class="about-card">One</article>
+-  <article class="about-card">Two</article>
++  <article class="about-card about-card--wide">One</article>
++  <article class="about-card about-card--compact">Two</article>
+ </section>
+ <style>
+ .about-cards {
+-  display: block;
++  display: grid;
+ }
+ .about-card {
+-  margin: 24px;
++  margin: 16px;
+ }
+ </style>
+`);
+
+    const findings = expectedCompanionsDetector.run({
+      task: {
+        source: "cli",
+        text: "Masonry-align about cards and fix project card arrow"
+      },
+      diff,
+      context: {
+        frameworkPacks: ["astro"],
+        knowledge: {
+          getFileGraph: () => ({ nodes: [], edges: [] }),
+          getHistoryIndex: () => ({
+            profile: { commitCount: 50, minConfidenceCommitCount: 20, coChanges: [] },
+            coChanges: [],
+            companionRules: [
+              {
+                sourcePath: "src/views/AboutView.astro",
+                expectedPath: "src/content/page-content.ts",
+                support: 5,
+                confidence: 0.8
+              },
+              {
+                sourcePath: "src/views/AboutView.astro",
+                expectedPath: "src/layouts/BaseLayout.astro",
+                support: 5,
+                confidence: 0.75
+              }
+            ]
+          }),
+          getPatternIndex: () => ({ patterns: [] }),
+          getSolutionIndex: () => ({ solutions: [] })
+        }
+      }
+    });
+
+    expect(findings).toEqual([]);
+  });
+
   it("does not emit immature or weak historical companions", () => {
     const diff = parse(`diff --git a/src/components/HeroVideo.astro b/src/components/HeroVideo.astro
 index 57b22a0..cb3e0f1 100644

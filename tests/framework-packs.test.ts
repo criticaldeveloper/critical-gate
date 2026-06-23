@@ -118,4 +118,35 @@ index 57b22a0..cb3e0f1 100644
 
     expect(findings.some((finding) => finding.id.includes("react-component-test"))).toBe(false);
   });
+
+  it("does not require external Astro support files for inline style edits", () => {
+    const diff =
+      parse(`diff --git a/src/components/NowPlaying.astro b/src/components/NowPlaying.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/NowPlaying.astro
++++ b/src/components/NowPlaying.astro
+@@ -1,8 +1,8 @@
+ <div class="now-playing">
+-  <span class="now-playing__dot"></span>
++  <img class="now-playing__vinyl" src="/icons/vinyl.png" alt="" />
+ </div>
+ <style>
+-.now-playing__dot { inline-size: 8px; }
++.now-playing__vinyl { inline-size: 28px; animation: spin 4s linear infinite; }
+ </style>
+`);
+
+    const findings = expectedCompanionsDetector.run({
+      task: {
+        source: "cli",
+        text: "Replace now playing dot with rotating vinyl"
+      },
+      diff,
+      context: {
+        frameworkPacks: ["astro"]
+      }
+    });
+
+    expect(findings).toEqual([]);
+  });
 });

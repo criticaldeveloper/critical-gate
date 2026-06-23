@@ -239,4 +239,43 @@ index 57b22a0..cb3e0f1 100644
       ])
     );
   });
+
+  it("does not emit for explicitly requested separate UI and visual asset clusters", () => {
+    const diff =
+      parse(`diff --git a/src/components/NowPlaying.astro b/src/components/NowPlaying.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/NowPlaying.astro
++++ b/src/components/NowPlaying.astro
+@@ -1 +1 @@
+-<span class="now-playing__dot"></span>
++<img class="now-playing__vinyl" src="/icons/vinyl.png" alt="" />
+diff --git a/src/views/ContactView.astro b/src/views/ContactView.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/views/ContactView.astro
++++ b/src/views/ContactView.astro
+@@ -1 +1 @@
+-<section class="contact contact--loose">
++<section class="contact">
+diff --git a/public/icons/vinyl.png b/public/icons/vinyl.png
+new file mode 100644
+index 0000000..cb3e0f1
+--- /dev/null
++++ b/public/icons/vinyl.png
+@@ -0,0 +1 @@
++png
+`);
+
+    const findings = blastRadiusDetector.run({
+      task: {
+        source: "cli",
+        text: "Match contact card spacing and replace now playing dot with rotating vinyl"
+      },
+      diff,
+      context: {
+        knowledge: knowledge({ nodes: [], edges: [] })
+      }
+    });
+
+    expect(findings).toEqual([]);
+  });
 });

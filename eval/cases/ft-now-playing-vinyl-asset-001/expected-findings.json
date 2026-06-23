@@ -1,0 +1,8 @@
+{
+  "sourceRepository": "criticaldeveloper-ft",
+  "caseType": "false-positive-regression",
+  "labelSource": "docs/critical-gate-evidence/2026-06-23/150801-match-contact-card-spacing-and-replace-now-playing-dot-with-rotating-vinyl.labels.json",
+  "shouldBlock": false,
+  "expectedFindings": [],
+  "allowedExtraDetectors": ["expected-companions", "repository-intelligence"]
+}

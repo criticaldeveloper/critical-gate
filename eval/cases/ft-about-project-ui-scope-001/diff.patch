@@ -1,0 +1,28 @@
+diff --git a/src/views/AboutView.astro b/src/views/AboutView.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/views/AboutView.astro
++++ b/src/views/AboutView.astro
+@@ -1,13 +1,13 @@
+ <section class="about-cards">
+-  <article class="about-card">One</article>
+-  <article class="about-card">Two</article>
++  <article class="about-card about-card--wide">One</article>
++  <article class="about-card about-card--compact">Two</article>
+ </section>
+ <style>
+ .about-cards {
+-  display: block;
++  display: grid;
+ }
+ .about-card {
+-  margin: 24px;
++  margin: 16px;
+ }
+ </style>
+diff --git a/src/views/ProjectsView.astro b/src/views/ProjectsView.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/views/ProjectsView.astro
++++ b/src/views/ProjectsView.astro
+@@ -1 +1 @@
+-<span class="project-card__arrow">-></span>
++<span class="project-card__arrow" aria-hidden="true">-></span>

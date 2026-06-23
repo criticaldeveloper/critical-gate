@@ -160,6 +160,28 @@ describe("classifyObservedDiffActions", () => {
       ])
     );
   });
+
+  it("treats card layout and vinyl indicator tasks as UI intent", () => {
+    expect(
+      summarizeIntentVerification(
+        createTask("Masonry-align about cards and fix project card arrow"),
+        [createFile("src/views/AboutView.astro", "source")]
+      )
+    ).toMatchObject({
+      requestedClasses: expect.arrayContaining(["ui"]),
+      unexpectedClasses: []
+    });
+
+    expect(
+      summarizeIntentVerification(
+        createTask("Replace now playing dot with rotating vinyl indicator"),
+        [createFile("src/components/NowPlaying.astro", "source")]
+      )
+    ).toMatchObject({
+      requestedClasses: expect.arrayContaining(["ui"]),
+      unexpectedClasses: []
+    });
+  });
 });
 
 function createTask(text: string): TaskIntent {

@@ -266,6 +266,8 @@ Will not flag:
 - Expected source/test/doc companions when task intent supports them.
 - Version-only manifest changes during release tasks.
 - Tiny legitimate stylesheet/token changes when task intent is explicitly stylistic.
+- Focused UI presentation tasks that explicitly name multiple component/view areas and only touch
+  UI source files or visual assets.
 
 Known blind spots:
 
@@ -275,7 +277,9 @@ Known blind spots:
 Coverage:
 
 - Unit tests: `tests/scope-detector.test.ts`, `tests/task-analysis.test.ts`.
-- Evaluation cases: `eval/cases/config-runtime-pin-drift-001`, `eval/cases/typography-clean-001`.
+- Evaluation cases: `eval/cases/config-runtime-pin-drift-001`, `eval/cases/typography-clean-001`,
+  `eval/cases/ft-about-project-ui-scope-001`,
+  `eval/cases/ft-now-playing-vinyl-asset-001`.
 
 ### Intent Coverage
 
@@ -352,6 +356,9 @@ Will not flag:
 
 - Legitimate broad refactors with task intent that names the refactor scope.
 - Larger changes where file roles and task scope are coherent.
+- Focused UI presentation rewrites are downgraded to medium when the task terms and changed file
+  path show layout/style intent and no structural imports, exports, props, or companion-relevant
+  data hooks changed.
 
 Known blind spots:
 
@@ -384,6 +391,8 @@ Quality boundary:
 
 - Useful for review and scoring.
 - Should not block by default unless the repository has tuned policy and repeated evidence.
+- Should not report separate clusters for focused UI presentation tasks when every cluster is an
+  expected component/view/style/script path or a visual asset named by the task surface.
 
 Coverage:
 
@@ -404,6 +413,9 @@ Quality boundary:
 
 - Useful for missing support-file observations.
 - Should remain observation-friendly for immature repositories or tiny edits.
+- Should not require external framework style companions when an Astro component carries its
+  changed style evidence inline, or when historical companions are low relevance for a focused UI
+  presentation task.
 
 Coverage:
 

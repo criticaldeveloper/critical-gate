@@ -34,6 +34,10 @@ const manifestTaskTerms = [
 const dependencyLinePattern = /^\s*"([^"]+)":\s*"([^"]+)"/;
 const dependencySectionPattern =
   /^\s*"(dependencies|devDependencies|peerDependencies|optionalDependencies)":\s*\{/;
+const uiPresentationTaskPattern =
+  /\b(?:style|styles|styling|visual|redesign|polish|spacing|sizing|grid|layout|align|masonry|card|cards|cta|arrow|icon|indicator|vinyl|animation|animated|mobile|css|scss|typography|display|view|mode)\b/i;
+const uiPresentationPathPattern =
+  /(^|\/)(components?|views?|pages?|screens?|styles?|theme|themes|scripts?)\/|\.astro$|\.(?:css|scss|sass|less)$/i;
 
 export const scopeDetector: Detector = {
   name: "scope",
@@ -98,6 +102,10 @@ function isUnexpectedForSmallTask(
     return false;
   }
 
+  if (isFocusedUiPresentationSourceChange(file, files, taskText)) {
+    return false;
+  }
+
   if (file.status === "deleted" && !isDeletionAcknowledged(file, taskText, keywords)) {
     return true;
   }
@@ -152,6 +160,35 @@ function isRoleAlignedConfigOrManifestChange(
 function hasAnyTaskTerm(taskText: string, terms: string[]): boolean {
   const normalizedTask = taskText.toLowerCase();
   return terms.some((term) => normalizedTask.includes(term));
+}
+
+function isFocusedUiPresentationSourceChange(
+  file: DiffFile,
+  files: DiffFile[],
+  taskText: string
+): boolean {
+  if (
+    files.length === 0 ||
+    files.length > 6 ||
+    !uiPresentationTaskPattern.test(taskText) ||
+    !uiPresentationPathPattern.test(file.path)
+  ) {
+    return false;
+  }
+
+  return files.every(
+    (candidate) =>
+      candidate.status !== "deleted" &&
+      (candidate.role === "source" || candidate.role === "unknown") &&
+      isUiPresentationOrAssetPath(candidate.path)
+  );
+}
+
+function isUiPresentationOrAssetPath(path: string): boolean {
+  return (
+    uiPresentationPathPattern.test(path) ||
+    /(^|\/)(public|assets?)\/.+\.(?:png|jpe?g|webp|gif|svg|avif)$/i.test(path)
+  );
 }
 
 function hasConfigProhibition(taskText: string): boolean {

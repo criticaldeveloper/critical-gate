@@ -1,0 +1,8 @@
+{
+  "sourceRepository": "criticaldeveloper-ft",
+  "caseType": "false-positive-regression",
+  "labelSource": "docs/critical-gate-evidence/2026-06-23/144914-masonry-align-about-cards-and-fix-project-card-arrow.labels.json",
+  "shouldBlock": false,
+  "expectedFindings": [],
+  "allowedExtraDetectors": ["expected-companions", "repository-intelligence"]
+}
