@@ -627,7 +627,55 @@ Result:
 Status:
 Useful / False positive / Missed / Clean
 
+Missed finding review:
+Yes / No. Record anything Critical Gate failed to catch.
+
+Repair loop:
+Not needed / Attempted / Repaired / Partially repaired / Not repaired / Harmful.
+
+Repair scope:
+Stayed inside task: Yes / No / Not applicable.
+Stayed inside repair contract: Yes / No / Not applicable.
+
 Follow-up:
+\`\`\`
+
+## Label Sidecar Template
+
+Create or update a \`.labels.json\` sidecar next to each exported JSON report. Use the repair-loop
+fields when Critical Gate findings are fed back to an agent or developer for a rerun.
+
+\`\`\`json
+{
+  "schemaVersion": "1.0",
+  "reportId": "<report id>",
+  "repo": "<repo name>",
+  "reportPath": "docs/critical-gate-evidence/YYYY-MM-DD/<report>.json",
+  "task": "<task>",
+  "taskType": "feature|bugfix|docs|policy|evidence-workflow|release|other",
+  "runLabel": "useful|clean|false-positive",
+  "decision": "pass|fail",
+  "findingCount": 0,
+  "usefulFindingCount": 0,
+  "falsePositiveFindingCount": 0,
+  "missedFindingCount": 0,
+  "detectorsReviewed": [],
+  "findingIdsReviewed": [],
+  "repairOutcome": "none|not-needed|repaired|partially-repaired|not-repaired|harmful",
+  "repairAttempted": false,
+  "repairPromptCaptured": false,
+  "repairPromptPath": "",
+  "repairDiffPath": "",
+  "rerunReportPath": "",
+  "rerunDecision": "",
+  "repairScopeStayedWithinTask": false,
+  "repairScopeStayedWithinContract": false,
+  "missedFindingsReviewed": true,
+  "missedFindingNotes": "",
+  "fixtureNeeded": false,
+  "fixtureCreated": false,
+  "notes": ""
+}
 \`\`\`
 `;
 }

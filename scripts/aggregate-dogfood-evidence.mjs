@@ -29,6 +29,20 @@ const requiredLabelFields = [
   "fixtureCreated",
   "notes"
 ];
+const optionalBooleanLabelFields = [
+  "repairAttempted",
+  "repairPromptCaptured",
+  "repairScopeStayedWithinTask",
+  "repairScopeStayedWithinContract",
+  "missedFindingsReviewed"
+];
+const optionalStringLabelFields = [
+  "repairPromptPath",
+  "repairDiffPath",
+  "rerunReportPath",
+  "rerunDecision",
+  "missedFindingNotes"
+];
 
 const args = parseArgs(process.argv.slice(2));
 const repos = parseList(args.repo, defaultRepos).map((repo) => resolvePath(repo));
@@ -194,6 +208,18 @@ function validateLabel(label) {
     errors.push("detectorsReviewed must be an array.");
   }
 
+  for (const field of optionalBooleanLabelFields) {
+    if (label[field] !== undefined && typeof label[field] !== "boolean") {
+      errors.push(`${field} must be a boolean when present.`);
+    }
+  }
+
+  for (const field of optionalStringLabelFields) {
+    if (label[field] !== undefined && typeof label[field] !== "string") {
+      errors.push(`${field} must be a string when present.`);
+    }
+  }
+
   return errors;
 }
 
@@ -239,6 +265,7 @@ function buildSummary(labels, repoPaths) {
   const runLabels = countBy(validLabels, (label) => label.runLabel ?? "unknown");
   const taskTypes = countBy(validLabels, (label) => label.taskType ?? "unknown");
   const repairOutcomes = countBy(validLabels, (label) => label.repairOutcome ?? "unknown");
+  const repairLoopMetrics = summarizeRepairLoops(validLabels);
   const validationErrors = labels.flatMap((label) =>
     (label.validationErrors ?? []).map((error) => ({
       repo: label.repo ?? label.repoPath,
@@ -262,6 +289,7 @@ function buildSummary(labels, repoPaths) {
       missedFindingCount: sum(validLabels, "missedFindingCount"),
       fixtureNeededCount: validLabels.filter((label) => label.fixtureNeeded === true).length,
       fixtureCreatedCount: validLabels.filter((label) => label.fixtureCreated === true).length,
+      repairLoopMetrics,
       detectorCounts
     },
     validation: {
@@ -293,6 +321,7 @@ function summarizeRepo(repo, labels) {
     falsePositiveFindingCount: sum(labels, "falsePositiveFindingCount"),
     missedFindingCount: sum(labels, "missedFindingCount"),
     fixtureNeededCount: labels.filter((label) => label.fixtureNeeded === true).length,
+    repairLoopMetrics: summarizeRepairLoops(labels),
     detectorCounts: countDetectors(labels)
   };
 }
@@ -310,11 +339,43 @@ function summarizeLabel(label) {
     falsePositiveFindingCount: label.falsePositiveFindingCount,
     missedFindingCount: label.missedFindingCount,
     repairOutcome: label.repairOutcome,
+    repairAttempted: label.repairAttempted,
+    repairPromptCaptured: label.repairPromptCaptured,
+    rerunReportPath: label.rerunReportPath,
+    rerunDecision: label.rerunDecision,
+    repairScopeStayedWithinTask: label.repairScopeStayedWithinTask,
+    repairScopeStayedWithinContract: label.repairScopeStayedWithinContract,
+    missedFindingsReviewed: label.missedFindingsReviewed,
     fixtureNeeded: label.fixtureNeeded,
     fixtureCreated: label.fixtureCreated,
     detectorsReviewed: label.detectorsReviewed ?? [],
     labelPath: label.relativeLabelPath,
     validationErrors: label.validationErrors ?? []
+  };
+}
+
+function summarizeRepairLoops(labels) {
+  const attempted = labels.filter((label) => label.repairAttempted === true);
+  const rerun = labels.filter(
+    (label) => typeof label.rerunReportPath === "string" && label.rerunReportPath.length > 0
+  );
+  const scopedToTask = labels.filter((label) => label.repairScopeStayedWithinTask === true);
+  const scopedToContract = labels.filter((label) => label.repairScopeStayedWithinContract === true);
+
+  return {
+    repairAttemptedCount: attempted.length,
+    repairPromptCapturedCount: labels.filter((label) => label.repairPromptCaptured === true).length,
+    repairRerunCount: rerun.length,
+    repairSuccessCount: labels.filter(
+      (label) => label.repairOutcome === "repaired" || label.rerunDecision === "pass"
+    ).length,
+    repairScopedToTaskCount: scopedToTask.length,
+    repairScopedToContractCount: scopedToContract.length,
+    missedFindingsReviewedCount: labels.filter((label) => label.missedFindingsReviewed === true)
+      .length,
+    missedFindingsReviewMissingCount: labels.filter(
+      (label) => label.missedFindingsReviewed !== true
+    ).length
   };
 }
 
@@ -381,6 +442,10 @@ function renderMarkdown(summary) {
     `- Missed findings: ${summary.metrics.missedFindingCount}`,
     `- Fixture-needed reports: ${summary.metrics.fixtureNeededCount}`,
     `- Fixture-created reports: ${summary.metrics.fixtureCreatedCount}`,
+    `- Repair attempts captured: ${summary.metrics.repairLoopMetrics.repairAttemptedCount}`,
+    `- Repair reruns captured: ${summary.metrics.repairLoopMetrics.repairRerunCount}`,
+    `- Repairs passing rerun: ${summary.metrics.repairLoopMetrics.repairSuccessCount}`,
+    `- Missed-finding reviews captured: ${summary.metrics.repairLoopMetrics.missedFindingsReviewedCount}`,
     "",
     "## Run Labels",
     "",
@@ -390,11 +455,15 @@ function renderMarkdown(summary) {
     "",
     renderCountTable(summary.metrics.detectorCounts),
     "",
+    "## Repair Loop Evidence",
+    "",
+    renderRepairLoopMetrics(summary.metrics.repairLoopMetrics),
+    "",
     "## Repositories",
     "",
     ...summary.repositories.map(
       (repo) =>
-        `- ${repo.repo}: ${repo.reports} reports; useful findings ${repo.usefulFindingCount}; false-positive findings ${repo.falsePositiveFindingCount}; missed findings ${repo.missedFindingCount}; fixture-needed reports ${repo.fixtureNeededCount}.`
+        `- ${repo.repo}: ${repo.reports} reports; useful findings ${repo.usefulFindingCount}; false-positive findings ${repo.falsePositiveFindingCount}; missed findings ${repo.missedFindingCount}; fixture-needed reports ${repo.fixtureNeededCount}; repair attempts ${repo.repairLoopMetrics.repairAttemptedCount}; missed-finding reviews ${repo.repairLoopMetrics.missedFindingsReviewedCount}.`
     ),
     "",
     "## Reports",
@@ -428,7 +497,7 @@ function renderReportList(reports) {
 
     for (const report of repoReports) {
       lines.push(
-        `- \`${report.reportId}\`: ${report.runLabel}; findings ${report.findingCount}; false positives ${report.falsePositiveFindingCount}; fixture needed ${formatBoolean(report.fixtureNeeded)}.`
+        `- \`${report.reportId}\`: ${report.runLabel}; findings ${report.findingCount}; false positives ${report.falsePositiveFindingCount}; fixture needed ${formatBoolean(report.fixtureNeeded)}; repair attempted ${formatBoolean(report.repairAttempted)}; missed reviewed ${formatBoolean(report.missedFindingsReviewed)}.`
       );
     }
 
@@ -436,6 +505,19 @@ function renderReportList(reports) {
   }
 
   return lines;
+}
+
+function renderRepairLoopMetrics(metrics) {
+  return [
+    `- Repair attempts captured: ${metrics.repairAttemptedCount}`,
+    `- Repair prompts captured: ${metrics.repairPromptCapturedCount}`,
+    `- Repair reruns captured: ${metrics.repairRerunCount}`,
+    `- Repairs passing rerun: ${metrics.repairSuccessCount}`,
+    `- Repairs scoped to task: ${metrics.repairScopedToTaskCount}`,
+    `- Repairs scoped to repair contract: ${metrics.repairScopedToContractCount}`,
+    `- Missed-finding reviews captured: ${metrics.missedFindingsReviewedCount}`,
+    `- Reports still missing missed-finding review: ${metrics.missedFindingsReviewMissingCount}`
+  ].join("\n");
 }
 
 function renderCountTable(counts) {
@@ -449,6 +531,10 @@ function renderCountTable(counts) {
 }
 
 function formatBoolean(value) {
+  if (value === undefined) {
+    return "not recorded";
+  }
+
   return value === true ? "yes" : "no";
 }
 

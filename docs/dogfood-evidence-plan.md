@@ -233,6 +233,34 @@ artifacts/dogfood/<run-id>/
 - Number of agent repair attempts.
 - Whether repair guidance was directly actionable.
 
+## Project-Level Evidence Sidecars
+
+For ongoing project-level dogfooding, each exported JSON report should have a neighboring
+`.labels.json` sidecar. Older sidecars without repair-loop fields are still valid, but new evidence
+should include these fields so the aggregate summary can report repair-loop proof instead of only
+static finding usefulness:
+
+```json
+{
+  "repairOutcome": "none|not-needed|repaired|partially-repaired|not-repaired|harmful",
+  "repairAttempted": false,
+  "repairPromptCaptured": false,
+  "repairPromptPath": "",
+  "repairDiffPath": "",
+  "rerunReportPath": "",
+  "rerunDecision": "",
+  "repairScopeStayedWithinTask": false,
+  "repairScopeStayedWithinContract": false,
+  "missedFindingsReviewed": true,
+  "missedFindingNotes": ""
+}
+```
+
+Use the repair fields only when a Critical Gate finding is fed back to an agent or developer and the
+gate is rerun. `missedFindingsReviewed` should be set for every new report after manual review,
+including clean reports. This makes missed-finding evidence explicit instead of assuming zero misses
+from silence.
+
 ### Cost And Value Metrics
 
 The first version can use deterministic proxies:
