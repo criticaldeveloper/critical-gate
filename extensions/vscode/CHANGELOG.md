@@ -2,6 +2,14 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.6.0 - 2026-06-23
+
+Minor release aligned with Critical Gate 2.6.0.
+
+- Bundle focused UI false-positive calibration for scope, blast-radius, expected-companion, and
+  rewrite findings.
+- Bundle expanded UI intent vocabulary and Astro inline-style companion handling.
+
 ## 2.5.0 - 2026-06-23
 
 - Add `Critical Gate: Initialize Repository` and visible panel actions to bootstrap observe-only

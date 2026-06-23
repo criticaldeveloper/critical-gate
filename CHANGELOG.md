@@ -4,6 +4,25 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## 2.6.0 - 2026-06-23
+
+### Changed
+
+- Calibrate focused UI presentation tasks so explicitly requested multi-area component, view, style,
+  script, and visual-asset changes produce fewer noisy scope and blast-radius observations.
+- Downgrade non-structural UI presentation rewrites from blocking severity to observational severity
+  when the task and changed file path show layout/style intent and no imports, exports, props, or
+  companion-relevant data hooks changed.
+- Expand task intent vocabulary for common design/product wording such as cards, CTA, masonry,
+  arrows, icons, indicators, vinyl, animation, layout, and spacing.
+
+### Fixed
+
+- Treat changed inline Astro styles as self-contained framework style evidence so component changes
+  do not require external CSS/SCSS companions by default.
+- Add `criticaldeveloper-ft` false-positive regression fixtures for multi-area UI scope and visual
+  asset replacement evidence.
+
 ## 2.5.0 - 2026-06-23
 
 ### Added
