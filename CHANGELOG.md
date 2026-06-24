@@ -4,6 +4,13 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## Unreleased
+
+### Fixed
+
+- Detect package-only tool upgrades when the manifest diff hunk starts inside the dependency block,
+  avoiding residual expected-companion noise for pnpm monorepo lockfile updates.
+
 ## 2.7.1 - 2026-06-24
 
 ### Fixed

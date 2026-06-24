@@ -5,6 +5,16 @@ const dependencySectionPattern =
   /^\s*"(dependencies|devDependencies|peerDependencies|optionalDependencies)":\s*\{/;
 const lockfilePathPattern =
   /(^|\/)(pnpm-lock\.yaml|package-lock\.json|yarn\.lock|bun\.lock|bun\.lockb)$/;
+const nonDependencyManifestKeys = new Set([
+  "name",
+  "version",
+  "description",
+  "type",
+  "license",
+  "author",
+  "private",
+  "packageManager"
+]);
 
 export function isExplicitPackageUpgradeDiff(taskText: string, files: DiffFile[]): boolean {
   const changedDependencies = getChangedManifestDependencies(files);
@@ -32,13 +42,26 @@ function getChangedManifestDependencies(files: DiffFile[]): Array<{ name: string
 }
 
 function getChangedDependencies(file: DiffFile): Array<{ name: string }> {
-  const beforeDependencies = extractChangedDependencyVersions(file, "before");
-  const afterDependencies = extractChangedDependencyVersions(file, "after");
+  const beforeDependencies = mergeDependencyVersions(
+    extractChangedDependencyVersions(file, "before"),
+    extractChangedDependencyVersionsFromChangedLines(file, "before")
+  );
+  const afterDependencies = mergeDependencyVersions(
+    extractChangedDependencyVersions(file, "after"),
+    extractChangedDependencyVersionsFromChangedLines(file, "after")
+  );
   const names = new Set([...beforeDependencies.keys(), ...afterDependencies.keys()]);
 
   return [...names]
     .filter((name) => beforeDependencies.get(name) !== afterDependencies.get(name))
     .map((name) => ({ name }));
+}
+
+function mergeDependencyVersions(
+  primary: Map<string, string>,
+  fallback: Map<string, string>
+): Map<string, string> {
+  return new Map([...fallback, ...primary]);
 }
 
 function extractChangedDependencyVersions(
@@ -80,8 +103,34 @@ function extractChangedDependencyVersions(
   return dependencies;
 }
 
+function extractChangedDependencyVersionsFromChangedLines(
+  file: DiffFile,
+  side: "before" | "after"
+): Map<string, string> {
+  const dependencies = new Map<string, string>();
+  const expectedKind = side === "before" ? "delete" : "add";
+
+  for (const line of file.hunks.flatMap((hunk) => hunk.lines)) {
+    if (line.kind !== expectedKind) {
+      continue;
+    }
+
+    const dependency = dependencyLinePattern.exec(line.content);
+
+    if (dependency !== null && isPlausibleDependencyKey(dependency[1])) {
+      dependencies.set(dependency[1], dependency[2]);
+    }
+  }
+
+  return dependencies;
+}
+
 function belongsToManifestSide(kind: "add" | "delete" | "context", side: "before" | "after") {
   return kind === "context" || (side === "before" ? kind === "delete" : kind === "add");
+}
+
+function isPlausibleDependencyKey(key: string): boolean {
+  return !nonDependencyManifestKeys.has(key);
 }
 
 function taskMentionsPackageUpgrade(taskText: string, dependencyName: string): boolean {

@@ -165,6 +165,18 @@ function packageUpgradeKnowledge(): KnowledgeProvider {
           expectedPath: "docs/critical-gate-evidence/README.md",
           support: 6,
           confidence: 0.8
+        },
+        {
+          sourcePath: "pnpm-lock.yaml",
+          expectedPath: "packages/components/custom-elements.json",
+          support: 6,
+          confidence: 0.8
+        },
+        {
+          sourcePath: "pnpm-lock.yaml",
+          expectedPath: "packages/components/package.json",
+          support: 6,
+          confidence: 0.8
         }
       ]
     }),
@@ -267,6 +279,46 @@ index 57b22a0..cb3e0f1 100644
         task: {
           source: "cli",
           text: "Upgrade Critical Gate to 2.7.0 controlled dogfood calibration"
+        },
+        diff,
+        context: { knowledge: packageUpgradeKnowledge() }
+      })
+    ).toEqual([]);
+  });
+
+  it("recognizes package-only tool upgrades when the manifest hunk omits dependency section headers", () => {
+    const diff = parse(`diff --git a/package.json b/package.json
+index 57b22a0..cb3e0f1 100644
+--- a/package.json
++++ b/package.json
+@@ -61,7 +61,7 @@
+     "@typescript-eslint/parser": "^8.57.2",
+     "@vitejs/plugin-react": "^6.0.1",
+-    "critical-gate": "2.7.0",
++    "critical-gate": "2.7.1",
+     "eslint": "^10.1.0",
+diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
+index 57b22a0..cb3e0f1 100644
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -66,8 +66,8 @@ importers:
+       critical-gate:
+-        specifier: 2.7.0
+-        version: 2.7.0
++        specifier: 2.7.1
++        version: 2.7.1
+@@ -2263,8 +2263,8 @@ packages:
+-  critical-gate@2.7.0:
+-    resolution: {integrity: sha512-old}
++  critical-gate@2.7.1:
++    resolution: {integrity: sha512-new}
+`);
+
+    expect(
+      expectedCompanionsDetector.run({
+        task: {
+          source: "cli",
+          text: "Upgrade Critical Gate to 2.7.1 and verify package-only upgrade calibration"
         },
         diff,
         context: { knowledge: packageUpgradeKnowledge() }
