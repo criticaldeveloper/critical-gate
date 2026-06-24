@@ -4,7 +4,7 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
-## Unreleased
+## 2.7.2 - 2026-06-24
 
 ### Fixed
 
