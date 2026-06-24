@@ -28,6 +28,28 @@ const profile: RepositoryProfile = {
   ]
 };
 
+const uiProfile: RepositoryProfile = {
+  commitCount: 50,
+  minConfidenceCommitCount: 20,
+  coChanges: [
+    {
+      path: "src/components/StatusBadge.astro",
+      count: 8,
+      relatedPaths: [{ path: "src/styles/status.scss", count: 7 }]
+    },
+    {
+      path: "src/views/ProfileView.astro",
+      count: 8,
+      relatedPaths: [{ path: "src/content/profile.ts", count: 6 }]
+    },
+    {
+      path: "src/views/ContactView.astro",
+      count: 8,
+      relatedPaths: [{ path: "src/content/contact.ts", count: 6 }]
+    }
+  ]
+};
+
 function parse(diffText: string): GateResult["diff"] {
   return {
     files: parseUnifiedDiff(diffText)
@@ -185,6 +207,128 @@ index 57b22a0..cb3e0f1 100644
         }
       ]
     });
+  });
+
+  it("does not emit for explicitly named focused UI presentation surfaces", () => {
+    const diff =
+      parse(`diff --git a/src/components/StatusBadge.astro b/src/components/StatusBadge.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/StatusBadge.astro
++++ b/src/components/StatusBadge.astro
+@@ -1 +1 @@
+-<span class="status-badge">Live</span>
++<span class="status-badge status-badge--animated">Live</span>
+diff --git a/src/views/ProfileView.astro b/src/views/ProfileView.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/views/ProfileView.astro
++++ b/src/views/ProfileView.astro
+@@ -1 +1 @@
+-<section class="profile-card">
++<section class="profile-card profile-card--compact">
+diff --git a/src/views/ContactView.astro b/src/views/ContactView.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/views/ContactView.astro
++++ b/src/views/ContactView.astro
+@@ -1 +1 @@
+-<section class="contact-card contact-card--loose">
++<section class="contact-card">
+`);
+
+    expect(
+      repositoryIntelligenceDetector.run({
+        task: {
+          source: "cli",
+          text: "Align profile card, contact card spacing, and animated status badge"
+        },
+        diff,
+        context: { repositoryProfile: uiProfile }
+      })
+    ).toEqual([]);
+  });
+
+  it("still emits for vague UI presentation tasks without an explicit surface match", () => {
+    const diff =
+      parse(`diff --git a/src/components/StatusBadge.astro b/src/components/StatusBadge.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/StatusBadge.astro
++++ b/src/components/StatusBadge.astro
+@@ -1 +1 @@
+-<span class="status-badge">Live</span>
++<span class="status-badge status-badge--animated">Live</span>
+diff --git a/src/views/ProfileView.astro b/src/views/ProfileView.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/views/ProfileView.astro
++++ b/src/views/ProfileView.astro
+@@ -1 +1 @@
+-<section class="profile-card">
++<section class="profile-card profile-card--compact">
+`);
+
+    const findings = repositoryIntelligenceDetector.run({
+      task: {
+        source: "cli",
+        text: "Polish card spacing"
+      },
+      diff,
+      context: { repositoryProfile: uiProfile }
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        id: "repository-intelligence:src/components/StatusBadge.astro"
+      }),
+      expect.objectContaining({
+        id: "repository-intelligence:src/views/ProfileView.astro"
+      })
+    ]);
+  });
+
+  it("still emits when an explicitly named UI surface is paired with config drift", () => {
+    const diff =
+      parse(`diff --git a/src/components/StatusBadge.astro b/src/components/StatusBadge.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/StatusBadge.astro
++++ b/src/components/StatusBadge.astro
+@@ -1 +1 @@
+-<span class="status-badge">Live</span>
++<span class="status-badge status-badge--animated">Live</span>
+diff --git a/webpack.config.js b/webpack.config.js
+index 57b22a0..cb3e0f1 100644
+--- a/webpack.config.js
++++ b/webpack.config.js
+@@ -1 +1,2 @@
++export const cache = true;
+`);
+
+    expect(
+      repositoryIntelligenceDetector.run({
+        task: {
+          source: "cli",
+          text: "Animate the status badge indicator"
+        },
+        diff,
+        context: {
+          repositoryProfile: {
+            ...uiProfile,
+            coChanges: [
+              ...uiProfile.coChanges,
+              {
+                path: "webpack.config.js",
+                count: 6,
+                relatedPaths: [{ path: "package.json", count: 5 }]
+              }
+            ]
+          }
+        }
+      })
+    ).toEqual([
+      expect.objectContaining({
+        id: "repository-intelligence:src/components/StatusBadge.astro"
+      }),
+      expect.objectContaining({
+        id: "repository-intelligence:webpack.config.js"
+      })
+    ]);
   });
 });
 

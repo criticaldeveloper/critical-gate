@@ -10,7 +10,7 @@ Generated: 2026-06-24T09:04:29.664Z
 - False-positive finding instances: 111
 - Missed findings: 0
 - Fixture-needed reports: 12
-- Fixture-created reports: 11
+- Fixture-created reports: 12
 - Repair attempts captured: 0
 - Repair reruns captured: 0
 - Repairs passing rerun: 0

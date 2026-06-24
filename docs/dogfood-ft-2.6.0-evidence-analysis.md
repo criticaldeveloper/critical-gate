@@ -71,8 +71,8 @@ What it does show:
 
 What still needs proof:
 
-- Convert the remaining UI replay `repository-intelligence` false positive into a fixture if the
-  pattern can be generalized safely.
+- Validate the new generalized `eval/cases/explicit-ui-surface-history-001` fixture against future
+  repository-intelligence changes.
 - Add a dependency-upgrade false-positive regression fixture if the package/lockfile to unrelated
   style companion pattern repeats in another project or is easy to generalize safely.
 - Continue capturing missed-finding reviews and repair-loop outcomes; this evidence set still has no

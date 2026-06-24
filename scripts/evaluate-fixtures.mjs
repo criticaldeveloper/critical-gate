@@ -113,10 +113,33 @@ function validateExpected(id, value) {
     labelSource: value.labelSource,
     shouldBlock: value.shouldBlock,
     expectedFindings: value.expectedFindings,
+    repositoryProfile: validateRepositoryProfile(id, value.repositoryProfile),
     allowedExtraDetectors: Array.isArray(value.allowedExtraDetectors)
       ? value.allowedExtraDetectors.filter((entry) => typeof entry === "string")
       : []
   };
+}
+
+function validateRepositoryProfile(id, value) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new Error(`${id}: repositoryProfile must be an object when present.`);
+  }
+
+  if (
+    !Number.isFinite(value.commitCount) ||
+    !Number.isFinite(value.minConfidenceCommitCount) ||
+    !Array.isArray(value.coChanges)
+  ) {
+    throw new Error(
+      `${id}: repositoryProfile requires commitCount, minConfidenceCommitCount, and coChanges.`
+    );
+  }
+
+  return value;
 }
 
 function evaluateCase(evaluationCase) {
@@ -129,7 +152,13 @@ function evaluateCase(evaluationCase) {
     headRef: "evaluation/head",
     files: parseUnifiedDiff(evaluationCase.diffPatch)
   };
-  const findings = runDetectors(task, diff);
+  const detectorContext =
+    evaluationCase.expected.repositoryProfile === undefined
+      ? undefined
+      : {
+          repositoryProfile: evaluationCase.expected.repositoryProfile
+        };
+  const findings = runDetectors(task, diff, detectorContext);
   const summary = summarizeFindings(findings, task, diff);
   const matchedExpectedFindings = evaluationCase.expected.expectedFindings.filter((expected) =>
     findings.some((finding) => matchesExpectedFinding(finding, expected))

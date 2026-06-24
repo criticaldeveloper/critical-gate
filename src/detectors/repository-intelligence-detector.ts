@@ -5,7 +5,7 @@ import type { Detector } from "./types.js";
 
 export const repositoryIntelligenceDetector: Detector = {
   name: "repository-intelligence",
-  run: ({ diff, context }) => {
+  run: ({ task, diff, context }) => {
     const history = context?.knowledge?.getHistoryIndex();
     const profile = context?.repositoryProfile ?? history?.profile;
 
@@ -20,10 +20,35 @@ export const repositoryIntelligenceDetector: Detector = {
     }
 
     return diff.files
-      .filter((file) => isHistoricallyUnrelated(file, changedPaths, profile))
+      .filter(
+        (file) =>
+          isHistoricallyUnrelated(file, changedPaths, profile) &&
+          !isExplicitFocusedUiPresentationChange(file, diff.files, task.text)
+      )
       .map((file) => toFinding(file, changedPaths, profile, history));
   }
 };
+
+const focusedUiPresentationTaskPattern =
+  /\b(?:style|styles|styling|visual|redesign|polish|spacing|sizing|grid|layout|align|masonry|card|cards|cta|arrow|icon|indicator|vinyl|animation|animated|mobile|css|scss|typography|display|view|mode)\b/i;
+const uiPresentationPathPattern =
+  /(^|\/)(components?|views?|pages?|screens?|styles?|theme|themes|scripts?)\/|\.astro$|\.(?:css|scss|sass|less)$/i;
+const visualAssetPathPattern = /(^|\/)(public|assets?)\/.+\.(?:png|jpe?g|webp|gif|svg|avif)$/i;
+const genericPathTokens = new Set([
+  "component",
+  "components",
+  "view",
+  "views",
+  "page",
+  "pages",
+  "screen",
+  "screens",
+  "style",
+  "styles",
+  "script",
+  "scripts",
+  "src"
+]);
 
 function isHistoricallyUnrelated(
   file: DiffFile,
@@ -41,6 +66,59 @@ function isHistoricallyUnrelated(
   );
 
   return relatedChangedPaths.length === 0;
+}
+
+function isExplicitFocusedUiPresentationChange(
+  file: DiffFile,
+  files: DiffFile[],
+  taskText: string
+): boolean {
+  if (
+    files.length === 0 ||
+    files.length > 6 ||
+    !focusedUiPresentationTaskPattern.test(taskText) ||
+    !files.every(isUiPresentationOrAssetChange)
+  ) {
+    return false;
+  }
+
+  return getPathIntentTokens(file.path).some((token) => taskMentionsToken(taskText, token));
+}
+
+function isUiPresentationOrAssetChange(file: DiffFile): boolean {
+  return (
+    file.status !== "deleted" &&
+    (file.role === "source" || file.role === "unknown") &&
+    (uiPresentationPathPattern.test(file.path) || visualAssetPathPattern.test(file.path))
+  );
+}
+
+function getPathIntentTokens(path: string): string[] {
+  const fileName = path
+    .split("/")
+    .at(-1)
+    ?.replace(/\.[^.]+$/u, "");
+
+  if (fileName === undefined) {
+    return [];
+  }
+
+  const tokens = fileName
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/u)
+    .filter((token) => token.length >= 3)
+    .filter((token) => !genericPathTokens.has(token));
+
+  return [...new Set(tokens)];
+}
+
+function taskMentionsToken(taskText: string, token: string): boolean {
+  return new RegExp(`(^|[^a-z0-9])${escapeRegExp(token)}([^a-z0-9]|$)`, "i").test(taskText);
+}
+
+function escapeRegExp(value: string): string {
+  return value.replaceAll(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function toFinding(

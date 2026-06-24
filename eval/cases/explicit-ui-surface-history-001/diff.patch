@@ -1,0 +1,21 @@
+diff --git a/src/components/StatusBadge.astro b/src/components/StatusBadge.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/StatusBadge.astro
++++ b/src/components/StatusBadge.astro
+@@ -1 +1 @@
+-<span class="status-badge">Live</span>
++<span class="status-badge status-badge--animated">Live</span>
+diff --git a/src/views/ProfileView.astro b/src/views/ProfileView.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/views/ProfileView.astro
++++ b/src/views/ProfileView.astro
+@@ -1 +1 @@
+-<section class="profile-card">
++<section class="profile-card profile-card--compact">
+diff --git a/src/views/ContactView.astro b/src/views/ContactView.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/views/ContactView.astro
++++ b/src/views/ContactView.astro
+@@ -1 +1 @@
+-<section class="contact-card contact-card--loose">
++<section class="contact-card">

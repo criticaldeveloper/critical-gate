@@ -1,0 +1,43 @@
+{
+  "sourceRepository": "criticaldeveloper-ft",
+  "caseType": "false-positive-regression",
+  "labelSource": "docs/critical-gate-evidence/2026-06-24/090427-replay-about-card-layout-project-arrow-contact-spacing-and-now-playing-vinyl-ui-.labels.json",
+  "shouldBlock": false,
+  "expectedFindings": [],
+  "repositoryProfile": {
+    "commitCount": 50,
+    "minConfidenceCommitCount": 20,
+    "coChanges": [
+      {
+        "path": "src/components/StatusBadge.astro",
+        "count": 8,
+        "relatedPaths": [
+          {
+            "path": "src/styles/status.scss",
+            "count": 7
+          }
+        ]
+      },
+      {
+        "path": "src/views/ProfileView.astro",
+        "count": 8,
+        "relatedPaths": [
+          {
+            "path": "src/content/profile.ts",
+            "count": 6
+          }
+        ]
+      },
+      {
+        "path": "src/views/ContactView.astro",
+        "count": 8,
+        "relatedPaths": [
+          {
+            "path": "src/content/contact.ts",
+            "count": 6
+          }
+        ]
+      }
+    ]
+  }
+}

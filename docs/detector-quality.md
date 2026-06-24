@@ -457,11 +457,16 @@ Quality boundary:
 
 - Useful as repo-aware context.
 - Should stay observational unless policy-enabled after dogfooding.
+- Repository-history unusualness is weaker evidence when the task explicitly names the UI component
+  or view surface and the diff stays inside focused UI presentation files.
+- Explicit UI-surface suppression must not apply to vague tasks, config/package drift, deleted files,
+  or non-UI change clusters.
 
 Coverage:
 
 - Unit tests: `tests/pattern-violation-detector.test.ts`,
   `tests/repository-intelligence-detector.test.ts`, `tests/repository-profile.test.ts`.
+- Evaluation case: `eval/cases/explicit-ui-surface-history-001`.
 
 ## Promotion Checklist
 

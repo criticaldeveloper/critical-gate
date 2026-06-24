@@ -139,7 +139,7 @@ After every new dogfood batch:
   captured in the aggregate summary yet.
 - `criticaldeveloper-blog` still has fixture-needed reports that should be converted into
   deterministic eval cases.
-- The remaining FT 2.6.0 UI replay noise is isolated to `repository-intelligence` and should become
-  a generalized fixture if it can be represented without FT-specific assumptions.
+- The remaining FT 2.6.0 UI replay `repository-intelligence` noise has been converted into the
+  generalized `eval/cases/explicit-ui-surface-history-001` fixture.
 - Package-only Critical Gate upgrades exposed expected-companion noise from package/lockfile changes
   to unrelated style files; add a fixture if the pattern repeats or can be generalized safely.

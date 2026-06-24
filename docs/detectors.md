@@ -269,6 +269,9 @@ Initial implementation:
   relationship.
 - Include known normal patterns in repository-intelligence evidence when a changed path appears with
   an unusual combination.
+- Suppress repository-intelligence observations for focused UI presentation diffs when the task
+  explicitly names the touched component or view surface and all changed files remain inside UI
+  source or visual asset paths. This keeps sparse history from overriding clear task intent.
 - Suppress history-derived companion prompts for tiny stylesheet value-only edits, because a
   one-line typography token change should not require broad historical docs or component companions.
 - Suppress history-derived companion prompts for focused UI presentation and small default-state
