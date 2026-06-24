@@ -103,6 +103,33 @@ index 57b22a0..cb3e0f1 100644
     expect(intentVerificationDetector.run({ task, diff })).toEqual([]);
   });
 
+  it("treats explicit tool version upgrades as dependency intent", () => {
+    const task: TaskIntent = {
+      source: "cli",
+      text: "Upgrade Critical Gate to 2.7.0 controlled dogfood calibration"
+    };
+    const diff = parse(`diff --git a/package.json b/package.json
+index 57b22a0..cb3e0f1 100644
+--- a/package.json
++++ b/package.json
+@@ -2,7 +2,7 @@
+   "devDependencies": {
+-    "critical-gate": "2.6.0",
++    "critical-gate": "2.7.0",
+     "sass": "^1.97.2"
+   }
+diff --git a/bun.lock b/bun.lock
+index 57b22a0..cb3e0f1 100644
+--- a/bun.lock
++++ b/bun.lock
+@@ -1 +1 @@
+-"critical-gate": ["critical-gate@2.6.0", "", {}, "sha512-old"]
++"critical-gate": ["critical-gate@2.7.0", "", {}, "sha512-new"]
+`);
+
+    expect(intentVerificationDetector.run({ task, diff })).toEqual([]);
+  });
+
   it("fails strong UI feature intent when only trivial stylesheet values changed", () => {
     const task: TaskIntent = {
       source: "cli",

@@ -4,6 +4,13 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## Unreleased
+
+### Fixed
+
+- Calibrate explicit package-only tool upgrades so manifest and lockfile changes for the named
+  upgraded dependency stay in scope and do not require unrelated historical companion files.
+
 ## 2.7.0 - 2026-06-24
 
 ### Changed

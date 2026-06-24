@@ -190,6 +190,10 @@ function inferAllowedChangeClasses(normalizedText: string): ChangeClass[] {
     }
   }
 
+  if (isExplicitToolVersionUpgradeIntent(normalizedText)) {
+    classes.add("dependency");
+  }
+
   if (isReleaseManagementIntent(normalizedText)) {
     classes.add("docs");
     classes.add("dependency");
@@ -236,6 +240,13 @@ function isReleaseManagementIntent(normalizedText: string): boolean {
     hasTerm(normalizedText, "version") ||
     (hasTerm(normalizedText, "release") &&
       /\b(?:bump|publish|prepare|cut|tag|changelog|notes|version)\b/i.test(normalizedText))
+  );
+}
+
+function isExplicitToolVersionUpgradeIntent(normalizedText: string): boolean {
+  return (
+    /\b(?:upgrade|upgraded|bump|bumped|update|updated)\b/.test(normalizedText) &&
+    /\b(?:to|from)\s+v?\d+(?:\.\d+){1,3}\b/.test(normalizedText)
   );
 }
 

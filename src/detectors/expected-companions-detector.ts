@@ -1,6 +1,10 @@
 import { frameworkPacks, matchesPathPattern } from "../frameworks/index.js";
 import type { CompanionRule, NormalChangePattern } from "../knowledge/index.js";
 import type { DiffFile, Finding } from "../schema/index.js";
+import {
+  isExplicitPackageUpgradeDiff,
+  isManifestOrLockfilePath
+} from "./package-upgrade-intent.js";
 import type { Detector } from "./types.js";
 
 const maxHistoryFindingsPerSource = 3;
@@ -20,6 +24,7 @@ export const expectedCompanionsDetector: Detector = {
     const history = context?.knowledge?.getHistoryIndex();
 
     const changedPaths = new Set(diff.files.map((file) => file.path));
+    const packageUpgradeDiff = isExplicitPackageUpgradeDiff(task.text, diff.files);
     const historyFindings =
       history === undefined || !hasMatureHistory(history.profile?.commitCount)
         ? []
@@ -29,7 +34,12 @@ export const expectedCompanionsDetector: Detector = {
                 changedPaths.has(rule.sourcePath) &&
                 !changedPaths.has(rule.expectedPath) &&
                 isStrongCompanionRule(rule) &&
-                !isLowRelevanceCompanionChange(rule.sourcePath, diff.files, task.text)
+                !isLowRelevanceCompanionChange(
+                  rule.sourcePath,
+                  diff.files,
+                  task.text,
+                  packageUpgradeDiff
+                )
             ),
             history.normalPatterns ?? []
           );
@@ -91,8 +101,14 @@ function isStrongCompanionRule(rule: CompanionRule): boolean {
   return rule.support >= minimumCompanionSupport;
 }
 
-function isLowRelevanceCompanionChange(path: string, files: DiffFile[], taskText: string): boolean {
+function isLowRelevanceCompanionChange(
+  path: string,
+  files: DiffFile[],
+  taskText: string,
+  packageUpgradeDiff: boolean
+): boolean {
   return (
+    (packageUpgradeDiff && isManifestOrLockfilePath(path)) ||
     isTrivialStylesheetChange(path, files) ||
     isTinySelfContainedComponentChange(path, files) ||
     isFocusedUiPresentationChange(path, files, taskText)

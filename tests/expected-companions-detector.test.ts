@@ -137,6 +137,42 @@ function blogKnowledge(): KnowledgeProvider {
   };
 }
 
+function packageUpgradeKnowledge(): KnowledgeProvider {
+  return {
+    getFileGraph: () => ({ nodes: [], edges: [] }),
+    getHistoryIndex: () => ({
+      profile: {
+        commitCount: 50,
+        minConfidenceCommitCount: 20,
+        coChanges: []
+      },
+      coChanges: [],
+      companionRules: [
+        {
+          sourcePath: "package.json",
+          expectedPath: "docs/critical-gate-dogfood.md",
+          support: 6,
+          confidence: 0.8
+        },
+        {
+          sourcePath: "package.json",
+          expectedPath: "src/pages/index.astro",
+          support: 6,
+          confidence: 0.8
+        },
+        {
+          sourcePath: "bun.lock",
+          expectedPath: "docs/critical-gate-evidence/README.md",
+          support: 6,
+          confidence: 0.8
+        }
+      ]
+    }),
+    getPatternIndex: () => ({ patterns: [] }),
+    getSolutionIndex: () => ({ solutions: [] })
+  };
+}
+
 describe("expectedCompanionsDetector", () => {
   it("emits when a historically paired test companion is missing", () => {
     const diff = parse(`diff --git a/src/signup.ts b/src/signup.ts
@@ -202,6 +238,68 @@ index 57b22a0..cb3e0f1 100644
       expect.objectContaining({
         title: "Expected companion lockfile missing",
         message: "package.json changed without a corresponding package lockfile change."
+      })
+    ]);
+  });
+
+  it("does not emit historical companions for explicit package-only tool upgrades", () => {
+    const diff = parse(`diff --git a/package.json b/package.json
+index 57b22a0..cb3e0f1 100644
+--- a/package.json
++++ b/package.json
+@@ -2,7 +2,7 @@
+   "devDependencies": {
+-    "critical-gate": "2.6.0",
++    "critical-gate": "2.7.0",
+     "sass": "^1.97.2"
+   }
+diff --git a/bun.lock b/bun.lock
+index 57b22a0..cb3e0f1 100644
+--- a/bun.lock
++++ b/bun.lock
+@@ -1 +1 @@
+-"critical-gate": ["critical-gate@2.6.0", "", {}, "sha512-old"]
++"critical-gate": ["critical-gate@2.7.0", "", {}, "sha512-new"]
+`);
+
+    expect(
+      expectedCompanionsDetector.run({
+        task: {
+          source: "cli",
+          text: "Upgrade Critical Gate to 2.7.0 controlled dogfood calibration"
+        },
+        diff,
+        context: { knowledge: packageUpgradeKnowledge() }
+      })
+    ).toEqual([]);
+  });
+
+  it("still emits the missing lockfile companion for manifest-only tool upgrades", () => {
+    const diff = parse(`diff --git a/package.json b/package.json
+index 57b22a0..cb3e0f1 100644
+--- a/package.json
++++ b/package.json
+@@ -2,7 +2,7 @@
+   "devDependencies": {
+-    "critical-gate": "2.6.0",
++    "critical-gate": "2.7.0",
+     "sass": "^1.97.2"
+   }
+`);
+
+    expect(
+      expectedCompanionsDetector.run({
+        task: {
+          source: "cli",
+          text: "Upgrade Critical Gate to 2.7.0 controlled dogfood calibration"
+        },
+        diff,
+        context: { knowledge: packageUpgradeKnowledge() }
+      })
+    ).toEqual([
+      expect.objectContaining({
+        id: "expected-companions:package.json:lockfile",
+        title: "Expected companion lockfile missing"
       })
     ]);
   });

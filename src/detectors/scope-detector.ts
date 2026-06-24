@@ -2,6 +2,7 @@ import { analyzeTaskIntent } from "../intent/index.js";
 import type { DiffFile, Finding, RepositoryTokenIndex } from "../schema/index.js";
 
 import type { Detector } from "./types.js";
+import { isExplicitPackageUpgradeDiff } from "./package-upgrade-intent.js";
 
 const broadTaskTerms = ["repo", "all", "setup", "scaffold", "architecture", "refactor"];
 const configTaskTerms = [
@@ -87,6 +88,13 @@ function isUnexpectedForSmallTask(
   }
 
   if (file.role === "lockfile" && hasAlignedDependencyRemovalManifest(files, taskText)) {
+    return false;
+  }
+
+  if (
+    (file.role === "manifest" || file.role === "lockfile") &&
+    isExplicitPackageUpgradeDiff(taskText, files)
+  ) {
     return false;
   }
 

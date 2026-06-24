@@ -365,6 +365,37 @@ index 57b22a0..cb3e0f1 100644
     ).toEqual([]);
   });
 
+  it("does not emit for explicitly requested package dependency upgrades", () => {
+    const diff = parse(`diff --git a/package.json b/package.json
+index 57b22a0..cb3e0f1 100644
+--- a/package.json
++++ b/package.json
+@@ -2,7 +2,7 @@
+   "devDependencies": {
+-    "critical-gate": "2.6.0",
++    "critical-gate": "2.7.0",
+     "typescript": "^5.9.3"
+   }
+diff --git a/bun.lock b/bun.lock
+index 57b22a0..cb3e0f1 100644
+--- a/bun.lock
++++ b/bun.lock
+@@ -1 +1 @@
+-"critical-gate": ["critical-gate@2.6.0", "", {}, "sha512-old"]
++"critical-gate": ["critical-gate@2.7.0", "", {}, "sha512-new"]
+`);
+
+    expect(
+      scopeDetector.run({
+        task: {
+          source: "cli",
+          text: "Upgrade Critical Gate to 2.7.0 controlled dogfood calibration"
+        },
+        diff
+      })
+    ).toEqual([]);
+  });
+
   it("does not emit for version-only release manifest changes", () => {
     const diff = parse(`diff --git a/package.json b/package.json
 index 57b22a0..cb3e0f1 100644
