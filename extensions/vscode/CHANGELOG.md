@@ -2,6 +2,12 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.7.1 - 2026-06-24
+
+Patch release aligned with Critical Gate 2.7.1.
+
+- Bundle package-only tool upgrade detector calibration.
+
 ## 2.7.0 - 2026-06-24
 
 Minor release aligned with Critical Gate 2.7.0.

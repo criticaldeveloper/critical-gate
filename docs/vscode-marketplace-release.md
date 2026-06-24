@@ -47,7 +47,7 @@ Current public identity:
 
 - Publisher: `criticaldeveloper`
 - Extension name: `critical-gate-vscode`
-- Extension version: `2.7.0`
+- Extension version: `2.7.1`
 - Display name: `Critical-Gate`
 - Extension ID: `criticaldeveloper.critical-gate-vscode`
 - Icon: `extensions/vscode/resources/icon.png`
