@@ -64,6 +64,8 @@ Before implementing, read:
 8. `docs/editor-surface.md` when changing editor integrations
 9. `docs/versioning-policy.md` and `CHANGELOG.md` when preparing releases
 10. `docs/installation.md` when changing user-facing installation or distribution paths
+11. `docs/evidence-index.md` when changing dogfood evidence collection, labels, aggregation,
+    analysis docs, or eval fixtures
 
 When changing code later:
 
@@ -72,6 +74,22 @@ When changing code later:
 - Prefer structured parsers and existing ecosystem tools over string matching.
 - Keep output schemas backward compatible unless the task explicitly changes them.
 - Run the narrowest relevant verification commands before handing off.
+
+When maintaining dogfood evidence:
+
+- Treat `docs/evidence-index.md` as the current map for evidence sources and responsibilities.
+- Keep raw project evidence in the project that produced it under `docs/critical-gate-evidence/`.
+- Ensure every new raw report has a complete `.labels.json` sidecar with schema, task, decision,
+  useful/false-positive/missed counts, fixture status, repair status, reviewed detectors, and notes.
+- Set `missedFindingsReviewed: true` after manual review, including clean reports.
+- Run `node scripts/aggregate-dogfood-evidence.mjs` after new labels or label fixes and resolve all
+  validation errors before committing aggregate docs.
+- Update `docs/dogfood-evidence-summary.md` through the aggregator, not by hand.
+- Add focused analysis docs for meaningful before/after results, such as version calibration replays.
+- Convert repeated, generalizable false positives or missed findings into `eval/cases/` fixtures and
+  run `pnpm evaluate`.
+- Treat `dogfood/scenarios/` as historical or future-runner scenario definitions, not as the current
+  source of collected evidence.
 
 Before completing any file-changing task:
 

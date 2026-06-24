@@ -5,6 +5,11 @@
 Produce public proof that Critical Gate is useful in real agent workflows, not only synthetic
 fixtures.
 
+For the current source-of-truth map of collected evidence, raw project report locations, aggregate
+summaries, focused analysis docs, fixtures, and maintenance rules, see
+`docs/evidence-index.md`. This plan documents the evidence strategy and older scenario-runner
+protocol; it is not the only index of collected evidence.
+
 The proof should answer four questions:
 
 1. Does the gate catch real failing agent diffs?
