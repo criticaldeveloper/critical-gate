@@ -1,38 +1,41 @@
 # Dogfood Evidence Summary
 
-Generated: 2026-06-24T09:04:29.664Z
+Generated: 2026-06-24T13:00:55.821Z
 
 ## Overview
 
 - Repositories: 3
-- Labeled reports: 40
+- Labeled reports: 54
 - Useful findings: 108
-- False-positive finding instances: 111
+- False-positive finding instances: 128
 - Missed findings: 0
-- Fixture-needed reports: 12
-- Fixture-created reports: 12
+- Fixture-needed reports: 17
+- Fixture-created reports: 15
 - Repair attempts captured: 0
 - Repair reruns captured: 0
 - Repairs passing rerun: 0
-- Missed-finding reviews captured: 9
+- Missed-finding reviews captured: 12
 
 ## Run Labels
 
+- clean: 18
 - useful: 18
-- clean: 9
+- false-positive: 7
 - pass-with-reviewed-observations: 7
-- false-positive: 5
 - pass-with-reviewed-observation: 1
+- pass-with-scope-noise: 1
+- pending: 1
+- pending-review: 1
 
 ## Detector Frequency
 
-- expected-companions: 26
-- blast-radius: 18
-- repository-intelligence: 12
+- expected-companions: 31
+- blast-radius: 19
+- repository-intelligence: 13
+- scope: 6
 - dependency-addition: 4
 - intent-verification: 4
 - rewrite: 3
-- scope: 3
 
 ## Repair Loop Evidence
 
@@ -42,14 +45,14 @@ Generated: 2026-06-24T09:04:29.664Z
 - Repairs passing rerun: 0
 - Repairs scoped to task: 0
 - Repairs scoped to repair contract: 0
-- Missed-finding reviews captured: 9
-- Reports still missing missed-finding review: 31
+- Missed-finding reviews captured: 12
+- Reports still missing missed-finding review: 42
 
 ## Repositories
 
-- critical-components: 12 reports; useful findings 82; false-positive findings 0; missed findings 0; fixture-needed reports 0; repair attempts 0; missed-finding reviews 0.
-- criticaldeveloper-blog: 13 reports; useful findings 10; false-positive findings 77; missed findings 0; fixture-needed reports 11; repair attempts 0; missed-finding reviews 0.
-- criticaldeveloper-ft: 15 reports; useful findings 16; false-positive findings 34; missed findings 0; fixture-needed reports 1; repair attempts 0; missed-finding reviews 9.
+- critical-components: 15 reports; useful findings 82; false-positive findings 3; missed findings 0; fixture-needed reports 2; repair attempts 0; missed-finding reviews 0.
+- criticaldeveloper-blog: 17 reports; useful findings 10; false-positive findings 89; missed findings 0; fixture-needed reports 13; repair attempts 0; missed-finding reviews 0.
+- criticaldeveloper-ft: 22 reports; useful findings 16; false-positive findings 36; missed findings 0; fixture-needed reports 2; repair attempts 0; missed-finding reviews 12.
 
 ## Reports
 
@@ -67,6 +70,9 @@ Generated: 2026-06-24T09:04:29.664Z
 - `195928-sharpen-critical-aura-button-radius-weight-and-hover-design`: useful; findings 6; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed not recorded.
 - `200655-tune-critical-gate-policy-from-aura-theme-evidence`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed not recorded.
 - `critical-dark-aura-rename-refinement`: useful; findings 8; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed not recorded.
+- `104333-post-2-7-0-controlled-dogfood-calibration`: pending; findings 10; false positives 0; fixture needed yes; repair attempted not recorded; missed reviewed not recorded.
+- `120826-upgrade-critical-gate-to-2-7-1-and-verify-package-only-upgrade-calibration`: false-positive; findings 3; false positives 3; fixture needed yes; repair attempted not recorded; missed reviewed not recorded.
+- `124556-upgrade-critical-gate-to-2-7-2-and-verify-shortened-package-hunk-upgrade-calibra`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed not recorded.
 
 ### criticaldeveloper-blog
 
@@ -83,6 +89,10 @@ Generated: 2026-06-24T09:04:29.664Z
 - `150827-make-post-detail-hero-metadata-two-columns-on-mobile`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed not recorded.
 - `181051-create-synapse-review-skill-and-agent-instructions`: useful; findings 3; false positives 3; fixture needed yes; repair attempted not recorded; missed reviewed not recorded.
 - `182625-update-blog-synapses-across-all-posts`: useful; findings 36; false positives 36; fixture needed yes; repair attempted not recorded; missed reviewed not recorded.
+- `094312-fix-article-detail-hero-title-overflow`: pass-with-scope-noise; findings 4; false positives 4; fixture needed yes; repair attempted not recorded; missed reviewed not recorded.
+- `111810-upgrade-critical-gate-to-2-7-0-controlled-dogfood-calibration`: pending-review; findings 8; false positives 8; fixture needed yes; repair attempted not recorded; missed reviewed not recorded.
+- `121251-upgrade-critical-gate-to-2-7-1-and-verify-package-only-upgrade-calibration`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed not recorded.
+- `124809-upgrade-critical-gate-to-2-7-2-and-verify-shortened-package-hunk-upgrade-calibra`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed not recorded.
 
 ### criticaldeveloper-ft
 
@@ -101,3 +111,10 @@ Generated: 2026-06-24T09:04:29.664Z
 - `165850-keep-now-playing-vinyl-spinning-continuously`: pass-with-reviewed-observations; findings 3; false positives 3; fixture needed no; repair attempted no; missed reviewed yes.
 - `083953-upgrade-critical-gate-dependency-and-evidence-workflow-to-2-6-0`: pass-with-reviewed-observations; findings 3; false positives 3; fixture needed no; repair attempted no; missed reviewed yes.
 - `090427-replay-about-card-layout-project-arrow-contact-spacing-and-now-playing-vinyl-ui-`: pass-with-reviewed-observations; findings 1; false positives 1; fixture needed yes; repair attempted no; missed reviewed yes.
+- `101010-upgrade-critical-gate-to-2-7-0-and-rerun-focused-dogfood-calibration`: false-positive; findings 2; false positives 2; fixture needed yes; repair attempted not recorded; missed reviewed not recorded.
+- `101717-controlled-ui-replay-for-repository-intelligence-calibration-in-aboutview-presen`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed not recorded.
+- `102812-fix-about-cta-placement-after-cards-and-remove-cta-scroll-bounce`: clean; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `104742-restore-desktop-about-cta-column-placement-while-keeping-mobile-cta-below-cards`: clean; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `121429-upgrade-critical-gate-to-2-7-1-and-verify-package-only-upgrade-calibration`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed not recorded.
+- `124858-upgrade-critical-gate-to-2-7-2-and-verify-shortened-package-hunk-upgrade-calibra`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed not recorded.
+- `130052-add-wall-clock-synchronized-countdown-to-now-playing-track-duration`: clean; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
