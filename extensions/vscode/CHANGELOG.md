@@ -2,6 +2,12 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.7.3 - 2026-06-24
+
+Patch release aligned with Critical Gate 2.7.3.
+
+- Bundle content metadata companion calibration for static/content-heavy repositories.
+
 ## 2.7.2 - 2026-06-24
 
 Patch release aligned with Critical Gate 2.7.2.

@@ -4,6 +4,15 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## 2.7.3 - 2026-06-24
+
+### Fixed
+
+- Calibrate content-heavy reciprocal metadata updates so adding a new content post with related
+  content or synapse references does not produce repository-intelligence noise when the task
+  explicitly names those companion updates.
+- Add a generalized content metadata fixture and focused detector tests for the calibration.
+
 ## 2.7.2 - 2026-06-24
 
 ### Fixed
