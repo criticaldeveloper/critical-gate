@@ -36,7 +36,7 @@ const dependencyLinePattern = /^\s*"([^"]+)":\s*"([^"]+)"/;
 const dependencySectionPattern =
   /^\s*"(dependencies|devDependencies|peerDependencies|optionalDependencies)":\s*\{/;
 const uiPresentationTaskPattern =
-  /\b(?:style|styles|styling|visual|redesign|polish|spacing|sizing|grid|layout|align|masonry|card|cards|cta|arrow|icon|indicator|vinyl|animation|animated|mobile|css|scss|typography|display|view|mode)\b/i;
+  /\b(?:style|styles|styling|visual|redesign|polish|spacing|sizing|grid|layout|align|masonry|card|cards|cta|arrow|icon|indicator|vinyl|animation|animated|mobile|css|scss|typography|display|view|mode|hero|title|overflow)\b/i;
 const uiPresentationPathPattern =
   /(^|\/)(components?|views?|pages?|screens?|styles?|theme|themes|scripts?)\/|\.astro$|\.(?:css|scss|sass|less)$/i;
 

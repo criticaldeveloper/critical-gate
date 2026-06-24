@@ -1,0 +1,7 @@
+{
+  "sourceRepository": "criticaldeveloper-blog",
+  "caseType": "false-positive-regression",
+  "labelSource": "docs/critical-gate-evidence/2026-06-23/094312-fix-article-detail-hero-title-overflow.labels.json",
+  "shouldBlock": false,
+  "expectedFindings": []
+}

@@ -299,7 +299,7 @@ function isFocusedUiPresentationTask(taskText: string): boolean {
   const normalized = taskText.toLowerCase();
 
   return (
-    /\b(?:style|styles|styling|visual|redesign|polish|spacing|sizing|grid|layout|align|masonry|card|cards|cta|arrow|icon|indicator|vinyl|animation|animated|mobile|css|scss|typography|drop cap|flicker)\b/.test(
+    /\b(?:style|styles|styling|visual|redesign|polish|spacing|sizing|grid|layout|align|masonry|card|cards|cta|arrow|icon|indicator|vinyl|animation|animated|mobile|css|scss|typography|drop cap|flicker|hero|title|overflow)\b/.test(
       normalized
     ) || /\b(?:default|display|view|mode|list view|grid view)\b/.test(normalized)
   );

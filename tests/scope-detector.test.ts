@@ -515,6 +515,37 @@ index 57b22a0..cb3e0f1 100644
       })
     ).toEqual([]);
   });
+
+  it("does not flag selector-local article hero overflow stylesheet fixes", () => {
+    const diff = parse(`diff --git a/src/styles/post.scss b/src/styles/post.scss
+index 57b22a0..cb3e0f1 100644
+--- a/src/styles/post.scss
++++ b/src/styles/post.scss
+@@ -1,8 +1,9 @@
+ .post-detail__hero-title {
+-  font-size: 5rem;
++  font-size: clamp(2.75rem, 9vw, 5rem);
+   line-height: 0.95;
++  overflow-wrap: anywhere;
+ }
+ @media (max-width: 48rem) {
+   .post-detail__hero-title {
+-    max-width: 18rem;
++    max-width: 100%;
+   }
+ }
+`);
+
+    expect(
+      scopeDetector.run({
+        task: {
+          source: "cli",
+          text: "Fix article detail hero title overflow"
+        },
+        diff
+      })
+    ).toEqual([]);
+  });
 });
 
 describe("detector runner with scope findings", () => {

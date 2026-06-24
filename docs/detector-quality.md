@@ -268,6 +268,8 @@ Will not flag:
 - Tiny legitimate stylesheet/token changes when task intent is explicitly stylistic.
 - Focused UI presentation tasks that explicitly name multiple component/view areas and only touch
   UI source files or visual assets.
+- Selector-local responsive visual fixes, such as article hero title overflow corrections, when the
+  changed stylesheet is the only affected surface.
 
 Known blind spots:
 
@@ -416,6 +418,8 @@ Quality boundary:
 - Should not require external framework style companions when an Astro component carries its
   changed style evidence inline, or when historical companions are low relevance for a focused UI
   presentation task.
+- Should not require historical route, listing, or template companions for selector-local article
+  stylesheet fixes unless markup, routing, imports, exports, or data hooks changed.
 
 Coverage:
 

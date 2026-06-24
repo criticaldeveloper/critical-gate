@@ -1,0 +1,18 @@
+diff --git a/src/styles/post.scss b/src/styles/post.scss
+index 61e75aa..ce2919d 100644
+--- a/src/styles/post.scss
++++ b/src/styles/post.scss
+@@ -1,10 +1,11 @@
+ .post-detail__hero-title {
+-  font-size: 5rem;
++  font-size: clamp(2.75rem, 9vw, 5rem);
+   line-height: 0.95;
+   max-width: 14ch;
++  overflow-wrap: anywhere;
+ }
+ @media (max-width: 48rem) {
+   .post-detail__hero-title {
+-    max-width: 18rem;
++    max-width: 100%;
+   }
+ }
