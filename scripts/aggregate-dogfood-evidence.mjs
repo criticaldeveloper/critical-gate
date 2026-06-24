@@ -6,7 +6,8 @@ import process from "node:process";
 const defaultRepos = [
   "C:/dev/critical-components",
   "C:/dev/criticaldeveloper-blog",
-  "C:/dev/criticaldeveloper-ft"
+  "C:/dev/criticaldeveloper-ft",
+  "C:/dev/diegolopes-ft"
 ];
 const defaultJsonOutput = "artifacts/dogfood/evidence-summary.json";
 const defaultMarkdownOutput = "docs/dogfood-evidence-summary.md";

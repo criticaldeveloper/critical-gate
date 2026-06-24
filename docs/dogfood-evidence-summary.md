@@ -1,26 +1,26 @@
 # Dogfood Evidence Summary
 
-Generated: 2026-06-24T14:37:26.758Z
+Generated: 2026-06-24T20:50:53.193Z
 
 ## Overview
 
-- Repositories: 3
-- Labeled reports: 55
-- Useful findings: 108
-- False-positive finding instances: 132
+- Repositories: 4
+- Labeled reports: 62
+- Useful findings: 135
+- False-positive finding instances: 139
 - Missed findings: 0
-- Fixture-needed reports: 17
+- Fixture-needed reports: 18
 - Fixture-created reports: 17
-- Repair attempts captured: 0
-- Repair reruns captured: 0
-- Repairs passing rerun: 0
-- Missed-finding reviews captured: 12
+- Repair attempts captured: 1
+- Repair reruns captured: 1
+- Repairs passing rerun: 1
+- Missed-finding reviews captured: 19
 
 ## Run Labels
 
-- clean: 18
-- useful: 18
-- pass-with-reviewed-observations: 8
+- clean: 22
+- useful: 20
+- pass-with-reviewed-observations: 9
 - false-positive: 7
 - pass-with-reviewed-observation: 1
 - pass-with-scope-noise: 1
@@ -29,23 +29,28 @@ Generated: 2026-06-24T14:37:26.758Z
 
 ## Detector Frequency
 
-- expected-companions: 31
-- blast-radius: 20
+- expected-companions: 32
+- blast-radius: 27
 - repository-intelligence: 14
-- scope: 6
+- scope: 13
+- config-change: 7
+- dependency: 7
+- secret-path: 7
+- test-weakening: 7
 - dependency-addition: 4
 - intent-verification: 4
 - rewrite: 3
+- api-surface: 1
 
 ## Repair Loop Evidence
 
-- Repair attempts captured: 0
+- Repair attempts captured: 1
 - Repair prompts captured: 0
-- Repair reruns captured: 0
-- Repairs passing rerun: 0
-- Repairs scoped to task: 0
-- Repairs scoped to repair contract: 0
-- Missed-finding reviews captured: 12
+- Repair reruns captured: 1
+- Repairs passing rerun: 1
+- Repairs scoped to task: 7
+- Repairs scoped to repair contract: 7
+- Missed-finding reviews captured: 19
 - Reports still missing missed-finding review: 43
 
 ## Repositories
@@ -53,6 +58,7 @@ Generated: 2026-06-24T14:37:26.758Z
 - critical-components: 15 reports; useful findings 82; false-positive findings 3; missed findings 0; fixture-needed reports 2; repair attempts 0; missed-finding reviews 0.
 - criticaldeveloper-blog: 18 reports; useful findings 10; false-positive findings 93; missed findings 0; fixture-needed reports 13; repair attempts 0; missed-finding reviews 0.
 - criticaldeveloper-ft: 22 reports; useful findings 16; false-positive findings 36; missed findings 0; fixture-needed reports 2; repair attempts 0; missed-finding reviews 12.
+- diegolopes-ft: 7 reports; useful findings 27; false-positive findings 7; missed findings 0; fixture-needed reports 1; repair attempts 1; missed-finding reviews 7.
 
 ## Reports
 
@@ -119,3 +125,13 @@ Generated: 2026-06-24T14:37:26.758Z
 - `121429-upgrade-critical-gate-to-2-7-1-and-verify-package-only-upgrade-calibration`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed not recorded.
 - `124858-upgrade-critical-gate-to-2-7-2-and-verify-shortened-package-hunk-upgrade-calibra`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed not recorded.
 - `130052-add-wall-clock-synchronized-countdown-to-now-playing-track-duration`: clean; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+
+### diegolopes-ft
+
+- `192045-build-diego-lopes-gif-motion-archive-landing-page`: useful; findings 16; false positives 0; fixture needed no; repair attempted yes; missed reviewed yes.
+- `192901-fix-diego-lopes-homepage-sections-to-occupy-full-viewport-height`: useful; findings 4; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `193844-refine-diego-lopes-hero-typography-and-add-section-navigation`: clean; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `194605-brighten-diego-lopes-hero-background-and-slow-zoom-motion`: clean; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `200015-add-scroll-entry-exit-animations-and-fix-top-navigation`: pass-with-reviewed-observations; findings 14; false positives 7; fixture needed yes; repair attempted no; missed reviewed yes.
+- `201219-show-all-hero-motion-elements-on-initial-page-load`: clean; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `205050-upgrade-critical-gate-from-2-7-2-to-2-7-3`: clean; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.

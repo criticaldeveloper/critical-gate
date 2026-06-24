@@ -28,6 +28,7 @@ The aggregator currently reads these local project evidence roots:
 | `critical-components`    | `C:/dev/critical-components/docs/critical-gate-evidence/`    | Useful finding and clean-pass dogfood                         |
 | `criticaldeveloper-blog` | `C:/dev/criticaldeveloper-blog/docs/critical-gate-evidence/` | False-positive regression source and fixture backlog          |
 | `criticaldeveloper-ft`   | `C:/dev/criticaldeveloper-ft/docs/critical-gate-evidence/`   | UI calibration replay, upgrade evidence, missed-review labels |
+| `diegolopes-ft`          | `C:/dev/diegolopes-ft/docs/critical-gate-evidence/`          | Fresh static Astro website dogfood and repair-loop discipline |
 
 Raw evidence stays in the project that produced it. This repo keeps aggregate summaries, analysis
 docs, and fixtures so package-level claims are auditable without copying every raw report.
@@ -137,8 +138,8 @@ After every new dogfood batch:
 
 - Repair-loop evidence is still missing: no repair attempts, reruns, or scoped repair outcomes are
   captured in the aggregate summary yet.
-- `criticaldeveloper-blog` still has fixture-needed reports that should be converted into
-  deterministic eval cases.
+- `diegolopes-ft` has started capturing fresh-project static Astro evidence, including one
+  fixture-needed UI motion/navigation calibration case.
 - The remaining FT 2.6.0 UI replay `repository-intelligence` noise has been converted into the
   generalized `eval/cases/explicit-ui-surface-history-001` fixture.
 - Package-only Critical Gate upgrades exposed expected-companion noise from package/lockfile changes
