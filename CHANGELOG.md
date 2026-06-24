@@ -4,6 +4,23 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## 2.7.0 - 2026-06-24
+
+### Changed
+
+- Calibrate `repository-intelligence` so sparse history does not report focused UI presentation
+  changes when the task explicitly names the touched component or view surface and the diff remains
+  inside UI source or visual asset paths.
+- Extend fixture evaluation cases with optional synthetic repository profiles so history-aware
+  detector behavior can be tested without relying on private repository state.
+
+### Fixed
+
+- Add a generalized false-positive regression fixture for explicit UI surface changes discovered
+  from the `criticaldeveloper-ft` 2.6.0 replay evidence.
+- Keep `repository-intelligence` active for vague UI tasks and for explicit UI work mixed with
+  config drift.
+
 ## 2.6.0 - 2026-06-23
 
 ### Changed

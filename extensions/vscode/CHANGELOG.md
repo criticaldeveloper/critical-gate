@@ -2,6 +2,13 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.7.0 - 2026-06-24
+
+Minor release aligned with Critical Gate 2.7.0.
+
+- Bundle repository-intelligence calibration for explicitly named focused UI surfaces.
+- Bundle the new history-aware evaluation fixture support.
+
 ## 2.6.0 - 2026-06-23
 
 Minor release aligned with Critical Gate 2.6.0.
