@@ -1,26 +1,26 @@
 # Dogfood Evidence Summary
 
-Generated: 2026-06-24T08:39:56.752Z
+Generated: 2026-06-24T09:04:29.664Z
 
 ## Overview
 
 - Repositories: 3
-- Labeled reports: 39
+- Labeled reports: 40
 - Useful findings: 108
-- False-positive finding instances: 110
+- False-positive finding instances: 111
 - Missed findings: 0
-- Fixture-needed reports: 11
+- Fixture-needed reports: 12
 - Fixture-created reports: 11
 - Repair attempts captured: 0
 - Repair reruns captured: 0
 - Repairs passing rerun: 0
-- Missed-finding reviews captured: 8
+- Missed-finding reviews captured: 9
 
 ## Run Labels
 
 - useful: 18
 - clean: 9
-- pass-with-reviewed-observations: 6
+- pass-with-reviewed-observations: 7
 - false-positive: 5
 - pass-with-reviewed-observation: 1
 
@@ -28,7 +28,7 @@ Generated: 2026-06-24T08:39:56.752Z
 
 - expected-companions: 26
 - blast-radius: 18
-- repository-intelligence: 11
+- repository-intelligence: 12
 - dependency-addition: 4
 - intent-verification: 4
 - rewrite: 3
@@ -42,14 +42,14 @@ Generated: 2026-06-24T08:39:56.752Z
 - Repairs passing rerun: 0
 - Repairs scoped to task: 0
 - Repairs scoped to repair contract: 0
-- Missed-finding reviews captured: 8
+- Missed-finding reviews captured: 9
 - Reports still missing missed-finding review: 31
 
 ## Repositories
 
 - critical-components: 12 reports; useful findings 82; false-positive findings 0; missed findings 0; fixture-needed reports 0; repair attempts 0; missed-finding reviews 0.
 - criticaldeveloper-blog: 13 reports; useful findings 10; false-positive findings 77; missed findings 0; fixture-needed reports 11; repair attempts 0; missed-finding reviews 0.
-- criticaldeveloper-ft: 14 reports; useful findings 16; false-positive findings 33; missed findings 0; fixture-needed reports 0; repair attempts 0; missed-finding reviews 8.
+- criticaldeveloper-ft: 15 reports; useful findings 16; false-positive findings 34; missed findings 0; fixture-needed reports 1; repair attempts 0; missed-finding reviews 9.
 
 ## Reports
 
@@ -100,3 +100,4 @@ Generated: 2026-06-24T08:39:56.752Z
 - `164848-update-now-playing-playlist-from-youtube-screenshot`: clean; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
 - `165850-keep-now-playing-vinyl-spinning-continuously`: pass-with-reviewed-observations; findings 3; false positives 3; fixture needed no; repair attempted no; missed reviewed yes.
 - `083953-upgrade-critical-gate-dependency-and-evidence-workflow-to-2-6-0`: pass-with-reviewed-observations; findings 3; false positives 3; fixture needed no; repair attempted no; missed reviewed yes.
+- `090427-replay-about-card-layout-project-arrow-contact-spacing-and-now-playing-vinyl-ui-`: pass-with-reviewed-observations; findings 1; false positives 1; fixture needed yes; repair attempted no; missed reviewed yes.
