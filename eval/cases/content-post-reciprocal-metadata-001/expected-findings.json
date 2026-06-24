@@ -1,0 +1,33 @@
+{
+  "sourceRepository": "content-heavy-site",
+  "caseType": "false-positive-regression",
+  "labelSource": "docs/critical-gate-evidence/2026-06-24/143722-publish-critical-gate-2-7-2-evidence-report-post-and-update-related-synapses.labels.json",
+  "shouldBlock": false,
+  "expectedFindings": [],
+  "repositoryProfile": {
+    "commitCount": 50,
+    "minConfidenceCommitCount": 20,
+    "coChanges": [
+      {
+        "path": "src/content/posts/testing-ai-agents.md",
+        "count": 8,
+        "relatedPaths": [
+          {
+            "path": "src/content/posts/agent-orchestration.md",
+            "count": 6
+          }
+        ]
+      },
+      {
+        "path": "src/content/posts/developer-tools.md",
+        "count": 8,
+        "relatedPaths": [
+          {
+            "path": "src/content/posts/scaffolding.md",
+            "count": 6
+          }
+        ]
+      }
+    ]
+  }
+}

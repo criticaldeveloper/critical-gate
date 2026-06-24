@@ -1,6 +1,7 @@
 import type { DiffFile, Finding, FindingSeverity } from "../schema/index.js";
 import type { FileGraph } from "../knowledge/index.js";
 import type { Detector } from "./types.js";
+import { isContentPostReciprocalMetadataChange } from "./content-metadata-change.js";
 
 interface ChangedCluster {
   paths: string[];
@@ -28,6 +29,7 @@ export const blastRadiusDetector: Detector = {
       .slice(1)
       .filter((cluster) => cluster !== primaryCluster)
       .filter((cluster) => !isAllowedFocusedUiCluster(cluster, diff.files, task.text))
+      .filter((cluster) => !isAllowedContentMetadataCluster(cluster, diff.files, task.text))
       .map((cluster, index) => toFinding(cluster, index + 1));
   }
 };
@@ -125,6 +127,17 @@ function isAllowedFocusedUiCluster(
       (uiPresentationPathPattern.test(path) || visualAssetPathPattern.test(path))
     );
   });
+}
+
+function isAllowedContentMetadataCluster(
+  cluster: ChangedCluster,
+  files: DiffFile[],
+  taskText: string
+): boolean {
+  return (
+    isContentPostReciprocalMetadataChange(files, taskText) &&
+    cluster.roles.every((role) => role === "docs")
+  );
 }
 
 function toFinding(cluster: ChangedCluster, index: number): Finding {

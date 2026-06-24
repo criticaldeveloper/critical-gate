@@ -1,0 +1,49 @@
+diff --git a/src/content/posts/diff-integrity-evidence.md b/src/content/posts/diff-integrity-evidence.md
+new file mode 100644
+index 0000000..cb3e0f1
+--- /dev/null
++++ b/src/content/posts/diff-integrity-evidence.md
+@@ -0,0 +1,18 @@
++---
++title: "Diff Integrity Evidence for AI Agent Development"
++description: "How evidence-backed gates help keep AI agent diffs inside task scope."
++pubDate: 2026-06-24
++tags:
++  [
++    "AI Agents",
++    "Code Quality",
++    "Diff Integrity",
++  ]
++related:
++  [
++    "testing-ai-agents",
++    "developer-tools",
++  ]
++draft: false
++---
++
++Diff integrity needs evidence from real agent loops.
+diff --git a/src/content/posts/testing-ai-agents.md b/src/content/posts/testing-ai-agents.md
+index 57b22a0..cb3e0f1 100644
+--- a/src/content/posts/testing-ai-agents.md
++++ b/src/content/posts/testing-ai-agents.md
+@@ -8,7 +8,7 @@ tags:
+ related:
+   [
++    "diff-integrity-evidence",
+     "developer-tools",
+-    "agent-orchestration",
+   ]
+ ---
+diff --git a/src/content/posts/developer-tools.md b/src/content/posts/developer-tools.md
+index 57b22a0..cb3e0f1 100644
+--- a/src/content/posts/developer-tools.md
++++ b/src/content/posts/developer-tools.md
+@@ -8,7 +8,7 @@ tags:
+ related:
+   [
++    "diff-integrity-evidence",
+     "testing-ai-agents",
+-    "scaffolding",
+   ]
+ ---

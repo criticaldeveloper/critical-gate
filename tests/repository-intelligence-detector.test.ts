@@ -50,6 +50,23 @@ const uiProfile: RepositoryProfile = {
   ]
 };
 
+const contentProfile: RepositoryProfile = {
+  commitCount: 50,
+  minConfidenceCommitCount: 20,
+  coChanges: [
+    {
+      path: "src/content/posts/testing-ai-agents.md",
+      count: 8,
+      relatedPaths: [{ path: "src/content/posts/agent-orchestration.md", count: 6 }]
+    },
+    {
+      path: "src/content/posts/developer-tools.md",
+      count: 8,
+      relatedPaths: [{ path: "src/content/posts/scaffolding.md", count: 6 }]
+    }
+  ]
+};
+
 function parse(diffText: string): GateResult["diff"] {
   return {
     files: parseUnifiedDiff(diffText)
@@ -327,6 +344,107 @@ index 57b22a0..cb3e0f1 100644
       }),
       expect.objectContaining({
         id: "repository-intelligence:webpack.config.js"
+      })
+    ]);
+  });
+
+  it("does not emit for new content posts with reciprocal related metadata updates", () => {
+    const diff =
+      parse(`diff --git a/src/content/posts/diff-integrity-evidence.md b/src/content/posts/diff-integrity-evidence.md
+new file mode 100644
+index 0000000..cb3e0f1
+--- /dev/null
++++ b/src/content/posts/diff-integrity-evidence.md
+@@ -0,0 +1,8 @@
++---
++title: "Diff Integrity Evidence"
++related:
++  [
++    "testing-ai-agents",
++  ]
++---
++Evidence text.
+diff --git a/src/content/posts/testing-ai-agents.md b/src/content/posts/testing-ai-agents.md
+index 57b22a0..cb3e0f1 100644
+--- a/src/content/posts/testing-ai-agents.md
++++ b/src/content/posts/testing-ai-agents.md
+@@ -1,6 +1,7 @@
+ ---
+ related:
+   [
++    "diff-integrity-evidence",
+     "developer-tools",
+   ]
+ ---
+diff --git a/src/content/posts/developer-tools.md b/src/content/posts/developer-tools.md
+index 57b22a0..cb3e0f1 100644
+--- a/src/content/posts/developer-tools.md
++++ b/src/content/posts/developer-tools.md
+@@ -1,6 +1,7 @@
+ ---
+ related:
+   [
++    "diff-integrity-evidence",
+     "testing-ai-agents",
+   ]
+ ---
+`);
+
+    expect(
+      repositoryIntelligenceDetector.run({
+        task: {
+          source: "cli",
+          text: "Publish a new article about diff integrity evidence and update related content synapses"
+        },
+        diff,
+        context: { repositoryProfile: contentProfile }
+      })
+    ).toEqual([]);
+  });
+
+  it("still emits for vague content metadata changes without explicit synapse intent", () => {
+    const diff =
+      parse(`diff --git a/src/content/posts/testing-ai-agents.md b/src/content/posts/testing-ai-agents.md
+index 57b22a0..cb3e0f1 100644
+--- a/src/content/posts/testing-ai-agents.md
++++ b/src/content/posts/testing-ai-agents.md
+@@ -1,6 +1,7 @@
+ ---
+ related:
+   [
++    "diff-integrity-evidence",
+     "developer-tools",
+   ]
+ ---
+diff --git a/src/content/posts/developer-tools.md b/src/content/posts/developer-tools.md
+index 57b22a0..cb3e0f1 100644
+--- a/src/content/posts/developer-tools.md
++++ b/src/content/posts/developer-tools.md
+@@ -1,6 +1,7 @@
+ ---
+ related:
+   [
++    "diff-integrity-evidence",
+     "testing-ai-agents",
+   ]
+ ---
+`);
+
+    expect(
+      repositoryIntelligenceDetector.run({
+        task: {
+          source: "cli",
+          text: "Update posts"
+        },
+        diff,
+        context: { repositoryProfile: contentProfile }
+      })
+    ).toEqual([
+      expect.objectContaining({
+        id: "repository-intelligence:src/content/posts/testing-ai-agents.md"
+      }),
+      expect.objectContaining({
+        id: "repository-intelligence:src/content/posts/developer-tools.md"
       })
     ]);
   });

@@ -2,6 +2,7 @@ import type { DiffFile, Finding, RepositoryProfile } from "../schema/index.js";
 import type { HistoryIndex, NormalChangePattern } from "../knowledge/index.js";
 
 import type { Detector } from "./types.js";
+import { isContentPostReciprocalMetadataChange } from "./content-metadata-change.js";
 
 export const repositoryIntelligenceDetector: Detector = {
   name: "repository-intelligence",
@@ -23,7 +24,8 @@ export const repositoryIntelligenceDetector: Detector = {
       .filter(
         (file) =>
           isHistoricallyUnrelated(file, changedPaths, profile) &&
-          !isExplicitFocusedUiPresentationChange(file, diff.files, task.text)
+          !isExplicitFocusedUiPresentationChange(file, diff.files, task.text) &&
+          !isContentPostReciprocalMetadataChange(diff.files, task.text)
       )
       .map((file) => toFinding(file, changedPaths, profile, history));
   }

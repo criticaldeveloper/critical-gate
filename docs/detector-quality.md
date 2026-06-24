@@ -395,6 +395,9 @@ Quality boundary:
 - Should not block by default unless the repository has tuned policy and repeated evidence.
 - Should not report separate clusters for focused UI presentation tasks when every cluster is an
   expected component/view/style/script path or a visual asset named by the task surface.
+- Should not report separate clusters for explicit content publication tasks when the diff adds a
+  content post/article and only updates reciprocal frontmatter metadata such as `related` or
+  `synapses` in existing content files.
 
 Coverage:
 
@@ -463,6 +466,9 @@ Quality boundary:
 - Should stay observational unless policy-enabled after dogfooding.
 - Repository-history unusualness is weaker evidence when the task explicitly names the UI component
   or view surface and the diff stays inside focused UI presentation files.
+- Repository-history unusualness is weaker evidence when a content-heavy repository adds a new
+  post/article and updates only reciprocal content metadata in existing posts as part of an explicit
+  related/synapse metadata task.
 - Explicit UI-surface suppression must not apply to vague tasks, config/package drift, deleted files,
   or non-UI change clusters.
 

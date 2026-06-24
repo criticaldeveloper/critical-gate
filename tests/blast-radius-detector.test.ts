@@ -278,4 +278,100 @@ index 0000000..cb3e0f1
 
     expect(findings).toEqual([]);
   });
+
+  it("does not emit for new content posts with reciprocal related metadata clusters", () => {
+    const diff =
+      parse(`diff --git a/src/content/posts/diff-integrity-evidence.md b/src/content/posts/diff-integrity-evidence.md
+new file mode 100644
+index 0000000..cb3e0f1
+--- /dev/null
++++ b/src/content/posts/diff-integrity-evidence.md
+@@ -0,0 +1,8 @@
++---
++title: "Diff Integrity Evidence"
++related:
++  [
++    "testing-ai-agents",
++  ]
++---
++Evidence text.
+diff --git a/src/content/posts/testing-ai-agents.md b/src/content/posts/testing-ai-agents.md
+index 57b22a0..cb3e0f1 100644
+--- a/src/content/posts/testing-ai-agents.md
++++ b/src/content/posts/testing-ai-agents.md
+@@ -1,6 +1,7 @@
+ ---
+ related:
+   [
++    "diff-integrity-evidence",
+     "developer-tools",
+   ]
+ ---
+diff --git a/src/content/posts/developer-tools.md b/src/content/posts/developer-tools.md
+index 57b22a0..cb3e0f1 100644
+--- a/src/content/posts/developer-tools.md
++++ b/src/content/posts/developer-tools.md
+@@ -1,6 +1,7 @@
+ ---
+ related:
+   [
++    "diff-integrity-evidence",
+     "testing-ai-agents",
+   ]
+ ---
+`);
+
+    const findings = blastRadiusDetector.run({
+      task: {
+        source: "cli",
+        text: "Publish a new article about diff integrity evidence and update related content synapses"
+      },
+      diff,
+      context: {
+        knowledge: knowledge({ nodes: [], edges: [] })
+      }
+    });
+
+    expect(findings).toEqual([]);
+  });
+
+  it("still emits when content metadata updates are paired with non-content drift", () => {
+    const diff =
+      parse(`diff --git a/src/content/posts/testing-ai-agents.md b/src/content/posts/testing-ai-agents.md
+index 57b22a0..cb3e0f1 100644
+--- a/src/content/posts/testing-ai-agents.md
++++ b/src/content/posts/testing-ai-agents.md
+@@ -1,6 +1,7 @@
+ ---
+ related:
+   [
++    "diff-integrity-evidence",
+     "developer-tools",
+   ]
+ ---
+diff --git a/src/router.ts b/src/router.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/router.ts
++++ b/src/router.ts
+@@ -1 +1,2 @@
++export const route = true;
+`);
+
+    const findings = blastRadiusDetector.run({
+      task: {
+        source: "cli",
+        text: "Publish a new article about diff integrity evidence and update related content synapses"
+      },
+      diff,
+      context: {
+        knowledge: knowledge({ nodes: [], edges: [] })
+      }
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        detector: "blast-radius"
+      })
+    ]);
+  });
 });

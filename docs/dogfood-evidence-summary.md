@@ -1,16 +1,16 @@
 # Dogfood Evidence Summary
 
-Generated: 2026-06-24T13:00:55.821Z
+Generated: 2026-06-24T14:37:26.758Z
 
 ## Overview
 
 - Repositories: 3
-- Labeled reports: 54
+- Labeled reports: 55
 - Useful findings: 108
-- False-positive finding instances: 128
+- False-positive finding instances: 132
 - Missed findings: 0
-- Fixture-needed reports: 17
-- Fixture-created reports: 16
+- Fixture-needed reports: 18
+- Fixture-created reports: 17
 - Repair attempts captured: 0
 - Repair reruns captured: 0
 - Repairs passing rerun: 0
@@ -20,8 +20,8 @@ Generated: 2026-06-24T13:00:55.821Z
 
 - clean: 18
 - useful: 18
+- pass-with-reviewed-observations: 8
 - false-positive: 7
-- pass-with-reviewed-observations: 7
 - pass-with-reviewed-observation: 1
 - pass-with-scope-noise: 1
 - pending: 1
@@ -30,8 +30,8 @@ Generated: 2026-06-24T13:00:55.821Z
 ## Detector Frequency
 
 - expected-companions: 31
-- blast-radius: 19
-- repository-intelligence: 13
+- blast-radius: 20
+- repository-intelligence: 14
 - scope: 6
 - dependency-addition: 4
 - intent-verification: 4
@@ -46,12 +46,12 @@ Generated: 2026-06-24T13:00:55.821Z
 - Repairs scoped to task: 0
 - Repairs scoped to repair contract: 0
 - Missed-finding reviews captured: 12
-- Reports still missing missed-finding review: 42
+- Reports still missing missed-finding review: 43
 
 ## Repositories
 
 - critical-components: 15 reports; useful findings 82; false-positive findings 3; missed findings 0; fixture-needed reports 2; repair attempts 0; missed-finding reviews 0.
-- criticaldeveloper-blog: 17 reports; useful findings 10; false-positive findings 89; missed findings 0; fixture-needed reports 13; repair attempts 0; missed-finding reviews 0.
+- criticaldeveloper-blog: 18 reports; useful findings 10; false-positive findings 93; missed findings 0; fixture-needed reports 14; repair attempts 0; missed-finding reviews 0.
 - criticaldeveloper-ft: 22 reports; useful findings 16; false-positive findings 36; missed findings 0; fixture-needed reports 2; repair attempts 0; missed-finding reviews 12.
 
 ## Reports
@@ -93,6 +93,7 @@ Generated: 2026-06-24T13:00:55.821Z
 - `111810-upgrade-critical-gate-to-2-7-0-controlled-dogfood-calibration`: pending-review; findings 8; false positives 8; fixture needed yes; repair attempted not recorded; missed reviewed not recorded.
 - `121251-upgrade-critical-gate-to-2-7-1-and-verify-package-only-upgrade-calibration`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed not recorded.
 - `124809-upgrade-critical-gate-to-2-7-2-and-verify-shortened-package-hunk-upgrade-calibra`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed not recorded.
+- `143722-publish-critical-gate-2-7-2-evidence-report-post-and-update-related-synapses`: pass-with-reviewed-observations; findings 4; false positives 4; fixture needed yes; repair attempted not recorded; missed reviewed not recorded.
 
 ### criticaldeveloper-ft
 
