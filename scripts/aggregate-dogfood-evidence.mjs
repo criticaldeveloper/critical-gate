@@ -346,7 +346,7 @@ function summarizeLabel(label) {
     rerunDecision: label.rerunDecision,
     repairScopeStayedWithinTask: label.repairScopeStayedWithinTask,
     repairScopeStayedWithinContract: label.repairScopeStayedWithinContract,
-    missedFindingsReviewed: label.missedFindingsReviewed,
+    missedFindingsReviewed: hasMissedFindingsReviewEvidence(label),
     fixtureNeeded: label.fixtureNeeded,
     fixtureCreated: label.fixtureCreated,
     detectorsReviewed: label.detectorsReviewed ?? [],
@@ -372,12 +372,18 @@ function summarizeRepairLoops(labels) {
     ).length,
     repairScopedToTaskCount: scopedToTask.length,
     repairScopedToContractCount: scopedToContract.length,
-    missedFindingsReviewedCount: labels.filter((label) => label.missedFindingsReviewed === true)
-      .length,
+    missedFindingsReviewedCount: labels.filter(hasMissedFindingsReviewEvidence).length,
     missedFindingsReviewMissingCount: labels.filter(
-      (label) => label.missedFindingsReviewed !== true
+      (label) => !hasMissedFindingsReviewEvidence(label)
     ).length
   };
+}
+
+function hasMissedFindingsReviewEvidence(label) {
+  return (
+    label.missedFindingsReviewed === true ||
+    (typeof label.missesCheck === "string" && label.missesCheck.trim().length > 0)
+  );
 }
 
 function groupBy(values, getKey) {

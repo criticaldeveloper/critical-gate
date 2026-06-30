@@ -136,10 +136,12 @@ After every new dogfood batch:
 
 ## Current Open Evidence Gaps
 
-- Repair-loop evidence is still missing: no repair attempts, reruns, or scoped repair outcomes are
-  captured in the aggregate summary yet.
-- `diegolopes-ft` has started capturing fresh-project static Astro evidence, including one
-  fixture-needed UI motion/navigation calibration case.
+- Repair-loop evidence has started, but the sample is still thin. Keep collecting scoped repair
+  prompts, rerun reports, and human-accepted repair outcomes across different task types.
+- `diegolopes-ft` has expanded fresh-project static Astro evidence, including several
+  fixture-needed UI motion/navigation calibration cases.
+- `criticaldeveloper-ft` has new PageSpeed/accessibility-performance evidence showing scope noise
+  for local owner files (`BaseLayout.astro` and `global.scss`) during accessibility and CLS work.
 - The remaining FT 2.6.0 UI replay `repository-intelligence` noise has been converted into the
   generalized `eval/cases/explicit-ui-surface-history-001` fixture.
 - Package-only Critical Gate upgrades exposed expected-companion noise from package/lockfile changes
