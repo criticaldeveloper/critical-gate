@@ -1,45 +1,47 @@
 # Dogfood Evidence Summary
 
-Generated: 2026-06-30T12:19:04.046Z
+Generated: 2026-06-30T16:58:57.179Z
 
 ## Overview
 
 - Repositories: 4
-- Labeled reports: 83
-- Useful findings: 147
-- False-positive finding instances: 193
+- Labeled reports: 98
+- Useful findings: 148
+- False-positive finding instances: 283
 - Missed findings: 0
-- Fixture-needed reports: 24
+- Fixture-needed reports: 25
 - Fixture-created reports: 17
-- Repair attempts captured: 3
-- Repair reruns captured: 3
-- Repairs passing rerun: 3
-- Missed-finding reviews captured: 51
+- Repair attempts captured: 4
+- Repair reruns captured: 4
+- Repairs passing rerun: 4
+- Missed-finding reviews captured: 66
 
 ## Run Labels
 
 - useful: 31
-- clean: 27
+- clean: 30
 - pass-with-reviewed-observations: 9
 - false-positive: 7
-- reviewed-findings: 3
+- reviewed-observations: 7
+- reviewed-findings: 4
+- clean-reviewed: 2
+- repair-required: 2
+- repair-rerun: 2
 - pass-with-reviewed-observation: 1
 - pass-with-scope-noise: 1
 - pending: 1
-- repair-required: 1
-- repair-rerun: 1
 - superseded-by-clean-replay: 1
 
 ## Detector Frequency
 
-- expected-companions: 50
-- blast-radius: 45
-- scope: 34
-- config-change: 27
-- dependency: 27
-- secret-path: 27
-- test-weakening: 27
-- repository-intelligence: 15
+- expected-companions: 65
+- blast-radius: 60
+- scope: 49
+- config-change: 42
+- dependency: 42
+- secret-path: 42
+- test-weakening: 42
+- repository-intelligence: 17
 - dependency-addition: 4
 - intent-verification: 4
 - rewrite: 3
@@ -48,13 +50,13 @@ Generated: 2026-06-30T12:19:04.046Z
 
 ## Repair Loop Evidence
 
-- Repair attempts captured: 3
-- Repair prompts captured: 2
-- Repair reruns captured: 3
-- Repairs passing rerun: 3
-- Repairs scoped to task: 27
-- Repairs scoped to repair contract: 27
-- Missed-finding reviews captured: 51
+- Repair attempts captured: 4
+- Repair prompts captured: 3
+- Repair reruns captured: 4
+- Repairs passing rerun: 4
+- Repairs scoped to task: 42
+- Repairs scoped to repair contract: 42
+- Missed-finding reviews captured: 66
 - Reports still missing missed-finding review: 32
 
 ## Repositories
@@ -62,7 +64,7 @@ Generated: 2026-06-30T12:19:04.046Z
 - critical-components: 15 reports; useful findings 82; false-positive findings 3; missed findings 0; fixture-needed reports 2; repair attempts 0; missed-finding reviews 3.
 - criticaldeveloper-blog: 18 reports; useful findings 10; false-positive findings 93; missed findings 0; fixture-needed reports 13; repair attempts 0; missed-finding reviews 4.
 - criticaldeveloper-ft: 23 reports; useful findings 16; false-positive findings 38; missed findings 0; fixture-needed reports 2; repair attempts 0; missed-finding reviews 17.
-- diegolopes-ft: 27 reports; useful findings 39; false-positive findings 59; missed findings 0; fixture-needed reports 7; repair attempts 3; missed-finding reviews 27.
+- diegolopes-ft: 42 reports; useful findings 40; false-positive findings 149; missed findings 0; fixture-needed reports 8; repair attempts 4; missed-finding reviews 42.
 
 ## Reports
 
@@ -160,3 +162,18 @@ Generated: 2026-06-30T12:19:04.046Z
 - `114950-fix-fight-memory-title-overlap-with-stats-panel`: clean; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
 - `115735-prevent-fight-memory-title-from-running-behind-stats-panel`: clean; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
 - `121857-fix-identity-youtube-card-layout-and-open-video-on-youtube`: reviewed-findings; findings 8; false positives 8; fixture needed yes; repair attempted no; missed reviewed yes.
+- `122915-remove-top-left-background-clip-and-focus-identity-on-video-content`: reviewed-findings; findings 5; false positives 5; fixture needed yes; repair attempted no; missed reviewed yes.
+- `124107-polish-identity-video-hover-fit-and-bottom-navigator-behavior`: clean; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `142812-center-identity-content-remove-horizontal-overflow-and-widen-video-title-fit`: clean; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `144321-show-active-navigator-label-and-hide-it-while-hovering-inactive-menu-items`: clean; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `145754-fix-navigator-label-stacking-and-swap-identity-and-end-frame-backgrounds`: reviewed-observations; findings 9; false positives 9; fixture needed no; repair attempted no; missed reviewed yes.
+- `150916-delay-navigator-labels-during-navigation-update-youtube-layout-and-win-streak`: repair-required; findings 10; false positives 9; fixture needed no; repair attempted yes; missed reviewed yes.
+- `151058-delay-navigator-labels-during-navigation-update-youtube-layout-and-win-streak-re`: repair-rerun; findings 8; false positives 8; fixture needed no; repair attempted no; missed reviewed yes.
+- `152500-use-tall-final-frame-background-with-left-clip-reveal`: reviewed-observations; findings 8; false positives 8; fixture needed no; repair attempted no; missed reviewed yes.
+- `153750-activate-identity-navigator-on-section-entry-and-remove-background-blur`: reviewed-observations; findings 6; false positives 6; fixture needed no; repair attempted no; missed reviewed yes.
+- `160444-update-section-urls-social-layout-and-bottom-note`: reviewed-observations; findings 12; false positives 12; fixture needed no; repair attempted no; missed reviewed yes.
+- `162050-fix-navigator-hover-state-memory-intro-font-and-final-background-sizing`: reviewed-observations; findings 11; false positives 11; fixture needed no; repair attempted no; missed reviewed yes.
+- `163203-fix-bottom-note-left-clipping-height`: reviewed-observations; findings 1; false positives 1; fixture needed no; repair attempted no; missed reviewed yes.
+- `163951-add-favicon-assets-and-seo-metadata`: reviewed-observations; findings 21; false positives 21; fixture needed no; repair attempted no; missed reviewed yes.
+- `165219-fix-mobile-section-sizing-and-navigator-usability`: clean-reviewed; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `165853-add-comprehensive-project-readme`: clean-reviewed; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.

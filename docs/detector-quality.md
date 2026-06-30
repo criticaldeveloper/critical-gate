@@ -421,6 +421,10 @@ Quality boundary:
 - Should not require external framework style companions when an Astro component carries its
   changed style evidence inline, or when historical companions are low relevance for a focused UI
   presentation task.
+- Fresh `diegolopes-ft` evidence shows the remaining noisy boundary: coherent static Astro visual
+  tasks often touch more than six component/style files across sections, navigation, background
+  media, metadata, or mobile layout. See
+  `docs/dogfood-diegolopes-ft-2026-06-30-analysis.md` before changing this detector.
 - Should not require historical route, listing, or template companions for selector-local article
   stylesheet fixes unless markup, routing, imports, exports, or data hooks changed.
 

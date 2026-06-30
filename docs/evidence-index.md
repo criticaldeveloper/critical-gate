@@ -39,6 +39,7 @@ docs, and fixtures so package-level claims are auditable without copying every r
 | -------------------------------------------- | ------------------------------------------------------------------------- |
 | `docs/dogfood-evidence-summary.md`           | Generated aggregate metrics across all labeled project reports            |
 | `docs/dogfood-ft-2.6.0-evidence-analysis.md` | Focused before/after analysis for the FT 2.6.0 calibration replay         |
+| `docs/dogfood-diegolopes-ft-2026-06-30-analysis.md` | Fresh static Astro site evidence and expected-companion calibration target |
 | `docs/dogfood-evidence-plan.md`              | Evidence strategy, labeling protocol, and repair-loop rubric              |
 | `docs/dogfood-mv-ft-2026-06-19.md`           | Historical manual dogfood report                                          |
 | `docs/dogfood-ky-2026-06-18.md`              | Historical public-repo dogfood report                                     |
@@ -138,8 +139,8 @@ After every new dogfood batch:
 
 - Repair-loop evidence has started, but the sample is still thin. Keep collecting scoped repair
   prompts, rerun reports, and human-accepted repair outcomes across different task types.
-- `diegolopes-ft` has expanded fresh-project static Astro evidence, including several
-  fixture-needed UI motion/navigation calibration cases.
+- `diegolopes-ft` has expanded fresh-project static Astro evidence. The strongest current package
+  target is expected-companion noise for coherent multi-section Astro visual tasks.
 - `criticaldeveloper-ft` has new PageSpeed/accessibility-performance evidence showing scope noise
   for local owner files (`BaseLayout.astro` and `global.scss`) during accessibility and CLS work.
 - The remaining FT 2.6.0 UI replay `repository-intelligence` noise has been converted into the
