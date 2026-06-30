@@ -4,6 +4,16 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## 2.7.4 - 2026-06-30
+
+### Fixed
+
+- Calibrate `expected-companions` and `scope` for coherent static Astro visual tasks that touch
+  multiple section, navigator, page, and visual asset files without structural or config drift.
+- Add the `astro-multisection-visual-001` regression fixture from `diegolopes-ft` dogfood evidence.
+- Extend fixture evaluation with optional framework packs and exact finding-count assertions for
+  false-positive regression cases.
+
 ## 2.7.3 - 2026-06-24
 
 ### Fixed

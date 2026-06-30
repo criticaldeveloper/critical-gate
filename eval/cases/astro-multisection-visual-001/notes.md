@@ -1,0 +1,1 @@
+Generalized from diegolopes-ft 2026-06-30 evidence. A static Astro visual task can coherently touch several section, navigator, page, and visual asset files without requiring unrelated style/script companions when no structural props, imports, exports, data hooks, config, package, generated, or deleted files changed.

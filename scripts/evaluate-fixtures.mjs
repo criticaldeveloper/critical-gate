@@ -112,12 +112,38 @@ function validateExpected(id, value) {
     caseType: value.caseType,
     labelSource: value.labelSource,
     shouldBlock: value.shouldBlock,
+    expectedFindingCount: validateOptionalExpectedFindingCount(id, value.expectedFindingCount),
     expectedFindings: value.expectedFindings,
+    frameworkPacks: validateOptionalStringArray(id, value.frameworkPacks, "frameworkPacks"),
     repositoryProfile: validateRepositoryProfile(id, value.repositoryProfile),
     allowedExtraDetectors: Array.isArray(value.allowedExtraDetectors)
       ? value.allowedExtraDetectors.filter((entry) => typeof entry === "string")
       : []
   };
+}
+
+function validateOptionalExpectedFindingCount(id, value) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (!Number.isInteger(value) || value < 0) {
+    throw new Error(`${id}: expectedFindingCount must be a non-negative integer when present.`);
+  }
+
+  return value;
+}
+
+function validateOptionalStringArray(id, value, key) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (!Array.isArray(value) || !value.every((entry) => typeof entry === "string")) {
+    throw new Error(`${id}: ${key} must be an array of strings when present.`);
+  }
+
+  return value;
 }
 
 function validateRepositoryProfile(id, value) {
@@ -153,10 +179,12 @@ function evaluateCase(evaluationCase) {
     files: parseUnifiedDiff(evaluationCase.diffPatch)
   };
   const detectorContext =
-    evaluationCase.expected.repositoryProfile === undefined
+    evaluationCase.expected.repositoryProfile === undefined &&
+    evaluationCase.expected.frameworkPacks === undefined
       ? undefined
       : {
-          repositoryProfile: evaluationCase.expected.repositoryProfile
+          repositoryProfile: evaluationCase.expected.repositoryProfile,
+          frameworkPacks: evaluationCase.expected.frameworkPacks
         };
   const findings = runDetectors(task, diff, detectorContext);
   const summary = summarizeFindings(findings, task, diff);
@@ -176,8 +204,12 @@ function evaluateCase(evaluationCase) {
   );
   const expectedBlock = evaluationCase.expected.shouldBlock;
   const actualBlock = summary.decision === "fail";
+  const expectedFindingCount = evaluationCase.expected.expectedFindingCount;
+  const findingCountMatches =
+    expectedFindingCount === undefined || expectedFindingCount === findings.length;
   const passed =
     expectedBlock === actualBlock &&
+    findingCountMatches &&
     missingExpectedFindings.length === 0 &&
     (!expectedBlock ? unexpectedBlockingFindings.length === 0 : true);
 
@@ -185,6 +217,8 @@ function evaluateCase(evaluationCase) {
     id: evaluationCase.id,
     expectedBlock,
     actualBlock,
+    expectedFindingCount,
+    actualFindingCount: findings.length,
     passed,
     outcome: classifyOutcome(expectedBlock, actualBlock, missingExpectedFindings),
     task: evaluationCase.task,

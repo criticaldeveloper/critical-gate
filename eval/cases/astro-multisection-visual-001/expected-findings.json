@@ -1,0 +1,9 @@
+{
+  "sourceRepository": "diegolopes-ft",
+  "caseType": "false-positive-regression",
+  "labelSource": "docs/critical-gate-evidence/2026-06-30/145754-fix-navigator-label-stacking-and-swap-identity-and-end-frame-backgrounds.labels.json",
+  "shouldBlock": false,
+  "expectedFindingCount": 0,
+  "frameworkPacks": ["astro"],
+  "expectedFindings": []
+}

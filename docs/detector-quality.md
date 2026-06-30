@@ -425,6 +425,7 @@ Quality boundary:
   tasks often touch more than six component/style files across sections, navigation, background
   media, metadata, or mobile layout. See
   `docs/dogfood-diegolopes-ft-2026-06-30-analysis.md` before changing this detector.
+- Regression fixture: `eval/cases/astro-multisection-visual-001`.
 - Should not require historical route, listing, or template companions for selector-local article
   stylesheet fixes unless markup, routing, imports, exports, or data hooks changed.
 

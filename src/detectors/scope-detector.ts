@@ -35,8 +35,9 @@ const manifestTaskTerms = [
 const dependencyLinePattern = /^\s*"([^"]+)":\s*"([^"]+)"/;
 const dependencySectionPattern =
   /^\s*"(dependencies|devDependencies|peerDependencies|optionalDependencies)":\s*\{/;
+const maxFocusedUiPresentationFiles = 12;
 const uiPresentationTaskPattern =
-  /\b(?:style|styles|styling|visual|redesign|polish|spacing|sizing|grid|layout|align|masonry|card|cards|cta|arrow|icon|indicator|vinyl|animation|animated|mobile|css|scss|typography|display|view|mode|hero|title|overflow)\b/i;
+  /\b(?:style|styles|styling|visual|redesign|polish|spacing|sizing|grid|layout|align|masonry|card|cards|cta|arrow|icon|indicator|vinyl|animation|animated|mobile|responsive|css|scss|typography|display|view|mode|hero|title|overflow|section|sections|navigator|navigation|background|clip|clipping|video|youtube|seo|metadata|favicon)\b/i;
 const uiPresentationPathPattern =
   /(^|\/)(components?|views?|pages?|screens?|styles?|theme|themes|scripts?)\/|\.astro$|\.(?:css|scss|sass|less)$/i;
 
@@ -177,7 +178,7 @@ function isFocusedUiPresentationSourceChange(
 ): boolean {
   if (
     files.length === 0 ||
-    files.length > 6 ||
+    files.length > maxFocusedUiPresentationFiles ||
     !uiPresentationTaskPattern.test(taskText) ||
     !uiPresentationPathPattern.test(file.path)
   ) {

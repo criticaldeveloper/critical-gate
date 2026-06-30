@@ -9,6 +9,7 @@ import type { Detector } from "./types.js";
 
 const maxHistoryFindingsPerSource = 3;
 const maxFrameworkFindingsPerSource = 2;
+const maxFocusedUiPresentationFiles = 12;
 const minimumHistoryCommitCount = 20;
 const minimumCompanionSupport = 3;
 const stylePathPattern = /\.(?:css|scss|sass|less|styl)$/i;
@@ -43,7 +44,11 @@ export const expectedCompanionsDetector: Detector = {
             ),
             history.normalPatterns ?? []
           );
-    const frameworkFindings = getFrameworkFindings(diff.files, context?.frameworkPacks ?? []);
+    const frameworkFindings = getFrameworkFindings(
+      diff.files,
+      context?.frameworkPacks ?? [],
+      task.text
+    );
     const packageFinding = detectMissingLockfile(diff.files);
 
     return packageFinding === undefined
@@ -52,7 +57,11 @@ export const expectedCompanionsDetector: Detector = {
   }
 };
 
-function getFrameworkFindings(files: DiffFile[], activePackIds: string[]): Finding[] {
+function getFrameworkFindings(
+  files: DiffFile[],
+  activePackIds: string[],
+  taskText: string
+): Finding[] {
   if (activePackIds.length === 0) {
     return [];
   }
@@ -67,7 +76,7 @@ function getFrameworkFindings(files: DiffFile[], activePackIds: string[]): Findi
           file.role === "source" &&
           file.status !== "deleted" &&
           matchesPathPattern(rule.whenChanged, file.path) &&
-          !isLowRelevanceFrameworkChange(file, files)
+          !isLowRelevanceFrameworkChange(file, files, taskText)
       );
 
       if (
@@ -115,12 +124,17 @@ function isLowRelevanceCompanionChange(
   );
 }
 
-function isLowRelevanceFrameworkChange(file: DiffFile, files: DiffFile[]): boolean {
+function isLowRelevanceFrameworkChange(
+  file: DiffFile,
+  files: DiffFile[],
+  taskText: string
+): boolean {
   return (
     isTinySelfContainedComponentChange(file.path, files) ||
     isSelfContainedAddedComponent(file) ||
     isSelfContainedComponentWiringChange(file, files) ||
-    isSelfContainedAstroStyleChange(file)
+    isSelfContainedAstroStyleChange(file) ||
+    isFocusedUiPresentationChange(file.path, files, taskText)
   );
 }
 
@@ -299,25 +313,30 @@ function isFocusedUiPresentationTask(taskText: string): boolean {
   const normalized = taskText.toLowerCase();
 
   return (
-    /\b(?:style|styles|styling|visual|redesign|polish|spacing|sizing|grid|layout|align|masonry|card|cards|cta|arrow|icon|indicator|vinyl|animation|animated|mobile|css|scss|typography|drop cap|flicker|hero|title|overflow)\b/.test(
+    /\b(?:style|styles|styling|visual|redesign|polish|spacing|sizing|grid|layout|align|masonry|card|cards|cta|arrow|icon|indicator|vinyl|animation|animated|mobile|responsive|css|scss|typography|drop cap|flicker|hero|title|overflow|section|sections|navigator|navigation|background|clip|clipping|video|youtube|seo|metadata|favicon)\b/.test(
       normalized
     ) || /\b(?:default|display|view|mode|list view|grid view)\b/.test(normalized)
   );
 }
 
 function isUiPresentationDiff(files: DiffFile[]): boolean {
-  if (files.length === 0 || files.length > 6) {
+  if (files.length === 0 || files.length > maxFocusedUiPresentationFiles) {
     return false;
   }
 
   return files.every(
     (file) =>
-      file.status !== "added" &&
       file.status !== "deleted" &&
+      (file.status !== "added" || isStaticVisualAssetPath(file.path)) &&
       (stylePathPattern.test(file.path) ||
         componentPathPattern.test(file.path) ||
-        /^src\/scripts\/[^/]+\.[jt]s$/i.test(file.path))
+        /^src\/scripts\/[^/]+\.[jt]s$/i.test(file.path) ||
+        isStaticVisualAssetPath(file.path))
   );
+}
+
+function isStaticVisualAssetPath(path: string): boolean {
+  return /^public\/.+\.(?:png|jpe?g|webp|gif|svg|avif|ico|webmanifest)$/i.test(path);
 }
 
 function isStyleValueLine(content: string): boolean {

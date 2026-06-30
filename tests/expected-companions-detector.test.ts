@@ -1,4 +1,9 @@
-import { expectedCompanionsDetector, parseUnifiedDiff, runDetectors } from "../src/index.js";
+import {
+  expectedCompanionsDetector,
+  parseUnifiedDiff,
+  runDetectors,
+  scopeDetector
+} from "../src/index.js";
 import type { GateResult, KnowledgeProvider, TaskIntent } from "../src/index.js";
 
 const task: TaskIntent = {
@@ -704,6 +709,183 @@ index 57b22a0..cb3e0f1 100644
     });
 
     expect(findings).toEqual([]);
+  });
+
+  it("does not emit framework companions for coherent multi-section Astro visual changes", () => {
+    const diff = parse(`diff --git a/src/components/Hero.astro b/src/components/Hero.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/Hero.astro
++++ b/src/components/Hero.astro
+@@ -1 +1 @@
+-<section class="hero hero--dim"><h1>Diego Lopes</h1></section>
++<section class="hero hero--bright"><h1>Diego Lopes</h1></section>
+diff --git a/src/components/Moments.astro b/src/components/Moments.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/Moments.astro
++++ b/src/components/Moments.astro
+@@ -1 +1 @@
+-<section class="moments moments--stacked"></section>
++<section class="moments moments--wide"></section>
+diff --git a/src/components/Identity.astro b/src/components/Identity.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/Identity.astro
++++ b/src/components/Identity.astro
+@@ -1 +1 @@
+-<section class="identity identity--left"></section>
++<section class="identity identity--centered"></section>
+diff --git a/src/components/FightMemory.astro b/src/components/FightMemory.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/FightMemory.astro
++++ b/src/components/FightMemory.astro
+@@ -1 +1 @@
+-<section class="fight-memory fight-memory--compressed"></section>
++<section class="fight-memory fight-memory--expanded"></section>
+diff --git a/src/components/SectionNavigator.astro b/src/components/SectionNavigator.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/SectionNavigator.astro
++++ b/src/components/SectionNavigator.astro
+@@ -1 +1 @@
+-<nav class="section-nav section-nav--hover-labels"></nav>
++<nav class="section-nav section-nav--delayed-labels"></nav>
+diff --git a/src/components/FinalFrame.astro b/src/components/FinalFrame.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/FinalFrame.astro
++++ b/src/components/FinalFrame.astro
+@@ -1 +1 @@
+-<section class="final-frame final-frame--blurred"></section>
++<section class="final-frame final-frame--sharp"></section>
+diff --git a/src/pages/index.astro b/src/pages/index.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/pages/index.astro
++++ b/src/pages/index.astro
+@@ -1 +1 @@
+-<main class="home home--intro-first"></main>
++<main class="home home--moments-first"></main>
+diff --git a/public/identity-bg.avif b/public/identity-bg.avif
+new file mode 100644
+index 0000000..cb3e0f1
+--- /dev/null
++++ b/public/identity-bg.avif
+@@ -0,0 +1 @@
++avif
+`);
+
+    const findings = expectedCompanionsDetector.run({
+      task: {
+        source: "cli",
+        text: "Fix navigator label stacking and swap Identity and End Frame backgrounds"
+      },
+      diff,
+      context: { frameworkPacks: ["astro"] }
+    });
+
+    expect(findings).toEqual([]);
+  });
+
+  it("does not emit scope findings for coherent multi-section Astro visual changes", () => {
+    const diff = parse(`diff --git a/src/components/Hero.astro b/src/components/Hero.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/Hero.astro
++++ b/src/components/Hero.astro
+@@ -1 +1 @@
+-<section class="hero hero--dim"><h1>Diego Lopes</h1></section>
++<section class="hero hero--bright"><h1>Diego Lopes</h1></section>
+diff --git a/src/components/Moments.astro b/src/components/Moments.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/Moments.astro
++++ b/src/components/Moments.astro
+@@ -1 +1 @@
+-<section class="moments moments--stacked"></section>
++<section class="moments moments--wide"></section>
+diff --git a/src/components/Identity.astro b/src/components/Identity.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/Identity.astro
++++ b/src/components/Identity.astro
+@@ -1 +1 @@
+-<section class="identity identity--left"></section>
++<section class="identity identity--centered"></section>
+diff --git a/src/components/FightMemory.astro b/src/components/FightMemory.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/FightMemory.astro
++++ b/src/components/FightMemory.astro
+@@ -1 +1 @@
+-<section class="fight-memory fight-memory--compressed"></section>
++<section class="fight-memory fight-memory--expanded"></section>
+diff --git a/src/components/SectionNavigator.astro b/src/components/SectionNavigator.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/SectionNavigator.astro
++++ b/src/components/SectionNavigator.astro
+@@ -1 +1 @@
+-<nav class="section-nav section-nav--hover-labels"></nav>
++<nav class="section-nav section-nav--delayed-labels"></nav>
+diff --git a/src/components/FinalFrame.astro b/src/components/FinalFrame.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/FinalFrame.astro
++++ b/src/components/FinalFrame.astro
+@@ -1 +1 @@
+-<section class="final-frame final-frame--blurred"></section>
++<section class="final-frame final-frame--sharp"></section>
+diff --git a/src/pages/index.astro b/src/pages/index.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/pages/index.astro
++++ b/src/pages/index.astro
+@@ -1 +1 @@
+-<main class="home home--intro-first"></main>
++<main class="home home--moments-first"></main>
+diff --git a/public/identity-bg.avif b/public/identity-bg.avif
+new file mode 100644
+index 0000000..cb3e0f1
+--- /dev/null
++++ b/public/identity-bg.avif
+@@ -0,0 +1 @@
++avif
+`);
+
+    const findings = scopeDetector.run({
+      task: {
+        source: "cli",
+        text: "Fix navigator label stacking and swap Identity and End Frame backgrounds"
+      },
+      diff
+    });
+
+    expect(findings).toEqual([]);
+  });
+
+  it("still emits framework companions for structural Astro changes inside broad visual tasks", () => {
+    const diff = parse(`diff --git a/src/components/Hero.astro b/src/components/Hero.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/Hero.astro
++++ b/src/components/Hero.astro
+@@ -1,2 +1,3 @@
+ import HeroImage from "./HeroImage.astro";
++import TrackingPixel from "./TrackingPixel.astro";
+ <HeroImage />
++<TrackingPixel />
+diff --git a/src/components/Identity.astro b/src/components/Identity.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/Identity.astro
++++ b/src/components/Identity.astro
+@@ -1 +1 @@
+-<section class="identity identity--left"></section>
++<section class="identity identity--centered"></section>
+`);
+
+    const findings = expectedCompanionsDetector.run({
+      task: {
+        source: "cli",
+        text: "Polish hero layout and identity background"
+      },
+      diff,
+      context: { frameworkPacks: ["astro"] }
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        detector: "expected-companions",
+        id: "expected-companions:framework:astro-component-style:src/components/Hero.astro"
+      })
+    ]);
   });
 
   it("does not emit immature or weak historical companions", () => {

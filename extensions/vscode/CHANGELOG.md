@@ -2,6 +2,12 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.7.4 - 2026-06-30
+
+Patch release aligned with Critical Gate 2.7.4.
+
+- Bundle static Astro multi-section visual-task calibration for `expected-companions` and `scope`.
+
 ## 2.7.3 - 2026-06-24
 
 Patch release aligned with Critical Gate 2.7.3.

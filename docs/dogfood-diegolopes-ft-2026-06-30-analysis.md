@@ -81,11 +81,15 @@ separate style/script/test companion was required by the project structure.
 
 ## Next Package Work
 
-1. Convert the Astro multi-section visual false-positive pattern into a generalized eval fixture.
-2. Calibrate `expected-companions` so explicitly scoped static Astro visual tasks can touch a larger
-   coherent set of component/style files without requiring unrelated style/script companions.
-3. Keep findings for broad/vague UI tasks, structural component changes, data-hook changes, config
+1. Re-run this pattern in future `diegolopes-ft` tasks after the calibration lands in a published
+   package version.
+2. Keep findings for broad/vague UI tasks, structural component changes, data-hook changes, config
    drift, package drift, generated files, and unrelated deletions.
-4. Add focused tests around the file-count boundary that currently makes the detector noisy.
-5. Re-run the `diegolopes-ft` fixture after calibration and compare false-positive count before
+3. Compare the `astro-multisection-visual-001` fixture against new UI evidence before
    considering another release.
+
+## Implemented Calibration
+
+The first package follow-up from this evidence is now represented by
+`eval/cases/astro-multisection-visual-001`. The fixture protects the coherent static Astro
+multi-section visual-task boundary and requires zero findings for that sanitized case.
