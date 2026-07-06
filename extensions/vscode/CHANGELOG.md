@@ -2,6 +2,13 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.7.5 - 2026-07-06
+
+Patch release aligned with Critical Gate 2.7.5.
+
+- Bundle expected-companion calibration for generated evidence/report outputs and data-only content
+  record additions.
+
 ## 2.7.4 - 2026-06-30
 
 Patch release aligned with Critical Gate 2.7.4.
