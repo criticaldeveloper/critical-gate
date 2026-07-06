@@ -14,8 +14,12 @@ const minimumHistoryCommitCount = 20;
 const minimumCompanionSupport = 3;
 const stylePathPattern = /\.(?:css|scss|sass|less|styl)$/i;
 const componentPathPattern = /\.(?:astro|vue|svelte|[jt]sx)$/i;
+const dataContentPathPattern =
+  /(?:^|\/)(?:src\/)?(?:data|content|fixtures|seed|seeds)\/.+\.(?:[cm]?[jt]s|json|ya?ml|mdx?)$/i;
 const structuralLinePattern =
   /^\s*(?:import\s|export\s|interface\s+Props\b|type\s+Props\b|const\s+\{\s*[^}]+\s*\}\s*=\s*Astro\.props\b)/;
+const exportedDeclarationLinePattern =
+  /^\s*(?:import\s|export\s+(?:interface|type|class|function|const|let|var|default)\b|interface\s+|type\s+)/;
 const companionRelevantDataPattern =
   /\bdata-(?:frame|scroll|release|artist|hero|outro|cursor|sequence)-[a-z0-9-]+/gi;
 
@@ -35,6 +39,7 @@ export const expectedCompanionsDetector: Detector = {
                 changedPaths.has(rule.sourcePath) &&
                 !changedPaths.has(rule.expectedPath) &&
                 isStrongCompanionRule(rule) &&
+                !isLowSignalHistoricalCompanionPath(rule.expectedPath) &&
                 !isLowRelevanceCompanionChange(
                   rule.sourcePath,
                   diff.files,
@@ -118,9 +123,18 @@ function isLowRelevanceCompanionChange(
 ): boolean {
   return (
     (packageUpgradeDiff && isManifestOrLockfilePath(path)) ||
+    isDataOnlyRecordAddition(path, files) ||
     isTrivialStylesheetChange(path, files) ||
     isTinySelfContainedComponentChange(path, files) ||
     isFocusedUiPresentationChange(path, files, taskText)
+  );
+}
+
+function isLowSignalHistoricalCompanionPath(path: string): boolean {
+  return (
+    /(?:^|\/)(?:docs\/)?critical-gate-evidence(?:\/|$)/i.test(path) ||
+    /(?:^|\/)(?:artifacts|coverage|dist|build|out|reports?|snapshots?)(?:\/|$)/i.test(path) ||
+    /\.(?:sarif|log|tmp)$/i.test(path)
   );
 }
 
@@ -307,6 +321,72 @@ function isFocusedUiPresentationChange(path: string, files: DiffFile[], taskText
   }
 
   return false;
+}
+
+function isDataOnlyRecordAddition(path: string, files: DiffFile[]): boolean {
+  if (!dataContentPathPattern.test(path) || files.length !== 1) {
+    return false;
+  }
+
+  const file = files.find((candidate) => candidate.path === path);
+
+  if (
+    file === undefined ||
+    file.status !== "modified" ||
+    file.additions === 0 ||
+    file.deletions !== 0
+  ) {
+    return false;
+  }
+
+  const changedLines = file.hunks.flatMap((hunk) =>
+    hunk.lines.filter((line) => line.kind === "add" || line.kind === "delete")
+  );
+
+  if (
+    changedLines.length === 0 ||
+    changedLines.some((line) => exportedDeclarationLinePattern.test(line.content))
+  ) {
+    return false;
+  }
+
+  const addedLines = changedLines.filter((line) => line.kind === "add");
+
+  if (!addedLines.every((line) => isDataRecordLine(line.content))) {
+    return false;
+  }
+
+  const contextKeys = new Set(
+    file.hunks
+      .flatMap((hunk) => hunk.lines)
+      .filter((line) => line.kind === "context")
+      .flatMap((line) => extractObjectKeys(line.content))
+  );
+  const addedKeys = new Set(addedLines.flatMap((line) => extractObjectKeys(line.content)));
+
+  return (
+    addedKeys.size > 0 &&
+    [...addedKeys].every((key) => contextKeys.has(key)) &&
+    addedLines.some((line) => /[{[]/.test(line.content.trim()))
+  );
+}
+
+function isDataRecordLine(content: string): boolean {
+  const trimmed = content.trim();
+
+  return (
+    trimmed.length === 0 ||
+    /^[{}\][,]*$/.test(trimmed) ||
+    /^["']?[$A-Za-z_][$\w-]*["']?\s*:\s*(?:["'`][^"'`]*["'`]|-?\d+(?:\.\d+)?|true|false|null|\[[^\]]*\]|{[^}]*})\s*,?$/.test(
+      trimmed
+    )
+  );
+}
+
+function extractObjectKeys(content: string): string[] {
+  const match = content.trim().match(/^["']?([$A-Za-z_][$\w-]*)["']?\s*:/);
+
+  return match === null ? [] : [match[1]];
 }
 
 function isFocusedUiPresentationTask(taskText: string): boolean {

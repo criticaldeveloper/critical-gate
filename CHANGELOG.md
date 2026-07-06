@@ -4,6 +4,16 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## Unreleased
+
+### Fixed
+
+- Calibrate `expected-companions` so generated evidence/report outputs do not become historical
+  implementation companions, and data/content files can add another record with the existing shape
+  without requiring renderer companions.
+- Add the `data-record-addition-existing-shape-001` regression fixture from `diegolopes-ft`
+  controlled replay evidence.
+
 ## 2.7.4 - 2026-06-30
 
 ### Fixed

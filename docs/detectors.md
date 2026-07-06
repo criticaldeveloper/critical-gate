@@ -278,6 +278,12 @@ Initial implementation:
   changes when the diff is self-contained in styles, UI components, pages, or tiny client scripts.
   This keeps visual polish and display-mode defaults from requiring historically paired route,
   config, or unrelated style companions when no structural behavior changed.
+- Suppress low-signal generated, build, report, and evidence-output paths as historical companion
+  targets. These files can co-change during dogfood or CI workflows, but they should not become
+  required implementation companions for future feature work.
+- Suppress history-derived companion prompts for data/content files when the diff only adds another
+  record using the same existing object shape. Adding a new field, exported type, import, or schema
+  still remains companion-relevant because the renderer or validation layer may need to change.
 
 ### Task Intent Quality Warnings
 

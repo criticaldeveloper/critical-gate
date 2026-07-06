@@ -1,0 +1,8 @@
+{
+  "sourceRepository": "diegolopes-ft",
+  "caseType": "false-positive-regression",
+  "labelSource": "docs/critical-gate-evidence/2026-07-06/195751-add-second-youtube-fight-moment-existing-data-model.labels.json",
+  "shouldBlock": false,
+  "expectedFindingCount": 0,
+  "expectedFindings": []
+}

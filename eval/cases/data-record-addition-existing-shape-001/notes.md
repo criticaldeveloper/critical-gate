@@ -1,0 +1,1 @@
+Generalized from diegolopes-ft 2026-07-06 controlled replay evidence. A data/content file can add another record using the same existing object shape without requiring historically paired renderer or evidence-report companions. Schema changes or new fields should still remain companion-relevant.

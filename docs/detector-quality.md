@@ -428,6 +428,11 @@ Quality boundary:
 - Regression fixture: `eval/cases/astro-multisection-visual-001`.
 - Should not require historical route, listing, or template companions for selector-local article
   stylesheet fixes unless markup, routing, imports, exports, or data hooks changed.
+- Should not require generated evidence/report files as historical companions for implementation
+  changes.
+- Should not require renderer companions for data/content additions that reuse the existing record
+  shape; new fields or schema/type changes remain companion-relevant.
+- Regression fixture: `eval/cases/data-record-addition-existing-shape-001`.
 
 Coverage:
 

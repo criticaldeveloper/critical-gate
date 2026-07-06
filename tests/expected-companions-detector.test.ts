@@ -464,6 +464,168 @@ index 57b22a0..cb3e0f1 100644
     ]);
   });
 
+  it("does not treat generated evidence reports as historical companion requirements", () => {
+    const diff = parse(`diff --git a/src/signup.ts b/src/signup.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/signup.ts
++++ b/src/signup.ts
+@@ -1 +1,2 @@
++export const signup = true;
+`);
+
+    const findings = expectedCompanionsDetector.run({
+      task: {
+        source: "cli",
+        text: "Add another YouTube moment to the existing data list"
+      },
+      diff,
+      context: {
+        knowledge: {
+          getFileGraph: () => ({ nodes: [], edges: [] }),
+          getHistoryIndex: () => ({
+            profile: { commitCount: 50, minConfidenceCommitCount: 20, coChanges: [] },
+            coChanges: [],
+            companionRules: [
+              {
+                sourcePath: "src/signup.ts",
+                expectedPath: "docs/critical-gate-evidence/README.md",
+                support: 7,
+                confidence: 1
+              },
+              {
+                sourcePath: "src/signup.ts",
+                expectedPath: "artifacts/reports/evidence-summary.json",
+                support: 5,
+                confidence: 0.9
+              }
+            ]
+          }),
+          getPatternIndex: () => ({ patterns: [] }),
+          getSolutionIndex: () => ({ solutions: [] })
+        }
+      }
+    });
+
+    expect(findings).toEqual([]);
+  });
+
+  it("does not emit historical companions for data-only additions matching an existing record shape", () => {
+    const diff = parse(`diff --git a/src/data/moments.ts b/src/data/moments.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/data/moments.ts
++++ b/src/data/moments.ts
+@@ -2,7 +2,14 @@ export const moments = [
+   {
+     id: "moment-01",
+     title: "Fight Day",
+     caption: "Behind the scenes",
+     youtubeId: "abc123",
+     youtubeUrl: "https://example.com/one"
++  },
++  {
++    id: "moment-02",
++    title: "Training Room",
++    caption: "Camp footage",
++    youtubeId: "def456",
++    youtubeUrl: "https://example.com/two"
+   }
+ ];
+`);
+
+    const findings = expectedCompanionsDetector.run({
+      task: {
+        source: "cli",
+        text: "Add a second YouTube fight moment using the existing moments data model"
+      },
+      diff,
+      context: {
+        knowledge: {
+          getFileGraph: () => ({ nodes: [], edges: [] }),
+          getHistoryIndex: () => ({
+            profile: { commitCount: 50, minConfidenceCommitCount: 20, coChanges: [] },
+            coChanges: [],
+            companionRules: [
+              {
+                sourcePath: "src/data/moments.ts",
+                expectedPath: "src/components/MomentList.astro",
+                support: 6,
+                confidence: 0.85
+              },
+              {
+                sourcePath: "src/data/moments.ts",
+                expectedPath: "src/pages/index.astro",
+                support: 5,
+                confidence: 0.8
+              }
+            ]
+          }),
+          getPatternIndex: () => ({ patterns: [] }),
+          getSolutionIndex: () => ({ solutions: [] })
+        }
+      }
+    });
+
+    expect(findings).toEqual([]);
+  });
+
+  it("still emits historical companions when a data change adds a new record field", () => {
+    const diff = parse(`diff --git a/src/data/moments.ts b/src/data/moments.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/data/moments.ts
++++ b/src/data/moments.ts
+@@ -2,7 +2,15 @@ export const moments = [
+   {
+     id: "moment-01",
+     title: "Fight Day",
+     caption: "Behind the scenes",
+     youtubeId: "abc123",
+     youtubeUrl: "https://example.com/one"
++  },
++  {
++    id: "moment-02",
++    title: "Training Room",
++    caption: "Camp footage",
++    badge: "new",
++    youtubeId: "def456",
++    youtubeUrl: "https://example.com/two"
+   }
+ ];
+`);
+
+    const findings = expectedCompanionsDetector.run({
+      task: {
+        source: "cli",
+        text: "Add a highlighted YouTube fight moment"
+      },
+      diff,
+      context: {
+        knowledge: {
+          getFileGraph: () => ({ nodes: [], edges: [] }),
+          getHistoryIndex: () => ({
+            profile: { commitCount: 50, minConfidenceCommitCount: 20, coChanges: [] },
+            coChanges: [],
+            companionRules: [
+              {
+                sourcePath: "src/data/moments.ts",
+                expectedPath: "src/components/MomentList.astro",
+                support: 6,
+                confidence: 0.85
+              }
+            ]
+          }),
+          getPatternIndex: () => ({ patterns: [] }),
+          getSolutionIndex: () => ({ solutions: [] })
+        }
+      }
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        id: "expected-companions:src/data/moments.ts:src/components/MomentList.astro"
+      })
+    ]);
+  });
+
   it("does not emit historical companions for tiny stylesheet value changes", () => {
     const diff = parse(`diff --git a/src/styles/typography.scss b/src/styles/typography.scss
 index 57b22a0..cb3e0f1 100644

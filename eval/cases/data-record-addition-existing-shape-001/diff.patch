@@ -1,0 +1,20 @@
+diff --git a/src/data/moments.ts b/src/data/moments.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/data/moments.ts
++++ b/src/data/moments.ts
+@@ -2,7 +2,14 @@ export const moments = [
+   {
+     id: "moment-01",
+     title: "Fight Day",
+     caption: "Behind the scenes",
+     youtubeId: "abc123",
+     youtubeUrl: "https://example.com/one"
++  },
++  {
++    id: "moment-02",
++    title: "Training Room",
++    caption: "Camp footage",
++    youtubeId: "def456",
++    youtubeUrl: "https://example.com/two"
+   }
+ ];
