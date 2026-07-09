@@ -29,6 +29,7 @@ The aggregator currently reads these local project evidence roots:
 | `criticaldeveloper-blog` | `C:/dev/criticaldeveloper-blog/docs/critical-gate-evidence/` | False-positive regression source and fixture backlog          |
 | `criticaldeveloper-ft`   | `C:/dev/criticaldeveloper-ft/docs/critical-gate-evidence/`   | UI calibration replay, upgrade evidence, missed-review labels |
 | `diegolopes-ft`          | `C:/dev/diegolopes-ft/docs/critical-gate-evidence/`          | Fresh static Astro website dogfood and repair-loop discipline |
+| `tamagotchi`             | `C:/dev/tamagotchi/docs/critical-gate-evidence/`             | Fresh desktop app dogfood source for Tauri/React/Pixi work    |
 
 Raw evidence stays in the project that produced it. This repo keeps aggregate summaries, analysis
 docs, and fixtures so package-level claims are auditable without copying every raw report.
