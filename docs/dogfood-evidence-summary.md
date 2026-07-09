@@ -1,25 +1,25 @@
 # Dogfood Evidence Summary
 
-Generated: 2026-07-06T17:57:53.091Z
+Generated: 2026-07-06T18:42:51.364Z
 
 ## Overview
 
 - Repositories: 4
-- Labeled reports: 103
+- Labeled reports: 104
 - Useful findings: 148
 - False-positive finding instances: 286
 - Missed findings: 0
-- Fixture-needed reports: 26
+- Fixture-needed reports: 27
 - Fixture-created reports: 17
 - Repair attempts captured: 4
 - Repair reruns captured: 4
 - Repairs passing rerun: 4
-- Missed-finding reviews captured: 71
+- Missed-finding reviews captured: 72
 
 ## Run Labels
 
+- clean: 31
 - useful: 31
-- clean: 30
 - pass-with-reviewed-observations: 9
 - false-positive: 7
 - reviewed-observations: 7
@@ -35,15 +35,15 @@ Generated: 2026-07-06T17:57:53.091Z
 
 ## Detector Frequency
 
-- expected-companions: 70
-- blast-radius: 65
-- scope: 54
-- config-change: 47
-- dependency: 47
-- secret-path: 47
-- test-weakening: 47
+- expected-companions: 71
+- blast-radius: 66
+- scope: 55
+- config-change: 48
+- dependency: 48
+- secret-path: 48
+- test-weakening: 48
 - repository-intelligence: 17
-- intent-verification: 8
+- intent-verification: 9
 - dependency-addition: 4
 - rewrite: 3
 - api-surface: 1
@@ -55,9 +55,9 @@ Generated: 2026-07-06T17:57:53.091Z
 - Repair prompts captured: 3
 - Repair reruns captured: 4
 - Repairs passing rerun: 4
-- Repairs scoped to task: 47
-- Repairs scoped to repair contract: 47
-- Missed-finding reviews captured: 71
+- Repairs scoped to task: 48
+- Repairs scoped to repair contract: 48
+- Missed-finding reviews captured: 72
 - Reports still missing missed-finding review: 32
 
 ## Repositories
@@ -65,7 +65,7 @@ Generated: 2026-07-06T17:57:53.091Z
 - critical-components: 15 reports; useful findings 82; false-positive findings 3; missed findings 0; fixture-needed reports 2; repair attempts 0; missed-finding reviews 3.
 - criticaldeveloper-blog: 18 reports; useful findings 10; false-positive findings 93; missed findings 0; fixture-needed reports 13; repair attempts 0; missed-finding reviews 4.
 - criticaldeveloper-ft: 23 reports; useful findings 16; false-positive findings 38; missed findings 0; fixture-needed reports 2; repair attempts 0; missed-finding reviews 17.
-- diegolopes-ft: 47 reports; useful findings 40; false-positive findings 152; missed findings 0; fixture-needed reports 9; repair attempts 4; missed-finding reviews 47.
+- diegolopes-ft: 48 reports; useful findings 40; false-positive findings 152; missed findings 0; fixture-needed reports 10; repair attempts 4; missed-finding reviews 48.
 
 ## Reports
 
@@ -179,6 +179,7 @@ Generated: 2026-07-06T17:57:53.091Z
 - `165219-fix-mobile-section-sizing-and-navigator-usability`: clean-reviewed; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
 - `165853-add-comprehensive-project-readme`: clean-reviewed; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
 - `143942-fix-mobile-background-clipping-depth-while-preserving-alternating-sides`: clean-reviewed; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `184248-upgrade-critical-gate-to-2-7-5-and-verify-expected-companion-calibration`: clean; findings 0; false positives 0; fixture needed yes; repair attempted no; missed reviewed yes.
 - `195618-reduce-mobile-fighter-stats-panel-density`: clean-reviewed; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
 - `195656-polish-social-profile-link-active-states`: clean-reviewed; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
 - `195722-update-homepage-seo-title-description-and-social-preview-alt-text`: clean-reviewed; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
