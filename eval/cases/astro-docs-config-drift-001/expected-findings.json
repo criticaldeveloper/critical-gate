@@ -1,5 +1,6 @@
 {
   "sourceRepository": "withastro/docs",
+  "evaluationSet": "calibration",
   "caseType": "config-drift",
   "labelSource": "sanitized-public-repo-fixture",
   "shouldBlock": true,

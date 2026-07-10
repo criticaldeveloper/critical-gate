@@ -1,5 +1,6 @@
 {
   "sourceRepository": "withastro/docs",
+  "evaluationSet": "calibration",
   "caseType": "clean-narrow-task",
   "labelSource": "sanitized-public-repo-fixture",
   "shouldBlock": false,

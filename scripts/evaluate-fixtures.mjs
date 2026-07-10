@@ -108,6 +108,7 @@ function validateExpected(id, value) {
   }
 
   return {
+    evaluationSet: validateEvaluationSet(id, value.evaluationSet),
     sourceRepository: value.sourceRepository,
     caseType: value.caseType,
     labelSource: value.labelSource,
@@ -120,6 +121,20 @@ function validateExpected(id, value) {
       ? value.allowedExtraDetectors.filter((entry) => typeof entry === "string")
       : []
   };
+}
+
+function validateEvaluationSet(id, value) {
+  if (value === undefined) {
+    return "development";
+  }
+
+  if (value !== "development" && value !== "calibration" && value !== "holdout") {
+    throw new Error(
+      `${id}: evaluationSet must be development, calibration, or holdout when present.`
+    );
+  }
+
+  return value;
 }
 
 function validateOptionalExpectedFindingCount(id, value) {
@@ -225,6 +240,7 @@ function evaluateCase(evaluationCase) {
     notes: evaluationCase.notes,
     sourceRepository: evaluationCase.expected.sourceRepository,
     caseType: evaluationCase.expected.caseType,
+    evaluationSet: evaluationCase.expected.evaluationSet,
     labelSource: evaluationCase.expected.labelSource,
     summary,
     expectedFindings: evaluationCase.expected.expectedFindings,
@@ -311,6 +327,7 @@ function calculateMetrics(results) {
     findingPrecision: divide(matchedFindingCount, matchedFindingCount + unexpectedBlockingCount),
     findingRecall: divide(matchedFindingCount, expectedFindingCount),
     detectorMetrics: getDetectorMetrics(results),
+    evaluationSetMetrics: getGroupedMetrics(results, "evaluationSet"),
     repositoryMetrics: getGroupedMetrics(results, "sourceRepository"),
     caseTypeMetrics: getGroupedMetrics(results, "caseType"),
     noisiestDetector: getNoisiestDetector(results),
@@ -470,6 +487,12 @@ function renderMarkdown(evaluation) {
         `| ${metric.detector} | ${metric.expected} | ${metric.matched} | ${metric.unexpectedBlocking} | ${formatPercent(metric.precision)} | ${formatPercent(metric.recall)} | ${metric.evidenceLevel} |`
     ),
     "",
+    "## Evaluation Set Metrics",
+    "",
+    "| Set | Cases | TP | TN | FP | FN | Precision | Recall |",
+    "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ...metrics.evaluationSetMetrics.map((metric) => renderGroupedMetricRow(metric)),
+    "",
     "## Repository Metrics",
     "",
     "| Repository | Cases | TP | TN | FP | FN | Precision | Recall |",
@@ -499,6 +522,7 @@ function renderCase(result) {
     `- Actual Block: ${result.actualBlock ? "yes" : "no"}`,
     `- Source Repository: ${result.sourceRepository}`,
     `- Case Type: ${result.caseType}`,
+    `- Evaluation Set: ${result.evaluationSet}`,
     `- Label Source: ${result.labelSource}`,
     `- Findings: ${result.summary.findingCount}`,
     `- Notes: ${result.notes}`,

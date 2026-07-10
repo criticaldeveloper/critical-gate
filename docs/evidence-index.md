@@ -67,9 +67,13 @@ When adding a fixture from dogfood evidence:
 
 1. Sanitize the diff so it does not depend on private project content.
 2. Keep `expected-findings.json` traceable with `sourceRepository`, `caseType`, and `labelSource`.
-3. Prefer generalized detector behavior over repository-specific path exceptions.
-4. Run `pnpm evaluate`.
-5. Update detector docs when the behavior boundary changes.
+3. Set `evaluationSet` deliberately:
+   - `development` for detector implementation and regression cases;
+   - `calibration` for threshold and policy tuning;
+   - `holdout` only for frozen release-check cases that are not tuned directly in the same cycle.
+4. Prefer generalized detector behavior over repository-specific path exceptions.
+5. Run `pnpm evaluate`.
+6. Update detector docs when the behavior boundary changes.
 
 ## Legacy Scenario Definitions
 

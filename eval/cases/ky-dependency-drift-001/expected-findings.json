@@ -1,5 +1,6 @@
 {
   "sourceRepository": "sindresorhus/ky",
+  "evaluationSet": "holdout",
   "caseType": "dependency-drift",
   "labelSource": "sanitized-public-repo-fixture",
   "shouldBlock": true,

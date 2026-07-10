@@ -78,11 +78,26 @@ expected-findings.json
 notes.md
 ```
 
+Cases belong to one evaluation set:
+
+- `development`: default. Cases may be inspected and used while implementing detector changes.
+- `calibration`: used to tune thresholds and policy after implementation choices are made.
+- `holdout`: frozen release-check evidence. Do not tune directly against holdout failures during the
+  same release cycle; record the result first, then convert learnings into development cases for a
+  later cycle.
+
+Split by repository and team where possible, not by random diff, so near-duplicate local patterns do
+not leak across development, calibration, and holdout evidence.
+
 `expected-findings.json` declares whether the case should block and which detector findings are
 required:
 
 ```json
 {
+  "evaluationSet": "development",
+  "sourceRepository": "example/repo",
+  "caseType": "weakened-test",
+  "labelSource": "manual-review",
   "shouldBlock": true,
   "expectedFindings": [
     {
@@ -102,6 +117,7 @@ The harness reports:
 - False negatives.
 - Case precision and recall.
 - Finding precision and recall.
+- Development, calibration, and holdout metrics separately.
 - Per-detector precision and recall when enough labeled cases exist; smaller detector samples stay
   labeled as anecdotal.
 - Noisiest detector based on unexpected blocking findings.
