@@ -1,6 +1,6 @@
 import type { KnowledgeProvider } from "../knowledge/index.js";
 import type { ApiSurfaceSnapshot } from "../repository/index.js";
-import type { Finding, GateResult, TaskIntent } from "../schema/index.js";
+import type { DetectorRunStatus, Finding, GateResult, TaskIntent } from "../schema/index.js";
 
 export type DetectorMaturity = "experimental" | "review" | "blocker-certified";
 
@@ -19,4 +19,11 @@ export interface Detector {
   name: string;
   maturity?: DetectorMaturity;
   run: (context: DetectorContext) => Finding[];
+  getStatus?: (
+    context: DetectorContext,
+    findings: Finding[]
+  ) => {
+    status: DetectorRunStatus;
+    reason?: string;
+  };
 }

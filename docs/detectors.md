@@ -78,6 +78,11 @@ Every CLI result can report detector execution status:
 A degraded status such as `skipped`, `insufficient-context`, `timed-out`, or `errored` is not clean
 pass evidence. Reports should show it separately from successful detector runs.
 
+The scope detector uses `insufficient-context` for medium, large, or broad tasks where simple
+path-keyword matching cannot prove the changed files are inside the intended boundary. That status
+does not fail the gate by itself, but it tells reviewers and agents to provide a structured task
+contract, ownership context, or explicit allowed and forbidden paths.
+
 ## V1 Blockers
 
 ### Unrelated File Modifications

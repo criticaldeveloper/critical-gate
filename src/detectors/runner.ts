@@ -94,7 +94,12 @@ export function runDetectorsWithStatuses(
     .map((finding) => enrichFindingWithRepairContract(finding, diff.files));
   const findingCountsByDetector = countFindingsByDetector(findings);
   const detectorRuns = detectorResults.map(({ detector, status }) => {
-    if (status.status === "errored") {
+    if (
+      status.status === "errored" ||
+      status.status === "skipped" ||
+      status.status === "insufficient-context" ||
+      status.status === "timed-out"
+    ) {
       return status;
     }
 
@@ -153,7 +158,9 @@ function runSingleDetector(
   const startedAt = Date.now();
 
   try {
-    const findings = detector.run({ task, diff, context });
+    const detectorContext = { task, diff, context };
+    const findings = detector.run(detectorContext);
+    const statusOverride = detector.getStatus?.(detectorContext, findings);
     const durationMs = Math.max(0, Date.now() - startedAt);
 
     return {
@@ -161,11 +168,12 @@ function runSingleDetector(
       findings,
       status: {
         detector: detector.name,
-        status: findings.length > 0 ? "findings" : "passed",
+        status: statusOverride?.status ?? (findings.length > 0 ? "findings" : "passed"),
         durationMs,
         findingCount: findings.length,
         maturity: detector.maturity ?? getDetectorMaturity(detector.name),
-        filesInspected: diff.files.length
+        filesInspected: diff.files.length,
+        reason: statusOverride?.reason
       }
     };
   } catch (error) {

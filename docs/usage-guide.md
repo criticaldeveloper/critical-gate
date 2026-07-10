@@ -159,6 +159,9 @@ observation mode, or suppressed because evidence strength was below the detector
 JSON and Markdown output can also include detector run statuses. `passed` means the detector ran and
 emitted no findings. `errored`, `timed-out`, `skipped`, and `insufficient-context` mean that check
 did not produce pass evidence and should be reviewed separately from normal clean runs.
+For scope checks, `insufficient-context` usually means the task is too broad for path-keyword
+validation and should include a structured task contract with allowed paths, forbidden paths, and
+invariants.
 
 Use `--format pr-comment` when the audience is a pull request discussion. It keeps the same
 evidence-backed data but groups it into blocking findings, observations, expected support changes,

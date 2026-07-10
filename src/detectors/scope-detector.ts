@@ -62,6 +62,30 @@ export const scopeDetector: Detector = {
         )
       )
       .map((file) => toFinding(file, analysis.keywords, context?.repositoryTokenIndex));
+  },
+  getStatus: ({ task }, findings) => {
+    if (findings.length > 0) {
+      return { status: "findings" };
+    }
+
+    const analysis = analyzeTaskIntent(task);
+
+    if (analysis.complexity !== "small") {
+      return {
+        status: "insufficient-context",
+        reason: `Task complexity is ${analysis.complexity}; scope needs an explicit task contract or ownership context.`
+      };
+    }
+
+    if (isBroadTask(task.text)) {
+      return {
+        status: "insufficient-context",
+        reason:
+          "Task wording is broad; path-keyword scope validation is not enough to prove changed files are in scope."
+      };
+    }
+
+    return { status: "passed" };
   }
 };
 

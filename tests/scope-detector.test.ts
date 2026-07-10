@@ -1,5 +1,11 @@
 import type { GateResult, TaskIntent } from "../src/index.js";
-import { parseUnifiedDiff, runDetectors, scopeDetector, summarizeFindings } from "../src/index.js";
+import {
+  parseUnifiedDiff,
+  runDetectors,
+  runDetectorsWithStatuses,
+  scopeDetector,
+  summarizeFindings
+} from "../src/index.js";
 import { buildRepositoryTokenIndex } from "../src/repository/index.js";
 
 const task: TaskIntent = {
@@ -258,6 +264,68 @@ index 57b22a0..cb3e0f1 100644
         diff
       })
     ).toEqual([]);
+  });
+
+  it("marks broad refactor scope checks as insufficient context", () => {
+    const diff = parse(`diff --git a/src/logger.ts b/src/logger.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/logger.ts
++++ b/src/logger.ts
+@@ -1,2 +1,3 @@
++export const verbose = true;
+ export const logger = true;
+`);
+
+    const result = runDetectorsWithStatuses(
+      {
+        source: "cli",
+        text: "Refactor project logging architecture"
+      },
+      diff,
+      undefined,
+      [scopeDetector]
+    );
+
+    expect(result.findings).toEqual([]);
+    expect(result.detectorRuns).toEqual([
+      expect.objectContaining({
+        detector: "scope",
+        status: "insufficient-context",
+        findingCount: 0,
+        reason:
+          "Task complexity is large; scope needs an explicit task contract or ownership context."
+      })
+    ]);
+  });
+
+  it("marks medium task scope checks as insufficient context", () => {
+    const diff = parse(`diff --git a/src/logger.ts b/src/logger.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/logger.ts
++++ b/src/logger.ts
+@@ -1,2 +1,3 @@
++export const verbose = true;
+ export const logger = true;
+`);
+
+    const result = runDetectorsWithStatuses(
+      {
+        source: "cli",
+        text: "Coordinate platform observability output across backend response handling and service diagnostics"
+      },
+      diff,
+      undefined,
+      [scopeDetector]
+    );
+
+    expect(result.detectorRuns).toEqual([
+      expect.objectContaining({
+        detector: "scope",
+        status: "insufficient-context",
+        reason:
+          "Task complexity is medium; scope needs an explicit task contract or ownership context."
+      })
+    ]);
   });
 
   it("does not emit for workflow changes when the task mentions CI", () => {
