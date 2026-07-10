@@ -65,6 +65,46 @@ describe("dependencyDetector", () => {
     expect(findings).toEqual([]);
   });
 
+  it("emits a blocker when no_new_dependencies is enforced by task contract", () => {
+    const diff = {
+      files: parseUnifiedDiff(
+        readFileSync(join(process.cwd(), "fixtures", "diffs", "basic-ts.diff"), "utf8")
+      )
+    };
+
+    const findings = dependencyDetector.run({
+      task: {
+        source: "cli",
+        text: "Install axios for the signup API client"
+      },
+      diff,
+      context: {
+        taskContract: {
+          source: "provided",
+          goal: "Use existing dependencies for the signup API client",
+          allowedPaths: [],
+          forbiddenPaths: [],
+          expectedArtifacts: [],
+          invariants: ["no_new_dependencies"],
+          requiredChecks: []
+        }
+      }
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        detector: "dependency-addition",
+        severity: "blocker",
+        title: "New dependency violates task contract",
+        message:
+          "axios@^1.7.0 was added to dependencies, but task contract invariant no_new_dependencies forbids new dependencies.",
+        repair:
+          "Remove the dependency or revise the task contract with explicit reviewer approval.",
+        tags: ["dependency"]
+      })
+    ]);
+  });
+
   it("emits medium severity for unjustified dev dependencies", () => {
     const diff = {
       files: parseUnifiedDiff(`diff --git a/package.json b/package.json

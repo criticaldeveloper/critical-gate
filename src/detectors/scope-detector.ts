@@ -46,12 +46,28 @@ export const scopeDetector: Detector = {
   maturity: "review",
   run: ({ task, diff, context }) => {
     const analysis = analyzeTaskIntent(task);
+    const forbiddenPathFindings = diff.files
+      .map((file) => {
+        const matchingPatterns = getMatchingForbiddenPatterns(
+          file.path,
+          context?.taskContract?.forbiddenPaths ?? []
+        );
+
+        return matchingPatterns.length > 0
+          ? toForbiddenPathFinding(file, matchingPatterns)
+          : undefined;
+      })
+      .filter((finding): finding is Finding => finding !== undefined);
+    const forbiddenPaths = new Set(
+      forbiddenPathFindings.map((finding) => finding.evidence[0]?.path)
+    );
 
     if (analysis.complexity !== "small" || isBroadTask(task.text)) {
-      return [];
+      return forbiddenPathFindings;
     }
 
-    return diff.files
+    const unexpectedScopeFindings = diff.files
+      .filter((file) => !forbiddenPaths.has(file.path))
       .filter((file) =>
         isUnexpectedForSmallTask(
           file,
@@ -62,6 +78,8 @@ export const scopeDetector: Detector = {
         )
       )
       .map((file) => toFinding(file, analysis.keywords, context?.repositoryTokenIndex));
+
+    return [...forbiddenPathFindings, ...unexpectedScopeFindings];
   },
   getStatus: ({ task }, findings) => {
     if (findings.length > 0) {
@@ -88,6 +106,47 @@ export const scopeDetector: Detector = {
     return { status: "passed" };
   }
 };
+
+function getMatchingForbiddenPatterns(path: string, patterns: string[]): string[] {
+  return patterns.filter((pattern) => matchesContractPath(path, pattern));
+}
+
+function matchesContractPath(path: string, pattern: string): boolean {
+  const normalizedPath = normalizeContractPath(path);
+  const normalizedPattern = normalizeContractPath(pattern);
+
+  if (normalizedPattern.length === 0) {
+    return false;
+  }
+
+  if (normalizedPattern.endsWith("/**")) {
+    const root = normalizedPattern.slice(0, -3);
+    return normalizedPath === root || normalizedPath.startsWith(`${root}/`);
+  }
+
+  if (!normalizedPattern.includes("*")) {
+    return normalizedPath === normalizedPattern;
+  }
+
+  const source = normalizedPattern
+    .split("**")
+    .map((part) => part.split("*").map(escapeRegExp).join("[^/]*"))
+    .join(".*");
+
+  return new RegExp(`^${source}$`).test(normalizedPath);
+}
+
+function normalizeContractPath(path: string): string {
+  return path
+    .replaceAll("\\", "/")
+    .replace(/^\.\/+/, "")
+    .replace(/\/+/g, "/")
+    .trim();
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 function isBroadTask(taskText: string): boolean {
   const normalizedTask = taskText.toLowerCase();
@@ -368,6 +427,41 @@ function toFinding(file: DiffFile, keywords: string[], tokenIndex?: RepositoryTo
     ],
     repair:
       "Remove unrelated edits or split them into a separate task with explicit justification.",
+    tags: ["scope"]
+  };
+}
+
+function toForbiddenPathFinding(file: DiffFile, matchingPatterns: string[]): Finding {
+  const firstChangedLine = file.hunks
+    .flatMap((hunk) => hunk.lines)
+    .find((line) => line.kind === "add" || line.kind === "delete");
+  const lineNumber = firstChangedLine?.newLineNumber ?? firstChangedLine?.oldLineNumber;
+
+  return {
+    id: `scope:forbidden-path:${file.path}`,
+    detector: "scope",
+    severity: "blocker",
+    confidence: 0.95,
+    evidenceStrength: 0.95,
+    title: "Forbidden path changed by task contract",
+    message: `${file.path} changed even though the task contract forbids ${matchingPatterns.join(", ")}.`,
+    evidence: [
+      {
+        kind: "file",
+        path: file.path,
+        startLine: lineNumber,
+        endLine: lineNumber,
+        message: `Changed file matches forbidden task contract path: ${matchingPatterns.join(", ")}.`,
+        data: {
+          forbiddenPatterns: matchingPatterns,
+          role: file.role,
+          additions: file.additions,
+          deletions: file.deletions
+        }
+      }
+    ],
+    repair:
+      "Remove the forbidden-path change or update the task contract with explicit reviewer approval.",
     tags: ["scope"]
   };
 }

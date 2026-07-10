@@ -30,12 +30,17 @@ const sectionLinePattern =
 export const dependencyDetector: Detector = {
   name: "dependency-addition",
   maturity: "review",
-  run: ({ task, diff }) => {
+  run: ({ task, diff, context }) => {
     const addedDependencies = diff.files.flatMap(extractAddedDependencies);
+    const noNewDependencies = context?.taskContract?.invariants.includes("no_new_dependencies");
 
     return addedDependencies
-      .filter((dependency) => !hasVisibleJustification(task.text, dependency.name))
-      .map(toFinding);
+      .filter(
+        (dependency) => noNewDependencies || !hasVisibleJustification(task.text, dependency.name)
+      )
+      .map((dependency) =>
+        toFinding(dependency, noNewDependencies ? "no_new_dependencies" : undefined)
+      );
   }
 };
 
@@ -136,19 +141,32 @@ function toDependencyKey(section: DependencySection, name: string): string {
   return `${section}:${name}`;
 }
 
-function toFinding(dependency: AddedDependency): Finding {
+function toFinding(dependency: AddedDependency, enforcedInvariant?: string): Finding {
   const isProductionDependency =
     dependency.section === "dependencies" || dependency.section === "optionalDependencies";
-  const severity = isProductionDependency ? "blocker" : "medium";
+  const severity = enforcedInvariant !== undefined || isProductionDependency ? "blocker" : "medium";
   const dependencyType = isProductionDependency ? "production" : "development";
+  const title =
+    enforcedInvariant === undefined
+      ? `Unjustified ${dependencyType} dependency added`
+      : "New dependency violates task contract";
+  const message =
+    enforcedInvariant === undefined
+      ? `${dependency.name}@${dependency.version} was added to ${dependency.section} without visible task justification.`
+      : `${dependency.name}@${dependency.version} was added to ${dependency.section}, but task contract invariant ${enforcedInvariant} forbids new dependencies.`;
+  const repair =
+    enforcedInvariant === undefined
+      ? `Remove ${dependency.name} unless it is required, or update the task/PR context with a clear justification and alternatives considered.`
+      : "Remove the dependency or revise the task contract with explicit reviewer approval.";
 
   return {
     id: `dependency-addition:${dependency.path}:${dependency.section}:${dependency.name}`,
     detector: "dependency-addition",
     severity,
-    confidence: 0.9,
-    title: `Unjustified ${dependencyType} dependency added`,
-    message: `${dependency.name}@${dependency.version} was added to ${dependency.section} without visible task justification.`,
+    confidence: enforcedInvariant === undefined ? 0.9 : 0.95,
+    evidenceStrength: enforcedInvariant === undefined ? 0.9 : 0.95,
+    title,
+    message,
     evidence: [
       {
         kind: "manifest",
@@ -159,11 +177,12 @@ function toFinding(dependency: AddedDependency): Finding {
         data: {
           dependency: dependency.name,
           version: dependency.version,
-          section: dependency.section
+          section: dependency.section,
+          enforcedInvariant
         }
       }
     ],
-    repair: `Remove ${dependency.name} unless it is required, or update the task/PR context with a clear justification and alternatives considered.`,
+    repair,
     tags: ["dependency"]
   };
 }

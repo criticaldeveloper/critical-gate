@@ -1,4 +1,4 @@
-import type { GateResult, TaskIntent } from "../src/index.js";
+import type { GateResult, TaskContract, TaskIntent } from "../src/index.js";
 import {
   parseUnifiedDiff,
   runDetectors,
@@ -11,6 +11,15 @@ import { buildRepositoryTokenIndex } from "../src/repository/index.js";
 const task: TaskIntent = {
   source: "cli",
   text: "Fix signup validation"
+};
+const emptyTaskContract: TaskContract = {
+  source: "provided",
+  goal: "Fix signup validation",
+  allowedPaths: [],
+  forbiddenPaths: [],
+  expectedArtifacts: [],
+  invariants: [],
+  requiredChecks: []
 };
 
 function parse(diffText: string): GateResult["diff"] {
@@ -294,6 +303,53 @@ index 57b22a0..cb3e0f1 100644
         findingCount: 0,
         reason:
           "Task complexity is large; scope needs an explicit task contract or ownership context."
+      })
+    ]);
+  });
+
+  it("emits blocker findings for forbidden task-contract paths even on broad tasks", () => {
+    const diff = parse(`diff --git a/src/auth/session.ts b/src/auth/session.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/auth/session.ts
++++ b/src/auth/session.ts
+@@ -1,2 +1,3 @@
++export const sessionTimeout = 30;
+ export const session = true;
+`);
+
+    const result = runDetectorsWithStatuses(
+      {
+        source: "cli",
+        text: "Refactor project architecture"
+      },
+      diff,
+      {
+        taskContract: {
+          ...emptyTaskContract,
+          goal: "Refactor project architecture",
+          forbiddenPaths: ["src/auth/**"]
+        }
+      },
+      [scopeDetector]
+    );
+
+    expect(result.findings).toEqual([
+      expect.objectContaining({
+        id: "scope:forbidden-path:src/auth/session.ts",
+        detector: "scope",
+        severity: "blocker",
+        title: "Forbidden path changed by task contract",
+        message: "src/auth/session.ts changed even though the task contract forbids src/auth/**.",
+        repair:
+          "Remove the forbidden-path change or update the task contract with explicit reviewer approval.",
+        tags: ["scope"]
+      })
+    ]);
+    expect(result.detectorRuns).toEqual([
+      expect.objectContaining({
+        detector: "scope",
+        status: "findings",
+        findingCount: 1
       })
     ]);
   });

@@ -1,12 +1,19 @@
 import type { KnowledgeProvider } from "../knowledge/index.js";
 import type { ApiSurfaceSnapshot } from "../repository/index.js";
-import type { DetectorRunStatus, Finding, GateResult, TaskIntent } from "../schema/index.js";
+import type {
+  DetectorRunStatus,
+  Finding,
+  GateResult,
+  TaskContract,
+  TaskIntent
+} from "../schema/index.js";
 
 export type DetectorMaturity = "experimental" | "review" | "blocker-certified";
 
 export type DetectorRepoContext = NonNullable<GateResult["context"]> & {
   knowledge?: KnowledgeProvider;
   apiSurfaceSnapshot?: ApiSurfaceSnapshot;
+  taskContract?: TaskContract;
 };
 
 export interface DetectorContext {

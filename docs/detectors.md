@@ -83,6 +83,10 @@ path-keyword matching cannot prove the changed files are inside the intended bou
 does not fail the gate by itself, but it tells reviewers and agents to provide a structured task
 contract, ownership context, or explicit allowed and forbidden paths.
 
+When a provided task contract includes `forbidden_paths`, the scope detector enforces those paths
+directly and emits blocker findings for matching changed files. This check runs before the
+small-task keyword heuristic, so explicit forbidden paths still apply to broad or medium tasks.
+
 ## V1 Blockers
 
 ### Unrelated File Modifications
@@ -146,6 +150,8 @@ Initial implementation:
   classified as additions after comma or line-context shifts.
 - Distinguish production and development dependencies.
 - Require stronger justification for production dependencies.
+- Treat a provided task contract invariant of `no_new_dependencies` as stronger than task-text
+  justification and emit a blocker for any added dependency.
 - Detect common native alternatives and existing utilities later.
 
 ### Silent Public API Change

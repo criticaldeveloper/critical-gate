@@ -489,6 +489,38 @@ describe("cli", () => {
     });
   });
 
+  it("enforces forbidden paths from a structured task contract", () => {
+    const { io, stdout, files } = createTestIo();
+
+    files.set(
+      "C:\\dev\\critical-gate\\task-contract.json",
+      JSON.stringify({
+        goal: "Correct the profile heading font weight",
+        allowed_paths: ["src/profile/**"],
+        forbidden_paths: ["src/signup.ts"],
+        invariants: []
+      })
+    );
+
+    expect(main(["check", "--task-contract", "task-contract.json", "--format", "json"], io)).toBe(
+      ExitCode.FindingsFailed
+    );
+
+    expect(JSON.parse(stdout[0] ?? "")).toMatchObject({
+      summary: {
+        decision: "fail",
+        blockerCount: 1
+      },
+      findings: [
+        expect.objectContaining({
+          id: "scope:forbidden-path:src/signup.ts",
+          severity: "blocker",
+          title: "Forbidden path changed by task contract"
+        })
+      ]
+    });
+  });
+
   it("passes the criticaldeveloper-blog local SVG icon dependency removal replay", () => {
     const { io, stdout } = createTestIo();
     const fixtureDiff = readFileSync(

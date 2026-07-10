@@ -136,9 +136,11 @@ npx critical-gate check --task-contract task-contract.json --format markdown
 
 `goal` becomes the task text used by existing detectors. The contract is also emitted in JSON,
 Markdown, and PR-comment output so reviewers can see whether the boundary was inferred or provided.
-This first contract slice is an input and reporting foundation; detector enforcement should be
-expanded gradually so explicit `allowed_paths`, `forbidden_paths`, and `invariants` become stronger
-than lexical task matching.
+Provided `forbidden_paths` are enforced as blocker scope findings, including on broad tasks where
+keyword scope matching would otherwise report insufficient context. The `no_new_dependencies`
+invariant is enforced by the dependency detector as a blocker even when the task text mentions the
+new package. Other contract fields remain visible reporting inputs until they have deterministic
+detector support and fixtures.
 
 ## Understanding Reports
 

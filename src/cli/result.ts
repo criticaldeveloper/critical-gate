@@ -90,6 +90,7 @@ export function createGateResult(
     ...context,
     apiSurfaceSnapshot: apiSnapshot,
     publicApiEntrypoints: publicApiEntrypointContext,
+    taskContract: resolvedTaskContract,
     knowledge: diffResult.knowledge
   };
   const detectorResult = runDetectorsWithStatuses(task, diff, detectorContext);
