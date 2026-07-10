@@ -26,7 +26,11 @@ describe("invariantCoverageDetector", () => {
       context: {
         taskContract: {
           ...baseContract,
-          invariants: ["no_new_dependencies", "authentication_behavior_unchanged"]
+          invariants: [
+            "no_new_dependencies",
+            "no_public_api_change",
+            "authentication_behavior_unchanged"
+          ]
         }
       }
     });
@@ -77,7 +81,7 @@ describe("invariantCoverageDetector", () => {
         context: {
           taskContract: {
             ...baseContract,
-            invariants: ["no_new_dependencies"]
+            invariants: ["no_new_dependencies", "no_public_api_change"]
           }
         }
       })

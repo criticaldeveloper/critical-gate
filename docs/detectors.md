@@ -203,6 +203,7 @@ Evidence:
 Initial implementation:
 
 - Treat `no_new_dependencies` as covered by the dependency detector.
+- Treat `no_public_api_change` as covered by the API-surface detector.
 - Emit one observation-mode finding for provided invariants that are not deterministically enforced.
 - Include each unenforced invariant as evidence with `enforced: false`.
 
@@ -222,6 +223,8 @@ Initial implementation:
 - Use TypeScript compiler APIs or API Extractor.
 - Compare public export surface before and after diff.
 - Flag public API changes without visible documentation or acknowledgement.
+- Treat the task-contract invariant `no_public_api_change` as stronger than visible API
+  acknowledgement and emit blocker findings for public API changes.
 
 Current snapshot behavior:
 

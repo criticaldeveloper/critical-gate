@@ -175,6 +175,53 @@ index 57b22a0..cb3e0f1 100644
     expect(findings).toEqual([]);
   });
 
+  it("emits blocker when API work violates no_public_api_change invariant", () => {
+    const diff = parse(`diff --git a/src/index.ts b/src/index.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -1,2 +1,3 @@
++export function validateSignup(input: SignupInput) {}
+ export const existing = true;
+`);
+
+    const findings = apiSurfaceDetector.run({
+      task: {
+        source: "cli",
+        text: "Export public API for signup validation"
+      },
+      diff,
+      context: {
+        taskContract: {
+          source: "provided",
+          goal: "Refactor signup internals",
+          allowedPaths: [],
+          forbiddenPaths: [],
+          expectedArtifacts: [],
+          invariants: ["no_public_api_change"],
+          requiredChecks: []
+        }
+      }
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        detector: "api-surface",
+        severity: "blocker",
+        confidence: 0.95,
+        title: "Public API change violates task contract",
+        message:
+          "The diff changes public API surface even though the task contract invariant no_public_api_change forbids public API changes.",
+        repair:
+          "Remove the public API change or revise the task contract with explicit reviewer approval."
+      })
+    ]);
+    expect(findings[0]?.evidence[0]?.data).toMatchObject({
+      signal: "added-export",
+      enforcedInvariant: "no_public_api_change"
+    });
+  });
+
   it("does not emit when docs change alongside API surface", () => {
     const diff = parse(`diff --git a/src/index.ts b/src/index.ts
 index 57b22a0..cb3e0f1 100644
@@ -192,6 +239,47 @@ index 0000000..6bb83df
 `);
 
     expect(apiSurfaceDetector.run({ task, diff })).toEqual([]);
+  });
+
+  it("emits blocker for docs-backed API changes when no_public_api_change is declared", () => {
+    const diff = parse(`diff --git a/src/index.ts b/src/index.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -1,2 +1,3 @@
++export function validateSignup(input: SignupInput) {}
+ export const existing = true;
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 0000000..6bb83df
+--- /dev/null
++++ b/CHANGELOG.md
+@@ -0,0 +1 @@
++Document public API change.
+`);
+
+    const findings = apiSurfaceDetector.run({
+      task,
+      diff,
+      context: {
+        taskContract: {
+          source: "provided",
+          goal: "Update signup validation",
+          allowedPaths: [],
+          forbiddenPaths: [],
+          expectedArtifacts: [],
+          invariants: ["no_public_api_change"],
+          requiredChecks: []
+        }
+      }
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        detector: "api-surface",
+        severity: "blocker",
+        title: "Public API change violates task contract"
+      })
+    ]);
   });
 
   it("ignores non-export source changes", () => {

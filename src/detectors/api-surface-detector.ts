@@ -60,7 +60,9 @@ export const apiSurfaceDetector: Detector = {
   maturity: "review",
   run: ({ task, diff, context }) => {
     const snapshot = context?.apiSurfaceSnapshot;
-    const hasReleaseEvidence = hasContractReleaseEvidence(task.text, diff.files);
+    const noPublicApiChange = context?.taskContract?.invariants.includes("no_public_api_change");
+    const hasReleaseEvidence =
+      noPublicApiChange !== true && hasContractReleaseEvidence(task.text, diff.files);
     const snapshotUpdateSignals =
       hasApiSnapshotEvidence(diff.files) && !hasReleaseEvidence
         ? extractSnapshotUpdateSignals(diff.files)
@@ -70,7 +72,7 @@ export const apiSurfaceDetector: Detector = {
         ? extractSnapshotSignals(diff.files, snapshot)
         : [];
 
-    if (hasVisibleApiAcknowledgement(task.text, diff.files)) {
+    if (noPublicApiChange !== true && hasVisibleApiAcknowledgement(task.text, diff.files)) {
       return [...snapshotUpdateSignals, ...snapshotSignals].map(toFinding);
     }
 
@@ -82,9 +84,32 @@ export const apiSurfaceDetector: Detector = {
       .flatMap((file) => extractSignals(file, context?.publicApiEntrypoints))
       .filter((signal) => !snapshotSignalKeys.has(`${signal.path}:${signal.symbol ?? "unknown"}`));
 
-    return [...snapshotUpdateSignals, ...snapshotSignals, ...lineSignals].map(toFinding);
+    const signals = [...snapshotUpdateSignals, ...snapshotSignals, ...lineSignals];
+
+    return signals
+      .map((signal) =>
+        noPublicApiChange === true ? applyNoPublicApiChangeInvariant(signal) : signal
+      )
+      .map(toFinding);
   }
 };
+
+function applyNoPublicApiChangeInvariant(signal: ApiSurfaceSignal): ApiSurfaceSignal {
+  return {
+    ...signal,
+    title: "Public API change violates task contract",
+    message:
+      "The diff changes public API surface even though the task contract invariant no_public_api_change forbids public API changes.",
+    repair:
+      "Remove the public API change or revise the task contract with explicit reviewer approval.",
+    severity: "blocker",
+    confidence: Math.max(signal.confidence, 0.95),
+    data: {
+      ...signal.data,
+      enforcedInvariant: "no_public_api_change"
+    }
+  };
+}
 
 function isSourceFile(file: DiffFile): boolean {
   return file.role === "source" && /\.(?:[cm]?[jt]sx?)$/.test(file.path);
