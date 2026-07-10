@@ -4,6 +4,26 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## 2.8.0 - 2026-07-10
+
+### Added
+
+- Add structured task contracts with `--task-contract`, including allowed paths, forbidden paths,
+  expected artifacts, invariants, and required checks.
+- Add `--check-ran` and `--checks-report` so required task-contract checks can be compared against
+  reported check execution metadata.
+- Add observation detectors for required checks, expected artifacts, and invariant coverage.
+
+### Changed
+
+- Enforce task-contract `allowed_paths` and `forbidden_paths` through scope findings.
+- Enforce deterministic task-contract invariants through existing detectors:
+  `no_new_dependencies`, `no_public_api_change`, `tests_must_not_weaken`,
+  `no_test_weakening`, `no_config_changes`, `configuration_unchanged`, `no_secret_leaks`, and
+  `no_environment_leaks`.
+- Keep newly introduced required-check, expected-artifact, and invariant-coverage evidence
+  observation-only by default so repositories can calibrate before promoting them through policy.
+
 ## 2.7.5 - 2026-07-06
 
 ### Fixed

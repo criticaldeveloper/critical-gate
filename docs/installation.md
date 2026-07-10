@@ -96,7 +96,7 @@ Useful options:
 
 ```bash
 npx critical-gate init --package-manager pnpm --install
-npx critical-gate init --version 2.7.5 --install
+npx critical-gate init --version 2.8.0 --install
 npx critical-gate init --skip-workflow
 npx critical-gate init --skip-agent
 npx critical-gate init --force

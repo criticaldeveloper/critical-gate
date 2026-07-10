@@ -2,6 +2,15 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.8.0 - 2026-07-10
+
+Minor release aligned with Critical Gate 2.8.0.
+
+- Bundle task-contract parsing, path enforcement, invariant enforcement, required-check metadata,
+  expected-artifact evidence, and invariant-coverage reporting.
+- Bundle the new pre-stable task-contract CLI flags and output metadata in the analyzer used by the
+  extension.
+
 ## 2.7.5 - 2026-07-06
 
 Patch release aligned with Critical Gate 2.7.5.
