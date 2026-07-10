@@ -314,4 +314,35 @@ describe("requiredChecksDetector", () => {
       }
     });
   });
+
+  it("fails when required-checks is promoted through policy", () => {
+    const findings = runDetectors(task, diff, {
+      taskContract: {
+        ...baseContract,
+        requiredChecks: ["pnpm typecheck"]
+      },
+      checkResults: [
+        {
+          command: "pnpm typecheck",
+          status: "failed",
+          exitCode: 2
+        }
+      ]
+    });
+
+    expect(
+      summarizeFindings(findings, task, diff, {
+        failOn: "high",
+        blockingDetectors: ["required-checks"]
+      })
+    ).toMatchObject({
+      decision: "fail",
+      highCount: 1,
+      policyApplied: {
+        blockingDetectors: ["required-checks"],
+        blockingFindingIds: ["required-checks:failed"],
+        observationFindingIds: []
+      }
+    });
+  });
 });

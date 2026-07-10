@@ -772,6 +772,75 @@ describe("cli", () => {
     });
   });
 
+  it("fails required-checks when promoted by repository policy", () => {
+    const { io, stdout, files } = createTestIo();
+
+    files.set(
+      "C:\\dev\\critical-gate\\.critical-gate.json",
+      JSON.stringify({
+        policy: {
+          detectorOverrides: [
+            {
+              detector: "required-checks",
+              mode: "blocking",
+              reason: "Required checks are calibrated for this repository."
+            }
+          ]
+        }
+      })
+    );
+    files.set(
+      "C:\\dev\\critical-gate\\task-contract.json",
+      JSON.stringify({
+        goal: "Add signup validation",
+        allowed_paths: ["src/signup.ts"],
+        required_checks: ["pnpm typecheck"]
+      })
+    );
+    files.set(
+      "C:\\dev\\critical-gate\\checks-report.json",
+      JSON.stringify([
+        {
+          command: "pnpm typecheck",
+          status: "failed",
+          exitCode: 2
+        }
+      ])
+    );
+
+    expect(
+      main(
+        [
+          "check",
+          "--task-contract",
+          "task-contract.json",
+          "--checks-report",
+          "checks-report.json",
+          "--format",
+          "json"
+        ],
+        io
+      )
+    ).toBe(ExitCode.FindingsFailed);
+
+    expect(JSON.parse(stdout[0] ?? "")).toMatchObject({
+      findings: [
+        expect.objectContaining({
+          id: "required-checks:failed",
+          severity: "high"
+        })
+      ],
+      summary: {
+        decision: "fail",
+        policyApplied: {
+          blockingDetectors: ["required-checks"],
+          blockingFindingIds: ["required-checks:failed"],
+          observationFindingIds: []
+        }
+      }
+    });
+  });
+
   it("rejects invalid structured check result reports", () => {
     const { io, stderr, files } = createTestIo();
 

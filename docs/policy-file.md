@@ -98,6 +98,23 @@ Detector maturity is reported separately from these overrides. A `review` detect
 automatically blocking in every repository, and an `experimental` detector promoted through policy
 still remains labeled experimental until external evidence supports promotion.
 
+For example, after a repository has reliable `--checks-report` or `--check-ran` metadata, it can
+promote task-contract check failures:
+
+```json
+{
+  "policy": {
+    "detectorOverrides": [
+      {
+        "detector": "required-checks",
+        "mode": "blocking",
+        "reason": "Task-contract required checks are reported by CI for every gated run."
+      }
+    ]
+  }
+}
+```
+
 Task contracts are supplied per run with `--task-contract <json-file>`, not stored as durable policy.
 Use policy for repository-wide defaults and rollouts; use task contracts for the specific diff
 boundary, allowed paths, forbidden paths, invariants, and required checks for one agent task.
