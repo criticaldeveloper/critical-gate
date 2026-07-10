@@ -164,8 +164,10 @@ clearest contract violation. The `no_new_dependencies` invariant is enforced by 
 detector as a blocker even when the task text mentions the new package. `required_checks` are
 compared against `--check-ran` values and `--checks-report` commands after whitespace
 normalization. Missing, unreported, or failed checks remain observation-only by default while the
-execution metadata surface is new. Other contract fields remain visible reporting inputs until they
-have deterministic detector support and fixtures.
+execution metadata surface is new. `expected_artifacts` are emitted as observation-only evidence for
+reviewers and repair loops; Critical Gate does not yet infer whether an artifact is present from
+filenames or prose. Other contract fields remain visible reporting inputs until they have
+deterministic detector support and fixtures.
 
 ## Understanding Reports
 

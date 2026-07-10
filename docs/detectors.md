@@ -59,8 +59,8 @@ Current baseline:
 - `review`: `dependency-addition`, `test-weakening`, `secret-path`, `api-surface`,
   `config-change`, `scope`, `rewrite`, and the `intent-coverage` finding subtype.
 - `experimental`: `intent-verification`, `blast-radius`, `expected-companions`,
-  `existing-solution`, `utility-reinvention`, `pattern-violation`, `required-checks`, and
-  `repository-intelligence`.
+  `existing-solution`, `utility-reinvention`, `pattern-violation`, `required-checks`,
+  `expected-artifacts`, and `repository-intelligence`.
 - `blocker-certified`: none yet.
 
 ## Detector Run Status
@@ -174,6 +174,21 @@ Initial implementation:
 - Include each missing, failed, or unverified required command as evidence with `verified: false`.
 - Do not fail the gate by default while check execution metadata is new; repositories can promote
   the detector through policy after calibration.
+
+### Expected Artifacts Declared
+
+Goal: make task-contract deliverables visible without guessing whether the diff satisfies prose
+artifact descriptions.
+
+Evidence:
+
+- Provided task contract `expected_artifacts`.
+
+Initial implementation:
+
+- Emit one observation-mode finding when a provided contract declares expected artifacts.
+- Include each artifact as evidence with `verified: false`.
+- Do not infer missing artifacts from filenames or prose until a deterministic matcher exists.
 
 ### Silent Public API Change
 

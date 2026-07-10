@@ -13,6 +13,7 @@ export {
 export { configChangeDetector } from "./config-change-detector.js";
 export { dependencyDetector } from "./dependency-detector.js";
 export { existingSolutionDetector } from "./existing-solution-detector.js";
+export { expectedArtifactsDetector } from "./expected-artifacts-detector.js";
 export { expectedCompanionsDetector } from "./expected-companions-detector.js";
 export { intentVerificationDetector } from "./intent-verification-detector.js";
 export { patternViolationDetector } from "./pattern-violation-detector.js";

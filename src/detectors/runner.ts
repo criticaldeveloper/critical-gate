@@ -17,6 +17,7 @@ import { calibrateFindingConfidence } from "./confidence-calibration.js";
 import { configChangeDetector } from "./config-change-detector.js";
 import { dependencyDetector } from "./dependency-detector.js";
 import { existingSolutionDetector } from "./existing-solution-detector.js";
+import { expectedArtifactsDetector } from "./expected-artifacts-detector.js";
 import { expectedCompanionsDetector } from "./expected-companions-detector.js";
 import { intentVerificationDetector } from "./intent-verification-detector.js";
 import { patternViolationDetector } from "./pattern-violation-detector.js";
@@ -45,7 +46,8 @@ const defaultObservationDetectors = [
   "existing-solution",
   "pattern-violation",
   "expected-companions",
-  "required-checks"
+  "required-checks",
+  "expected-artifacts"
 ];
 
 const defaultDetectors: Detector[] = [
@@ -60,6 +62,7 @@ const defaultDetectors: Detector[] = [
   rewriteDetector,
   repositoryIntelligenceDetector,
   expectedCompanionsDetector,
+  expectedArtifactsDetector,
   utilityReinventionDetector,
   existingSolutionDetector,
   patternViolationDetector,

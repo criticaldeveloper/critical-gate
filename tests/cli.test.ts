@@ -465,9 +465,20 @@ describe("cli", () => {
       })
     );
 
-    expect(main(["check", "--task-contract", "task-contract.json", "--format", "json"], io)).toBe(
-      ExitCode.Pass
-    );
+    expect(
+      main(
+        [
+          "check",
+          "--task-contract",
+          "task-contract.json",
+          "--format",
+          "json",
+          "--fail-on",
+          "medium"
+        ],
+        io
+      )
+    ).toBe(ExitCode.Pass);
 
     expect(JSON.parse(stdout[0] ?? "")).toMatchObject({
       task: {
@@ -485,6 +496,54 @@ describe("cli", () => {
       },
       metadata: {
         taskContractPath: "task-contract.json"
+      }
+    });
+  });
+
+  it("reports expected artifacts from a structured task contract", () => {
+    const { io, stdout, files } = createTestIo();
+
+    files.set(
+      "C:\\dev\\critical-gate\\task-contract.json",
+      JSON.stringify({
+        goal: "Add signup validation",
+        allowed_paths: ["src/signup.ts"],
+        expected_artifacts: ["signup validator"],
+        required_checks: []
+      })
+    );
+
+    expect(
+      main(
+        [
+          "check",
+          "--task-contract",
+          "task-contract.json",
+          "--format",
+          "json",
+          "--fail-on",
+          "medium"
+        ],
+        io
+      )
+    ).toBe(ExitCode.Pass);
+
+    expect(JSON.parse(stdout[0] ?? "")).toMatchObject({
+      findings: [
+        expect.objectContaining({
+          id: "expected-artifacts:declared",
+          detector: "expected-artifacts",
+          severity: "medium",
+          title: "Expected artifacts declared by task contract"
+        })
+      ],
+      summary: {
+        decision: "pass",
+        mediumCount: 1,
+        policyApplied: {
+          observationFindingIds: ["expected-artifacts:declared"],
+          blockingFindingIds: []
+        }
       }
     });
   });
