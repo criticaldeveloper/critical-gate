@@ -8,7 +8,9 @@ const enforcedInvariants = new Set([
   "tests_must_not_weaken",
   "no_test_weakening",
   "no_config_changes",
-  "configuration_unchanged"
+  "configuration_unchanged",
+  "no_secret_leaks",
+  "no_environment_leaks"
 ]);
 
 export const invariantCoverageDetector: Detector = {

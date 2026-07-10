@@ -207,6 +207,7 @@ Initial implementation:
 - Treat `tests_must_not_weaken` and `no_test_weakening` as covered by the test-weakening detector.
 - Treat `no_config_changes` and `configuration_unchanged` as covered by the config-change
   detector.
+- Treat `no_secret_leaks` and `no_environment_leaks` as covered by the secret/path detector.
 - Emit one observation-mode finding for provided invariants that are not deterministically enforced.
 - Include each unenforced invariant as evidence with `enforced: false`.
 
@@ -282,6 +283,8 @@ Initial implementation:
 - Integrate existing tools where available.
 - Add lightweight diff-only checks for absolute paths and suspicious env values.
 - Never print secret values in full.
+- Treat task-contract invariants `no_secret_leaks` and `no_environment_leaks` as stronger than
+  normal severity and emit blocker findings for detected secret-like or environment-specific data.
 
 ### Config Change Without Explanation
 

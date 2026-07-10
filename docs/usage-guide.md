@@ -166,7 +166,8 @@ detector as a blocker even when the task text mentions the new package. The
 work is acknowledged in the task or docs. `tests_must_not_weaken` and `no_test_weakening` are
 enforced by the test-weakening detector as blockers. `no_config_changes` and
 `configuration_unchanged` are enforced by the config-change detector as blockers, even when config
-work is otherwise explained. `required_checks` are compared against `--check-ran` values and
+work is otherwise explained. `no_secret_leaks` and `no_environment_leaks` are enforced by the
+secret/path detector as blockers. `required_checks` are compared against `--check-ran` values and
 `--checks-report` commands after whitespace normalization. Missing, unreported, or failed checks
 remain observation-only by default while the execution metadata surface is new. `expected_artifacts`
 are emitted as observation-only evidence for reviewers and repair loops; Critical Gate does not yet

@@ -31,6 +31,7 @@ describe("invariantCoverageDetector", () => {
             "no_public_api_change",
             "tests_must_not_weaken",
             "no_config_changes",
+            "no_secret_leaks",
             "authentication_behavior_unchanged"
           ]
         }
@@ -89,7 +90,9 @@ describe("invariantCoverageDetector", () => {
               "tests_must_not_weaken",
               "no_test_weakening",
               "no_config_changes",
-              "configuration_unchanged"
+              "configuration_unchanged",
+              "no_secret_leaks",
+              "no_environment_leaks"
             ]
           }
         }

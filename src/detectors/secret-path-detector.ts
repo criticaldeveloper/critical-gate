@@ -12,6 +12,7 @@ interface SecretPathSignal {
   path: string;
   lineNumber?: number;
   redactedContent: string;
+  data?: Record<string, unknown>;
 }
 
 const secretAssignmentPattern =
@@ -30,8 +31,38 @@ const internalUrlPattern =
 export const secretPathDetector: Detector = {
   name: "secret-path",
   maturity: "review",
-  run: ({ diff }) => diff.files.flatMap(scanAddedLinesForSecretsAndPaths)
+  run: ({ diff, context }) => {
+    const enforcedInvariant = getSecretPathInvariant(context?.taskContract?.invariants ?? []);
+
+    return diff.files.flatMap((file) => scanAddedLinesForSecretsAndPaths(file, enforcedInvariant));
+  }
 };
+
+function getSecretPathInvariant(invariants: string[]): string | undefined {
+  return invariants.find(
+    (invariant) => invariant === "no_secret_leaks" || invariant === "no_environment_leaks"
+  );
+}
+
+function applySecretPathInvariant(
+  signal: SecretPathSignal,
+  enforcedInvariant: string
+): SecretPathSignal {
+  return {
+    ...signal,
+    title: "Secret or environment leak violates task contract",
+    message:
+      "The diff adds secret-like or environment-specific data even though the task contract forbids leaks.",
+    repair:
+      "Remove the leaked value or environment-specific reference, or revise the task contract with explicit reviewer approval.",
+    severity: "blocker",
+    confidence: Math.max(signal.confidence, 0.95),
+    data: {
+      ...signal.data,
+      enforcedInvariant
+    }
+  };
+}
 
 function extractSignals(file: DiffFile, line: DiffLine): SecretPathSignal[] {
   return [
@@ -180,7 +211,8 @@ function toFinding(signal: SecretPathSignal): Finding {
         endLine: signal.lineNumber,
         message: signal.redactedContent.trim(),
         data: {
-          signal: signal.id
+          signal: signal.id,
+          ...signal.data
         }
       }
     ],
@@ -189,10 +221,21 @@ function toFinding(signal: SecretPathSignal): Finding {
   };
 }
 
-export function scanAddedLinesForSecretsAndPaths(file: DiffFile): Finding[] {
+export function scanAddedLinesForSecretsAndPaths(
+  file: DiffFile,
+  enforcedInvariant?: string
+): Finding[] {
   return file.hunks.flatMap((hunk) =>
     hunk.lines
       .filter((line) => line.kind === "add")
-      .flatMap((line) => extractSignals(file, line).map(toFinding))
+      .flatMap((line) =>
+        extractSignals(file, line)
+          .map((signal) =>
+            enforcedInvariant === undefined
+              ? signal
+              : applySecretPathInvariant(signal, enforcedInvariant)
+          )
+          .map(toFinding)
+      )
   );
 }

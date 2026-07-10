@@ -97,6 +97,51 @@ index 57b22a0..cb3e0f1 100644
     expect(findings[0]?.evidence[0]?.message).not.toContain("/Users/marc/project/tmp/cache");
   });
 
+  it("emits blocker when an environment leak violates a task contract invariant", () => {
+    const diff = parse(`diff --git a/src/config.ts b/src/config.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/config.ts
++++ b/src/config.ts
+@@ -1 +1,2 @@
++export const cachePath = "/Users/marc/project/tmp/cache";
+`);
+
+    const findings = secretPathDetector.run({
+      task,
+      diff,
+      context: {
+        taskContract: {
+          source: "provided",
+          goal: "Add signup validation",
+          allowedPaths: [],
+          forbiddenPaths: [],
+          expectedArtifacts: [],
+          invariants: ["no_environment_leaks"],
+          requiredChecks: []
+        }
+      }
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        detector: "secret-path",
+        severity: "blocker",
+        confidence: 0.95,
+        title: "Secret or environment leak violates task contract",
+        message:
+          "The diff adds secret-like or environment-specific data even though the task contract forbids leaks.",
+        repair:
+          "Remove the leaked value or environment-specific reference, or revise the task contract with explicit reviewer approval."
+      })
+    ]);
+    expect(findings[0]?.evidence[0]).toMatchObject({
+      data: {
+        signal: "absolute-path",
+        enforcedInvariant: "no_environment_leaks"
+      }
+    });
+  });
+
   it("emits medium severity for internal or local URLs", () => {
     const diff = parse(`diff --git a/src/config.ts b/src/config.ts
 index 57b22a0..cb3e0f1 100644
