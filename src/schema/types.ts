@@ -21,6 +21,14 @@ export interface TaskContract {
   requiredChecks: string[];
 }
 
+export type CheckExecutionStatus = "passed" | "failed";
+
+export interface CheckExecutionResult {
+  command: string;
+  status: CheckExecutionStatus;
+  exitCode?: number;
+}
+
 export type DiffFileStatus = "added" | "modified" | "deleted" | "renamed";
 
 export type DiffFileRole =

@@ -105,6 +105,81 @@ describe("requiredChecksDetector", () => {
     ).toEqual([]);
   });
 
+  it("does not emit when all required checks have passed structured results", () => {
+    expect(
+      requiredChecksDetector.run({
+        task,
+        diff,
+        context: {
+          taskContract: {
+            ...baseContract,
+            requiredChecks: ["pnpm test profile", "pnpm typecheck"]
+          },
+          checkResults: [
+            {
+              command: "pnpm test profile",
+              status: "passed"
+            },
+            {
+              command: "pnpm typecheck",
+              status: "passed",
+              exitCode: 0
+            }
+          ]
+        }
+      })
+    ).toEqual([]);
+  });
+
+  it("emits failed required checks from structured results", () => {
+    const findings = requiredChecksDetector.run({
+      task,
+      diff,
+      context: {
+        taskContract: {
+          ...baseContract,
+          requiredChecks: ["pnpm test profile", "pnpm typecheck"]
+        },
+        checkResults: [
+          {
+            command: "pnpm test profile",
+            status: "passed"
+          },
+          {
+            command: "pnpm typecheck",
+            status: "failed",
+            exitCode: 2
+          }
+        ]
+      }
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        id: "required-checks:failed",
+        detector: "required-checks",
+        severity: "high",
+        title: "Required checks failed",
+        message:
+          "The task contract requires pnpm typecheck, but those checks were reported as failed.",
+        repair: "Fix the failing required checks before merging this diff."
+      })
+    ]);
+    expect(findings[0]?.evidence).toEqual([
+      expect.objectContaining({
+        kind: "metric",
+        message: "Failed required check 1: pnpm typecheck",
+        data: {
+          check: "pnpm typecheck",
+          command: "pnpm typecheck",
+          status: "failed",
+          exitCode: 2,
+          verified: false
+        }
+      })
+    ]);
+  });
+
   it("emits missing required checks when reported checks are incomplete", () => {
     const findings = requiredChecksDetector.run({
       task,
@@ -198,6 +273,43 @@ describe("requiredChecksDetector", () => {
       highCount: 1,
       policyApplied: {
         observationFindingIds: ["required-checks:missing"],
+        blockingFindingIds: []
+      }
+    });
+  });
+
+  it("keeps failed required checks observation-only by default", () => {
+    const findings = runDetectors(task, diff, {
+      taskContract: {
+        ...baseContract,
+        requiredChecks: ["pnpm typecheck"]
+      },
+      checkResults: [
+        {
+          command: "pnpm typecheck",
+          status: "failed",
+          exitCode: 2
+        }
+      ]
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        id: "required-checks:failed",
+        detector: "required-checks",
+        severity: "high"
+      })
+    ]);
+    expect(
+      summarizeFindings(findings, task, diff, {
+        failOn: "medium"
+      })
+    ).toMatchObject({
+      decision: "pass",
+      findingCount: 1,
+      highCount: 1,
+      policyApplied: {
+        observationFindingIds: ["required-checks:failed"],
         blockingFindingIds: []
       }
     });

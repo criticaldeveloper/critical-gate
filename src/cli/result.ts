@@ -21,6 +21,7 @@ import {
   summarizeApiSurfaceSnapshot,
   summarizeFindings,
   summarizeIntentVerification,
+  type CheckExecutionResult,
   type GateResult,
   type GitDiffResult
 } from "../index.js";
@@ -39,6 +40,9 @@ export function createGateResult(
   });
   const taskContract = options.taskContract
     ? loadTaskContract(diffResult.root, options.taskContract, io)
+    : undefined;
+  const checkResults = options.checksReport
+    ? loadCheckResults(diffResult.root, options.checksReport, io)
     : undefined;
   const taskText = taskContract?.goal ?? options.task;
   const task = {
@@ -92,6 +96,7 @@ export function createGateResult(
     publicApiEntrypoints: publicApiEntrypointContext,
     taskContract: resolvedTaskContract,
     checksRan: options.checksRan,
+    checkResults,
     knowledge: diffResult.knowledge
   };
   const detectorResult = runDetectorsWithStatuses(task, diff, detectorContext);
@@ -131,6 +136,8 @@ export function createGateResult(
       failOn: options.failOn ?? getConfiguredFailOn(configResult.config) ?? "high",
       taskContractPath: options.taskContract,
       checksRan: options.checksRan ?? [],
+      checksReportPath: options.checksReport,
+      checkResults: checkResults ?? [],
       rolloutPolicy: configResult.config.rollout,
       policy: configResult.config.policy,
       frameworkPacks: frameworkPacks.map((pack) => pack.id),
@@ -155,6 +162,70 @@ function loadTaskContract(
   }
 
   return parseTaskContractJson(io.readFile?.(resolvedPath) ?? "");
+}
+
+function loadCheckResults(
+  root: string,
+  path: string,
+  io: Pick<CliIo, "exists" | "readFile">
+): CheckExecutionResult[] {
+  const resolvedPath = isAbsolute(path) ? path : join(root, path);
+
+  if (io.exists?.(resolvedPath) !== true) {
+    throw new Error(`Checks report file not found: ${path}`);
+  }
+
+  return parseCheckResultsJson(io.readFile?.(resolvedPath) ?? "");
+}
+
+function parseCheckResultsJson(content: string): CheckExecutionResult[] {
+  const parsed = JSON.parse(content) as unknown;
+  const rawChecks = Array.isArray(parsed)
+    ? parsed
+    : isRecord(parsed) && Array.isArray(parsed.checks)
+      ? parsed.checks
+      : undefined;
+
+  if (rawChecks === undefined) {
+    throw new Error("Checks report must be an array or an object with a checks array.");
+  }
+
+  return rawChecks.map((rawCheck, index) => parseCheckResult(rawCheck, index));
+}
+
+function parseCheckResult(rawCheck: unknown, index: number): CheckExecutionResult {
+  if (!isRecord(rawCheck)) {
+    throw new Error(`Invalid checks report entry at index ${index}.`);
+  }
+
+  const command = rawCheck.command;
+  const status = rawCheck.status;
+  const exitCode = rawCheck.exitCode;
+
+  if (typeof command !== "string" || command.trim().length === 0) {
+    throw new Error(`Invalid checks report command at index ${index}.`);
+  }
+
+  if (status !== "passed" && status !== "failed") {
+    throw new Error(`Invalid checks report status at index ${index}. Expected passed or failed.`);
+  }
+
+  if (
+    exitCode !== undefined &&
+    (typeof exitCode !== "number" || !Number.isInteger(exitCode) || exitCode < 0)
+  ) {
+    throw new Error(`Invalid checks report exitCode at index ${index}.`);
+  }
+
+  return {
+    command,
+    status,
+    exitCode
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
 }
 
 function readOptionalPackageJson(root: string, io: Pick<CliIo, "exists" | "readFile">): unknown {

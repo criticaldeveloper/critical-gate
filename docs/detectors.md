@@ -170,7 +170,8 @@ Initial implementation:
 - Emit one observation-mode finding when a provided contract declares required checks.
 - Accept repeated `--check-ran` values from the CLI and compare them to required checks after
   whitespace normalization.
-- Include each missing or unverified required command as evidence with `verified: false`.
+- Accept `--checks-report` JSON with `command`, `status`, and optional `exitCode` fields.
+- Include each missing, failed, or unverified required command as evidence with `verified: false`.
 - Do not fail the gate by default while check execution metadata is new; repositories can promote
   the detector through policy after calibration.
 

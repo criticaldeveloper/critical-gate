@@ -1,4 +1,4 @@
-import type { Finding } from "../schema/index.js";
+import type { CheckExecutionResult, Finding } from "../schema/index.js";
 
 import type { Detector } from "./types.js";
 
@@ -9,21 +9,47 @@ export const requiredChecksDetector: Detector = {
     const taskContract = context?.taskContract;
     const requiredChecks = taskContract?.requiredChecks ?? [];
     const checksRan = context?.checksRan;
+    const checkResults = context?.checkResults;
 
     if (taskContract?.source !== "provided" || requiredChecks.length === 0) {
       return [];
     }
 
-    if (checksRan === undefined) {
+    if (checksRan === undefined && checkResults === undefined) {
       return [toUnverifiedFinding(requiredChecks)];
     }
 
-    const normalizedChecksRan = new Set(checksRan.map(normalizeCheckCommand));
+    const normalizedPassedChecks = new Set([
+      ...(checksRan ?? []).map(normalizeCheckCommand),
+      ...(checkResults ?? [])
+        .filter((result) => result.status === "passed")
+        .map((result) => normalizeCheckCommand(result.command))
+    ]);
+    const failedRequiredChecks = requiredChecks
+      .map((check) => ({
+        check,
+        result: (checkResults ?? []).find(
+          (result) => normalizeCheckCommand(result.command) === normalizeCheckCommand(check)
+        )
+      }))
+      .filter(
+        (entry): entry is { check: string; result: CheckExecutionResult } =>
+          entry.result?.status === "failed"
+      );
     const missingChecks = requiredChecks.filter(
-      (check) => !normalizedChecksRan.has(normalizeCheckCommand(check))
+      (check) =>
+        !normalizedPassedChecks.has(normalizeCheckCommand(check)) &&
+        !failedRequiredChecks.some(
+          (entry) => normalizeCheckCommand(entry.check) === normalizeCheckCommand(check)
+        )
     );
 
-    return missingChecks.length > 0 ? [toMissingChecksFinding(missingChecks, checksRan)] : [];
+    return [
+      ...(failedRequiredChecks.length > 0 ? [toFailedChecksFinding(failedRequiredChecks)] : []),
+      ...(missingChecks.length > 0
+        ? [toMissingChecksFinding(missingChecks, getReportedCheckCommands(checksRan, checkResults))]
+        : [])
+    ];
   }
 };
 
@@ -72,6 +98,42 @@ function toMissingChecksFinding(missingChecks: string[], checksRan: string[]): F
     repair: "Run the missing required checks or pass the exact completed command with --check-ran.",
     tags: ["config"]
   };
+}
+
+function toFailedChecksFinding(
+  failedChecks: Array<{ check: string; result: CheckExecutionResult }>
+): Finding {
+  return {
+    id: "required-checks:failed",
+    detector: "required-checks",
+    severity: "high",
+    confidence: 0.95,
+    evidenceStrength: 0.95,
+    title: "Required checks failed",
+    message: `The task contract requires ${formatList(
+      failedChecks.map((entry) => entry.check)
+    )}, but those checks were reported as failed.`,
+    evidence: failedChecks.map(({ check, result }, index) => ({
+      kind: "metric" as const,
+      message: `Failed required check ${index + 1}: ${check}`,
+      data: {
+        check,
+        command: result.command,
+        status: result.status,
+        exitCode: result.exitCode,
+        verified: false
+      }
+    })),
+    repair: "Fix the failing required checks before merging this diff.",
+    tags: ["config"]
+  };
+}
+
+function getReportedCheckCommands(
+  checksRan: string[] | undefined,
+  checkResults: CheckExecutionResult[] | undefined
+): string[] {
+  return [...(checksRan ?? []), ...(checkResults ?? []).map((result) => result.command)];
 }
 
 function normalizeCheckCommand(value: string): string {

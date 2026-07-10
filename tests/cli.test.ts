@@ -642,6 +642,176 @@ describe("cli", () => {
     });
   });
 
+  it("loads structured check results for task-contract checks", () => {
+    const { io, stdout, files } = createTestIo();
+
+    files.set(
+      "C:\\dev\\critical-gate\\task-contract.json",
+      JSON.stringify({
+        goal: "Add signup validation",
+        allowed_paths: ["src/signup.ts"],
+        required_checks: ["pnpm test signup", "pnpm typecheck"]
+      })
+    );
+    files.set(
+      "C:\\dev\\critical-gate\\checks-report.json",
+      JSON.stringify({
+        checks: [
+          {
+            command: "pnpm test signup",
+            status: "passed",
+            exitCode: 0
+          },
+          {
+            command: "pnpm typecheck",
+            status: "passed",
+            exitCode: 0
+          }
+        ]
+      })
+    );
+
+    expect(
+      main(
+        [
+          "check",
+          "--task-contract",
+          "task-contract.json",
+          "--checks-report",
+          "checks-report.json",
+          "--format",
+          "json"
+        ],
+        io
+      )
+    ).toBe(ExitCode.Pass);
+
+    const result = JSON.parse(stdout[0] ?? "");
+
+    expect(result.metadata).toMatchObject({
+      checksReportPath: "checks-report.json",
+      checkResults: [
+        {
+          command: "pnpm test signup",
+          status: "passed",
+          exitCode: 0
+        },
+        {
+          command: "pnpm typecheck",
+          status: "passed",
+          exitCode: 0
+        }
+      ]
+    });
+    expect(result.findings).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          detector: "required-checks"
+        })
+      ])
+    );
+  });
+
+  it("reports failed task-contract checks from structured check results", () => {
+    const { io, stdout, files } = createTestIo();
+
+    files.set(
+      "C:\\dev\\critical-gate\\task-contract.json",
+      JSON.stringify({
+        goal: "Add signup validation",
+        allowed_paths: ["src/signup.ts"],
+        required_checks: ["pnpm test signup", "pnpm typecheck"]
+      })
+    );
+    files.set(
+      "C:\\dev\\critical-gate\\checks-report.json",
+      JSON.stringify([
+        {
+          command: "pnpm test signup",
+          status: "passed"
+        },
+        {
+          command: "pnpm typecheck",
+          status: "failed",
+          exitCode: 2
+        }
+      ])
+    );
+
+    expect(
+      main(
+        [
+          "check",
+          "--task-contract",
+          "task-contract.json",
+          "--checks-report",
+          "checks-report.json",
+          "--format",
+          "json"
+        ],
+        io
+      )
+    ).toBe(ExitCode.Pass);
+
+    expect(JSON.parse(stdout[0] ?? "")).toMatchObject({
+      findings: [
+        expect.objectContaining({
+          id: "required-checks:failed",
+          severity: "high",
+          title: "Required checks failed"
+        })
+      ],
+      summary: {
+        decision: "pass",
+        highCount: 1,
+        policyApplied: {
+          observationFindingIds: ["required-checks:failed"],
+          blockingFindingIds: []
+        }
+      }
+    });
+  });
+
+  it("rejects invalid structured check result reports", () => {
+    const { io, stderr, files } = createTestIo();
+
+    files.set(
+      "C:\\dev\\critical-gate\\task-contract.json",
+      JSON.stringify({
+        goal: "Add signup validation",
+        allowed_paths: ["src/signup.ts"],
+        required_checks: ["pnpm typecheck"]
+      })
+    );
+    files.set(
+      "C:\\dev\\critical-gate\\checks-report.json",
+      JSON.stringify({
+        checks: [
+          {
+            command: "pnpm typecheck",
+            status: "unknown"
+          }
+        ]
+      })
+    );
+
+    expect(
+      main(
+        [
+          "check",
+          "--task-contract",
+          "task-contract.json",
+          "--checks-report",
+          "checks-report.json",
+          "--format",
+          "json"
+        ],
+        io
+      )
+    ).toBe(ExitCode.InternalError);
+    expect(stderr[0]).toContain("Invalid checks report status at index 0");
+  });
+
   it("passes the criticaldeveloper-blog local SVG icon dependency removal replay", () => {
     const { io, stdout } = createTestIo();
     const fixtureDiff = readFileSync(

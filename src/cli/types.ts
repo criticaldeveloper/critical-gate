@@ -18,6 +18,7 @@ export interface CheckOptions {
   failOn?: "blocker" | "high" | "medium";
   taskContract?: string;
   checksRan?: string[];
+  checksReport?: string;
   output?: string;
 }
 

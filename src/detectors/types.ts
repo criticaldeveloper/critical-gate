@@ -4,6 +4,7 @@ import type {
   DetectorRunStatus,
   Finding,
   GateResult,
+  CheckExecutionResult,
   TaskContract,
   TaskIntent
 } from "../schema/index.js";
@@ -15,6 +16,7 @@ export type DetectorRepoContext = NonNullable<GateResult["context"]> & {
   apiSurfaceSnapshot?: ApiSurfaceSnapshot;
   taskContract?: TaskContract;
   checksRan?: string[];
+  checkResults?: CheckExecutionResult[];
 };
 
 export interface DetectorContext {
