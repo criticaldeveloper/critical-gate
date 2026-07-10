@@ -2,7 +2,12 @@ import type { Finding } from "../schema/index.js";
 
 import type { Detector } from "./types.js";
 
-const enforcedInvariants = new Set(["no_new_dependencies", "no_public_api_change"]);
+const enforcedInvariants = new Set([
+  "no_new_dependencies",
+  "no_public_api_change",
+  "tests_must_not_weaken",
+  "no_test_weakening"
+]);
 
 export const invariantCoverageDetector: Detector = {
   name: "invariant-coverage",

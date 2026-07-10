@@ -50,6 +50,56 @@ index 57b22a0..cb3e0f1 100644
     });
   });
 
+  it("emits blocker when test weakening violates task contract invariant", () => {
+    const diff = {
+      files: parseUnifiedDiff(`diff --git a/tests/signup.test.ts b/tests/signup.test.ts
+index 57b22a0..cb3e0f1 100644
+--- a/tests/signup.test.ts
++++ b/tests/signup.test.ts
+@@ -1,5 +1,4 @@
+ test("validates signup", () => {
+   const result = validateSignup(input);
+-  expect(result.error).toContain("email");
+   expect(result.ok).toBe(false);
+ });
+`)
+    };
+
+    const findings = testWeakeningDetector.run({
+      task,
+      diff,
+      context: {
+        taskContract: {
+          source: "provided",
+          goal: "Update signup validation",
+          allowedPaths: [],
+          forbiddenPaths: [],
+          expectedArtifacts: [],
+          invariants: ["tests_must_not_weaken"],
+          requiredChecks: []
+        }
+      }
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        detector: "test-weakening",
+        severity: "blocker",
+        confidence: 0.95,
+        title: "Test weakening violates task contract",
+        message: "The diff weakens tests even though the task contract forbids test weakening.",
+        repair:
+          "Restore equivalent or stronger test coverage, or revise the task contract with explicit reviewer approval."
+      })
+    ]);
+    expect(findings[0]?.evidence[0]).toMatchObject({
+      data: {
+        signal: "removed-assertion",
+        enforcedInvariant: "tests_must_not_weaken"
+      }
+    });
+  });
+
   it("emits high severity when a skipped test is added", () => {
     const diff = {
       files: parseUnifiedDiff(`diff --git a/tests/signup.test.ts b/tests/signup.test.ts

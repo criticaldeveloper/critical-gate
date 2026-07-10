@@ -76,8 +76,45 @@ const renderPresencePatterns = [
 export const testWeakeningDetector: Detector = {
   name: "test-weakening",
   maturity: "review",
-  run: ({ diff }) => diff.files.filter(isTestFile).flatMap(extractSignals).map(toFinding)
+  run: ({ diff, context }) => {
+    const enforcedInvariant = getTestWeakeningInvariant(context?.taskContract?.invariants ?? []);
+
+    return diff.files
+      .filter(isTestFile)
+      .flatMap(extractSignals)
+      .map((signal) =>
+        enforcedInvariant === undefined
+          ? signal
+          : applyTestWeakeningInvariant(signal, enforcedInvariant)
+      )
+      .map(toFinding);
+  }
 };
+
+function getTestWeakeningInvariant(invariants: string[]): string | undefined {
+  return invariants.find(
+    (invariant) => invariant === "tests_must_not_weaken" || invariant === "no_test_weakening"
+  );
+}
+
+function applyTestWeakeningInvariant(
+  signal: TestWeakeningSignal,
+  enforcedInvariant: string
+): TestWeakeningSignal {
+  return {
+    ...signal,
+    title: "Test weakening violates task contract",
+    message: "The diff weakens tests even though the task contract forbids test weakening.",
+    repair:
+      "Restore equivalent or stronger test coverage, or revise the task contract with explicit reviewer approval.",
+    severity: "blocker",
+    confidence: Math.max(signal.confidence, 0.95),
+    data: {
+      ...signal.data,
+      enforcedInvariant
+    }
+  };
+}
 
 function isTestFile(file: DiffFile): boolean {
   return file.role === "test";

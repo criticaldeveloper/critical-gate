@@ -204,6 +204,7 @@ Initial implementation:
 
 - Treat `no_new_dependencies` as covered by the dependency detector.
 - Treat `no_public_api_change` as covered by the API-surface detector.
+- Treat `tests_must_not_weaken` and `no_test_weakening` as covered by the test-weakening detector.
 - Emit one observation-mode finding for provided invariants that are not deterministically enforced.
 - Include each unenforced invariant as evidence with `enforced: false`.
 
@@ -257,6 +258,8 @@ Initial implementation:
 - Diff-level matcher and assertion heuristics.
 - Test framework-aware patterns for Jest, Vitest, Playwright, and Mocha.
 - Flag assertion deletion and skipped tests as high confidence.
+- Treat task-contract invariants `tests_must_not_weaken` and `no_test_weakening` as stronger than
+  normal severity and emit blocker findings for detected test weakening.
 - Score assertion specificity in changed hunks and flag high-to-low replacements such as
   `toHaveBeenCalledWith(...)` becoming `toBeInTheDocument()` or exact error checks becoming
   `toBeDefined()`.
