@@ -20,6 +20,7 @@ import { existingSolutionDetector } from "./existing-solution-detector.js";
 import { expectedArtifactsDetector } from "./expected-artifacts-detector.js";
 import { expectedCompanionsDetector } from "./expected-companions-detector.js";
 import { intentVerificationDetector } from "./intent-verification-detector.js";
+import { invariantCoverageDetector } from "./invariant-coverage-detector.js";
 import { patternViolationDetector } from "./pattern-violation-detector.js";
 import { rewriteDetector } from "./rewrite-detector.js";
 import { repositoryIntelligenceDetector } from "./repository-intelligence-detector.js";
@@ -47,7 +48,8 @@ const defaultObservationDetectors = [
   "pattern-violation",
   "expected-companions",
   "required-checks",
-  "expected-artifacts"
+  "expected-artifacts",
+  "invariant-coverage"
 ];
 
 const defaultDetectors: Detector[] = [
@@ -63,6 +65,7 @@ const defaultDetectors: Detector[] = [
   repositoryIntelligenceDetector,
   expectedCompanionsDetector,
   expectedArtifactsDetector,
+  invariantCoverageDetector,
   utilityReinventionDetector,
   existingSolutionDetector,
   patternViolationDetector,

@@ -16,6 +16,7 @@ export { existingSolutionDetector } from "./existing-solution-detector.js";
 export { expectedArtifactsDetector } from "./expected-artifacts-detector.js";
 export { expectedCompanionsDetector } from "./expected-companions-detector.js";
 export { intentVerificationDetector } from "./intent-verification-detector.js";
+export { invariantCoverageDetector } from "./invariant-coverage-detector.js";
 export { patternViolationDetector } from "./pattern-violation-detector.js";
 export { rewriteDetector } from "./rewrite-detector.js";
 export { repositoryIntelligenceDetector } from "./repository-intelligence-detector.js";

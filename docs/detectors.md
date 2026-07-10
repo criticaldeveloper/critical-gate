@@ -60,7 +60,7 @@ Current baseline:
   `config-change`, `scope`, `rewrite`, and the `intent-coverage` finding subtype.
 - `experimental`: `intent-verification`, `blast-radius`, `expected-companions`,
   `existing-solution`, `utility-reinvention`, `pattern-violation`, `required-checks`,
-  `expected-artifacts`, and `repository-intelligence`.
+  `expected-artifacts`, `invariant-coverage`, and `repository-intelligence`.
 - `blocker-certified`: none yet.
 
 ## Detector Run Status
@@ -189,6 +189,22 @@ Initial implementation:
 - Emit one observation-mode finding when a provided contract declares expected artifacts.
 - Include each artifact as evidence with `verified: false`.
 - Do not infer missing artifacts from filenames or prose until a deterministic matcher exists.
+
+### Invariant Coverage
+
+Goal: expose task-contract invariants that still need manual verification or future deterministic
+detector support.
+
+Evidence:
+
+- Provided task contract `invariants`.
+- Current deterministic invariant support list.
+
+Initial implementation:
+
+- Treat `no_new_dependencies` as covered by the dependency detector.
+- Emit one observation-mode finding for provided invariants that are not deterministically enforced.
+- Include each unenforced invariant as evidence with `enforced: false`.
 
 ### Silent Public API Change
 

@@ -548,6 +548,53 @@ describe("cli", () => {
     });
   });
 
+  it("reports task-contract invariants without deterministic enforcement", () => {
+    const { io, stdout, files } = createTestIo();
+
+    files.set(
+      "C:\\dev\\critical-gate\\task-contract.json",
+      JSON.stringify({
+        goal: "Add signup validation",
+        allowed_paths: ["src/signup.ts"],
+        invariants: ["no_new_dependencies", "authentication_behavior_unchanged"]
+      })
+    );
+
+    expect(
+      main(
+        [
+          "check",
+          "--task-contract",
+          "task-contract.json",
+          "--format",
+          "json",
+          "--fail-on",
+          "medium"
+        ],
+        io
+      )
+    ).toBe(ExitCode.Pass);
+
+    expect(JSON.parse(stdout[0] ?? "")).toMatchObject({
+      findings: [
+        expect.objectContaining({
+          id: "invariant-coverage:unenforced",
+          detector: "invariant-coverage",
+          severity: "medium",
+          title: "Task contract invariants need manual verification"
+        })
+      ],
+      summary: {
+        decision: "pass",
+        mediumCount: 1,
+        policyApplied: {
+          observationFindingIds: ["invariant-coverage:unenforced"],
+          blockingFindingIds: []
+        }
+      }
+    });
+  });
+
   it("enforces forbidden paths from a structured task contract", () => {
     const { io, stdout, files } = createTestIo();
 
