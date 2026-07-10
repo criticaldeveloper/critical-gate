@@ -140,8 +140,10 @@ Provided `allowed_paths` and `forbidden_paths` are enforced as blocker scope fin
 broad tasks where keyword scope matching would otherwise report insufficient context.
 `forbidden_paths` take precedence when a changed file matches both lists, so each file gets the
 clearest contract violation. The `no_new_dependencies` invariant is enforced by the dependency
-detector as a blocker even when the task text mentions the new package. Other contract fields remain
-visible reporting inputs until they have deterministic detector support and fixtures.
+detector as a blocker even when the task text mentions the new package. `required_checks` are
+reported as observation-only evidence because Critical Gate does not yet receive check execution
+metadata. Other contract fields remain visible reporting inputs until they have deterministic
+detector support and fixtures.
 
 ## Understanding Reports
 

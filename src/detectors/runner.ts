@@ -22,6 +22,7 @@ import { intentVerificationDetector } from "./intent-verification-detector.js";
 import { patternViolationDetector } from "./pattern-violation-detector.js";
 import { rewriteDetector } from "./rewrite-detector.js";
 import { repositoryIntelligenceDetector } from "./repository-intelligence-detector.js";
+import { requiredChecksDetector } from "./required-checks-detector.js";
 import { enrichFindingWithReasonChain } from "./reason-chain.js";
 import { enrichFindingWithRepairContract } from "./repair-contract.js";
 import { secretPathDetector } from "./secret-path-detector.js";
@@ -43,7 +44,8 @@ const defaultObservationDetectors = [
   "blast-radius",
   "existing-solution",
   "pattern-violation",
-  "expected-companions"
+  "expected-companions",
+  "required-checks"
 ];
 
 const defaultDetectors: Detector[] = [
@@ -60,7 +62,8 @@ const defaultDetectors: Detector[] = [
   expectedCompanionsDetector,
   utilityReinventionDetector,
   existingSolutionDetector,
-  patternViolationDetector
+  patternViolationDetector,
+  requiredChecksDetector
 ];
 
 const detectorMaturityByName = new Map([

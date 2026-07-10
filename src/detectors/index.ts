@@ -18,6 +18,7 @@ export { intentVerificationDetector } from "./intent-verification-detector.js";
 export { patternViolationDetector } from "./pattern-violation-detector.js";
 export { rewriteDetector } from "./rewrite-detector.js";
 export { repositoryIntelligenceDetector } from "./repository-intelligence-detector.js";
+export { requiredChecksDetector } from "./required-checks-detector.js";
 export {
   runDetectors,
   runDetectorsWithStatuses,

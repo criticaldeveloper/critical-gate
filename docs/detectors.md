@@ -59,7 +59,7 @@ Current baseline:
 - `review`: `dependency-addition`, `test-weakening`, `secret-path`, `api-surface`,
   `config-change`, `scope`, `rewrite`, and the `intent-coverage` finding subtype.
 - `experimental`: `intent-verification`, `blast-radius`, `expected-companions`,
-  `existing-solution`, `utility-reinvention`, `pattern-violation`, and
+  `existing-solution`, `utility-reinvention`, `pattern-violation`, `required-checks`, and
   `repository-intelligence`.
 - `blocker-certified`: none yet.
 
@@ -155,6 +155,21 @@ Initial implementation:
 - Treat a provided task contract invariant of `no_new_dependencies` as stronger than task-text
   justification and emit a blocker for any added dependency.
 - Detect common native alternatives and existing utilities later.
+
+### Required Checks Declared But Not Verified
+
+Goal: make task-contract validation expectations visible without pretending Critical Gate executed
+commands.
+
+Evidence:
+
+- Provided task contract `required_checks`.
+
+Initial implementation:
+
+- Emit one observation-mode finding when a provided contract declares required checks.
+- Include each required command as evidence with `verified: false`.
+- Do not fail the gate by default until the CLI accepts trustworthy check execution metadata.
 
 ### Silent Public API Change
 
