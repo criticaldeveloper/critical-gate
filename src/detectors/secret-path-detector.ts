@@ -29,6 +29,7 @@ const internalUrlPattern =
 
 export const secretPathDetector: Detector = {
   name: "secret-path",
+  maturity: "review",
   run: ({ diff }) => diff.files.flatMap(scanAddedLinesForSecretsAndPaths)
 };
 

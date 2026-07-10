@@ -11,6 +11,7 @@ interface SolutionMatch {
 
 export const existingSolutionDetector: Detector = {
   name: "existing-solution",
+  maturity: "experimental",
   run: ({ diff, context }) => {
     const existingSolutions = context?.knowledge?.getSolutionIndex().solutions ?? [];
 

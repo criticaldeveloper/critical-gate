@@ -6,6 +6,7 @@ import { isContentPostReciprocalMetadataChange } from "./content-metadata-change
 
 export const repositoryIntelligenceDetector: Detector = {
   name: "repository-intelligence",
+  maturity: "experimental",
   run: ({ task, diff, context }) => {
     const history = context?.knowledge?.getHistoryIndex();
     const profile = context?.repositoryProfile ?? history?.profile;

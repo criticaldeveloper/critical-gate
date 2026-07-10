@@ -26,6 +26,18 @@ describe("rollout decision policy", () => {
         failOn: "high",
         observationDetectors: expect.arrayContaining(["blast-radius"]),
         blockingDetectors: [],
+        detectorMaturity: expect.arrayContaining([
+          {
+            detector: "blast-radius",
+            maturity: "experimental",
+            defaultMode: "observation"
+          },
+          {
+            detector: "test-weakening",
+            maturity: "review",
+            defaultMode: "blocking"
+          }
+        ]),
         acceptedFindingIds: [],
         blockingFindingIds: [],
         observationFindingIds: ["blast-radius:unexpected-cluster:test"],
@@ -50,6 +62,13 @@ describe("rollout decision policy", () => {
       policyApplied: {
         failOn: "high",
         blockingDetectors: ["blast-radius"],
+        detectorMaturity: expect.arrayContaining([
+          {
+            detector: "blast-radius",
+            maturity: "experimental",
+            defaultMode: "observation"
+          }
+        ]),
         blockingFindingIds: ["blast-radius:unexpected-cluster:test"],
         observationFindingIds: []
       }

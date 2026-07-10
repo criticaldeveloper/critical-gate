@@ -103,6 +103,18 @@ const result: GateResult = {
         "expected-companions"
       ],
       blockingDetectors: [],
+      detectorMaturity: [
+        {
+          detector: "test-weakening",
+          maturity: "review",
+          defaultMode: "blocking"
+        },
+        {
+          detector: "blast-radius",
+          maturity: "experimental",
+          defaultMode: "observation"
+        }
+      ],
       acceptedFindingIds: ["scope:accepted-fixture"],
       blockingFindingIds: ["test-weakening-001"],
       observationFindingIds: [],
@@ -207,6 +219,7 @@ describe("reporters", () => {
     expect(report).toContain("## Policy Applied");
     expect(report).toContain("Fail threshold: high.");
     expect(report).toContain("Blocking findings after policy: test-weakening-001.");
+    expect(report).toContain("Detector maturity: 0 blocker-certified, 1 review, 1 experimental.");
     expect(report).toContain("Accepted findings applied: scope:accepted-fixture.");
     expect(report).toContain("## Intent Verification");
     expect(report).toContain("Requested Classes: source");
@@ -359,6 +372,7 @@ describe("reporters", () => {
     expect(report).toContain("- None.");
     expect(report).toContain("### Policy applied");
     expect(report).toContain("- Fail threshold: high.");
+    expect(report).toContain("- Detector maturity: 0 blocker-certified, 1 review, 1 experimental.");
     expect(report).toContain("- Accepted findings applied: scope:accepted-fixture.");
     expect(report).toContain("### Expected support changes");
     expect(report).toContain("- modified tests/signup.test.ts (test, +0/-1)");

@@ -43,6 +43,7 @@ const uiPresentationPathPattern =
 
 export const scopeDetector: Detector = {
   name: "scope",
+  maturity: "review",
   run: ({ task, diff, context }) => {
     const analysis = analyzeTaskIntent(task);
 

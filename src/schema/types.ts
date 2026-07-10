@@ -148,6 +148,14 @@ export interface RepositoryToken {
 
 export type FindingSeverity = "blocker" | "high" | "medium" | "low" | "info";
 
+export type DetectorMaturity = "experimental" | "review" | "blocker-certified";
+
+export interface DetectorMaturitySummary {
+  detector: string;
+  maturity: DetectorMaturity;
+  defaultMode: "blocking" | "observation";
+}
+
 export type FindingTag =
   | "scope"
   | "dependency"
@@ -225,6 +233,7 @@ export interface PolicyAppliedSummary {
   failOn: "blocker" | "high" | "medium";
   observationDetectors: string[];
   blockingDetectors: string[];
+  detectorMaturity?: DetectorMaturitySummary[];
   acceptedFindingIds: string[];
   blockingFindingIds: string[];
   observationFindingIds: string[];

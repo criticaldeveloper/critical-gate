@@ -94,6 +94,10 @@ Fields:
 Promotion does not bypass confidence calibration. A detector still needs a finding with sufficient
 severity and confidence to fail the gate.
 
+Detector maturity is reported separately from these overrides. A `review` detector is not
+automatically blocking in every repository, and an `experimental` detector promoted through policy
+still remains labeled experimental until external evidence supports promotion.
+
 ### Support-File Rules
 
 ```json

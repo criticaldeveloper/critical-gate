@@ -1,4 +1,4 @@
-import type { DiffFile, Finding, GateResult } from "../schema/index.js";
+import type { DetectorMaturitySummary, DiffFile, Finding, GateResult } from "../schema/index.js";
 import { renderReviewerChecklist } from "./reviewer-checklist.js";
 
 export function renderMarkdownReport(result: GateResult): string {
@@ -109,6 +109,7 @@ function renderPolicyAppliedLines(result: GateResult): string[] {
     `Fail threshold: ${policy.failOn}.`,
     `Observation detectors: ${formatClasses(policy.observationDetectors)}.`,
     `Blocking detector overrides: ${formatClasses(policy.blockingDetectors)}.`,
+    `Detector maturity: ${formatDetectorMaturity(policy.detectorMaturity ?? [])}.`,
     `Blocking findings after policy: ${formatClasses(policy.blockingFindingIds)}.`,
     `Observation findings after policy: ${formatClasses(policy.observationFindingIds)}.`,
     `Confidence-suppressed findings: ${formatClasses(policy.confidenceSuppressedFindingIds)}.`,
@@ -162,6 +163,26 @@ function formatCount(count: number, singularLabel: string): string {
 
 function formatClasses(classes: string[]): string {
   return classes.length === 0 ? "none" : classes.join(", ");
+}
+
+function formatDetectorMaturity(entries: DetectorMaturitySummary[]): string {
+  if (entries.length === 0) {
+    return "none";
+  }
+
+  const counts = entries.reduce(
+    (summary, entry) => {
+      summary[entry.maturity] += 1;
+      return summary;
+    },
+    {
+      experimental: 0,
+      review: 0,
+      "blocker-certified": 0
+    } satisfies Record<DetectorMaturitySummary["maturity"], number>
+  );
+
+  return `${counts["blocker-certified"]} blocker-certified, ${counts.review} review, ${counts.experimental} experimental`;
 }
 
 function renderFinding(finding: Finding): string {

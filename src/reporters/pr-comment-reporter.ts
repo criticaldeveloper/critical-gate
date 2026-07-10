@@ -1,5 +1,5 @@
 import { calibrateFindingConfidence } from "../detectors/confidence-calibration.js";
-import type { DiffFile, Finding, GateResult } from "../schema/index.js";
+import type { DetectorMaturitySummary, DiffFile, Finding, GateResult } from "../schema/index.js";
 import { renderReviewerChecklist } from "./reviewer-checklist.js";
 
 export function renderPrCommentReport(result: GateResult): string {
@@ -50,6 +50,9 @@ export function renderPrCommentReport(result: GateResult): string {
     );
     lines.push(
       `- Blocking detector overrides: ${formatList(result.summary.policyApplied.blockingDetectors)}.`
+    );
+    lines.push(
+      `- Detector maturity: ${formatDetectorMaturity(result.summary.policyApplied.detectorMaturity ?? [])}.`
     );
     lines.push(
       `- Accepted findings applied: ${formatList(result.summary.policyApplied.acceptedFindingIds)}.`
@@ -148,6 +151,26 @@ function appendTruncation(lines: string[], count: number, limit: number): void {
 
 function formatList(values: string[]): string {
   return values.length === 0 ? "none" : values.join(", ");
+}
+
+function formatDetectorMaturity(entries: DetectorMaturitySummary[]): string {
+  if (entries.length === 0) {
+    return "none";
+  }
+
+  const counts = entries.reduce(
+    (summary, entry) => {
+      summary[entry.maturity] += 1;
+      return summary;
+    },
+    {
+      experimental: 0,
+      review: 0,
+      "blocker-certified": 0
+    } satisfies Record<DetectorMaturitySummary["maturity"], number>
+  );
+
+  return `${counts["blocker-certified"]} blocker-certified, ${counts.review} review, ${counts.experimental} experimental`;
 }
 
 function getDiffMetrics(files: DiffFile[]) {

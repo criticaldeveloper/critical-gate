@@ -12,6 +12,7 @@ interface PatternViolation {
 
 export const patternViolationDetector: Detector = {
   name: "pattern-violation",
+  maturity: "experimental",
   run: ({ diff, context }) => {
     const patterns = context?.knowledge?.getPatternIndex().patterns ?? [];
 

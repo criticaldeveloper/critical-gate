@@ -75,6 +75,7 @@ const renderPresencePatterns = [
 
 export const testWeakeningDetector: Detector = {
   name: "test-weakening",
+  maturity: "review",
   run: ({ diff }) => diff.files.filter(isTestFile).flatMap(extractSignals).map(toFinding)
 };
 

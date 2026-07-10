@@ -10,6 +10,7 @@ import type { Detector } from "./types.js";
 
 export const intentVerificationDetector: Detector = {
   name: "intent-verification",
+  maturity: "experimental",
   run: ({ task, diff }) => {
     const intent = buildIntentModel(task);
     const observed = classifyObservedDiffActions(diff.files);

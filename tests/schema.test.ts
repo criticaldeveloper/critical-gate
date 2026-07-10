@@ -165,6 +165,18 @@ describe("gate result schema", () => {
           failOn: "high",
           observationDetectors: ["blast-radius"],
           blockingDetectors: ["api-surface"],
+          detectorMaturity: [
+            {
+              detector: "test-weakening",
+              maturity: "review",
+              defaultMode: "blocking"
+            },
+            {
+              detector: "blast-radius",
+              maturity: "experimental",
+              defaultMode: "observation"
+            }
+          ],
           acceptedFindingIds: ["scope:accepted-fixture"],
           blockingFindingIds: ["test-weakening-001"],
           observationFindingIds: [],

@@ -34,6 +34,32 @@ The summary exposes calibration counts:
 - `observationModeCount`: high-confidence findings kept observational by rollout policy.
 - `confidenceSuppressedCount`: high or blocker severity findings that did not meet confidence.
 
+## Detector Maturity
+
+Detector maturity is separate from severity, confidence, and rollout policy. It describes how much
+trust the project currently has in a detector family or subtype.
+
+- `experimental`: useful signal, but still advisory by default. These detectors need more
+  cross-repository labels, false-positive boundaries, or repair-loop proof before they should block.
+- `review`: deterministic evidence is strong enough for serious review and policy-enabled blocking,
+  but external validation is still not enough to call it certified.
+- `blocker-certified`: reserved for narrow detector subtypes that have frozen holdout evidence,
+  extremely low false-blocker rates, complete missed-finding review, and repair guidance that has
+  been validated in agent loops.
+
+Current runtime output includes detector maturity in the applied policy summary. Maturity is
+informational in this release: it does not by itself promote or suppress a finding. Rollout policy,
+severity, and confidence thresholds still decide whether a finding can fail the gate.
+
+Current baseline:
+
+- `review`: `dependency-addition`, `test-weakening`, `secret-path`, `api-surface`,
+  `config-change`, `scope`, `rewrite`, and the `intent-coverage` finding subtype.
+- `experimental`: `intent-verification`, `blast-radius`, `expected-companions`,
+  `existing-solution`, `utility-reinvention`, `pattern-violation`, and
+  `repository-intelligence`.
+- `blocker-certified`: none yet.
+
 ## V1 Blockers
 
 ### Unrelated File Modifications

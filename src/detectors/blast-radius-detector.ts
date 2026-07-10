@@ -10,6 +10,7 @@ interface ChangedCluster {
 
 export const blastRadiusDetector: Detector = {
   name: "blast-radius",
+  maturity: "experimental",
   run: ({ task, diff, context }) => {
     const graph = context?.knowledge?.getFileGraph();
 

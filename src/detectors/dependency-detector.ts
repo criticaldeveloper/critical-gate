@@ -29,6 +29,7 @@ const sectionLinePattern =
 
 export const dependencyDetector: Detector = {
   name: "dependency-addition",
+  maturity: "review",
   run: ({ task, diff }) => {
     const addedDependencies = diff.files.flatMap(extractAddedDependencies);
 

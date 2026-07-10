@@ -25,6 +25,7 @@ const companionRelevantDataPattern =
 
 export const expectedCompanionsDetector: Detector = {
   name: "expected-companions",
+  maturity: "experimental",
   run: ({ task, diff, context }) => {
     const history = context?.knowledge?.getHistoryIndex();
 

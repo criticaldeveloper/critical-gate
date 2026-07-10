@@ -1,4 +1,4 @@
-import type { Finding, GateResult, TaskIntent } from "../schema/index.js";
+import type { DetectorMaturity, Finding, GateResult, TaskIntent } from "../schema/index.js";
 
 import {
   calculateDiffCoherenceScore,
@@ -56,6 +56,13 @@ const defaultDetectors: Detector[] = [
   patternViolationDetector
 ];
 
+const detectorMaturityByName = new Map([
+  ...defaultDetectors.map(
+    (detector) => [detector.name, detector.maturity ?? "experimental"] as const
+  ),
+  ["intent-coverage", "review"] as const
+]);
+
 export function runDetectors(
   task: TaskIntent,
   diff: GateResult["diff"],
@@ -107,11 +114,22 @@ function summarizePolicyApplied(
   const failOn = policy.failOn ?? "high";
   const observationDetectors = policy.observationDetectors ?? defaultObservationDetectors;
   const blockingDetectors = policy.blockingDetectors ?? [];
+  const detectorIds = [
+    ...new Set([
+      ...defaultDetectors.map((detector) => detector.name),
+      ...findings.map((finding) => finding.detector)
+    ])
+  ].sort();
 
   return {
     failOn,
     observationDetectors,
     blockingDetectors,
+    detectorMaturity: detectorIds.map((detector) => ({
+      detector,
+      maturity: getDetectorMaturity(detector),
+      defaultMode: observationDetectors.includes(detector) ? "observation" : "blocking"
+    })),
     acceptedFindingIds: policy.acceptedFindingIds ?? [],
     blockingFindingIds: findings
       .filter((finding) => isBlockingFinding(finding, policy))
@@ -123,6 +141,10 @@ function summarizePolicyApplied(
       .filter(isConfidenceSuppressedFinding)
       .map((finding) => finding.id)
   };
+}
+
+export function getDetectorMaturity(detector: string): DetectorMaturity {
+  return detectorMaturityByName.get(detector) ?? "experimental";
 }
 
 function summarizeConfidenceCalibration(

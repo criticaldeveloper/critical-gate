@@ -20,6 +20,21 @@ Every blocker-capable detector should have:
 Uncertain detector families should remain observation-friendly until dogfood and evaluation evidence
 support promotion.
 
+## Maturity Levels
+
+Detector maturity is the trust label used in reports and policy summaries:
+
+- `experimental`: advisory evidence. These detectors can be useful, but they should not block by
+  default.
+- `review`: strong deterministic evidence for human review and explicit policy rollout, but not yet
+  independently validated enough to be called certified.
+- `blocker-certified`: reserved for narrow subtypes with frozen holdout evidence, very low
+  false-blocker rates, complete missed-finding review, and validated repair-loop outcomes.
+
+Maturity does not replace rollout policy. A `review` detector can still be observation-only in a
+repository policy, and an `experimental` detector promoted by policy still has to satisfy severity
+and confidence thresholds.
+
 ## Finding Stability Contract
 
 Finding ids, SARIF rule ids, SARIF fingerprints, and repair contract fields are user-facing output

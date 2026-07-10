@@ -7,6 +7,7 @@ const utilityPathPattern = /(^|\/)(utils?|helpers?|lib|shared)\//i;
 
 export const utilityReinventionDetector: Detector = {
   name: "utility-reinvention",
+  maturity: "experimental",
   run: ({ diff, context }) => {
     const existingUtilities =
       context?.utilityIndex?.utilities ??

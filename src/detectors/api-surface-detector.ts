@@ -57,6 +57,7 @@ const frameworkContractPathPatterns = [
 
 export const apiSurfaceDetector: Detector = {
   name: "api-surface",
+  maturity: "review",
   run: ({ task, diff, context }) => {
     const snapshot = context?.apiSurfaceSnapshot;
     const hasReleaseEvidence = hasContractReleaseEvidence(task.text, diff.files);

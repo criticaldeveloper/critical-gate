@@ -448,10 +448,28 @@ export const gateResultJsonSchema = {
         failOn: { enum: ["blocker", "high", "medium"] },
         observationDetectors: stringArraySchema,
         blockingDetectors: stringArraySchema,
+        detectorMaturity: {
+          type: "array",
+          items: { $ref: "#/$defs/detectorMaturitySummary" }
+        },
         acceptedFindingIds: stringArraySchema,
         blockingFindingIds: stringArraySchema,
         observationFindingIds: stringArraySchema,
         confidenceSuppressedFindingIds: stringArraySchema
+      }
+    },
+    detectorMaturitySummary: {
+      type: "object",
+      additionalProperties: false,
+      required: ["detector", "maturity", "defaultMode"],
+      properties: {
+        detector: { type: "string", minLength: 1 },
+        maturity: {
+          enum: ["experimental", "review", "blocker-certified"]
+        },
+        defaultMode: {
+          enum: ["blocking", "observation"]
+        }
       }
     },
     scopeExpansionScore: {

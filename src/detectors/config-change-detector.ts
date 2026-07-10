@@ -26,6 +26,7 @@ const documentationPathPattern =
 
 export const configChangeDetector: Detector = {
   name: "config-change",
+  maturity: "review",
   run: ({ task, diff }) => {
     const configFiles = diff.files.filter(isConfigChange);
 

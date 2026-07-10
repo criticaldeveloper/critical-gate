@@ -17,6 +17,7 @@ const companionRelevantDataPattern =
 
 export const rewriteDetector: Detector = {
   name: "rewrite",
+  maturity: "review",
   run: ({ task, diff }) => {
     const analysis = analyzeTaskIntent(task);
 

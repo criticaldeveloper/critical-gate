@@ -10,6 +10,8 @@ export type {
   DiffLineKind,
   DiffCoherenceDriver,
   DiffCoherenceScore,
+  DetectorMaturity,
+  DetectorMaturitySummary,
   Finding,
   FindingEvidence,
   FindingReasonChain,
