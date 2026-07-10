@@ -6,7 +6,9 @@ const enforcedInvariants = new Set([
   "no_new_dependencies",
   "no_public_api_change",
   "tests_must_not_weaken",
-  "no_test_weakening"
+  "no_test_weakening",
+  "no_config_changes",
+  "configuration_unchanged"
 ]);
 
 export const invariantCoverageDetector: Detector = {

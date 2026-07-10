@@ -78,6 +78,55 @@ index 57b22a0..cb3e0f1 100644
     expect(findings).toEqual([]);
   });
 
+  it("emits blocker when config work violates a task contract invariant", () => {
+    const diff = parse(`diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 57b22a0..cb3e0f1 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -1,3 +1,4 @@
+ name: CI
++timeout-minutes: 10
+`);
+
+    const findings = configChangeDetector.run({
+      task: {
+        source: "cli",
+        text: "Update CI workflow timeout"
+      },
+      diff,
+      context: {
+        taskContract: {
+          source: "provided",
+          goal: "Update signup validation",
+          allowedPaths: [],
+          forbiddenPaths: [],
+          expectedArtifacts: [],
+          invariants: ["no_config_changes"],
+          requiredChecks: []
+        }
+      }
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        detector: "config-change",
+        severity: "blocker",
+        confidence: 0.95,
+        title: "Config change violates task contract",
+        message:
+          ".github/workflows/ci.yml changed even though the task contract invariant no_config_changes forbids configuration changes.",
+        repair:
+          "Remove the configuration change or revise the task contract with explicit reviewer approval."
+      })
+    ]);
+    expect(findings[0]?.evidence[0]).toMatchObject({
+      data: {
+        role: "config",
+        enforcedInvariant: "no_config_changes"
+      }
+    });
+  });
+
   it("does emit when config is mentioned as forbidden scope", () => {
     const diff = parse(`diff --git a/.node-version b/.node-version
 index 57b22a0..cb3e0f1 100644

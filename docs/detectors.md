@@ -205,6 +205,8 @@ Initial implementation:
 - Treat `no_new_dependencies` as covered by the dependency detector.
 - Treat `no_public_api_change` as covered by the API-surface detector.
 - Treat `tests_must_not_weaken` and `no_test_weakening` as covered by the test-weakening detector.
+- Treat `no_config_changes` and `configuration_unchanged` as covered by the config-change
+  detector.
 - Emit one observation-mode finding for provided invariants that are not deterministically enforced.
 - Include each unenforced invariant as evidence with `enforced: false`.
 
@@ -295,6 +297,8 @@ Initial implementation:
 - Classify config files.
 - Detect contract-level edits.
 - Warn or fail when config changes are unrelated to the task and undocumented.
+- Treat task-contract invariants `no_config_changes` and `configuration_unchanged` as stronger
+  than visible config explanation and emit blocker findings for detected config changes.
 
 ## P1 Detectors
 

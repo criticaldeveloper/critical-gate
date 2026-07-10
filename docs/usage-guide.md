@@ -164,14 +164,16 @@ clearest contract violation. The `no_new_dependencies` invariant is enforced by 
 detector as a blocker even when the task text mentions the new package. The
 `no_public_api_change` invariant is enforced by the API-surface detector as a blocker even when API
 work is acknowledged in the task or docs. `tests_must_not_weaken` and `no_test_weakening` are
-enforced by the test-weakening detector as blockers. `required_checks` are compared against
-`--check-ran` values and `--checks-report` commands after whitespace normalization. Missing,
-unreported, or failed checks remain observation-only by default while the execution metadata surface
-is new. `expected_artifacts` are emitted as observation-only evidence for reviewers and repair
-loops; Critical Gate does not yet infer whether an artifact is present from filenames or prose.
-Invariants without deterministic detector support are emitted as observation-only coverage findings
-so reviewers can see what still needs manual verification. Other contract fields remain visible
-reporting inputs until they have deterministic detector support and fixtures.
+enforced by the test-weakening detector as blockers. `no_config_changes` and
+`configuration_unchanged` are enforced by the config-change detector as blockers, even when config
+work is otherwise explained. `required_checks` are compared against `--check-ran` values and
+`--checks-report` commands after whitespace normalization. Missing, unreported, or failed checks
+remain observation-only by default while the execution metadata surface is new. `expected_artifacts`
+are emitted as observation-only evidence for reviewers and repair loops; Critical Gate does not yet
+infer whether an artifact is present from filenames or prose. Invariants without deterministic
+detector support are emitted as observation-only coverage findings so reviewers can see what still
+needs manual verification. Other contract fields remain visible reporting inputs until they have
+deterministic detector support and fixtures.
 
 ## Understanding Reports
 

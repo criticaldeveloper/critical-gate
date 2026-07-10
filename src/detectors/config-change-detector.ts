@@ -27,16 +27,26 @@ const documentationPathPattern =
 export const configChangeDetector: Detector = {
   name: "config-change",
   maturity: "review",
-  run: ({ task, diff }) => {
+  run: ({ task, diff, context }) => {
     const configFiles = diff.files.filter(isConfigChange);
+    const enforcedInvariant = getConfigInvariant(context?.taskContract?.invariants ?? []);
 
-    if (configFiles.length === 0 || hasVisibleConfigExplanation(task, diff.files)) {
+    if (
+      configFiles.length === 0 ||
+      (enforcedInvariant === undefined && hasVisibleConfigExplanation(task, diff.files))
+    ) {
       return [];
     }
 
-    return configFiles.map((file) => toFinding(file, task));
+    return configFiles.map((file) => toFinding(file, task, enforcedInvariant));
   }
 };
+
+function getConfigInvariant(invariants: string[]): string | undefined {
+  return invariants.find(
+    (invariant) => invariant === "no_config_changes" || invariant === "configuration_unchanged"
+  );
+}
 
 function isConfigChange(file: DiffFile): boolean {
   return file.role === "config" && (file.additions > 0 || file.deletions > 0);
@@ -61,19 +71,25 @@ function hasConfigProhibition(taskText: string): boolean {
   );
 }
 
-function toFinding(file: DiffFile, task: TaskIntent): Finding {
+function toFinding(file: DiffFile, task: TaskIntent, enforcedInvariant?: string): Finding {
   const firstChangedLine = file.hunks
     .flatMap((hunk) => hunk.lines)
     .find((line) => line.kind === "add" || line.kind === "delete");
   const lineNumber = firstChangedLine?.newLineNumber ?? firstChangedLine?.oldLineNumber;
+  const isContractViolation = enforcedInvariant !== undefined;
 
   return {
     id: `config-change:${file.path}`,
     detector: "config-change",
-    severity: "medium",
-    confidence: 0.82,
-    title: "Config changed without visible explanation",
-    message: `${file.path} changed, but the task did not mention configuration and no documentation file changed.`,
+    severity: isContractViolation ? "blocker" : "medium",
+    confidence: isContractViolation ? 0.95 : 0.82,
+    evidenceStrength: isContractViolation ? 0.95 : 0.82,
+    title: isContractViolation
+      ? "Config change violates task contract"
+      : "Config changed without visible explanation",
+    message: isContractViolation
+      ? `${file.path} changed even though the task contract invariant ${enforcedInvariant} forbids configuration changes.`
+      : `${file.path} changed, but the task did not mention configuration and no documentation file changed.`,
     evidence: [
       {
         kind: "file",
@@ -84,12 +100,14 @@ function toFinding(file: DiffFile, task: TaskIntent): Finding {
         data: {
           additions: file.additions,
           deletions: file.deletions,
-          role: file.role
+          role: file.role,
+          enforcedInvariant
         }
       }
     ],
-    repair:
-      "Confirm the config change is required. If it changes team workflow or runtime behavior, add docs, an ADR, changelog entry, or explicit task/PR explanation.",
+    repair: isContractViolation
+      ? "Remove the configuration change or revise the task contract with explicit reviewer approval."
+      : "Confirm the config change is required. If it changes team workflow or runtime behavior, add docs, an ADR, changelog entry, or explicit task/PR explanation.",
     tags: ["config"]
   };
 }
