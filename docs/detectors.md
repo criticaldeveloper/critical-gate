@@ -60,6 +60,21 @@ Current baseline:
   `repository-intelligence`.
 - `blocker-certified`: none yet.
 
+## Detector Run Status
+
+Every CLI result can report detector execution status:
+
+- `passed`: the detector ran and emitted no findings.
+- `findings`: the detector ran and emitted findings.
+- `skipped`: the detector was intentionally skipped.
+- `insufficient-context`: the detector could not run meaningfully with the available repository
+  context.
+- `timed-out`: the detector exceeded its budget.
+- `errored`: the detector threw an exception and the rest of the gate continued.
+
+A degraded status such as `skipped`, `insufficient-context`, `timed-out`, or `errored` is not clean
+pass evidence. Reports should show it separately from successful detector runs.
+
 ## V1 Blockers
 
 ### Unrelated File Modifications

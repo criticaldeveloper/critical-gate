@@ -17,7 +17,7 @@ import {
   inferTaskContract,
   parseTaskContractJson,
   resolvePublicApiEntrypoints,
-  runDetectors,
+  runDetectorsWithStatuses,
   summarizeApiSurfaceSnapshot,
   summarizeFindings,
   summarizeIntentVerification,
@@ -92,7 +92,8 @@ export function createGateResult(
     publicApiEntrypoints: publicApiEntrypointContext,
     knowledge: diffResult.knowledge
   };
-  const detectorFindings = runDetectors(task, diff, detectorContext);
+  const detectorResult = runDetectorsWithStatuses(task, diff, detectorContext);
+  const detectorFindings = detectorResult.findings;
   const learningResult = applyLearningPolicy(detectorFindings, diff.files, {
     ...configResult.config.learning,
     expectedSupportFiles: getConfiguredExpectedSupportFiles(configResult.config)
@@ -115,7 +116,8 @@ export function createGateResult(
       observationDetectors: getPolicyObservationDetectors(configResult.config),
       blockingDetectors: getPolicyBlockingDetectors(configResult.config),
       failOn: options.failOn ?? getConfiguredFailOn(configResult.config),
-      acceptedFindingIds: learningResult.appliedAcceptedFindings
+      acceptedFindingIds: learningResult.appliedAcceptedFindings,
+      detectorRuns: detectorResult.detectorRuns
     }),
     taskContract: resolvedTaskContract,
     intentVerification: summarizeIntentVerification(task, diff.files),

@@ -191,6 +191,24 @@ describe("gate result schema", () => {
           observationFindingIds: [],
           confidenceSuppressedFindingIds: []
         },
+        detectorRuns: [
+          {
+            detector: "test-weakening",
+            status: "findings",
+            durationMs: 2,
+            findingCount: 1,
+            maturity: "review",
+            filesInspected: 1
+          },
+          {
+            detector: "blast-radius",
+            status: "passed",
+            durationMs: 1,
+            findingCount: 0,
+            maturity: "experimental",
+            filesInspected: 1
+          }
+        ],
         diffCostScore: 32,
         diffCoherenceScore: {
           score: 86,

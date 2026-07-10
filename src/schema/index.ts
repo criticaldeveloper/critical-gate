@@ -12,6 +12,8 @@ export type {
   DiffCoherenceScore,
   DetectorMaturity,
   DetectorMaturitySummary,
+  DetectorRunStatus,
+  DetectorRunSummary,
   Finding,
   FindingEvidence,
   FindingReasonChain,

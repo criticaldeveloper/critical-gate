@@ -67,6 +67,17 @@ export function renderPrCommentReport(result: GateResult): string {
     lines.push("");
   }
 
+  const degradedRuns = getDegradedDetectorRuns(result);
+  if (degradedRuns.length > 0) {
+    lines.push("### Detector run issues", "");
+    for (const run of degradedRuns.slice(0, 5)) {
+      const reason = run.reason === undefined ? "" : ` Reason: ${run.reason}.`;
+      lines.push(`- ${run.detector}: ${run.status}.${reason}`);
+    }
+    appendTruncation(lines, degradedRuns.length, 5);
+    lines.push("");
+  }
+
   lines.push("### Expected support changes", "");
   if (expectedSupportFiles.length === 0) {
     lines.push("- None detected.");
@@ -104,6 +115,12 @@ export function renderPrCommentReport(result: GateResult): string {
   );
 
   return `${lines.join("\n").trimEnd()}\n`;
+}
+
+function getDegradedDetectorRuns(result: GateResult) {
+  return (result.summary.detectorRuns ?? []).filter((run) =>
+    ["skipped", "insufficient-context", "timed-out", "errored"].includes(run.status)
+  );
 }
 
 function getPolicyFindingGroup(result: GateResult, group: "blocking" | "observation"): Finding[] {

@@ -437,7 +437,15 @@ describe("cli", () => {
       findings: [],
       summary: {
         decision: "pass",
-        findingCount: 0
+        findingCount: 0,
+        detectorRuns: expect.arrayContaining([
+          expect.objectContaining({
+            detector: "dependency-addition",
+            status: "passed",
+            findingCount: 0,
+            maturity: "review"
+          })
+        ])
       }
     });
   });

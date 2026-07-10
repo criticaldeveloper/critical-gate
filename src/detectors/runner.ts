@@ -1,4 +1,10 @@
-import type { DetectorMaturity, Finding, GateResult, TaskIntent } from "../schema/index.js";
+import type {
+  DetectorMaturity,
+  DetectorRunSummary,
+  Finding,
+  GateResult,
+  TaskIntent
+} from "../schema/index.js";
 
 import {
   calculateDiffCoherenceScore,
@@ -29,6 +35,7 @@ export interface FindingDecisionPolicy {
   blockingDetectors?: string[];
   failOn?: "blocker" | "high" | "medium";
   acceptedFindingIds?: string[];
+  detectorRuns?: DetectorRunSummary[];
 }
 
 const defaultObservationDetectors = [
@@ -69,9 +76,37 @@ export function runDetectors(
   context?: DetectorRepoContext,
   detectors = defaultDetectors
 ): Finding[] {
-  return dedupeFindings(detectors.flatMap((detector) => detector.run({ task, diff, context })))
+  return runDetectorsWithStatuses(task, diff, context, detectors).findings;
+}
+
+export function runDetectorsWithStatuses(
+  task: TaskIntent,
+  diff: GateResult["diff"],
+  context?: DetectorRepoContext,
+  detectors = defaultDetectors
+): { findings: Finding[]; detectorRuns: DetectorRunSummary[] } {
+  const detectorResults = detectors.map((detector) =>
+    runSingleDetector(detector, task, diff, context)
+  );
+  const findings = dedupeFindings(detectorResults.flatMap((result) => result.findings))
     .map(enrichFindingWithReasonChain)
     .map((finding) => enrichFindingWithRepairContract(finding, diff.files));
+  const findingCountsByDetector = countFindingsByDetector(findings);
+  const detectorRuns = detectorResults.map(({ detector, status }) => {
+    if (status.status === "errored") {
+      return status;
+    }
+
+    const findingCount = findingCountsByDetector.get(detector.name) ?? 0;
+
+    return {
+      ...status,
+      status: findingCount > 0 ? "findings" : "passed",
+      findingCount
+    } satisfies DetectorRunSummary;
+  });
+
+  return { findings, detectorRuns };
 }
 
 export function summarizeFindings(
@@ -94,6 +129,7 @@ export function summarizeFindings(
     infoCount: countSeverity(findings, "info"),
     confidenceCalibration: summarizeConfidenceCalibration(findings, policy),
     policyApplied: summarizePolicyApplied(findings, policy),
+    detectorRuns: policy.detectorRuns,
     diffCostScore:
       task !== undefined && diff !== undefined ? calculateDiffCostScore(task, diff.files) : 0,
     scopeExpansionScore:
@@ -105,6 +141,59 @@ export function summarizeFindings(
         ? calculateDiffCoherenceScore(task, diff.files, findings)
         : undefined
   };
+}
+
+function runSingleDetector(
+  detector: Detector,
+  task: TaskIntent,
+  diff: GateResult["diff"],
+  context?: DetectorRepoContext
+): { detector: Detector; findings: Finding[]; status: DetectorRunSummary } {
+  const startedAt = Date.now();
+
+  try {
+    const findings = detector.run({ task, diff, context });
+    const durationMs = Math.max(0, Date.now() - startedAt);
+
+    return {
+      detector,
+      findings,
+      status: {
+        detector: detector.name,
+        status: findings.length > 0 ? "findings" : "passed",
+        durationMs,
+        findingCount: findings.length,
+        maturity: detector.maturity ?? getDetectorMaturity(detector.name),
+        filesInspected: diff.files.length
+      }
+    };
+  } catch (error) {
+    const durationMs = Math.max(0, Date.now() - startedAt);
+
+    return {
+      detector,
+      findings: [],
+      status: {
+        detector: detector.name,
+        status: "errored",
+        durationMs,
+        findingCount: 0,
+        maturity: detector.maturity ?? getDetectorMaturity(detector.name),
+        filesInspected: diff.files.length,
+        reason: error instanceof Error ? error.message : "Unknown detector error"
+      }
+    };
+  }
+}
+
+function countFindingsByDetector(findings: Finding[]): Map<string, number> {
+  const counts = new Map<string, number>();
+
+  for (const finding of findings) {
+    counts.set(finding.detector, (counts.get(finding.detector) ?? 0) + 1);
+  }
+
+  return counts;
 }
 
 function summarizePolicyApplied(

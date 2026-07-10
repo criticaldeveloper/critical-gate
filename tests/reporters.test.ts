@@ -129,6 +129,24 @@ const result: GateResult = {
       observationFindingIds: [],
       confidenceSuppressedFindingIds: []
     },
+    detectorRuns: [
+      {
+        detector: "test-weakening",
+        status: "findings",
+        durationMs: 2,
+        findingCount: 1,
+        maturity: "review",
+        filesInspected: 2
+      },
+      {
+        detector: "blast-radius",
+        status: "passed",
+        durationMs: 1,
+        findingCount: 0,
+        maturity: "experimental",
+        filesInspected: 2
+      }
+    ],
     diffCostScore: 42,
     diffCoherenceScore: {
       score: 71,
@@ -230,6 +248,8 @@ describe("reporters", () => {
     expect(report).toContain("Blocking findings after policy: test-weakening-001.");
     expect(report).toContain("Detector maturity: 0 blocker-certified, 1 review, 1 experimental.");
     expect(report).toContain("Accepted findings applied: scope:accepted-fixture.");
+    expect(report).toContain("## Detector Runs");
+    expect(report).toContain("1 passed, 1 produced findings, 0 degraded across 2 detectors.");
     expect(report).toContain("## Task Contract");
     expect(report).toContain("Source: provided.");
     expect(report).toContain("Allowed paths: src/signup.ts, tests/signup.test.ts.");

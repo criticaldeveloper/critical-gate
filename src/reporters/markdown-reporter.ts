@@ -44,6 +44,14 @@ export function renderMarkdownReport(result: GateResult): string {
     lines.push("");
   }
 
+  if ((result.summary.detectorRuns?.length ?? 0) > 0) {
+    lines.push("## Detector Runs", "");
+    for (const runLine of renderDetectorRunLines(result)) {
+      lines.push(`- ${runLine}`);
+    }
+    lines.push("");
+  }
+
   if (result.taskContract !== undefined) {
     lines.push("## Task Contract", "");
     for (const contractLine of renderTaskContractLines(result)) {
@@ -104,6 +112,27 @@ export function renderMarkdownReport(result: GateResult): string {
   }
 
   return `${lines.join("\n").trimEnd()}\n`;
+}
+
+function renderDetectorRunLines(result: GateResult): string[] {
+  const runs = result.summary.detectorRuns ?? [];
+  const degradedRuns = runs.filter((run) =>
+    ["skipped", "insufficient-context", "timed-out", "errored"].includes(run.status)
+  );
+
+  if (degradedRuns.length > 0) {
+    return degradedRuns.map((run) => {
+      const reason = run.reason === undefined ? "" : ` Reason: ${run.reason}.`;
+      return `${run.detector}: ${run.status}; ${run.findingCount} findings; ${run.durationMs}ms.${reason}`;
+    });
+  }
+
+  const findingRuns = runs.filter((run) => run.status === "findings").length;
+  const passedRuns = runs.filter((run) => run.status === "passed").length;
+
+  return [
+    `${passedRuns} passed, ${findingRuns} produced findings, 0 degraded across ${runs.length} detectors.`
+  ];
 }
 
 function renderTaskContractLines(result: GateResult): string[] {

@@ -1,4 +1,10 @@
-import { runDetectors, summarizeFindings, type Detector, type Finding } from "../src/index.js";
+import {
+  runDetectors,
+  runDetectorsWithStatuses,
+  summarizeFindings,
+  type Detector,
+  type Finding
+} from "../src/index.js";
 
 const highObservationFinding: Finding = {
   id: "blast-radius:unexpected-cluster:test",
@@ -149,5 +155,52 @@ describe("rollout decision policy", () => {
         repairHint: "Remove unrelated edits."
       }
     });
+  });
+
+  it("records detector run statuses and isolates detector errors", () => {
+    const findingDetector: Detector = {
+      name: "finding-detector",
+      maturity: "review",
+      run: () => [
+        {
+          ...highObservationFinding,
+          id: "finding-detector:test",
+          detector: "finding-detector"
+        }
+      ]
+    };
+    const failingDetector: Detector = {
+      name: "failing-detector",
+      maturity: "experimental",
+      run: () => {
+        throw new Error("fixture detector failure");
+      }
+    };
+
+    const result = runDetectorsWithStatuses(
+      { source: "cli", text: "Fix signup validation" },
+      { files: [] },
+      undefined,
+      [findingDetector, failingDetector]
+    );
+
+    expect(result.findings).toHaveLength(1);
+    expect(result.detectorRuns).toEqual([
+      expect.objectContaining({
+        detector: "finding-detector",
+        status: "findings",
+        findingCount: 1,
+        maturity: "review",
+        filesInspected: 0
+      }),
+      expect.objectContaining({
+        detector: "failing-detector",
+        status: "errored",
+        findingCount: 0,
+        maturity: "experimental",
+        filesInspected: 0,
+        reason: "fixture detector failure"
+      })
+    ]);
   });
 });

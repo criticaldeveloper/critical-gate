@@ -168,6 +168,24 @@ export interface DetectorMaturitySummary {
   defaultMode: "blocking" | "observation";
 }
 
+export type DetectorRunStatus =
+  | "passed"
+  | "findings"
+  | "skipped"
+  | "insufficient-context"
+  | "timed-out"
+  | "errored";
+
+export interface DetectorRunSummary {
+  detector: string;
+  status: DetectorRunStatus;
+  durationMs: number;
+  findingCount: number;
+  maturity: DetectorMaturity;
+  filesInspected?: number;
+  reason?: string;
+}
+
 export type FindingTag =
   | "scope"
   | "dependency"
@@ -233,6 +251,7 @@ export interface GateSummary {
   diffCoherenceScore?: DiffCoherenceScore;
   confidenceCalibration?: ConfidenceCalibrationSummary;
   policyApplied?: PolicyAppliedSummary;
+  detectorRuns?: DetectorRunSummary[];
 }
 
 export interface ConfidenceCalibrationSummary {

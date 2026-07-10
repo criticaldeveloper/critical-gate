@@ -444,7 +444,11 @@ export const gateResultJsonSchema = {
         scopeExpansionScore: { $ref: "#/$defs/scopeExpansionScore" },
         diffCoherenceScore: { $ref: "#/$defs/diffCoherenceScore" },
         confidenceCalibration: { $ref: "#/$defs/confidenceCalibrationSummary" },
-        policyApplied: { $ref: "#/$defs/policyAppliedSummary" }
+        policyApplied: { $ref: "#/$defs/policyAppliedSummary" },
+        detectorRuns: {
+          type: "array",
+          items: { $ref: "#/$defs/detectorRunSummary" }
+        }
       }
     },
     confidenceCalibrationSummary: {
@@ -495,6 +499,24 @@ export const gateResultJsonSchema = {
         defaultMode: {
           enum: ["blocking", "observation"]
         }
+      }
+    },
+    detectorRunSummary: {
+      type: "object",
+      additionalProperties: false,
+      required: ["detector", "status", "durationMs", "findingCount", "maturity"],
+      properties: {
+        detector: { type: "string", minLength: 1 },
+        status: {
+          enum: ["passed", "findings", "skipped", "insufficient-context", "timed-out", "errored"]
+        },
+        durationMs: { type: "number", minimum: 0 },
+        findingCount: { type: "integer", minimum: 0 },
+        maturity: {
+          enum: ["experimental", "review", "blocker-certified"]
+        },
+        filesInspected: { type: "integer", minimum: 0 },
+        reason: { type: "string", minLength: 1 }
       }
     },
     scopeExpansionScore: {

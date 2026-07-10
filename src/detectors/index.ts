@@ -14,7 +14,12 @@ export { intentVerificationDetector } from "./intent-verification-detector.js";
 export { patternViolationDetector } from "./pattern-violation-detector.js";
 export { rewriteDetector } from "./rewrite-detector.js";
 export { repositoryIntelligenceDetector } from "./repository-intelligence-detector.js";
-export { runDetectors, summarizeFindings, type FindingDecisionPolicy } from "./runner.js";
+export {
+  runDetectors,
+  runDetectorsWithStatuses,
+  summarizeFindings,
+  type FindingDecisionPolicy
+} from "./runner.js";
 export { scanAddedLinesForSecretsAndPaths, secretPathDetector } from "./secret-path-detector.js";
 export { scopeDetector } from "./scope-detector.js";
 export { testWeakeningDetector } from "./test-weakening-detector.js";
