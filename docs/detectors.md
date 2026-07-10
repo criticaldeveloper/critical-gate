@@ -83,9 +83,11 @@ path-keyword matching cannot prove the changed files are inside the intended bou
 does not fail the gate by itself, but it tells reviewers and agents to provide a structured task
 contract, ownership context, or explicit allowed and forbidden paths.
 
-When a provided task contract includes `forbidden_paths`, the scope detector enforces those paths
-directly and emits blocker findings for matching changed files. This check runs before the
-small-task keyword heuristic, so explicit forbidden paths still apply to broad or medium tasks.
+When a provided task contract includes `allowed_paths` or `forbidden_paths`, the scope detector
+enforces those paths directly and emits blocker findings for changed files outside the allowed set
+or inside the forbidden set. These checks run before the small-task keyword heuristic, so explicit
+contract paths still apply to broad or medium tasks. If both lists match the same file,
+`forbidden_paths` take precedence to avoid duplicate findings.
 
 ## V1 Blockers
 

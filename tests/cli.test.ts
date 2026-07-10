@@ -457,7 +457,7 @@ describe("cli", () => {
       "C:\\dev\\critical-gate\\task-contract.json",
       JSON.stringify({
         goal: "Correct the profile heading font weight",
-        allowed_paths: ["src/profile/**", "tests/profile/**"],
+        allowed_paths: ["src/profile/**", "tests/profile/**", "src/signup.ts"],
         forbidden_paths: ["src/auth/**", "package.json"],
         expected_artifacts: ["profile heading stylesheet"],
         invariants: ["no_new_dependencies", "authentication_behavior_unchanged"],
@@ -477,7 +477,7 @@ describe("cli", () => {
       taskContract: {
         source: "provided",
         goal: "Correct the profile heading font weight",
-        allowedPaths: ["src/profile/**", "tests/profile/**"],
+        allowedPaths: ["src/profile/**", "tests/profile/**", "src/signup.ts"],
         forbiddenPaths: ["src/auth/**", "package.json"],
         expectedArtifacts: ["profile heading stylesheet"],
         invariants: ["no_new_dependencies", "authentication_behavior_unchanged"],
@@ -516,6 +516,38 @@ describe("cli", () => {
           id: "scope:forbidden-path:src/signup.ts",
           severity: "blocker",
           title: "Forbidden path changed by task contract"
+        })
+      ]
+    });
+  });
+
+  it("enforces allowed paths from a structured task contract", () => {
+    const { io, stdout, files } = createTestIo();
+
+    files.set(
+      "C:\\dev\\critical-gate\\task-contract.json",
+      JSON.stringify({
+        goal: "Correct the profile heading font weight",
+        allowed_paths: ["src/profile/**", "tests/profile/**"],
+        forbidden_paths: [],
+        invariants: []
+      })
+    );
+
+    expect(main(["check", "--task-contract", "task-contract.json", "--format", "json"], io)).toBe(
+      ExitCode.FindingsFailed
+    );
+
+    expect(JSON.parse(stdout[0] ?? "")).toMatchObject({
+      summary: {
+        decision: "fail",
+        blockerCount: 1
+      },
+      findings: [
+        expect.objectContaining({
+          id: "scope:outside-allowed-path:src/signup.ts",
+          severity: "blocker",
+          title: "Path outside task contract allowed paths"
         })
       ]
     });

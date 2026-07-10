@@ -61,13 +61,28 @@ export const scopeDetector: Detector = {
     const forbiddenPaths = new Set(
       forbiddenPathFindings.map((finding) => finding.evidence[0]?.path)
     );
+    const outsideAllowedPathFindings = diff.files
+      .filter((file) => !forbiddenPaths.has(file.path))
+      .map((file) => {
+        const allowedPatterns = context?.taskContract?.allowedPaths ?? [];
+
+        return isOutsideAllowedPaths(file.path, allowedPatterns)
+          ? toOutsideAllowedPathFinding(file, allowedPatterns)
+          : undefined;
+      })
+      .filter((finding): finding is Finding => finding !== undefined);
+    const contractScopePaths = new Set(
+      [...forbiddenPathFindings, ...outsideAllowedPathFindings].map(
+        (finding) => finding.evidence[0]?.path
+      )
+    );
 
     if (analysis.complexity !== "small" || isBroadTask(task.text)) {
-      return forbiddenPathFindings;
+      return [...forbiddenPathFindings, ...outsideAllowedPathFindings];
     }
 
     const unexpectedScopeFindings = diff.files
-      .filter((file) => !forbiddenPaths.has(file.path))
+      .filter((file) => !contractScopePaths.has(file.path))
       .filter((file) =>
         isUnexpectedForSmallTask(
           file,
@@ -79,7 +94,7 @@ export const scopeDetector: Detector = {
       )
       .map((file) => toFinding(file, analysis.keywords, context?.repositoryTokenIndex));
 
-    return [...forbiddenPathFindings, ...unexpectedScopeFindings];
+    return [...forbiddenPathFindings, ...outsideAllowedPathFindings, ...unexpectedScopeFindings];
   },
   getStatus: ({ task }, findings) => {
     if (findings.length > 0) {
@@ -109,6 +124,10 @@ export const scopeDetector: Detector = {
 
 function getMatchingForbiddenPatterns(path: string, patterns: string[]): string[] {
   return patterns.filter((pattern) => matchesContractPath(path, pattern));
+}
+
+function isOutsideAllowedPaths(path: string, patterns: string[]): boolean {
+  return patterns.length > 0 && !patterns.some((pattern) => matchesContractPath(path, pattern));
 }
 
 function matchesContractPath(path: string, pattern: string): boolean {
@@ -462,6 +481,41 @@ function toForbiddenPathFinding(file: DiffFile, matchingPatterns: string[]): Fin
     ],
     repair:
       "Remove the forbidden-path change or update the task contract with explicit reviewer approval.",
+    tags: ["scope"]
+  };
+}
+
+function toOutsideAllowedPathFinding(file: DiffFile, allowedPatterns: string[]): Finding {
+  const firstChangedLine = file.hunks
+    .flatMap((hunk) => hunk.lines)
+    .find((line) => line.kind === "add" || line.kind === "delete");
+  const lineNumber = firstChangedLine?.newLineNumber ?? firstChangedLine?.oldLineNumber;
+
+  return {
+    id: `scope:outside-allowed-path:${file.path}`,
+    detector: "scope",
+    severity: "blocker",
+    confidence: 0.95,
+    evidenceStrength: 0.95,
+    title: "Path outside task contract allowed paths",
+    message: `${file.path} changed outside the task contract allowed paths: ${allowedPatterns.join(", ")}.`,
+    evidence: [
+      {
+        kind: "file",
+        path: file.path,
+        startLine: lineNumber,
+        endLine: lineNumber,
+        message: `Changed file does not match any allowed task contract path: ${allowedPatterns.join(", ")}.`,
+        data: {
+          allowedPatterns,
+          role: file.role,
+          additions: file.additions,
+          deletions: file.deletions
+        }
+      }
+    ],
+    repair:
+      "Remove the out-of-contract change or update the task contract with explicit reviewer approval.",
     tags: ["scope"]
   };
 }

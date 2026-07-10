@@ -354,6 +354,152 @@ index 57b22a0..cb3e0f1 100644
     ]);
   });
 
+  it("does not emit contract findings for files inside allowed task-contract paths", () => {
+    const diff = parse(`diff --git a/src/profile/heading.ts b/src/profile/heading.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/profile/heading.ts
++++ b/src/profile/heading.ts
+@@ -1,2 +1,3 @@
++export const profileHeadingWeight = 700;
+ export const profileHeading = true;
+`);
+
+    expect(
+      scopeDetector.run({
+        task: {
+          source: "cli",
+          text: "Correct profile heading font weight"
+        },
+        diff,
+        context: {
+          taskContract: {
+            ...emptyTaskContract,
+            goal: "Correct profile heading font weight",
+            allowedPaths: ["src/profile/**"]
+          }
+        }
+      })
+    ).toEqual([]);
+  });
+
+  it("emits blocker findings for files outside allowed task-contract paths", () => {
+    const diff = parse(`diff --git a/src/auth/session.ts b/src/auth/session.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/auth/session.ts
++++ b/src/auth/session.ts
+@@ -1,2 +1,3 @@
++export const sessionTimeout = 30;
+ export const session = true;
+`);
+
+    const findings = scopeDetector.run({
+      task: {
+        source: "cli",
+        text: "Correct profile heading font weight"
+      },
+      diff,
+      context: {
+        taskContract: {
+          ...emptyTaskContract,
+          goal: "Correct profile heading font weight",
+          allowedPaths: ["src/profile/**", "tests/profile/**"]
+        }
+      }
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        id: "scope:outside-allowed-path:src/auth/session.ts",
+        detector: "scope",
+        severity: "blocker",
+        title: "Path outside task contract allowed paths",
+        message:
+          "src/auth/session.ts changed outside the task contract allowed paths: src/profile/**, tests/profile/**.",
+        repair:
+          "Remove the out-of-contract change or update the task contract with explicit reviewer approval.",
+        tags: ["scope"]
+      })
+    ]);
+  });
+
+  it("enforces allowed task-contract paths even on broad tasks", () => {
+    const diff = parse(`diff --git a/src/logger.ts b/src/logger.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/logger.ts
++++ b/src/logger.ts
+@@ -1,2 +1,3 @@
++export const verbose = true;
+ export const logger = true;
+`);
+
+    const result = runDetectorsWithStatuses(
+      {
+        source: "cli",
+        text: "Refactor project logging architecture"
+      },
+      diff,
+      {
+        taskContract: {
+          ...emptyTaskContract,
+          goal: "Refactor project logging architecture",
+          allowedPaths: ["src/platform/**"]
+        }
+      },
+      [scopeDetector]
+    );
+
+    expect(result.findings).toEqual([
+      expect.objectContaining({
+        id: "scope:outside-allowed-path:src/logger.ts",
+        severity: "blocker"
+      })
+    ]);
+    expect(result.detectorRuns).toEqual([
+      expect.objectContaining({
+        detector: "scope",
+        status: "findings",
+        findingCount: 1
+      })
+    ]);
+  });
+
+  it("reports forbidden path findings instead of duplicate allowed-path findings", () => {
+    const diff = parse(`diff --git a/src/auth/session.ts b/src/auth/session.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/auth/session.ts
++++ b/src/auth/session.ts
+@@ -1,2 +1,3 @@
++export const sessionTimeout = 30;
+ export const session = true;
+`);
+
+    const findings = scopeDetector.run({
+      task,
+      diff,
+      context: {
+        taskContract: {
+          ...emptyTaskContract,
+          allowedPaths: ["src/**"],
+          forbiddenPaths: ["src/auth/**"]
+        }
+      }
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        id: "scope:forbidden-path:src/auth/session.ts",
+        title: "Forbidden path changed by task contract"
+      })
+    ]);
+    expect(findings).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "scope:outside-allowed-path:src/auth/session.ts"
+        })
+      ])
+    );
+  });
+
   it("marks medium task scope checks as insufficient context", () => {
     const diff = parse(`diff --git a/src/logger.ts b/src/logger.ts
 index 57b22a0..cb3e0f1 100644
