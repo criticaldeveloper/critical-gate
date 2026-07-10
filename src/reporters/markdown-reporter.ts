@@ -44,6 +44,14 @@ export function renderMarkdownReport(result: GateResult): string {
     lines.push("");
   }
 
+  if (result.taskContract !== undefined) {
+    lines.push("## Task Contract", "");
+    for (const contractLine of renderTaskContractLines(result)) {
+      lines.push(`- ${contractLine}`);
+    }
+    lines.push("");
+  }
+
   if (result.intentVerification !== undefined) {
     lines.push(
       "## Intent Verification",
@@ -96,6 +104,24 @@ export function renderMarkdownReport(result: GateResult): string {
   }
 
   return `${lines.join("\n").trimEnd()}\n`;
+}
+
+function renderTaskContractLines(result: GateResult): string[] {
+  const contract = result.taskContract;
+
+  if (contract === undefined) {
+    return [];
+  }
+
+  return [
+    `Source: ${contract.source}.`,
+    `Goal: ${contract.goal}.`,
+    `Allowed paths: ${formatClasses(contract.allowedPaths)}.`,
+    `Forbidden paths: ${formatClasses(contract.forbiddenPaths)}.`,
+    `Expected artifacts: ${formatClasses(contract.expectedArtifacts)}.`,
+    `Invariants: ${formatClasses(contract.invariants)}.`,
+    `Required checks: ${formatClasses(contract.requiredChecks)}.`
+  ];
 }
 
 function renderPolicyAppliedLines(result: GateResult): string[] {

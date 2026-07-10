@@ -35,6 +35,8 @@ export type {
   RepoContext,
   ScopeExpansionDriver,
   ScopeExpansionScore,
+  TaskContract,
+  TaskContractSource,
   TaskIntentQualitySummary,
   TaskIntentQualityWarning,
   UtilityEntry,

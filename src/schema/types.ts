@@ -9,6 +9,18 @@ export interface TaskIntent {
   id?: string;
 }
 
+export type TaskContractSource = "inferred" | "provided";
+
+export interface TaskContract {
+  source: TaskContractSource;
+  goal: string;
+  allowedPaths: string[];
+  forbiddenPaths: string[];
+  expectedArtifacts: string[];
+  invariants: string[];
+  requiredChecks: string[];
+}
+
 export type DiffFileStatus = "added" | "modified" | "deleted" | "renamed";
 
 export type DiffFileRole =
@@ -309,6 +321,7 @@ export interface GateResult {
   context?: RepoContext;
   findings: Finding[];
   summary: GateSummary;
+  taskContract?: TaskContract;
   intentVerification?: IntentVerificationSummary;
   intentQuality?: TaskIntentQualitySummary;
   metadata?: Record<string, unknown>;

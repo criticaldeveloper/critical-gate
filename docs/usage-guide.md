@@ -115,6 +115,31 @@ When running in CI, prefer PR titles plus short PR-body context. If a PR intenti
 configuration, dependencies, or public API, include that in the task text so the gate can distinguish
 expected blast radius from drift.
 
+For higher-signal runs, provide a structured task contract:
+
+```json
+{
+  "goal": "Correct the profile heading font weight",
+  "allowed_paths": ["src/profile/**", "tests/profile/**"],
+  "forbidden_paths": ["src/auth/**", "package.json", "pnpm-lock.yaml"],
+  "expected_artifacts": ["profile heading stylesheet"],
+  "invariants": ["no_new_dependencies", "authentication_behavior_unchanged"],
+  "required_checks": ["pnpm test profile"]
+}
+```
+
+Run it with:
+
+```bash
+npx critical-gate check --task-contract task-contract.json --format markdown
+```
+
+`goal` becomes the task text used by existing detectors. The contract is also emitted in JSON,
+Markdown, and PR-comment output so reviewers can see whether the boundary was inferred or provided.
+This first contract slice is an input and reporting foundation; detector enforcement should be
+expanded gradually so explicit `allowed_paths`, `forbidden_paths`, and `invariants` become stronger
+than lexical task matching.
+
 ## Understanding Reports
 
 A report includes:

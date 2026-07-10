@@ -26,3 +26,4 @@ export {
 } from "./observed-actions.js";
 export { calculateScopeExpansionScore } from "./scope-expansion-score.js";
 export { calculateDiffCoherenceScore } from "./diff-coherence-score.js";
+export { inferTaskContract, parseTaskContractJson } from "./task-contract.js";

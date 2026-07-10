@@ -442,6 +442,45 @@ describe("cli", () => {
     });
   });
 
+  it("loads a structured task contract for checks", () => {
+    const { io, stdout, files } = createTestIo();
+
+    files.set(
+      "C:\\dev\\critical-gate\\task-contract.json",
+      JSON.stringify({
+        goal: "Correct the profile heading font weight",
+        allowed_paths: ["src/profile/**", "tests/profile/**"],
+        forbidden_paths: ["src/auth/**", "package.json"],
+        expected_artifacts: ["profile heading stylesheet"],
+        invariants: ["no_new_dependencies", "authentication_behavior_unchanged"],
+        required_checks: ["pnpm test profile"]
+      })
+    );
+
+    expect(main(["check", "--task-contract", "task-contract.json", "--format", "json"], io)).toBe(
+      ExitCode.Pass
+    );
+
+    expect(JSON.parse(stdout[0] ?? "")).toMatchObject({
+      task: {
+        source: "cli",
+        text: "Correct the profile heading font weight"
+      },
+      taskContract: {
+        source: "provided",
+        goal: "Correct the profile heading font weight",
+        allowedPaths: ["src/profile/**", "tests/profile/**"],
+        forbiddenPaths: ["src/auth/**", "package.json"],
+        expectedArtifacts: ["profile heading stylesheet"],
+        invariants: ["no_new_dependencies", "authentication_behavior_unchanged"],
+        requiredChecks: ["pnpm test profile"]
+      },
+      metadata: {
+        taskContractPath: "task-contract.json"
+      }
+    });
+  });
+
   it("passes the criticaldeveloper-blog local SVG icon dependency removal replay", () => {
     const { io, stdout } = createTestIo();
     const fixtureDiff = readFileSync(

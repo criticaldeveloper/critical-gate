@@ -1,4 +1,4 @@
-import { join } from "node:path";
+import { isAbsolute, join } from "node:path";
 
 import {
   GATE_RESULT_SCHEMA_VERSION,
@@ -14,6 +14,8 @@ import {
   getPolicyObservationDetectors,
   loadApiSurfaceSnapshot,
   loadCriticalGateConfig,
+  inferTaskContract,
+  parseTaskContractJson,
   resolvePublicApiEntrypoints,
   runDetectors,
   summarizeApiSurfaceSnapshot,
@@ -35,10 +37,15 @@ export function createGateResult(
     exists: io.exists,
     readFile: io.readFile
   });
+  const taskContract = options.taskContract
+    ? loadTaskContract(diffResult.root, options.taskContract, io)
+    : undefined;
+  const taskText = taskContract?.goal ?? options.task;
   const task = {
     source: "cli" as const,
-    text: options.task
+    text: taskText
   };
+  const resolvedTaskContract = taskContract ?? inferTaskContract(task);
   const diff = {
     baseRef: diffResult.baseRef,
     headRef: diffResult.headRef,
@@ -110,6 +117,7 @@ export function createGateResult(
       failOn: options.failOn ?? getConfiguredFailOn(configResult.config),
       acceptedFindingIds: learningResult.appliedAcceptedFindings
     }),
+    taskContract: resolvedTaskContract,
     intentVerification: summarizeIntentVerification(task, diff.files),
     intentQuality: analyzeTaskIntentQuality(task),
     metadata: {
@@ -117,6 +125,7 @@ export function createGateResult(
       strict: options.strict,
       staged: options.staged,
       failOn: options.failOn ?? getConfiguredFailOn(configResult.config) ?? "high",
+      taskContractPath: options.taskContract,
       rolloutPolicy: configResult.config.rollout,
       policy: configResult.config.policy,
       frameworkPacks: frameworkPacks.map((pack) => pack.id),
@@ -127,6 +136,20 @@ export function createGateResult(
       configWarnings: configResult.warnings
     }
   };
+}
+
+function loadTaskContract(
+  root: string,
+  path: string,
+  io: Pick<CliIo, "exists" | "readFile">
+): ReturnType<typeof parseTaskContractJson> {
+  const resolvedPath = isAbsolute(path) ? path : join(root, path);
+
+  if (io.exists?.(resolvedPath) !== true) {
+    throw new Error(`Task contract file not found: ${path}`);
+  }
+
+  return parseTaskContractJson(io.readFile?.(resolvedPath) ?? "");
 }
 
 function readOptionalPackageJson(root: string, io: Pick<CliIo, "exists" | "readFile">): unknown {

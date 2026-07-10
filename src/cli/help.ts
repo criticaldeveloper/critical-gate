@@ -16,7 +16,7 @@ export function getHelpText(): string {
     "critical-gate",
     "",
     "Usage:",
-    "  critical-gate check --task <text> [--base <ref>] [--format json|markdown|sarif|repair|pr-comment] [--strict] [--output <path>]",
+    "  critical-gate check --task <text> [--task-contract <json-file>] [--base <ref>] [--format json|markdown|sarif|repair|pr-comment] [--strict] [--output <path>]",
     "  critical-gate hook [--task <text>] [--base <ref>] [--output <path>]",
     "  critical-gate accept --finding <id> --reason <text>",
     "  critical-gate teach --id <id> --when-changed <glob> --allow <glob[,glob]> --reason <text>",
@@ -96,12 +96,13 @@ function getCheckHelpText(): string {
     "  --task <text>       Task intent, issue summary, or prompt",
     "",
     "Options:",
-    "  --base <ref>        Git baseline reference",
-    "  --format <format>   json, markdown, sarif, repair, or pr-comment",
-    "  --fail-on <level>   blocker, high, or medium; defaults to high",
-    "  --staged            Analyze staged changes with git diff --cached",
-    "  --strict            Fail on strict-mode findings once detectors exist",
-    "  --output <path>     Write report to a file instead of stdout",
+    "  --task-contract <path>  JSON task contract with goal, paths, invariants, and checks",
+    "  --base <ref>            Git baseline reference",
+    "  --format <format>       json, markdown, sarif, repair, or pr-comment",
+    "  --fail-on <level>       blocker, high, or medium; defaults to high",
+    "  --staged                Analyze staged changes with git diff --cached",
+    "  --strict                Fail on strict-mode findings once detectors exist",
+    "  --output <path>         Write report to a file instead of stdout",
     ""
   ].join("\n");
 }

@@ -18,6 +18,15 @@ const result: GateResult = {
     source: "cli",
     text: "Add signup validation"
   },
+  taskContract: {
+    source: "provided",
+    goal: "Add signup validation",
+    allowedPaths: ["src/signup.ts", "tests/signup.test.ts"],
+    forbiddenPaths: ["package.json"],
+    expectedArtifacts: ["signup validator"],
+    invariants: ["no_new_dependencies"],
+    requiredChecks: ["pnpm test signup"]
+  },
   diff: {
     baseRef: "main",
     headRef: "feature/signup-validation",
@@ -221,6 +230,11 @@ describe("reporters", () => {
     expect(report).toContain("Blocking findings after policy: test-weakening-001.");
     expect(report).toContain("Detector maturity: 0 blocker-certified, 1 review, 1 experimental.");
     expect(report).toContain("Accepted findings applied: scope:accepted-fixture.");
+    expect(report).toContain("## Task Contract");
+    expect(report).toContain("Source: provided.");
+    expect(report).toContain("Allowed paths: src/signup.ts, tests/signup.test.ts.");
+    expect(report).toContain("Forbidden paths: package.json.");
+    expect(report).toContain("Invariants: no_new_dependencies.");
     expect(report).toContain("## Intent Verification");
     expect(report).toContain("Requested Classes: source");
     expect(report).toContain("Unexpected Classes: tests");
@@ -360,6 +374,9 @@ describe("reporters", () => {
 
     expect(report).toContain("## Critical Gate: fail");
     expect(report).toContain("Task: Add signup validation");
+    expect(report).toContain(
+      "Contract: provided; allowed paths: src/signup.ts, tests/signup.test.ts; forbidden paths: package.json; invariants: no_new_dependencies"
+    );
     expect(report).toContain("Changed files: 2 (+3/-2)");
     expect(report).toContain("Diff coherence: 71/100");
     expect(report).toContain("### Blocking findings");

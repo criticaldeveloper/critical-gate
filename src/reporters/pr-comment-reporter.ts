@@ -20,6 +20,13 @@ export function renderPrCommentReport(result: GateResult): string {
     ""
   ];
 
+  if (result.taskContract !== undefined) {
+    lines.push(
+      `Contract: ${result.taskContract.source}; allowed paths: ${formatList(result.taskContract.allowedPaths)}; forbidden paths: ${formatList(result.taskContract.forbiddenPaths)}; invariants: ${formatList(result.taskContract.invariants)}`,
+      ""
+    );
+  }
+
   lines.push("### Blocking findings", "");
   if (blockingFindings.length === 0) {
     lines.push("- None.");

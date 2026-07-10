@@ -38,6 +38,7 @@ export function parseCheckArgs(
       arg === "--base" ||
       arg === "--format" ||
       arg === "--output" ||
+      arg === "--task-contract" ||
       arg === "--fail-on"
     ) {
       const value = args[index + 1];
@@ -50,6 +51,8 @@ export function parseCheckArgs(
 
       if (arg === "--task") {
         options.task = value;
+      } else if (arg === "--task-contract") {
+        options.taskContract = value;
       } else if (arg === "--base") {
         options.base = value;
       } else if (arg === "--format") {
@@ -83,6 +86,8 @@ export function parseCheckArgs(
   if (options.task === undefined || options.task.trim().length === 0) {
     if (command === "hook") {
       options.task = "Codex completed feature implementation";
+    } else if (options.taskContract !== undefined) {
+      options.task = "Task contract";
     } else {
       return { ok: false, error: "Missing required --task value." };
     }
@@ -101,6 +106,7 @@ export function parseCheckArgs(
       strict: options.strict ?? false,
       staged: options.staged ?? false,
       failOn: options.failOn,
+      taskContract: options.taskContract,
       output: options.output
     }
   };

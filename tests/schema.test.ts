@@ -15,6 +15,15 @@ describe("gate result schema", () => {
         text: "Add signup validation",
         summary: "Add validation to the signup form"
       },
+      taskContract: {
+        source: "provided",
+        goal: "Add signup validation",
+        allowedPaths: ["src/signup.ts", "tests/signup.test.ts"],
+        forbiddenPaths: ["package.json"],
+        expectedArtifacts: ["signup validator"],
+        invariants: ["no_new_dependencies"],
+        requiredChecks: ["pnpm test signup"]
+      },
       diff: {
         baseRef: "main",
         headRef: "feature/signup-validation",

@@ -23,6 +23,7 @@ export const gateResultJsonSchema = {
       items: { $ref: "#/$defs/finding" }
     },
     summary: { $ref: "#/$defs/gateSummary" },
+    taskContract: { $ref: "#/$defs/taskContract" },
     intentVerification: { $ref: "#/$defs/intentVerificationSummary" },
     intentQuality: { $ref: "#/$defs/taskIntentQualitySummary" },
     metadata: {
@@ -42,6 +43,30 @@ export const gateResultJsonSchema = {
         text: { type: "string", minLength: 1 },
         summary: { type: "string" },
         id: { type: "string" }
+      }
+    },
+    taskContract: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "source",
+        "goal",
+        "allowedPaths",
+        "forbiddenPaths",
+        "expectedArtifacts",
+        "invariants",
+        "requiredChecks"
+      ],
+      properties: {
+        source: {
+          enum: ["inferred", "provided"]
+        },
+        goal: { type: "string", minLength: 1 },
+        allowedPaths: stringArraySchema,
+        forbiddenPaths: stringArraySchema,
+        expectedArtifacts: stringArraySchema,
+        invariants: stringArraySchema,
+        requiredChecks: stringArraySchema
       }
     },
     diff: {
