@@ -1,6 +1,6 @@
 import {
-  calibrateFindingConfidence,
-  getConfidenceBand,
+  calibrateFindingEvidenceStrength,
+  getEvidenceStrengthBand,
   summarizeFindings,
   type Finding
 } from "../src/index.js";
@@ -17,15 +17,15 @@ const highScopeFinding: Finding = {
   tags: ["scope"]
 };
 
-describe("confidence calibration", () => {
-  it("classifies confidence bands", () => {
-    expect(getConfidenceBand(0.95)).toBe("very-high");
-    expect(getConfidenceBand(0.82)).toBe("high");
-    expect(getConfidenceBand(0.7)).toBe("medium");
-    expect(getConfidenceBand(0.4)).toBe("low");
+describe("evidence strength thresholds", () => {
+  it("classifies evidence strength bands", () => {
+    expect(getEvidenceStrengthBand(0.95)).toBe("very-high");
+    expect(getEvidenceStrengthBand(0.82)).toBe("high");
+    expect(getEvidenceStrengthBand(0.7)).toBe("medium");
+    expect(getEvidenceStrengthBand(0.4)).toBe("low");
   });
 
-  it("keeps low-confidence high-severity findings observational", () => {
+  it("keeps low-evidence high-severity findings observational", () => {
     expect(
       summarizeFindings([
         {
@@ -43,7 +43,7 @@ describe("confidence calibration", () => {
     });
   });
 
-  it("keeps calibrated high-confidence legacy findings blocking", () => {
+  it("keeps high-evidence legacy findings blocking", () => {
     expect(summarizeFindings([highScopeFinding])).toMatchObject({
       decision: "fail",
       confidenceCalibration: {
@@ -54,7 +54,7 @@ describe("confidence calibration", () => {
     });
   });
 
-  it("does not let explicit detector promotion bypass confidence thresholds", () => {
+  it("does not let explicit detector promotion bypass evidence-strength thresholds", () => {
     expect(
       summarizeFindings(
         [
@@ -78,8 +78,8 @@ describe("confidence calibration", () => {
     });
   });
 
-  it("explains per-detector minimum blocking confidence", () => {
-    expect(calibrateFindingConfidence(highScopeFinding)).toMatchObject({
+  it("explains per-detector minimum blocking evidence strength", () => {
+    expect(calibrateFindingEvidenceStrength(highScopeFinding)).toMatchObject({
       band: "high",
       minimumBlockingConfidence: 0.84,
       blockingEligible: true

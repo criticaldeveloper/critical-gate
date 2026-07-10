@@ -6,14 +6,16 @@ For detector-specific quality boundaries, known blind spots, and coverage expect
 ## Severity Levels
 
 - `blocker`: should fail the gate by default.
-- `high`: should fail the gate by default when confidence and rollout policy allow it.
+- `high`: should fail the gate by default when evidence strength and rollout policy allow it.
 - `medium`: should warn and appear in summaries; make it blocking only through explicit rollout
   policy or threshold changes after dogfooding.
 - `low`: informational unless combined with other risk.
 
-## Confidence Calibration
+## Evidence Strength
 
-Critical Gate treats confidence as part of the decision contract, not just display metadata.
+Critical Gate treats evidence strength as part of the decision contract, not just display metadata.
+The public JSON still includes the legacy `confidence` field for compatibility, but current values
+are heuristic evidence-strength scores, not empirically calibrated probabilities.
 
 - `very-high`: `0.90` and above.
 - `high`: `0.80` to `0.89`.
@@ -21,22 +23,23 @@ Critical Gate treats confidence as part of the decision contract, not just displ
 - `low`: below `0.60`.
 
 By default, only `blocker` and `high` findings can fail the gate. They must also clear the
-detector's calibrated minimum confidence and the active rollout policy. Deterministic detectors with
+detector's minimum evidence-strength threshold and the active rollout policy. Deterministic detectors with
 concrete evidence, such as dependency additions, test weakening, secrets, rewrites, public API
-removals, and high-confidence scope findings, can block when they meet their band. Architecture,
+removals, and high-evidence scope findings, can block when they meet their band. Architecture,
 convention, co-change, and framework-pack guesses are observation-friendly by default unless
-promoted through rollout policy, and even explicit promotion does not bypass the minimum confidence
+promoted through rollout policy, and even explicit promotion does not bypass the minimum evidence-strength
 threshold.
 
-The summary exposes calibration counts:
+The summary exposes evidence-strength decision counts:
 
 - `blockingEligibleCount`: findings that can fail this run.
-- `observationModeCount`: high-confidence findings kept observational by rollout policy.
-- `confidenceSuppressedCount`: high or blocker severity findings that did not meet confidence.
+- `observationModeCount`: high-evidence findings kept observational by rollout policy.
+- `confidenceSuppressedCount`: legacy field name for high or blocker severity findings that did not
+  meet the minimum evidence-strength threshold.
 
 ## Detector Maturity
 
-Detector maturity is separate from severity, confidence, and rollout policy. It describes how much
+Detector maturity is separate from severity, evidence strength, and rollout policy. It describes how much
 trust the project currently has in a detector family or subtype.
 
 - `experimental`: useful signal, but still advisory by default. These detectors need more
@@ -49,7 +52,7 @@ trust the project currently has in a detector family or subtype.
 
 Current runtime output includes detector maturity in the applied policy summary. Maturity is
 informational in this release: it does not by itself promote or suppress a finding. Rollout policy,
-severity, and confidence thresholds still decide whether a finding can fail the gate.
+severity, and evidence-strength thresholds still decide whether a finding can fail the gate.
 
 Current baseline:
 
@@ -114,7 +117,7 @@ Current behavior:
 
 - A task like `Add new section to the site to display works done` should not be satisfied by a
   one-line typography or color change.
-- The gate emits a high-confidence `intent-coverage` finding when visible UI implementation is
+- The gate emits a high-evidence `intent-coverage` finding when visible UI implementation is
   requested but only trivial stylesheet values changed.
 - Explicit style tasks, such as `Adjust typography font weight for the works section`, are excluded
   so normal visual tuning remains low-noise.

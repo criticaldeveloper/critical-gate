@@ -99,7 +99,10 @@ The indexer should be lazy where possible.
 
 ### Detector Runner
 
-Runs detectors over the diff and requested context. Detectors return normalized findings with evidence, confidence, severity, and repair hints.
+Runs detectors over the diff and requested context. Detectors return normalized findings with
+evidence, evidence strength, severity, and repair hints. The legacy JSON field is still named
+`confidence` for compatibility, but current values should be treated as heuristic evidence strength,
+not calibrated probability.
 
 ### Risk Scorer
 
@@ -125,7 +128,8 @@ Each finding should include:
 - `id`: stable detector finding id.
 - `detector`: detector name.
 - `severity`: `blocker`, `high`, `medium`, `low`, or `info`.
-- `confidence`: number from 0 to 1.
+- `confidence`: legacy compatibility field for heuristic evidence strength, from 0 to 1.
+- `evidenceStrength`: preferred compatibility-safe field for the same heuristic score.
 - `title`: short human label.
 - `message`: concise explanation.
 - `evidence`: file paths, line ranges, symbols, manifest keys, or metrics.

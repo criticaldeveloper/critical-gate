@@ -44,7 +44,7 @@ Legacy rollout controls still supported for compatibility.
 Fields:
 
 - `observationDetectors`: detector ids to keep non-blocking.
-- `blockingDetectors`: detector ids to promote when confidence and severity allow it.
+- `blockingDetectors`: detector ids to promote when evidence strength and severity allow it.
 - `failOn`: one of `blocker`, `high`, or `medium`.
 
 When both `policy` and `rollout` are present, policy helpers merge detector overrides with rollout
@@ -91,8 +91,8 @@ Fields:
 - `mode`: `blocking` or `observation`.
 - `reason`: reviewable explanation for the override.
 
-Promotion does not bypass confidence calibration. A detector still needs a finding with sufficient
-severity and confidence to fail the gate.
+Promotion does not bypass evidence-strength thresholds. A detector still needs a finding with
+sufficient severity and evidence strength to fail the gate.
 
 Detector maturity is reported separately from these overrides. A `review` detector is not
 automatically blocking in every repository, and an `experimental` detector promoted through policy

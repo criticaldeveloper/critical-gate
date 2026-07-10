@@ -92,6 +92,7 @@ function toSarifResult(finding: Finding) {
       detector: finding.detector,
       category: getRuleCategory(finding),
       confidence: finding.confidence,
+      evidenceStrength: finding.evidenceStrength ?? finding.confidence,
       severity: finding.severity,
       repair: finding.repair,
       tags: finding.tags

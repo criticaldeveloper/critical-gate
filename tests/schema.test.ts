@@ -117,6 +117,7 @@ describe("gate result schema", () => {
           detector: "test-weakening",
           severity: "high",
           confidence: 0.92,
+          evidenceStrength: 0.92,
           title: "Assertion removed from signup test",
           message: "The diff removes a behavioral assertion from the signup test.",
           evidence: [

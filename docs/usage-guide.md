@@ -146,15 +146,15 @@ A report includes:
 
 - **Decision**: `pass` or `fail`.
 - **Changed files**: file role, status, additions, and deletions.
-- **Findings**: severity, detector, confidence, message, evidence, and repair guidance.
+- **Findings**: severity, detector, evidence strength, message, evidence, and repair guidance.
 - **Detector runs**: whether each detector passed, emitted findings, or degraded.
 - **Diff Cost Score**: a rough signal for blast radius and churn.
 - **Diff Coherence Score**: a 0-100 positive signal for how well the changed files, support files,
   churn, and findings fit the task intent.
 
-JSON output also includes confidence calibration counts. These show whether high-risk findings were
-eligible to block, kept in observation mode, or suppressed because confidence was below the
-detector's calibrated threshold.
+JSON output also includes evidence-strength decision counts under the legacy
+`confidenceCalibration` field. These show whether high-risk findings were eligible to block, kept in
+observation mode, or suppressed because evidence strength was below the detector threshold.
 
 JSON and Markdown output can also include detector run statuses. `passed` means the detector ran and
 emitted no findings. `errored`, `timed-out`, `skipped`, and `insufficient-context` mean that check
@@ -276,7 +276,7 @@ such as source/test, component/story, translation/UI, config/docs, package/lockf
 They help the gate distinguish normal support changes from unrelated drift and make missing
 companion evidence clearer.
 
-The model is deterministic and local. It uses co-change support and confidence from repository
+The model is deterministic and local. It uses co-change support and evidence strength from repository
 history, and it stays quiet when the repository does not have enough history to be reliable.
 
 ## Monorepo Support
@@ -501,7 +501,7 @@ Use `fetch-depth: 0` on checkout so base diffs and repository history are availa
 
 ## Rollout Advice
 
-Start with the default threshold and focus on high-confidence findings. Review medium findings for a
+Start with the default threshold and focus on high-evidence findings. Review medium findings for a
 few weeks before making them blocking. Tune task text and repository docs when the gate lacks
 context.
 
@@ -527,8 +527,8 @@ repair guidance, but they do not fail the gate unless promoted. Promote a detect
 }
 ```
 
-Promotion does not bypass confidence calibration. A promoted detector still needs a high or blocker
-severity finding with enough confidence to fail the gate.
+Promotion does not bypass evidence-strength thresholds. A promoted detector still needs a high or
+blocker severity finding with enough evidence strength to fail the gate.
 
 ## Troubleshooting
 

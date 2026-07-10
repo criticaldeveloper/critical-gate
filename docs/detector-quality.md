@@ -33,7 +33,7 @@ Detector maturity is the trust label used in reports and policy summaries:
 
 Maturity does not replace rollout policy. A `review` detector can still be observation-only in a
 repository policy, and an `experimental` detector promoted by policy still has to satisfy severity
-and confidence thresholds.
+and evidence-strength thresholds.
 
 ## Finding Stability Contract
 

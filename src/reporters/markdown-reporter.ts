@@ -255,7 +255,7 @@ function renderFinding(finding: Finding): string {
     `### ${finding.title}`,
     "",
     `Severity: ${finding.severity}`,
-    `Confidence: ${Math.round(finding.confidence * 100)}%`,
+    `Evidence strength: ${Math.round((finding.evidenceStrength ?? finding.confidence) * 100)}%`,
     "",
     finding.message,
     "",

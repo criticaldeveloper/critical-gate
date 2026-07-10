@@ -328,6 +328,7 @@ export const gateResultJsonSchema = {
           enum: ["blocker", "high", "medium", "low", "info"]
         },
         confidence: { type: "number", minimum: 0, maximum: 1 },
+        evidenceStrength: { type: "number", minimum: 0, maximum: 1 },
         title: { type: "string", minLength: 1 },
         message: { type: "string", minLength: 1 },
         evidence: {

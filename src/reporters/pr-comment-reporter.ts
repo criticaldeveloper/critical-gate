@@ -149,7 +149,7 @@ function renderFindingBullet(finding: Finding): string {
     .join("; ");
   const suffix = evidence.length === 0 ? "" : ` Evidence: ${evidence}.`;
 
-  return `- **${finding.severity.toUpperCase()}** ${finding.title} (${finding.detector}, ${Math.round(finding.confidence * 100)}%). ${finding.message} Repair: ${finding.repair}${suffix}`;
+  return `- **${finding.severity.toUpperCase()}** ${finding.title} (${finding.detector}, evidence ${Math.round((finding.evidenceStrength ?? finding.confidence) * 100)}%). ${finding.message} Repair: ${finding.repair}${suffix}`;
 }
 
 function formatEvidence(evidence: Finding["evidence"][number]): string {

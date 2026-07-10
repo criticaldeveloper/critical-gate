@@ -1,6 +1,7 @@
 import type { Finding } from "../schema/index.js";
 
 export type ConfidenceBand = "low" | "medium" | "high" | "very-high";
+export type EvidenceStrengthBand = ConfidenceBand;
 
 export interface FindingConfidenceCalibration {
   band: ConfidenceBand;
@@ -8,6 +9,8 @@ export interface FindingConfidenceCalibration {
   blockingEligible: boolean;
   reason: string;
 }
+
+export type FindingEvidenceStrengthCalibration = FindingConfidenceCalibration;
 
 const detectorBlockingThresholds: Record<string, number> = {
   "api-surface": 0.84,
@@ -19,24 +22,32 @@ const detectorBlockingThresholds: Record<string, number> = {
 };
 
 export function calibrateFindingConfidence(finding: Finding): FindingConfidenceCalibration {
-  const band = getConfidenceBand(finding.confidence);
+  const band = getEvidenceStrengthBand(finding.evidenceStrength ?? finding.confidence);
   const minimumBlockingConfidence =
     detectorBlockingThresholds[finding.detector] ?? getSeverityBlockingThreshold(finding.severity);
   const severityEligible =
     finding.severity === "blocker" || finding.severity === "high" || finding.severity === "medium";
-  const blockingEligible = severityEligible && finding.confidence >= minimumBlockingConfidence;
+  const blockingEligible =
+    severityEligible &&
+    (finding.evidenceStrength ?? finding.confidence) >= minimumBlockingConfidence;
 
   return {
     band,
     minimumBlockingConfidence,
     blockingEligible,
     reason: blockingEligible
-      ? `${finding.detector} ${finding.severity} finding is ${band} confidence.`
+      ? `${finding.detector} ${finding.severity} finding has ${band} evidence strength.`
       : getNonBlockingReason(finding, band, minimumBlockingConfidence)
   };
 }
 
+export const calibrateFindingEvidenceStrength = calibrateFindingConfidence;
+
 export function getConfidenceBand(confidence: number): ConfidenceBand {
+  return getEvidenceStrengthBand(confidence);
+}
+
+export function getEvidenceStrengthBand(confidence: number): EvidenceStrengthBand {
   if (confidence >= 0.9) {
     return "very-high";
   }
@@ -77,7 +88,7 @@ function getNonBlockingReason(
     return `${finding.severity} findings are observational unless policy failOn is set to medium.`;
   }
 
-  return `${finding.detector} ${finding.severity} finding is ${band} confidence; blocking requires ${Math.round(
+  return `${finding.detector} ${finding.severity} finding has ${band} evidence strength; blocking requires ${Math.round(
     minimumBlockingConfidence * 100
-  )}% confidence.`;
+  )}% evidence strength.`;
 }

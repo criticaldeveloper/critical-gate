@@ -222,6 +222,7 @@ export interface Finding {
   detector: string;
   severity: FindingSeverity;
   confidence: number;
+  evidenceStrength?: number;
   title: string;
   message: string;
   evidence: FindingEvidence[];
@@ -259,6 +260,8 @@ export interface ConfidenceCalibrationSummary {
   observationModeCount: number;
   confidenceSuppressedCount: number;
 }
+
+export type EvidenceStrengthSummary = ConfidenceCalibrationSummary;
 
 export interface PolicyAppliedSummary {
   failOn: "blocker" | "high" | "medium";

@@ -89,6 +89,7 @@ export function runDetectorsWithStatuses(
     runSingleDetector(detector, task, diff, context)
   );
   const findings = dedupeFindings(detectorResults.flatMap((result) => result.findings))
+    .map(enrichFindingWithEvidenceStrength)
     .map(enrichFindingWithReasonChain)
     .map((finding) => enrichFindingWithRepairContract(finding, diff.files));
   const findingCountsByDetector = countFindingsByDetector(findings);
@@ -194,6 +195,13 @@ function countFindingsByDetector(findings: Finding[]): Map<string, number> {
   }
 
   return counts;
+}
+
+function enrichFindingWithEvidenceStrength(finding: Finding): Finding {
+  return {
+    ...finding,
+    evidenceStrength: finding.evidenceStrength ?? finding.confidence
+  };
 }
 
 function summarizePolicyApplied(

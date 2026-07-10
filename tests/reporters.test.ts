@@ -57,6 +57,7 @@ const result: GateResult = {
       detector: "test-weakening",
       severity: "high",
       confidence: 0.92,
+      evidenceStrength: 0.92,
       title: "Assertion removed from signup test",
       message: "The diff removes a behavioral assertion from the signup test.",
       evidence: [
@@ -401,7 +402,7 @@ describe("reporters", () => {
     expect(report).toContain("Diff coherence: 71/100");
     expect(report).toContain("### Blocking findings");
     expect(report).toContain(
-      "- **HIGH** Assertion removed from signup test (test-weakening, 92%)."
+      "- **HIGH** Assertion removed from signup test (test-weakening, evidence 92%)."
     );
     expect(report).toContain("Repair: Restore the removed behavioral assertion.");
     expect(report).toContain("Evidence: tests/signup.test.ts:24");
@@ -507,7 +508,8 @@ describe("reporters", () => {
               },
               properties: {
                 detector: "test-weakening",
-                category: "tests"
+                category: "tests",
+                evidenceStrength: 0.92
               },
               locations: [
                 {

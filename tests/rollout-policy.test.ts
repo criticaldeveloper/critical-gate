@@ -146,7 +146,7 @@ describe("rollout decision policy", () => {
         supportingSignals: expect.arrayContaining([
           "Detector: scope",
           "Severity: medium",
-          "Confidence: 70%",
+          "Evidence strength: 70%",
           "src/other.ts: Changed file role: source."
         ]),
         acceptableIf: expect.arrayContaining([
@@ -154,6 +154,22 @@ describe("rollout decision policy", () => {
         ]),
         repairHint: "Remove unrelated edits."
       }
+    });
+  });
+
+  it("adds evidence strength to detector findings for compatibility", () => {
+    const detector: Detector = {
+      name: "test-detector",
+      run: () => [highObservationFinding]
+    };
+
+    expect(
+      runDetectors({ source: "cli", text: "Fix signup validation" }, { files: [] }, undefined, [
+        detector
+      ])[0]
+    ).toMatchObject({
+      confidence: 0.9,
+      evidenceStrength: 0.9
     });
   });
 

@@ -70,7 +70,7 @@ function getSupportingSignals(finding: Finding): string[] {
   return [
     `Detector: ${finding.detector}`,
     `Severity: ${finding.severity}`,
-    `Confidence: ${Math.round(finding.confidence * 100)}%`,
+    `Evidence strength: ${Math.round((finding.evidenceStrength ?? finding.confidence) * 100)}%`,
     ...evidenceSignals
   ];
 }
