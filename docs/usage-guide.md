@@ -134,6 +134,12 @@ Run it with:
 npx critical-gate check --task-contract task-contract.json --format markdown
 ```
 
+If you have already run required checks, pass each completed command exactly as executed:
+
+```bash
+npx critical-gate check --task-contract task-contract.json --check-ran "pnpm test profile" --check-ran "pnpm typecheck"
+```
+
 `goal` becomes the task text used by existing detectors. The contract is also emitted in JSON,
 Markdown, and PR-comment output so reviewers can see whether the boundary was inferred or provided.
 Provided `allowed_paths` and `forbidden_paths` are enforced as blocker scope findings, including on
@@ -141,9 +147,9 @@ broad tasks where keyword scope matching would otherwise report insufficient con
 `forbidden_paths` take precedence when a changed file matches both lists, so each file gets the
 clearest contract violation. The `no_new_dependencies` invariant is enforced by the dependency
 detector as a blocker even when the task text mentions the new package. `required_checks` are
-reported as observation-only evidence because Critical Gate does not yet receive check execution
-metadata. Other contract fields remain visible reporting inputs until they have deterministic
-detector support and fixtures.
+compared against `--check-ran` values after whitespace normalization. Missing or unreported checks
+remain observation-only by default while the execution metadata surface is new. Other contract
+fields remain visible reporting inputs until they have deterministic detector support and fixtures.
 
 ## Understanding Reports
 

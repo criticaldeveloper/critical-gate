@@ -14,6 +14,7 @@ export type DetectorRepoContext = NonNullable<GateResult["context"]> & {
   knowledge?: KnowledgeProvider;
   apiSurfaceSnapshot?: ApiSurfaceSnapshot;
   taskContract?: TaskContract;
+  checksRan?: string[];
 };
 
 export interface DetectorContext {

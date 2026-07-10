@@ -168,8 +168,11 @@ Evidence:
 Initial implementation:
 
 - Emit one observation-mode finding when a provided contract declares required checks.
-- Include each required command as evidence with `verified: false`.
-- Do not fail the gate by default until the CLI accepts trustworthy check execution metadata.
+- Accept repeated `--check-ran` values from the CLI and compare them to required checks after
+  whitespace normalization.
+- Include each missing or unverified required command as evidence with `verified: false`.
+- Do not fail the gate by default while check execution metadata is new; repositories can promote
+  the detector through policy after calibration.
 
 ### Silent Public API Change
 

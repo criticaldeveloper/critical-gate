@@ -39,6 +39,7 @@ export function parseCheckArgs(
       arg === "--format" ||
       arg === "--output" ||
       arg === "--task-contract" ||
+      arg === "--check-ran" ||
       arg === "--fail-on"
     ) {
       const value = args[index + 1];
@@ -53,6 +54,8 @@ export function parseCheckArgs(
         options.task = value;
       } else if (arg === "--task-contract") {
         options.taskContract = value;
+      } else if (arg === "--check-ran") {
+        options.checksRan = [...(options.checksRan ?? []), value];
       } else if (arg === "--base") {
         options.base = value;
       } else if (arg === "--format") {
@@ -107,6 +110,7 @@ export function parseCheckArgs(
       staged: options.staged ?? false,
       failOn: options.failOn,
       taskContract: options.taskContract,
+      checksRan: options.checksRan,
       output: options.output
     }
   };

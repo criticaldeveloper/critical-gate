@@ -91,6 +91,7 @@ export function createGateResult(
     apiSurfaceSnapshot: apiSnapshot,
     publicApiEntrypoints: publicApiEntrypointContext,
     taskContract: resolvedTaskContract,
+    checksRan: options.checksRan,
     knowledge: diffResult.knowledge
   };
   const detectorResult = runDetectorsWithStatuses(task, diff, detectorContext);
@@ -129,6 +130,7 @@ export function createGateResult(
       staged: options.staged,
       failOn: options.failOn ?? getConfiguredFailOn(configResult.config) ?? "high",
       taskContractPath: options.taskContract,
+      checksRan: options.checksRan ?? [],
       rolloutPolicy: configResult.config.rollout,
       policy: configResult.config.policy,
       frameworkPacks: frameworkPacks.map((pack) => pack.id),

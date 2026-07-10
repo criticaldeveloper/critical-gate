@@ -553,6 +553,95 @@ describe("cli", () => {
     });
   });
 
+  it("records reported check execution metadata for task contracts", () => {
+    const { io, stdout, files } = createTestIo();
+
+    files.set(
+      "C:\\dev\\critical-gate\\task-contract.json",
+      JSON.stringify({
+        goal: "Add signup validation",
+        allowed_paths: ["src/signup.ts"],
+        required_checks: ["pnpm test signup", "pnpm typecheck"]
+      })
+    );
+
+    expect(
+      main(
+        [
+          "check",
+          "--task-contract",
+          "task-contract.json",
+          "--check-ran",
+          "pnpm test signup",
+          "--check-ran",
+          "pnpm typecheck",
+          "--format",
+          "json"
+        ],
+        io
+      )
+    ).toBe(ExitCode.Pass);
+
+    const result = JSON.parse(stdout[0] ?? "");
+
+    expect(result.metadata).toMatchObject({
+      checksRan: ["pnpm test signup", "pnpm typecheck"]
+    });
+    expect(result.findings).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          detector: "required-checks"
+        })
+      ])
+    );
+  });
+
+  it("reports missing task-contract checks from CLI metadata without failing by default", () => {
+    const { io, stdout, files } = createTestIo();
+
+    files.set(
+      "C:\\dev\\critical-gate\\task-contract.json",
+      JSON.stringify({
+        goal: "Add signup validation",
+        allowed_paths: ["src/signup.ts"],
+        required_checks: ["pnpm test signup", "pnpm typecheck"]
+      })
+    );
+
+    expect(
+      main(
+        [
+          "check",
+          "--task-contract",
+          "task-contract.json",
+          "--check-ran",
+          "pnpm test signup",
+          "--format",
+          "json"
+        ],
+        io
+      )
+    ).toBe(ExitCode.Pass);
+
+    expect(JSON.parse(stdout[0] ?? "")).toMatchObject({
+      findings: [
+        expect.objectContaining({
+          id: "required-checks:missing",
+          severity: "high",
+          title: "Required checks were not reported as run"
+        })
+      ],
+      summary: {
+        decision: "pass",
+        highCount: 1,
+        policyApplied: {
+          observationFindingIds: ["required-checks:missing"],
+          blockingFindingIds: []
+        }
+      }
+    });
+  });
+
   it("passes the criticaldeveloper-blog local SVG icon dependency removal replay", () => {
     const { io, stdout } = createTestIo();
     const fixtureDiff = readFileSync(

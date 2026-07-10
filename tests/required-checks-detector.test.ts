@@ -89,6 +89,60 @@ describe("requiredChecksDetector", () => {
     ).toEqual([]);
   });
 
+  it("does not emit when all required checks are reported as run", () => {
+    expect(
+      requiredChecksDetector.run({
+        task,
+        diff,
+        context: {
+          taskContract: {
+            ...baseContract,
+            requiredChecks: ["pnpm test profile", "pnpm typecheck"]
+          },
+          checksRan: ["pnpm   test profile", "pnpm typecheck"]
+        }
+      })
+    ).toEqual([]);
+  });
+
+  it("emits missing required checks when reported checks are incomplete", () => {
+    const findings = requiredChecksDetector.run({
+      task,
+      diff,
+      context: {
+        taskContract: {
+          ...baseContract,
+          requiredChecks: ["pnpm test profile", "pnpm typecheck"]
+        },
+        checksRan: ["pnpm test profile"]
+      }
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        id: "required-checks:missing",
+        detector: "required-checks",
+        severity: "high",
+        title: "Required checks were not reported as run",
+        message:
+          "The task contract requires pnpm typecheck, but reported checks were pnpm test profile.",
+        repair:
+          "Run the missing required checks or pass the exact completed command with --check-ran."
+      })
+    ]);
+    expect(findings[0]?.evidence).toEqual([
+      expect.objectContaining({
+        kind: "metric",
+        message: "Missing required check 1: pnpm typecheck",
+        data: {
+          check: "pnpm typecheck",
+          verified: false,
+          checksRan: ["pnpm test profile"]
+        }
+      })
+    ]);
+  });
+
   it("is observation-only by default when included in the normal detector run", () => {
     const findings = runDetectors(task, diff, {
       taskContract: {
@@ -113,6 +167,37 @@ describe("requiredChecksDetector", () => {
       mediumCount: 1,
       policyApplied: {
         observationFindingIds: ["required-checks:declared-not-verified"],
+        blockingFindingIds: []
+      }
+    });
+  });
+
+  it("keeps missing required checks observation-only by default", () => {
+    const findings = runDetectors(task, diff, {
+      taskContract: {
+        ...baseContract,
+        requiredChecks: ["pnpm test profile", "pnpm typecheck"]
+      },
+      checksRan: ["pnpm test profile"]
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        id: "required-checks:missing",
+        detector: "required-checks",
+        severity: "high"
+      })
+    ]);
+    expect(
+      summarizeFindings(findings, task, diff, {
+        failOn: "medium"
+      })
+    ).toMatchObject({
+      decision: "pass",
+      findingCount: 1,
+      highCount: 1,
+      policyApplied: {
+        observationFindingIds: ["required-checks:missing"],
         blockingFindingIds: []
       }
     });
