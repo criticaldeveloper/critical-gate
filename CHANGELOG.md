@@ -8,6 +8,10 @@ This project follows the versioning policy in `docs/versioning-policy.md`.
 
 ### Changed
 
+- Add five manually labeled Spanish and mixed-language development/calibration evaluation cases
+  across the dogfood repository profiles without presenting them as external validation.
+- Recognize explicit Spanish configuration prohibitions in scope analysis so `configuración`
+  wording does not justify a forbidden config change.
 - Resolve exact and wildcard TypeScript `baseUrl`/`paths` aliases from root JSONC tsconfig files
   into existing import-graph edges, degrading safely when configuration is malformed or unresolved.
 - Use changed exported-symbol matches as bounded scope alignment evidence and relative import-graph

@@ -1,0 +1,9 @@
+diff --git a/src/validacion/correo.ts b/src/validacion/correo.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/validacion/correo.ts
++++ b/src/validacion/correo.ts
+@@ -1,3 +1,3 @@
+ export function validarCorreo(valor: string): boolean {
+-  return valor.includes("@");
++  return /^[^@]+@[^@]+\.[^@]+$/.test(valor);
+ }

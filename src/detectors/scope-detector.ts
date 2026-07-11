@@ -635,8 +635,13 @@ function isUiPresentationOrAssetPath(path: string): boolean {
 }
 
 function hasConfigProhibition(taskText: string): boolean {
-  return /\b(?:without|no|avoid|do not|don't|dont|must not|never)\s+(?:(?:touching|changing|editing|modify|modifying)\s+)?(?:config|configuration|settings|runtime|node|tooling)\b/i.test(
-    taskText
+  return (
+    /\b(?:without|no|avoid|do not|don't|dont|must not|never)\s+(?:(?:touching|changing|editing|modify|modifying)\s+)?(?:config|configuration|settings|runtime|node|tooling)\b/i.test(
+      taskText
+    ) ||
+    /\b(?:sin\s+(?:cambiar|modificar|tocar)|no\s+(?:cambiar|modificar|tocar))\s+(?:la\s+)?(?:configuración|ajustes|entorno)\b/iu.test(
+      taskText
+    )
   );
 }
 

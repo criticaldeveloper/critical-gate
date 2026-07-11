@@ -1,0 +1,15 @@
+{
+  "evaluationSet": "development",
+  "sourceRepository": "tamagotchi",
+  "caseType": "multilingual-config-constraint-drift",
+  "labelSource": "manual-phase-3-multilingual-review-2026-07-11",
+  "shouldBlock": true,
+  "expectedFindings": [
+    {
+      "detector": "scope",
+      "severity": "high",
+      "file": ".node-version"
+    }
+  ],
+  "allowedExtraDetectors": ["config-change", "blast-radius"]
+}

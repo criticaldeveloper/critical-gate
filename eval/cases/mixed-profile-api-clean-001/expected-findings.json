@@ -1,0 +1,8 @@
+{
+  "evaluationSet": "calibration",
+  "sourceRepository": "diegolopes-ft",
+  "caseType": "mixed-language-clean-api-invariant",
+  "labelSource": "manual-phase-3-multilingual-review-2026-07-11",
+  "shouldBlock": false,
+  "expectedFindings": []
+}

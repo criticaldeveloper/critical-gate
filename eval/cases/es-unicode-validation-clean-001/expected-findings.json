@@ -1,0 +1,8 @@
+{
+  "evaluationSet": "development",
+  "sourceRepository": "criticaldeveloper-blog",
+  "caseType": "multilingual-clean-source-fix",
+  "labelSource": "manual-phase-3-multilingual-review-2026-07-11",
+  "shouldBlock": false,
+  "expectedFindings": []
+}

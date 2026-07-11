@@ -266,7 +266,8 @@ package ownership now contributes conservative medium/large-task scope evidence 
 file-level insufficient-context status. Changed exported symbols and relative import edges now
 provide bounded alignment/support evidence without creating clean-pass claims. Broader ownership
 remains; root TypeScript path aliases now resolve into import-graph evidence without changing the
-public result schema.
+public result schema. Five manually reviewed Spanish/mixed-language cases now seed development and
+calibration evaluation; broader real multilingual evidence remains.
 
 Goal: improve the core promise without pretending the tool understands broad tasks when it does not.
 

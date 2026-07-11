@@ -109,6 +109,10 @@ Provided contracts also constrain experimental intent-verification, blast-radius
 expected-companions heuristics. Explicitly allowed changed files are not reported as disconnected
 blast-radius clusters, companions outside the declared boundary are not suggested, and negated
 dependency, configuration, or test constraints are not interpreted as requested work.
+Free-text intent preprocessing recognizes explicit English and Spanish negative constraint clauses.
+For configuration scope specifically, phrases such as `without changing configuration` and
+`sin modificar la configuración` prevent the prohibited config wording from being treated as
+authorization for config changes.
 
 ## V1 Blockers
 

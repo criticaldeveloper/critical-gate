@@ -963,6 +963,33 @@ index 57b22a0..cb3e0f1 100644
     ]);
   });
 
+  it("emits for config changes when a Spanish task explicitly forbids them", () => {
+    const diff = parse(`diff --git a/.node-version b/.node-version
+index 57b22a0..cb3e0f1 100644
+--- a/.node-version
++++ b/.node-version
+@@ -1 +1 @@
+-22.12.0
++24.0.0
+`);
+
+    expect(
+      scopeDetector.run({
+        task: {
+          source: "cli",
+          text: "Mejora la ventana sin modificar la configuración"
+        },
+        diff
+      })
+    ).toEqual([
+      expect.objectContaining({
+        detector: "scope",
+        severity: "high",
+        evidence: [expect.objectContaining({ path: ".node-version" })]
+      })
+    ]);
+  });
+
   it("does not emit for package engine changes when the task mentions Node", () => {
     const diff = parse(`diff --git a/package.json b/package.json
 index 57b22a0..cb3e0f1 100644

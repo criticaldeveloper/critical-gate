@@ -1,0 +1,8 @@
+{
+  "evaluationSet": "calibration",
+  "sourceRepository": "critical-components",
+  "caseType": "mixed-language-clean-component-fix",
+  "labelSource": "manual-phase-3-multilingual-review-2026-07-11",
+  "shouldBlock": false,
+  "expectedFindings": []
+}

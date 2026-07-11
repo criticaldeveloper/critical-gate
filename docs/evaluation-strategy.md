@@ -128,6 +128,12 @@ negative, or valuable true positive found during dogfooding.
 Do not describe this corpus as an external benchmark until it contains cases from multiple unrelated
 repositories with independent labels.
 
+The Phase 3 multilingual seed adds five manually reviewed synthetic/internal cases across the five
+dogfood repository profiles: three development cases and two calibration cases. They cover Spanish
+Unicode targets, mixed-language component/API tasks, and explicit dependency/config constraints.
+Their label source is `manual-phase-3-multilingual-review-2026-07-11`; they are regression and
+calibration evidence, not independent external validation.
+
 ## Current Baselines
 
 Use these baselines when dogfooding Critical Gate on real repositories:

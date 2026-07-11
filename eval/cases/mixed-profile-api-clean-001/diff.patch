@@ -1,0 +1,16 @@
+diff --git a/src/profile/validator.ts b/src/profile/validator.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/profile/validator.ts
++++ b/src/profile/validator.ts
+@@ -1,3 +1,3 @@
+ export function validateProfile(value: string): boolean {
+-  return value.length > 0;
++  return value.trim().length > 0;
+ }
+diff --git a/tests/profile/validator.test.ts b/tests/profile/validator.test.ts
+index 57b22a0..cb3e0f1 100644
+--- a/tests/profile/validator.test.ts
++++ b/tests/profile/validator.test.ts
+@@ -1,2 +1,3 @@
+ expect(validateProfile("Marc")).toBe(true);
++expect(validateProfile("   ")).toBe(false);

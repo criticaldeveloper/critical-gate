@@ -1,0 +1,19 @@
+diff --git a/packages/components/src/components/drawer/ds-drawer.ts b/packages/components/src/components/drawer/ds-drawer.ts
+index 57b22a0..cb3e0f1 100644
+--- a/packages/components/src/components/drawer/ds-drawer.ts
++++ b/packages/components/src/components/drawer/ds-drawer.ts
+@@ -10,5 +10,6 @@ class DsDrawer extends HTMLElement {
+   onKeyDown(event: KeyboardEvent) {
+-    if (event.key === "Esc") this.close();
++    if (event.key !== "Escape") return;
++    this.close();
+   }
+ }
+diff --git a/packages/components/src/components/drawer/ds-drawer.spec.ts b/packages/components/src/components/drawer/ds-drawer.spec.ts
+index 57b22a0..cb3e0f1 100644
+--- a/packages/components/src/components/drawer/ds-drawer.spec.ts
++++ b/packages/components/src/components/drawer/ds-drawer.spec.ts
+@@ -8,3 +8,4 @@ test("closes from keyboard", () => {
+   drawer.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
++  expect(drawer.open).toBe(false);
+ });
