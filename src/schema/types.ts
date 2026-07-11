@@ -260,6 +260,8 @@ export interface GateSummary {
   diffCostScore?: number;
   scopeExpansionScore?: ScopeExpansionScore;
   diffCoherenceScore?: DiffCoherenceScore;
+  evidenceStrengthSummary?: EvidenceStrengthSummary;
+  /** @deprecated Use evidenceStrengthSummary. */
   confidenceCalibration?: ConfidenceCalibrationSummary;
   policyApplied?: PolicyAppliedSummary;
   detectorRuns?: DetectorRunSummary[];
@@ -271,7 +273,11 @@ export interface ConfidenceCalibrationSummary {
   confidenceSuppressedCount: number;
 }
 
-export type EvidenceStrengthSummary = ConfidenceCalibrationSummary;
+export interface EvidenceStrengthSummary {
+  blockingEligibleCount: number;
+  observationModeCount: number;
+  evidenceThresholdSuppressedCount: number;
+}
 
 export interface PolicyAppliedSummary {
   failOn: "blocker" | "high" | "medium";
@@ -281,6 +287,8 @@ export interface PolicyAppliedSummary {
   acceptedFindingIds: string[];
   blockingFindingIds: string[];
   observationFindingIds: string[];
+  evidenceThresholdSuppressedFindingIds?: string[];
+  /** @deprecated Use evidenceThresholdSuppressedFindingIds. */
   confidenceSuppressedFindingIds: string[];
 }
 

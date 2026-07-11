@@ -192,9 +192,11 @@ A report includes:
 - **Diff Coherence Score**: a 0-100 positive signal for how well the changed files, support files,
   churn, and findings fit the task intent.
 
-JSON output also includes evidence-strength decision counts under the legacy
-`confidenceCalibration` field. These show whether high-risk findings were eligible to block, kept in
-observation mode, or suppressed because evidence strength was below the detector threshold.
+JSON output includes evidence-strength decision counts under `evidenceStrengthSummary`. The legacy
+`confidenceCalibration` alias remains populated for compatibility. These show whether high-risk
+findings were eligible to block, kept in observation mode, or suppressed because evidence strength
+was below the detector threshold. `policyApplied.evidenceThresholdSuppressedFindingIds` identifies
+the affected findings without conflating their impact severity with the policy decision.
 
 JSON and Markdown output can also include detector run statuses. `passed` means the detector ran and
 emitted no findings. `errored`, `timed-out`, `skipped`, and `insufficient-context` mean that check

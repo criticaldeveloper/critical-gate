@@ -37,6 +37,11 @@ describe("evidence strength thresholds", () => {
       ])
     ).toMatchObject({
       decision: "pass",
+      evidenceStrengthSummary: {
+        blockingEligibleCount: 0,
+        observationModeCount: 0,
+        evidenceThresholdSuppressedCount: 1
+      },
       confidenceCalibration: {
         blockingEligibleCount: 0,
         observationModeCount: 0,
@@ -46,38 +51,54 @@ describe("evidence strength thresholds", () => {
   });
 
   it("keeps high-evidence legacy findings blocking", () => {
-    expect(summarizeFindings([highScopeFinding])).toMatchObject({
+    const summary = summarizeFindings([highScopeFinding]);
+
+    expect(summary).toMatchObject({
       decision: "fail",
+      evidenceStrengthSummary: {
+        blockingEligibleCount: 1,
+        observationModeCount: 0,
+        evidenceThresholdSuppressedCount: 0
+      },
       confidenceCalibration: {
         blockingEligibleCount: 1,
         observationModeCount: 0,
         confidenceSuppressedCount: 0
       }
     });
+    expect(summary.policyApplied?.evidenceThresholdSuppressedFindingIds).toEqual([]);
+    expect(summary.policyApplied?.confidenceSuppressedFindingIds).toEqual([]);
   });
 
   it("does not let explicit detector promotion bypass evidence-strength thresholds", () => {
-    expect(
-      summarizeFindings(
-        [
-          {
-            ...highScopeFinding,
-            detector: "blast-radius",
-            confidence: 0.79
-          }
-        ],
-        undefined,
-        undefined,
+    const summary = summarizeFindings(
+      [
         {
-          blockingDetectors: ["blast-radius"]
+          ...highScopeFinding,
+          detector: "blast-radius",
+          confidence: 0.79
         }
-      )
-    ).toMatchObject({
+      ],
+      undefined,
+      undefined,
+      {
+        blockingDetectors: ["blast-radius"]
+      }
+    );
+
+    expect(summary).toMatchObject({
       decision: "pass",
+      evidenceStrengthSummary: {
+        evidenceThresholdSuppressedCount: 1
+      },
       confidenceCalibration: {
         confidenceSuppressedCount: 1
       }
     });
+    expect(summary.policyApplied?.evidenceThresholdSuppressedFindingIds).toEqual([
+      "scope:tsconfig.json"
+    ]);
+    expect(summary.policyApplied?.confidenceSuppressedFindingIds).toEqual(["scope:tsconfig.json"]);
   });
 
   it("explains per-detector minimum blocking evidence strength", () => {

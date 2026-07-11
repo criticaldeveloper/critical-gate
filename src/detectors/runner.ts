@@ -133,6 +133,7 @@ export function summarizeFindings(
   const blockerCount = countSeverity(findings, "blocker");
   const highCount = countSeverity(findings, "high");
   const blockingFindings = findings.filter((finding) => isBlockingFinding(finding, policy));
+  const evidenceStrengthSummary = summarizeEvidenceStrength(findings, policy);
 
   return {
     decision: blockingFindings.length > 0 ? "fail" : "pass",
@@ -142,7 +143,12 @@ export function summarizeFindings(
     mediumCount: countSeverity(findings, "medium"),
     lowCount: countSeverity(findings, "low"),
     infoCount: countSeverity(findings, "info"),
-    confidenceCalibration: summarizeConfidenceCalibration(findings, policy),
+    evidenceStrengthSummary,
+    confidenceCalibration: {
+      blockingEligibleCount: evidenceStrengthSummary.blockingEligibleCount,
+      observationModeCount: evidenceStrengthSummary.observationModeCount,
+      confidenceSuppressedCount: evidenceStrengthSummary.evidenceThresholdSuppressedCount
+    },
     policyApplied: summarizePolicyApplied(findings, policy),
     detectorRuns: policy.detectorRuns,
     diffCostScore:
@@ -235,6 +241,10 @@ function summarizePolicyApplied(
     ])
   ].sort();
 
+  const evidenceThresholdSuppressedFindingIds = findings
+    .filter(isEvidenceStrengthSuppressedFinding)
+    .map((finding) => finding.id);
+
   return {
     failOn,
     observationDetectors,
@@ -251,9 +261,8 @@ function summarizePolicyApplied(
     observationFindingIds: findings
       .filter((finding) => isObservationModeFinding(finding, policy))
       .map((finding) => finding.id),
-    confidenceSuppressedFindingIds: findings
-      .filter(isEvidenceStrengthSuppressedFinding)
-      .map((finding) => finding.id)
+    evidenceThresholdSuppressedFindingIds,
+    confidenceSuppressedFindingIds: evidenceThresholdSuppressedFindingIds
   };
 }
 
@@ -261,15 +270,15 @@ export function getDetectorMaturity(detector: string): DetectorMaturity {
   return detectorMaturityByName.get(detector) ?? "experimental";
 }
 
-function summarizeConfidenceCalibration(
+function summarizeEvidenceStrength(
   findings: Finding[],
   policy: FindingDecisionPolicy
-): GateResult["summary"]["confidenceCalibration"] {
+): NonNullable<GateResult["summary"]["evidenceStrengthSummary"]> {
   return {
     blockingEligibleCount: findings.filter((finding) => isBlockingFinding(finding, policy)).length,
     observationModeCount: findings.filter((finding) => isObservationModeFinding(finding, policy))
       .length,
-    confidenceSuppressedCount: findings.filter(isEvidenceStrengthSuppressedFinding).length
+    evidenceThresholdSuppressedCount: findings.filter(isEvidenceStrengthSuppressedFinding).length
   };
 }
 

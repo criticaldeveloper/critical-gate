@@ -460,6 +460,7 @@ export const gateResultJsonSchema = {
         diffCostScore: { type: "number", minimum: 0, maximum: 100 },
         scopeExpansionScore: { $ref: "#/$defs/scopeExpansionScore" },
         diffCoherenceScore: { $ref: "#/$defs/diffCoherenceScore" },
+        evidenceStrengthSummary: { $ref: "#/$defs/evidenceStrengthSummary" },
         confidenceCalibration: { $ref: "#/$defs/confidenceCalibrationSummary" },
         policyApplied: { $ref: "#/$defs/policyAppliedSummary" },
         detectorRuns: {
@@ -476,6 +477,20 @@ export const gateResultJsonSchema = {
         blockingEligibleCount: { type: "integer", minimum: 0 },
         observationModeCount: { type: "integer", minimum: 0 },
         confidenceSuppressedCount: { type: "integer", minimum: 0 }
+      }
+    },
+    evidenceStrengthSummary: {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "blockingEligibleCount",
+        "observationModeCount",
+        "evidenceThresholdSuppressedCount"
+      ],
+      properties: {
+        blockingEligibleCount: { type: "integer", minimum: 0 },
+        observationModeCount: { type: "integer", minimum: 0 },
+        evidenceThresholdSuppressedCount: { type: "integer", minimum: 0 }
       }
     },
     policyAppliedSummary: {
@@ -501,6 +516,7 @@ export const gateResultJsonSchema = {
         acceptedFindingIds: stringArraySchema,
         blockingFindingIds: stringArraySchema,
         observationFindingIds: stringArraySchema,
+        evidenceThresholdSuppressedFindingIds: stringArraySchema,
         confidenceSuppressedFindingIds: stringArraySchema
       }
     },

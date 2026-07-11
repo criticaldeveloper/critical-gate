@@ -305,7 +305,8 @@ Validation:
 Status (2026-07-11): in progress. Runner output already normalizes optional `evidenceStrength` while
 retaining required legacy `confidence`. Evidence-strength calibration is now the canonical API,
 confidence-named exports remain deprecated aliases, and human policy summaries no longer use
-probability-like confidence wording.
+probability-like confidence wording. Canonical result summaries and policy suppression IDs now use
+evidence-strength terminology while legacy JSON aliases remain populated.
 
 Goal: stop presenting manual evidence thresholds as calibrated probabilities.
 

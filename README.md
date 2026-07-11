@@ -33,8 +33,9 @@ Current detectors focus on TypeScript and JavaScript repositories:
 - Unusual historical co-change patterns.
 - Repository convention drift and utility reinvention signals.
 
-Every finding includes severity, confidence, evidence, tags, and a repair hint that another agent or
-developer can act on.
+Every finding includes impact severity, heuristic evidence strength, concrete evidence, tags, and a
+repair hint that another agent or developer can act on. JSON retains the legacy `confidence` field
+for compatibility; it is not a calibrated probability.
 
 ## Supported Scope
 

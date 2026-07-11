@@ -41,6 +41,10 @@ The exported `calibrateFindingConfidence` function and `minimumBlockingConfidenc
 deprecated compatibility aliases. New integrations should use `calibrateFindingEvidenceStrength`
 and `minimumBlockingEvidenceStrength`. Human reports use evidence-strength terminology only.
 
+New JSON consumers should read `summary.evidenceStrengthSummary` and
+`summary.policyApplied.evidenceThresholdSuppressedFindingIds`. Critical Gate also emits the legacy
+`confidenceCalibration` and `confidenceSuppressedFindingIds` aliases for backward compatibility.
+
 ## Detector Maturity
 
 Detector maturity is separate from severity, evidence strength, and rollout policy. It describes how much

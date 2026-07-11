@@ -168,6 +168,11 @@ describe("gate result schema", () => {
         mediumCount: 0,
         lowCount: 0,
         infoCount: 0,
+        evidenceStrengthSummary: {
+          blockingEligibleCount: 1,
+          observationModeCount: 0,
+          evidenceThresholdSuppressedCount: 0
+        },
         confidenceCalibration: {
           blockingEligibleCount: 1,
           observationModeCount: 0,
@@ -192,6 +197,7 @@ describe("gate result schema", () => {
           acceptedFindingIds: ["scope:accepted-fixture"],
           blockingFindingIds: ["test-weakening-001"],
           observationFindingIds: [],
+          evidenceThresholdSuppressedFindingIds: [],
           confidenceSuppressedFindingIds: []
         },
         detectorRuns: [
