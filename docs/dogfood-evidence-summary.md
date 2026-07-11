@@ -1,13 +1,13 @@
 # Dogfood Evidence Summary
 
-Generated: 2026-07-11T16:18:38.026Z
+Generated: 2026-07-11T17:41:34.535Z
 
 ## Overview
 
 - Repositories: 5
 - Labeled reports: 117
 - Useful findings: 249
-- False-positive finding instances: 599
+- False-positive finding instances: 600
 - Missed findings: 3
 - Fixture-needed reports: 36
 - Fixture-created reports: 19
@@ -48,7 +48,7 @@ Generated: 2026-07-11T16:18:38.026Z
 - test-weakening: 53
 - config-change: 51
 - dependency: 48
-- repository-intelligence: 19
+- repository-intelligence: 20
 - intent-verification: 15
 - dependency-addition: 10
 - api-surface: 5
@@ -73,7 +73,7 @@ Generated: 2026-07-11T16:18:38.026Z
 
 ## Repositories
 
-- critical-components: 17 reports; useful findings 85; false-positive findings 11; missed findings 2; fixture-needed reports 4; repair attempts 0; missed-finding reviews 5.
+- critical-components: 17 reports; useful findings 85; false-positive findings 12; missed findings 2; fixture-needed reports 4; repair attempts 0; missed-finding reviews 5.
 - criticaldeveloper-blog: 21 reports; useful findings 12; false-positive findings 103; missed findings 1; fixture-needed reports 16; repair attempts 0; missed-finding reviews 7.
 - criticaldeveloper-ft: 23 reports; useful findings 16; false-positive findings 38; missed findings 0; fixture-needed reports 2; repair attempts 0; missed-finding reviews 17.
 - diegolopes-ft: 48 reports; useful findings 40; false-positive findings 152; missed findings 0; fixture-needed reports 10; repair attempts 4; missed-finding reviews 48.
@@ -99,7 +99,7 @@ Generated: 2026-07-11T16:18:38.026Z
 - `120826-upgrade-critical-gate-to-2-7-1-and-verify-package-only-upgrade-calibration`: false-positive; findings 3; false positives 3; fixture needed yes; repair attempted not recorded; missed reviewed yes.
 - `124556-upgrade-critical-gate-to-2-7-2-and-verify-shortened-package-hunk-upgrade-calibra`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed yes.
 - `123009-implement-ds-autocomplete-field-with-debounced-static-and-remote-filtering-dropd`: mixed; findings 9; false positives 8; fixture needed yes; repair attempted not recorded; missed reviewed yes.
-- `161832-implement-production-ready-ds-drawer-with-arbitrary-triggers-controlled-state-ac`: mixed; findings 2; false positives 0; fixture needed yes; repair attempted not recorded; missed reviewed yes.
+- `174126-implement-production-ready-ds-drawer-with-directional-velocity-snap-settling-nes`: mixed; findings 3; false positives 1; fixture needed yes; repair attempted not recorded; missed reviewed yes.
 
 ### criticaldeveloper-blog
 
