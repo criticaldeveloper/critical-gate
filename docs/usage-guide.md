@@ -209,6 +209,11 @@ Use `--format pr-comment` when the audience is a pull request discussion. It kee
 evidence-backed data but groups it into blocking findings, observations, expected support changes,
 and the strongest scope drivers.
 
+SARIF result properties expose `impactSeverity`, `evidenceStrength`, and `policyDecision` separately.
+The policy decision is one of `accepted`, `blocking`, `observation`,
+`evidence-threshold-suppressed`, or `non-blocking`. Legacy `severity` and `confidence` properties
+remain available for existing consumers.
+
 Severity levels:
 
 - `blocker`: should fail by default.

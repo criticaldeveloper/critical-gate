@@ -307,6 +307,8 @@ retaining required legacy `confidence`. Evidence-strength calibration is now the
 confidence-named exports remain deprecated aliases, and human policy summaries no longer use
 probability-like confidence wording. Canonical result summaries and policy suppression IDs now use
 evidence-strength terminology while legacy JSON aliases remain populated.
+SARIF results also expose impact severity, evidence strength, and policy decision as separate
+properties without removing legacy integration fields.
 
 Goal: stop presenting manual evidence thresholds as calibrated probabilities.
 

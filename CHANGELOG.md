@@ -13,6 +13,8 @@ This project follows the versioning policy in `docs/versioning-policy.md`.
   remove confidence wording from human policy summaries.
 - Add canonical evidence-strength summary and policy-decision fields while continuing to emit the
   legacy confidence-named JSON aliases for existing integrations.
+- Separate impact severity, heuristic evidence strength, and the applied policy decision in SARIF
+  result properties while preserving legacy properties.
 - Close Phase 3 after a criterion-by-criterion exit review covering Unicode/multilingual intent,
   constraints, structural complexity, explicit uncertainty, ownership, symbols, import aliases,
   and docs/test scope relevance; record residual limitations before beginning Phase 4.

@@ -34,7 +34,7 @@ export function renderSarifReport(result: GateResult): string {
             rules: getRules(emittedFindings)
           }
         },
-        results: emittedFindings.map(toSarifResult),
+        results: emittedFindings.map((finding) => toSarifResult(finding, result)),
         invocations: [
           {
             executionSuccessful: true,
@@ -76,7 +76,7 @@ function getRules(findings: Finding[]) {
   }));
 }
 
-function toSarifResult(finding: Finding) {
+function toSarifResult(finding: Finding, result: GateResult) {
   return {
     ruleId: getRuleId(finding),
     level: toSarifLevel(finding.severity),
@@ -94,10 +94,40 @@ function toSarifResult(finding: Finding) {
       confidence: finding.confidence,
       evidenceStrength: finding.evidenceStrength ?? finding.confidence,
       severity: finding.severity,
+      impactSeverity: finding.severity,
+      policyDecision: getPolicyDecision(finding, result),
       repair: finding.repair,
       tags: finding.tags
     }
   };
+}
+
+function getPolicyDecision(
+  finding: Finding,
+  result: GateResult
+): "accepted" | "blocking" | "observation" | "evidence-threshold-suppressed" | "non-blocking" {
+  const policy = result.summary.policyApplied;
+
+  if (policy?.acceptedFindingIds.includes(finding.id) === true) {
+    return "accepted";
+  }
+
+  if (policy?.blockingFindingIds.includes(finding.id) === true) {
+    return "blocking";
+  }
+
+  if (policy?.observationFindingIds.includes(finding.id) === true) {
+    return "observation";
+  }
+
+  const suppressedFindingIds =
+    policy?.evidenceThresholdSuppressedFindingIds ?? policy?.confidenceSuppressedFindingIds ?? [];
+
+  if (suppressedFindingIds.includes(finding.id)) {
+    return "evidence-threshold-suppressed";
+  }
+
+  return "non-blocking";
 }
 
 function getLocations(finding: Finding): SarifResultLocation[] {

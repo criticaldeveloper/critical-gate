@@ -515,7 +515,9 @@ describe("reporters", () => {
               properties: {
                 detector: "test-weakening",
                 category: "tests",
-                evidenceStrength: 0.92
+                evidenceStrength: 0.92,
+                impactSeverity: "high",
+                policyDecision: "blocking"
               },
               locations: [
                 {
@@ -548,6 +550,50 @@ describe("reporters", () => {
       emittedResultCount: 1,
       truncated: false
     });
+  });
+
+  it("separates SARIF impact, evidence strength, and policy decisions", () => {
+    const findings: Finding[] = [
+      { ...result.findings[0]!, id: "accepted" },
+      { ...result.findings[0]!, id: "observation" },
+      { ...result.findings[0]!, id: "suppressed", evidenceStrength: 0.7 },
+      { ...result.findings[0]!, id: "informational", severity: "low" }
+    ];
+    const sarif = JSON.parse(
+      renderSarifReport({
+        ...result,
+        findings,
+        summary: {
+          ...result.summary,
+          policyApplied: {
+            ...result.summary.policyApplied!,
+            acceptedFindingIds: ["accepted"],
+            blockingFindingIds: [],
+            observationFindingIds: ["observation"],
+            evidenceThresholdSuppressedFindingIds: ["suppressed"],
+            confidenceSuppressedFindingIds: ["suppressed"]
+          }
+        }
+      })
+    );
+
+    expect(
+      sarif.runs[0].results.map(
+        (item: { properties: Record<string, string | number> }) => item.properties
+      )
+    ).toEqual([
+      expect.objectContaining({
+        impactSeverity: "high",
+        evidenceStrength: 0.92,
+        policyDecision: "accepted"
+      }),
+      expect.objectContaining({ policyDecision: "observation" }),
+      expect.objectContaining({
+        evidenceStrength: 0.7,
+        policyDecision: "evidence-threshold-suppressed"
+      }),
+      expect.objectContaining({ impactSeverity: "low", policyDecision: "non-blocking" })
+    ]);
   });
 
   it("renders stable SARIF sub-rules, fingerprints, and truncation metadata", () => {
