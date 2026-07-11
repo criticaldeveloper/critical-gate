@@ -22,6 +22,39 @@ describe("task analysis", () => {
     expect(estimateTaskComplexity("add dependency detector")).toBe("large");
   });
 
+  it("keeps a long single-purpose fix small without using word count", () => {
+    expect(
+      estimateTaskComplexity(
+        "Fix the signup email validation message shown after submitting an invalid address"
+      )
+    ).toBe("small");
+  });
+
+  it("treats a short coordinated task as medium", () => {
+    expect(estimateTaskComplexity("Update profile form and tests")).toBe("medium");
+  });
+
+  it("treats an implementation-sized component task as medium", () => {
+    expect(estimateTaskComplexity("Implement Drawer component")).toBe("medium");
+  });
+
+  it("treats a three-step task plan as large", () => {
+    expect(
+      estimateTaskComplexity("Update the parser. Add regression tests. Document the behavior.")
+    ).toBe("large");
+  });
+
+  it("uses Spanish structural signals consistently", () => {
+    expect(estimateTaskComplexity("Corrige la validaci\u00f3n del correo electr\u00f3nico")).toBe(
+      "small"
+    );
+    expect(
+      estimateTaskComplexity(
+        "Actualiza la navegaci\u00f3n m\u00f3vil y documenta el comportamiento"
+      )
+    ).toBe("medium");
+  });
+
   it("extracts meaningful keywords", () => {
     expect(extractTaskKeywords("Add signup validation for email input")).toEqual([
       "signup",

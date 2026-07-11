@@ -8,6 +8,9 @@ This project follows the versioning policy in `docs/versioning-policy.md`.
 
 ### Changed
 
+- Replace raw task word-count complexity with structural signals including distinct actions,
+  clauses, lists, coordinated targets, explicit paths, and implementation-sized target nouns, with
+  English and Spanish regression coverage.
 - Separate explicit English and Spanish constraint clauses from descriptive free-text goals before
   lexical intent analysis, and infer only established invariants and clearly named forbidden paths
   into backward-compatible inferred task contracts.

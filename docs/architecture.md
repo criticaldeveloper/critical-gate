@@ -41,7 +41,9 @@ Can come from:
 The task intent is used to estimate expected scope and identify unrelated changes. For free-text
 tasks, explicit constraint clauses are separated from descriptive goal text before lexical intent
 analysis; only established deterministic constraints are inferred into contract invariants or
-forbidden paths. Structured task contracts remain authoritative.
+forbidden paths. Structured task contracts remain authoritative. Task complexity is estimated from
+structural signals such as action count, clauses, lists, coordinated targets, paths, and
+implementation-sized targets rather than raw word count.
 
 ### Git Diff
 

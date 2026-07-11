@@ -26,6 +26,26 @@ const largeTaskTerms = [
   "all"
 ];
 
+const actionPatterns = [
+  /\b(?:add|create|introduce|implement|a\u00f1adir|agregar|crear|implementar)\b/iu,
+  /\b(?:fix|fixed|bugfix|repair|resolve|correct|arreglar|arregla|corregir|corrige|resolver|resuelve)\b/iu,
+  /\b(?:remove|delete|drop|eliminar|borrar)\b/iu,
+  /\b(?:rename|renombrar)\b/iu,
+  /\b(?:update|change|adjust|improve|actualizar|actualiza|cambiar|cambia|ajustar|ajusta|mejorar|mejora)\b/iu,
+  /\b(?:refactor|rewrite|restructure|refactorizar|reescribir|reestructurar)\b/iu,
+  /\b(?:migrate|migration|migrar|migraci\u00f3n)\b/iu,
+  /\b(?:bump|upgrade|actualizar\s+versi\u00f3n)\b/iu,
+  /\b(?:wire|connect|integrate|conectar|integrar)\b/iu,
+  /\b(?:document|documentar|documenta)\b/iu,
+  /\b(?:release|publish|tag|publicar|publica|etiquetar|etiqueta)\b/iu
+];
+
+const implementationActionPattern =
+  /\b(?:add|create|introduce|implement|a\u00f1adir|agregar|crear|implementar)\b/iu;
+const implementationTargetPattern =
+  /\b(?:component|detector|feature|integration|package|page|service|system|workflow|componente|funcionalidad|integraci\u00f3n|paquete|p\u00e1gina|servicio|sistema|flujo)\b/iu;
+const coordinationPattern = /\b(?:and|also|plus|as\s+well\s+as|y|adem\u00e1s)\b/iu;
+
 const stopWords = new Set([
   "the",
   "and",
@@ -95,13 +115,38 @@ const keywordAliases: Record<string, string[]> = {
 };
 
 export function estimateTaskComplexity(normalizedTaskText: string): TaskComplexity {
-  if (largeTaskTerms.some((term) => normalizedTaskText.includes(term))) {
+  const text = normalizeTaskText(normalizedTaskText);
+
+  if (largeTaskTerms.some((term) => hasPhrase(text, term))) {
     return "large";
   }
 
-  const words = normalizedTaskText.split(/\s+/).filter(Boolean);
+  const segmentCount = countTaskSegments(text);
+  const listItemCount = text
+    .split(/\r?\n/u)
+    .filter((line) => /^\s*(?:[-*]|\d+[.)])\s+/u.test(line)).length;
+  const actionCount = actionPatterns.filter((pattern) => pattern.test(text)).length;
+  const pathCount =
+    text.match(/(?:[\w.-]+\/)+(?:\*\*|[\w.*-]+\.[\w.-]+)|[\w.-]+\.[\w.-]+/gu)?.length ?? 0;
+  const commaCount = text.match(/,/gu)?.length ?? 0;
 
-  if (words.length <= 8 || smallTaskTerms.some((term) => normalizedTaskText.includes(term))) {
+  if (segmentCount >= 3 || listItemCount >= 3 || actionCount >= 3) {
+    return "large";
+  }
+
+  if (
+    segmentCount >= 2 ||
+    listItemCount >= 2 ||
+    actionCount >= 2 ||
+    coordinationPattern.test(text) ||
+    pathCount >= 2 ||
+    commaCount >= 2 ||
+    (implementationActionPattern.test(text) && implementationTargetPattern.test(text))
+  ) {
+    return "medium";
+  }
+
+  if (actionCount === 1 || smallTaskTerms.some((term) => hasPhrase(text, term))) {
     return "small";
   }
 
@@ -122,4 +167,22 @@ export function normalizeTaskText(value: string): string {
 
 export function tokenizeTaskText(value: string): string[] {
   return normalizeTaskText(value).match(/[\p{L}\p{N}]+/gu) ?? [];
+}
+
+function countTaskSegments(value: string): number {
+  return value
+    .split(/(?:\r?\n|[!?;]+\s*|\.\s+)/u)
+    .map((segment) => segment.trim())
+    .filter(Boolean).length;
+}
+
+function hasPhrase(value: string, phrase: string): boolean {
+  return new RegExp(
+    "(^|[^\\p{L}\\p{N}])" + escapeRegExp(phrase) + "([^\\p{L}\\p{N}]|$)",
+    "iu"
+  ).test(value);
+}
+
+function escapeRegExp(value: string): string {
+  return value.replaceAll(/[.*+?^$(){}|[\]\\]/g, "\\$&");
 }
