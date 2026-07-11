@@ -8,6 +8,9 @@ This project follows the versioning policy in `docs/versioning-policy.md`.
 
 ### Changed
 
+- Close Phase 3 after a criterion-by-criterion exit review covering Unicode/multilingual intent,
+  constraints, structural complexity, explicit uncertainty, ownership, symbols, import aliases,
+  and docs/test scope relevance; record residual limitations before beginning Phase 4.
 - Treat docs and tests as scope-relevant for small tasks, using task tokens and changed-file graph
   relationships to accept support files, emit medium evidence for clearly unrelated support, and
   return insufficient context when no aligned anchor exists.

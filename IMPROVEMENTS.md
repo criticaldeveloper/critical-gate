@@ -259,16 +259,10 @@ Validation:
 
 ## Phase 3: Rebuild Intent And Scope Around Uncertainty
 
-Status (2026-07-11): in progress. Unicode-aware task tokenization, Spanish/mixed-language
-regression coverage, and deterministic separation of descriptive goals from explicit constraints
-are implemented. Task complexity now uses structural signals instead of raw word count. Repository
-package ownership now contributes conservative medium/large-task scope evidence while preserving
-file-level insufficient-context status. Changed exported symbols and relative import edges now
-provide bounded alignment/support evidence without creating clean-pass claims. Broader ownership
-remains; root TypeScript path aliases now resolve into import-graph evidence without changing the
-public result schema. Five manually reviewed Spanish/mixed-language cases now seed development and
-calibration evaluation. Docs/tests now participate in small-task scope relevance with explicit
-support evidence or uncertainty. Broader real multilingual evidence remains.
+Status (2026-07-11): complete. All tasks and exit criteria are satisfied at the intended reliability
+level. See `docs/phase-3-exit-review.md` for the criterion-by-criterion evidence and explicit
+residual limitations. Broader real multilingual evidence remains an external-proof task rather than
+a blocker for Phase 4.
 
 Goal: improve the core promise without pretending the tool understands broad tasks when it does not.
 
@@ -726,14 +720,11 @@ Critical Gate becomes meaningfully useful when it can demonstrate:
 
 ## Immediate Next Implementation Tasks
 
-1. Add detector maturity metadata to docs and runtime output.
-2. Add `TaskContract` schema and backward-compatible CLI parsing.
-3. Add detector status reporting with `unknown`, `insufficient-context`, `timed-out`, and `errored`.
-4. Rename user-facing confidence language to evidence strength while preserving JSON compatibility.
-5. Rework scope detection so medium and large tasks degrade explicitly instead of returning no
-   findings.
-6. Split evaluation into development, calibration, and holdout sets with repository-level isolation.
-7. Simplify Markdown output around top root causes and collapsed observations.
-8. Extend repair labels so rerun pass is not counted as repair success without task correctness.
+1. Complete the Phase 4 evidence-strength compatibility migration at the runner and human-report
+   boundaries while retaining legacy JSON `confidence` fields.
+2. Finish Phase 5 detector time/resource budgets and degradation reasons.
+3. Simplify Markdown and PR output around top root causes and collapsed observations.
+4. Extend repair labels so rerun pass is not counted as repair success without task correctness.
+5. Expand development/calibration evidence with independently reviewed real multilingual tasks.
 
 These tasks should be completed before any new detector family is accepted.
