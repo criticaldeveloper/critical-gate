@@ -302,7 +302,7 @@ Validation:
 
 ## Phase 4: Rename Or Actually Calibrate Confidence
 
-Status (2026-07-11): in progress. Runner output already normalizes optional `evidenceStrength` while
+Status (2026-07-11): complete. Runner output normalizes optional `evidenceStrength` while
 retaining required legacy `confidence`. Evidence-strength calibration is now the canonical API,
 confidence-named exports remain deprecated aliases, and human policy summaries no longer use
 probability-like confidence wording. Canonical result summaries and policy suppression IDs now use
@@ -311,6 +311,8 @@ SARIF results also expose impact severity, evidence strength, and policy decisio
 properties without removing legacy integration fields.
 The subtype-level calibration protocol now defines grouped development/calibration/holdout splits,
 minimum sample gates, reliability metrics, artifact requirements, and threshold governance.
+The criterion-by-criterion exit evidence and remaining statistical limitations are recorded in
+`docs/phase-4-exit-review.md`.
 
 Goal: stop presenting manual evidence thresholds as calibrated probabilities.
 

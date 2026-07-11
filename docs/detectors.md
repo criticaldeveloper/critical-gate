@@ -301,7 +301,7 @@ Initial implementation:
 
 - Diff-level matcher and assertion heuristics.
 - Test framework-aware patterns for Jest, Vitest, Playwright, and Mocha.
-- Flag assertion deletion and skipped tests as high confidence.
+- Flag assertion deletion and skipped tests when deterministic evidence strength is high.
 - Treat task-contract invariants `tests_must_not_weaken` and `no_test_weakening` as stronger than
   normal severity and emit blocker findings for detected test weakening.
 - Score assertion specificity in changed hunks and flag high-to-low replacements such as
@@ -397,7 +397,7 @@ Evidence:
 Initial implementation:
 
 - Build local naming profiles by folder.
-- Flag rare names only when confidence is high and the symbol is newly introduced.
+- Flag rare names only when evidence strength is high and the symbol is newly introduced.
 
 ### Normal Change Model
 

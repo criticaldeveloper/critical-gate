@@ -17,6 +17,8 @@ This project follows the versioning policy in `docs/versioning-policy.md`.
   result properties while preserving legacy properties.
 - Define a subtype-level evidence-strength calibration protocol with leakage-resistant dataset
   splits, minimum sample gates, reliability metrics, artifacts, and threshold governance.
+- Close Phase 4 after verifying backward-compatible JSON aliases, evidence-strength terminology
+  across human reports, separated SARIF policy concepts, and a measurable calibration path.
 - Close Phase 3 after a criterion-by-criterion exit review covering Unicode/multilingual intent,
   constraints, structural complexity, explicit uncertainty, ownership, symbols, import aliases,
   and docs/test scope relevance; record residual limitations before beginning Phase 4.
