@@ -1,5 +1,6 @@
 import type { TaskIntent } from "../schema/index.js";
 import { estimateTaskComplexity, extractTaskKeywords, type TaskComplexity } from "./intent-core.js";
+import { separateTaskText } from "./task-constraints.js";
 
 export type IntentVerb =
   | "add"
@@ -127,7 +128,8 @@ const classTerms: Array<{ changeClass: ChangeClass; terms: string[] }> = [
 const highRiskClasses: ChangeClass[] = ["config", "dependency", "api-surface", "ci", "build"];
 
 export function buildIntentModel(task: TaskIntent): IntentModel {
-  const normalizedText = task.text.toLowerCase();
+  const separatedTask = separateTaskText(task.text);
+  const normalizedText = separatedTask.descriptiveText.toLowerCase();
   const targetTokens = extractTaskKeywords(normalizedText);
   const allowedChangeClasses = inferAllowedChangeClasses(normalizedText);
 

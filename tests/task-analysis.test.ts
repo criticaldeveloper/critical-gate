@@ -66,6 +66,27 @@ describe("task analysis", () => {
     ]);
   });
 
+  it("does not treat an explicit dependency constraint as requested dependency work", () => {
+    const model = buildIntentModel({
+      source: "cli",
+      text: "Update the profile form without adding dependencies"
+    });
+
+    expect(model.targetTokens).toEqual(["profile", "form"]);
+    expect(model.allowedChangeClasses).toEqual(["source"]);
+    expect(model.expectedCategories).toEqual(["source-behavior"]);
+  });
+
+  it("separates a Spanish dependency constraint from mixed-language goal text", () => {
+    const model = buildIntentModel({
+      source: "cli",
+      text: "Actualiza navegación móvil del Drawer sin añadir dependencias"
+    });
+
+    expect(model.targetTokens).toEqual(["navegación", "móvil", "drawer"]);
+    expect(model.allowedChangeClasses).toEqual(["source"]);
+  });
+
   it("analyzes task intent", () => {
     const task: TaskIntent = {
       source: "cli",

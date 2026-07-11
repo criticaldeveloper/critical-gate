@@ -259,9 +259,10 @@ Validation:
 
 ## Phase 3: Rebuild Intent And Scope Around Uncertainty
 
-Status (2026-07-11): in progress. Unicode-aware task tokenization and Spanish/mixed-language
-regression coverage are implemented as the first slice. Constraint extraction, structural
-complexity signals, repository ownership evidence, and broader explicit uncertainty remain.
+Status (2026-07-11): in progress. Unicode-aware task tokenization, Spanish/mixed-language
+regression coverage, and deterministic separation of descriptive goals from explicit constraints
+are implemented. Structural complexity signals, repository ownership evidence, and broader
+explicit uncertainty remain.
 
 Goal: improve the core promise without pretending the tool understands broad tasks when it does not.
 

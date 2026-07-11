@@ -1,15 +1,18 @@
 import type { TaskContract, TaskIntent } from "../schema/index.js";
+import { separateTaskText } from "./task-constraints.js";
 
 type RawTaskContract = Record<string, unknown>;
 
 export function inferTaskContract(task: TaskIntent): TaskContract {
+  const separatedTask = separateTaskText(task.text);
+
   return {
     source: "inferred",
-    goal: task.text,
+    goal: separatedTask.descriptiveText || task.text.trim(),
     allowedPaths: [],
-    forbiddenPaths: [],
+    forbiddenPaths: separatedTask.inferredForbiddenPaths,
     expectedArtifacts: [],
-    invariants: [],
+    invariants: separatedTask.inferredInvariants,
     requiredChecks: []
   };
 }

@@ -1,10 +1,6 @@
 import type { DiffFile, TaskIntent } from "../schema/index.js";
 import { buildIntentModel } from "./intent-model.js";
-import {
-  estimateTaskComplexity,
-  extractTaskKeywords,
-  type TaskComplexity
-} from "./intent-core.js";
+import { estimateTaskComplexity, extractTaskKeywords, type TaskComplexity } from "./intent-core.js";
 
 export interface TaskAnalysis {
   complexity: TaskComplexity;

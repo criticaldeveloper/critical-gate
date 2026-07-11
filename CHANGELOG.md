@@ -8,6 +8,9 @@ This project follows the versioning policy in `docs/versioning-policy.md`.
 
 ### Changed
 
+- Separate explicit English and Spanish constraint clauses from descriptive free-text goals before
+  lexical intent analysis, and infer only established invariants and clearly named forbidden paths
+  into backward-compatible inferred task contracts.
 - Preserve Unicode letters and numbers during task tokenization, including canonically equivalent
   accented text, and filter common Spanish grammatical/task words from scope target keywords.
 - Reuse Unicode-aware tokenization in task-intent quality analysis so Spanish and mixed-language

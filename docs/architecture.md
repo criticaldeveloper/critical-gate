@@ -38,7 +38,10 @@ Can come from:
 - Issue text.
 - Codex goal or prompt summary.
 
-The task intent is used to estimate expected scope and identify unrelated changes.
+The task intent is used to estimate expected scope and identify unrelated changes. For free-text
+tasks, explicit constraint clauses are separated from descriptive goal text before lexical intent
+analysis; only established deterministic constraints are inferred into contract invariants or
+forbidden paths. Structured task contracts remain authoritative.
 
 ### Git Diff
 
