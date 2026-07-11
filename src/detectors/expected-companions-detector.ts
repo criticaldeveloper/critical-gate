@@ -6,6 +6,7 @@ import {
   isManifestOrLockfilePath
 } from "./package-upgrade-intent.js";
 import type { Detector } from "./types.js";
+import { isOutsideProvidedContract } from "./task-contract-authority.js";
 
 const maxHistoryFindingsPerSource = 3;
 const maxFrameworkFindingsPerSource = 2;
@@ -41,6 +42,7 @@ export const expectedCompanionsDetector: Detector = {
                 !changedPaths.has(rule.expectedPath) &&
                 isStrongCompanionRule(rule) &&
                 !isLowSignalHistoricalCompanionPath(rule.expectedPath) &&
+                !isOutsideProvidedContract(rule.expectedPath, context?.taskContract) &&
                 !isLowRelevanceCompanionChange(
                   rule.sourcePath,
                   diff.files,
@@ -55,7 +57,7 @@ export const expectedCompanionsDetector: Detector = {
       context?.frameworkPacks ?? [],
       task.text
     );
-    const packageFinding = detectMissingLockfile(diff.files);
+    const packageFinding = detectMissingLockfile(diff.files, context?.taskContract);
 
     return packageFinding === undefined
       ? [...historyFindings, ...frameworkFindings]
@@ -493,7 +495,10 @@ function getCappedHistoryFindings(
   );
 }
 
-function detectMissingLockfile(files: DiffFile[]): Finding | undefined {
+function detectMissingLockfile(
+  files: DiffFile[],
+  taskContract: NonNullable<Parameters<Detector["run"]>[0]["context"]>["taskContract"]
+): Finding | undefined {
   const changedPaths = new Set(files.map((file) => file.path));
   const changedPackage = files.find(
     (file) => file.path === "package.json" || file.path.endsWith("/package.json")
@@ -501,6 +506,9 @@ function detectMissingLockfile(files: DiffFile[]): Finding | undefined {
 
   if (
     changedPackage === undefined ||
+    getLockfileCandidates(changedPackage.path).every((path) =>
+      isOutsideProvidedContract(path, taskContract)
+    ) ||
     [...changedPaths].some((path) =>
       /(^|\/)(pnpm-lock\.yaml|package-lock\.json|yarn\.lock|bun\.lock|bun\.lockb)$/.test(path)
     )
@@ -526,6 +534,18 @@ function detectMissingLockfile(files: DiffFile[]): Finding | undefined {
       "Update the matching lockfile, or document why the manifest-only change is intentional.",
     tags: ["dependency"]
   };
+}
+
+function getLockfileCandidates(packagePath: string): string[] {
+  const packageDirectory = packagePath.includes("/")
+    ? packagePath.slice(0, packagePath.lastIndexOf("/"))
+    : "";
+  const names = ["pnpm-lock.yaml", "package-lock.json", "yarn.lock", "bun.lock", "bun.lockb"];
+
+  return [
+    ...names,
+    ...(packageDirectory.length === 0 ? [] : names.map((name) => `${packageDirectory}/${name}`))
+  ];
 }
 
 function toHistoryFinding(

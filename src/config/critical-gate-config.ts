@@ -30,6 +30,7 @@ export interface DetectorPolicyOverride {
 
 export interface CriticalGatePolicy {
   failOn?: "blocker" | "high" | "medium";
+  defaultInvariants?: string[];
   detectorOverrides?: DetectorPolicyOverride[];
   expectedCompanions?: ExpectedSupportFileRule[];
   allowedSupportFiles?: ExpectedSupportFileRule[];
@@ -72,6 +73,10 @@ export function getConfiguredFailOn(
   config: CriticalGateConfig
 ): "blocker" | "high" | "medium" | undefined {
   return config.policy?.failOn ?? config.rollout?.failOn;
+}
+
+export function getConfiguredDefaultInvariants(config: CriticalGateConfig): string[] {
+  return config.policy?.defaultInvariants ?? [];
 }
 
 export function getPolicyObservationDetectors(config: CriticalGateConfig): string[] | undefined {
@@ -251,6 +256,7 @@ function readPolicyConfig(
 
   return {
     failOn: readFailOn(rawValue, "policy.failOn", warnings),
+    defaultInvariants: readStringArray(rawValue, "defaultInvariants", warnings),
     detectorOverrides: readDetectorPolicyOverrides(rawValue, warnings),
     expectedCompanions: readSupportRules(rawValue, "expectedCompanions", warnings),
     allowedSupportFiles: readSupportRules(rawValue, "allowedSupportFiles", warnings),

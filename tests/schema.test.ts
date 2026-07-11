@@ -20,9 +20,11 @@ describe("gate result schema", () => {
         goal: "Add signup validation",
         allowedPaths: ["src/signup.ts", "tests/signup.test.ts"],
         forbiddenPaths: ["package.json"],
+        expectedChangedRoles: ["source", "test"],
         expectedArtifacts: ["signup validator"],
         invariants: ["no_new_dependencies"],
-        requiredChecks: ["pnpm test signup"]
+        requiredChecks: ["pnpm test signup"],
+        provenance: ["pull request body", "repository policy"]
       },
       diff: {
         baseRef: "main",

@@ -1,0 +1,8 @@
+{
+  "goal": "Create the article. No package, configuration, component, test, or stylesheet changes are required.",
+  "allowed_paths": ["src/content/posts/article.md"],
+  "forbidden_paths": ["package.json", "astro.config.*", "tests/**"],
+  "expected_artifacts": ["src/content/posts/article.md"],
+  "invariants": ["no_new_dependencies", "no_config_changes"],
+  "required_checks": []
+}

@@ -147,9 +147,11 @@ function renderTaskContractLines(result: GateResult): string[] {
     `Goal: ${contract.goal}.`,
     `Allowed paths: ${formatClasses(contract.allowedPaths)}.`,
     `Forbidden paths: ${formatClasses(contract.forbiddenPaths)}.`,
+    `Expected changed roles: ${formatClasses(contract.expectedChangedRoles ?? [])}.`,
     `Expected artifacts: ${formatClasses(contract.expectedArtifacts)}.`,
     `Invariants: ${formatClasses(contract.invariants)}.`,
-    `Required checks: ${formatClasses(contract.requiredChecks)}.`
+    `Required checks: ${formatClasses(contract.requiredChecks)}.`,
+    `Provenance: ${formatClasses(contract.provenance ?? [])}.`
   ];
 }
 

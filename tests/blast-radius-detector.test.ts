@@ -1,5 +1,11 @@
 import { blastRadiusDetector, parseUnifiedDiff, runDetectors } from "../src/index.js";
-import type { FileGraph, GateResult, KnowledgeProvider, TaskIntent } from "../src/index.js";
+import type {
+  FileGraph,
+  GateResult,
+  KnowledgeProvider,
+  TaskContract,
+  TaskIntent
+} from "../src/index.js";
 
 const task: TaskIntent = {
   source: "cli",
@@ -22,6 +28,39 @@ function knowledge(graph: FileGraph): KnowledgeProvider {
 }
 
 describe("blastRadiusDetector", () => {
+  it("does not report disconnected files explicitly allowed by a provided contract", () => {
+    const diff = parse(`diff --git a/src/component.ts b/src/component.ts
+new file mode 100644
+--- /dev/null
++++ b/src/component.ts
+@@ -0,0 +1 @@
++export const component = true;
+diff --git a/docs/contracts/component.json b/docs/contracts/component.json
+new file mode 100644
+--- /dev/null
++++ b/docs/contracts/component.json
+@@ -0,0 +1 @@
++{}
+`);
+    const taskContract: TaskContract = {
+      source: "provided",
+      goal: "Add component",
+      allowedPaths: ["src/component.ts", "docs/contracts/component.json"],
+      forbiddenPaths: [],
+      expectedArtifacts: ["src/component.ts"],
+      invariants: [],
+      requiredChecks: []
+    };
+
+    expect(
+      blastRadiusDetector.run({
+        task,
+        diff,
+        context: { knowledge: knowledge({ nodes: [], edges: [] }), taskContract }
+      })
+    ).toEqual([]);
+  });
+
   it("emits one aggregate finding for an unexpected changed cluster", () => {
     const diff = parse(`diff --git a/src/signup.ts b/src/signup.ts
 index 57b22a0..cb3e0f1 100644

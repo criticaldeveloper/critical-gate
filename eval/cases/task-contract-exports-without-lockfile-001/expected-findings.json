@@ -1,0 +1,13 @@
+{
+  "evaluationSet": "development",
+  "sourceRepository": "critical-components",
+  "caseType": "false-positive-regression",
+  "labelSource": "docs/critical-gate-evidence/2026-07-11/123009-implement-ds-autocomplete-field-with-debounced-static-and-remote-filtering-dropd.labels.json",
+  "shouldBlock": false,
+  "expectedFindingCount": 1,
+  "expectedFindings": [
+    {
+      "detector": "expected-artifacts"
+    }
+  ]
+}

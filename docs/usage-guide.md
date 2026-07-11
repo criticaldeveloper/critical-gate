@@ -134,6 +134,10 @@ Run it with:
 npx critical-gate check --task-contract task-contract.json --format markdown
 ```
 
+Contracts may also declare `expected_changed_roles` and `source_provenance`. These optional fields
+record the expected file-role shape and where the contract was composed from without invalidating
+existing contracts.
+
 If you have already run required checks, pass each completed command exactly as executed:
 
 ```bash

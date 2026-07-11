@@ -3,7 +3,12 @@ import { basename, join } from "node:path";
 import process from "node:process";
 import console from "node:console";
 
-import { parseUnifiedDiff, runDetectors, summarizeFindings } from "../dist/index.js";
+import {
+  parseTaskContractJson,
+  parseUnifiedDiff,
+  runDetectors,
+  summarizeFindings
+} from "../dist/index.js";
 
 const casesDir = join(process.cwd(), "eval", "cases");
 const outputDir = join(process.cwd(), "artifacts", "evaluation");
@@ -59,8 +64,15 @@ function readCase(caseDir) {
     task: readRequiredFile(caseDir, "task.md").trim(),
     diffPatch: readRequiredFile(caseDir, "diff.patch"),
     notes: readRequiredFile(caseDir, "notes.md").trim(),
+    taskContract: readOptionalTaskContract(caseDir),
     expected: validateExpected(id, expected)
   };
+}
+
+function readOptionalTaskContract(caseDir) {
+  const path = join(caseDir, "task-contract.json");
+
+  return existsSync(path) ? parseTaskContractJson(readFileSync(path, "utf8")) : undefined;
 }
 
 function readRequiredFile(caseDir, fileName) {
@@ -195,11 +207,13 @@ function evaluateCase(evaluationCase) {
   };
   const detectorContext =
     evaluationCase.expected.repositoryProfile === undefined &&
-    evaluationCase.expected.frameworkPacks === undefined
+    evaluationCase.expected.frameworkPacks === undefined &&
+    evaluationCase.taskContract === undefined
       ? undefined
       : {
           repositoryProfile: evaluationCase.expected.repositoryProfile,
-          frameworkPacks: evaluationCase.expected.frameworkPacks
+          frameworkPacks: evaluationCase.expected.frameworkPacks,
+          taskContract: evaluationCase.taskContract
         };
   const findings = runDetectors(task, diff, detectorContext);
   const summary = summarizeFindings(findings, task, diff);

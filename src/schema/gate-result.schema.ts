@@ -64,9 +64,25 @@ export const gateResultJsonSchema = {
         goal: { type: "string", minLength: 1 },
         allowedPaths: stringArraySchema,
         forbiddenPaths: stringArraySchema,
+        expectedChangedRoles: {
+          type: "array",
+          items: {
+            enum: [
+              "source",
+              "test",
+              "config",
+              "docs",
+              "manifest",
+              "lockfile",
+              "generated",
+              "unknown"
+            ]
+          }
+        },
         expectedArtifacts: stringArraySchema,
         invariants: stringArraySchema,
-        requiredChecks: stringArraySchema
+        requiredChecks: stringArraySchema,
+        provenance: stringArraySchema
       }
     },
     diff: {

@@ -16,9 +16,11 @@ export interface TaskContract {
   goal: string;
   allowedPaths: string[];
   forbiddenPaths: string[];
+  expectedChangedRoles?: DiffFileRole[];
   expectedArtifacts: string[];
   invariants: string[];
   requiredChecks: string[];
+  provenance?: string[];
 }
 
 export type CheckExecutionStatus = "passed" | "failed";

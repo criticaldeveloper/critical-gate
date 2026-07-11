@@ -1,0 +1,13 @@
+{
+  "evaluationSet": "development",
+  "sourceRepository": "criticaldeveloper-blog",
+  "caseType": "false-positive-regression",
+  "labelSource": "docs/critical-gate-evidence/2026-07-11/122436-create-the-agentic-browsing-and-pagespeed-insights-article-and-apply-its-follow-.labels.json",
+  "shouldBlock": false,
+  "expectedFindingCount": 1,
+  "expectedFindings": [
+    {
+      "detector": "expected-artifacts"
+    }
+  ]
+}

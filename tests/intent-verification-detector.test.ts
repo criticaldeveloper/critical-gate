@@ -4,7 +4,7 @@ import {
   runDetectors,
   summarizeFindings
 } from "../src/index.js";
-import type { GateResult, TaskIntent } from "../src/index.js";
+import type { GateResult, TaskContract, TaskIntent } from "../src/index.js";
 
 function parse(diffText: string): GateResult["diff"] {
   return {
@@ -13,6 +13,31 @@ function parse(diffText: string): GateResult["diff"] {
 }
 
 describe("intentVerificationDetector", () => {
+  it("does not treat provided contract exclusions as requested work", () => {
+    const task: TaskIntent = {
+      source: "cli",
+      text: "Create the article. No package, configuration, component, test, or stylesheet changes are required."
+    };
+    const taskContract: TaskContract = {
+      source: "provided",
+      goal: task.text,
+      allowedPaths: ["src/content/posts/**"],
+      forbiddenPaths: ["package.json", "astro.config.*", "tests/**"],
+      expectedArtifacts: ["src/content/posts/article.md"],
+      invariants: ["no_new_dependencies", "no_config_changes"],
+      requiredChecks: []
+    };
+    const diff = parse(`diff --git a/src/content/posts/article.md b/src/content/posts/article.md
+new file mode 100644
+--- /dev/null
++++ b/src/content/posts/article.md
+@@ -0,0 +1 @@
++# Article
+`);
+
+    expect(intentVerificationDetector.run({ task, diff, context: { taskContract } })).toEqual([]);
+  });
+
   it("emits a finding when a UI task changes CI", () => {
     const task: TaskIntent = {
       source: "cli",

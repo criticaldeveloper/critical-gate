@@ -197,6 +197,10 @@ function classifyFileActions(file: DiffFile): ObservedChangeClassEvidence[] {
 }
 
 function extractPublicExportEvidence(file: DiffFile): ObservedChangeClassEvidence[] {
+  if (file.role === "manifest") {
+    return extractManifestExportEvidence(file);
+  }
+
   if (file.role !== "source" || !/\.[cm]?[jt]sx?$/.test(file.path)) {
     return [];
   }
@@ -224,6 +228,28 @@ function extractPublicExportEvidence(file: DiffFile): ObservedChangeClassEvidenc
       ];
     })
   );
+}
+
+function extractManifestExportEvidence(file: DiffFile): ObservedChangeClassEvidence[] {
+  return file.hunks.flatMap((hunk) => {
+    if (!hunk.lines.some((line) => /^\s*["']exports["']\s*:/.test(line.content))) {
+      return [];
+    }
+
+    return hunk.lines
+      .filter(
+        (line) =>
+          (line.kind === "add" || line.kind === "delete") &&
+          /^\s*["']\.[^"']*["']\s*:/.test(line.content)
+      )
+      .map((line) => ({
+        changeClass: "api-surface" as const,
+        path: file.path,
+        lineNumber: line.kind === "add" ? line.newLineNumber : line.oldLineNumber,
+        symbol: line.content.match(/^\s*["']([^"']+)["']/)?.[1],
+        reason: "Package export changed."
+      }));
+  });
 }
 
 function getExportSymbol(line: DiffLine): string | undefined {

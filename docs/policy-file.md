@@ -27,6 +27,8 @@ Primary review policy for teams.
 Fields:
 
 - `failOn`: one of `blocker`, `high`, or `medium`. Defaults to the CLI decision model when omitted.
+- `defaultInvariants`: repository-wide task-contract invariants inherited by inferred and provided
+  contracts, such as `no_new_dependencies` or `no_public_api_change`.
 - `detectorOverrides`: reviewable detector rollout choices.
 - `expectedCompanions`: expected support-file rules that can make companion files normal for a
   repository.

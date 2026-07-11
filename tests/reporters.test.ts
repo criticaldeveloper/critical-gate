@@ -23,9 +23,11 @@ const result: GateResult = {
     goal: "Add signup validation",
     allowedPaths: ["src/signup.ts", "tests/signup.test.ts"],
     forbiddenPaths: ["package.json"],
+    expectedChangedRoles: ["source", "test"],
     expectedArtifacts: ["signup validator"],
     invariants: ["no_new_dependencies"],
-    requiredChecks: ["pnpm test signup"]
+    requiredChecks: ["pnpm test signup"],
+    provenance: ["pull request body", "repository policy"]
   },
   diff: {
     baseRef: "main",
@@ -255,7 +257,9 @@ describe("reporters", () => {
     expect(report).toContain("Source: provided.");
     expect(report).toContain("Allowed paths: src/signup.ts, tests/signup.test.ts.");
     expect(report).toContain("Forbidden paths: package.json.");
+    expect(report).toContain("Expected changed roles: source, test.");
     expect(report).toContain("Invariants: no_new_dependencies.");
+    expect(report).toContain("Provenance: pull request body, repository policy.");
     expect(report).toContain("## Intent Verification");
     expect(report).toContain("Requested Classes: source");
     expect(report).toContain("Unexpected Classes: tests");

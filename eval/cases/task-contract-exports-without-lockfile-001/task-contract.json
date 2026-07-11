@@ -1,0 +1,8 @@
+{
+  "goal": "Add the autocomplete-field package export without changing dependencies.",
+  "allowed_paths": ["packages/components/package.json"],
+  "forbidden_paths": ["pnpm-lock.yaml", "packages/react/package.json", "packages/vue/**"],
+  "expected_artifacts": ["packages/components/package.json"],
+  "invariants": ["no_new_dependencies"],
+  "required_checks": []
+}

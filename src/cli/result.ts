@@ -7,6 +7,7 @@ import {
   buildRepositoryTokenIndex,
   detectFrameworkPacks,
   detectMonorepoContext,
+  getConfiguredDefaultInvariants,
   getConfiguredExpectedSupportFiles,
   getConfiguredFailOn,
   getConfiguredPublicApiEntrypoints,
@@ -49,7 +50,16 @@ export function createGateResult(
     source: "cli" as const,
     text: taskText
   };
-  const resolvedTaskContract = taskContract ?? inferTaskContract(task);
+  const defaultInvariants = getConfiguredDefaultInvariants(configResult.config);
+  const baseTaskContract = taskContract ?? inferTaskContract(task);
+  const resolvedTaskContract = {
+    ...baseTaskContract,
+    invariants: [...new Set([...defaultInvariants, ...baseTaskContract.invariants])],
+    provenance:
+      defaultInvariants.length === 0
+        ? baseTaskContract.provenance
+        : [...new Set([...(baseTaskContract.provenance ?? []), ".critical-gate.json policy"])]
+  };
   const diff = {
     baseRef: diffResult.baseRef,
     headRef: diffResult.headRef,

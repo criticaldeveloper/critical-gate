@@ -1,20 +1,20 @@
 # Dogfood Evidence Summary
 
-Generated: 2026-07-06T18:42:51.364Z
+Generated: 2026-07-11T12:30:15.966Z
 
 ## Overview
 
-- Repositories: 4
-- Labeled reports: 104
-- Useful findings: 148
-- False-positive finding instances: 286
-- Missed findings: 0
-- Fixture-needed reports: 27
-- Fixture-created reports: 17
+- Repositories: 5
+- Labeled reports: 116
+- Useful findings: 247
+- False-positive finding instances: 599
+- Missed findings: 1
+- Fixture-needed reports: 35
+- Fixture-created reports: 19
 - Repair attempts captured: 4
 - Repair reruns captured: 4
 - Repairs passing rerun: 4
-- Missed-finding reviews captured: 72
+- Missed-finding reviews captured: 84
 
 ## Run Labels
 
@@ -24,29 +24,39 @@ Generated: 2026-07-06T18:42:51.364Z
 - false-positive: 7
 - reviewed-observations: 7
 - clean-reviewed: 6
+- accepted: 4
+- accepted_with_notes: 4
 - reviewed-findings: 4
 - repair-required: 2
 - repair-rerun: 2
 - false-positive-reviewed: 1
+- mixed: 1
+- pass-with-false-positive-intent-verification: 1
 - pass-with-reviewed-observation: 1
 - pass-with-scope-noise: 1
+- pass-with-useful-artifact-observation-negation-false-positives-and-missed-synapse-workflow: 1
+- pass-with-useful-contract-evidence-and-false-positive-companions: 1
 - pending: 1
 - superseded-by-clean-replay: 1
 
 ## Detector Frequency
 
-- expected-companions: 71
-- blast-radius: 66
-- scope: 55
-- config-change: 48
+- expected-companions: 81
+- blast-radius: 75
+- scope: 61
+- secret-path: 54
+- test-weakening: 52
+- config-change: 51
 - dependency: 48
-- secret-path: 48
-- test-weakening: 48
-- repository-intelligence: 17
-- intent-verification: 9
-- dependency-addition: 4
-- rewrite: 3
-- api-surface: 1
+- repository-intelligence: 19
+- intent-verification: 15
+- dependency-addition: 10
+- api-surface: 5
+- rewrite: 5
+- expected-artifacts: 3
+- existing-solution: 2
+- pattern-violation: 2
+- utility-reinvention: 2
 - framework: 1
 
 ## Repair Loop Evidence
@@ -57,15 +67,16 @@ Generated: 2026-07-06T18:42:51.364Z
 - Repairs passing rerun: 4
 - Repairs scoped to task: 48
 - Repairs scoped to repair contract: 48
-- Missed-finding reviews captured: 72
+- Missed-finding reviews captured: 84
 - Reports still missing missed-finding review: 32
 
 ## Repositories
 
-- critical-components: 15 reports; useful findings 82; false-positive findings 3; missed findings 0; fixture-needed reports 2; repair attempts 0; missed-finding reviews 3.
-- criticaldeveloper-blog: 18 reports; useful findings 10; false-positive findings 93; missed findings 0; fixture-needed reports 13; repair attempts 0; missed-finding reviews 4.
+- critical-components: 16 reports; useful findings 83; false-positive findings 11; missed findings 0; fixture-needed reports 3; repair attempts 0; missed-finding reviews 4.
+- criticaldeveloper-blog: 21 reports; useful findings 12; false-positive findings 103; missed findings 1; fixture-needed reports 16; repair attempts 0; missed-finding reviews 7.
 - criticaldeveloper-ft: 23 reports; useful findings 16; false-positive findings 38; missed findings 0; fixture-needed reports 2; repair attempts 0; missed-finding reviews 17.
 - diegolopes-ft: 48 reports; useful findings 40; false-positive findings 152; missed findings 0; fixture-needed reports 10; repair attempts 4; missed-finding reviews 48.
+- tamagotchi: 8 reports; useful findings 96; false-positive findings 295; missed findings 0; fixture-needed reports 4; repair attempts 0; missed-finding reviews 8.
 
 ## Reports
 
@@ -86,6 +97,7 @@ Generated: 2026-07-06T18:42:51.364Z
 - `104333-post-2-7-0-controlled-dogfood-calibration`: pending; findings 10; false positives 0; fixture needed yes; repair attempted not recorded; missed reviewed yes.
 - `120826-upgrade-critical-gate-to-2-7-1-and-verify-package-only-upgrade-calibration`: false-positive; findings 3; false positives 3; fixture needed yes; repair attempted not recorded; missed reviewed yes.
 - `124556-upgrade-critical-gate-to-2-7-2-and-verify-shortened-package-hunk-upgrade-calibra`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed yes.
+- `123009-implement-ds-autocomplete-field-with-debounced-static-and-remote-filtering-dropd`: mixed; findings 9; false positives 8; fixture needed yes; repair attempted not recorded; missed reviewed yes.
 
 ### criticaldeveloper-blog
 
@@ -107,6 +119,9 @@ Generated: 2026-07-06T18:42:51.364Z
 - `121251-upgrade-critical-gate-to-2-7-1-and-verify-package-only-upgrade-calibration`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed yes.
 - `124809-upgrade-critical-gate-to-2-7-2-and-verify-shortened-package-hunk-upgrade-calibra`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed yes.
 - `143722-publish-critical-gate-2-7-2-evidence-report-post-and-update-related-synapses`: pass-with-reviewed-observations; findings 4; false positives 4; fixture needed yes; repair attempted not recorded; missed reviewed yes.
+- `181659-publish-critical-gate-2-8-0-task-contract-release-post-and-update-related-synaps`: pass-with-false-positive-intent-verification; findings 2; false positives 2; fixture needed yes; repair attempted not recorded; missed reviewed yes.
+- `182748-update-critical-gate-evidence-export-workflow-for-task-contracts-and-check-conte`: pass-with-useful-contract-evidence-and-false-positive-companions; findings 6; false positives 5; fixture needed yes; repair attempted not recorded; missed reviewed yes.
+- `122436-create-the-agentic-browsing-and-pagespeed-insights-article-and-apply-its-follow-`: pass-with-useful-artifact-observation-negation-false-positives-and-missed-synapse-workflow; findings 4; false positives 3; fixture needed yes; repair attempted not recorded; missed reviewed yes.
 
 ### criticaldeveloper-ft
 
@@ -184,3 +199,14 @@ Generated: 2026-07-06T18:42:51.364Z
 - `195656-polish-social-profile-link-active-states`: clean-reviewed; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
 - `195722-update-homepage-seo-title-description-and-social-preview-alt-text`: clean-reviewed; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
 - `195751-add-second-youtube-fight-moment-existing-data-model`: false-positive-reviewed; findings 3; false positives 3; fixture needed yes; repair attempted no; missed reviewed yes.
+
+### tamagotchi
+
+- `151610-add-native-tauri-backed-save-persistence-with-browser-fallback`: accepted_with_notes; findings 90; false positives 72; fixture needed yes; repair attempted not recorded; missed reviewed yes.
+- `152122-add-windows-tray-menu-and-close-to-tray-desktop-behavior`: accepted_with_notes; findings 65; false positives 45; fixture needed yes; repair attempted not recorded; missed reviewed yes.
+- `152442-add-deeper-pet-lifecycle-health-recovery-death-and-medicine-behavior`: accepted_with_notes; findings 73; false positives 58; fixture needed yes; repair attempted not recorded; missed reviewed yes.
+- `152855-fix-severe-neglect-mood-so-dirty-exhausted-pets-become-sick`: accepted_with_notes; findings 139; false positives 120; fixture needed yes; repair attempted not recorded; missed reviewed yes.
+- `153516-create-og-tamagotchi-behavior-roadmap-from-tamanalysis-references`: accepted; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed yes.
+- `153739-update-og-tamagotchi-roadmap-with-p1-guide-mechanics`: accepted; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed yes.
+- `154356-task-1-1-define-canonical-og-tamagotchi-stats-and-units`: accepted; findings 19; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed yes.
+- `154814-task-1-1-define-canonical-og-tamagotchi-stats-and-units-with-branch-workflow-ins`: accepted; findings 5; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed yes.

@@ -38,10 +38,40 @@ export function parseTaskContractJson(content: string): TaskContract {
     goal: goal.trim(),
     allowedPaths: readStringArray(rawValue, "allowedPaths", "allowed_paths"),
     forbiddenPaths: readStringArray(rawValue, "forbiddenPaths", "forbidden_paths"),
+    expectedChangedRoles: readDiffFileRoles(
+      rawValue,
+      "expectedChangedRoles",
+      "expected_changed_roles"
+    ),
     expectedArtifacts: readStringArray(rawValue, "expectedArtifacts", "expected_artifacts"),
     invariants: readStringArray(rawValue, "invariants"),
-    requiredChecks: readStringArray(rawValue, "requiredChecks", "required_checks")
+    requiredChecks: readStringArray(rawValue, "requiredChecks", "required_checks"),
+    provenance: readStringArray(rawValue, "provenance", "source_provenance")
   };
+}
+
+const diffFileRoles = new Set([
+  "source",
+  "test",
+  "config",
+  "docs",
+  "manifest",
+  "lockfile",
+  "generated",
+  "unknown"
+]);
+
+function readDiffFileRoles(
+  value: RawTaskContract,
+  ...keys: string[]
+): TaskContract["expectedChangedRoles"] {
+  const roles = readStringArray(value, ...keys);
+
+  if (!roles.every((role) => diffFileRoles.has(role))) {
+    throw new Error(`Task contract field ${keys[0]} contains an unknown changed-file role.`);
+  }
+
+  return roles as NonNullable<TaskContract["expectedChangedRoles"]>;
 }
 
 function readString(value: RawTaskContract, key: string): string | undefined {

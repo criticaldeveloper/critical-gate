@@ -4,6 +4,7 @@ import { join } from "node:path";
 import {
   applyLearningPolicy,
   createDefaultPolicyConfig,
+  getConfiguredDefaultInvariants,
   getConfiguredExpectedSupportFiles,
   getConfiguredFailOn,
   getConfiguredPublicApiEntrypoints,
@@ -41,6 +42,7 @@ describe("loadCriticalGateConfig", () => {
             },
             policy: {
               failOn: "medium",
+              defaultInvariants: ["no_new_dependencies", "no_public_api_change"],
               detectorOverrides: [
                 {
                   detector: "existing-solution",
@@ -105,6 +107,7 @@ describe("loadCriticalGateConfig", () => {
         },
         policy: {
           failOn: "medium",
+          defaultInvariants: ["no_new_dependencies", "no_public_api_change"],
           detectorOverrides: [
             {
               detector: "existing-solution",
@@ -186,6 +189,7 @@ describe("loadCriticalGateConfig", () => {
       },
       policy: {
         failOn: "medium" as const,
+        defaultInvariants: ["no_new_dependencies"],
         detectorOverrides: [
           {
             detector: "existing-solution",
@@ -222,6 +226,7 @@ describe("loadCriticalGateConfig", () => {
     };
 
     expect(getConfiguredFailOn(config)).toBe("medium");
+    expect(getConfiguredDefaultInvariants(config)).toEqual(["no_new_dependencies"]);
     expect(getPolicyObservationDetectors(config)).toEqual(["blast-radius", "expected-companions"]);
     expect(getPolicyBlockingDetectors(config)).toEqual(["scope", "existing-solution"]);
     expect(getConfiguredExpectedSupportFiles(config)?.map((rule) => rule.id)).toEqual([

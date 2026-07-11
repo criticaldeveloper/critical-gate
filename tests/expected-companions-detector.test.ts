@@ -4,7 +4,7 @@ import {
   runDetectors,
   scopeDetector
 } from "../src/index.js";
-import type { GateResult, KnowledgeProvider, TaskIntent } from "../src/index.js";
+import type { GateResult, KnowledgeProvider, TaskContract, TaskIntent } from "../src/index.js";
 
 const task: TaskIntent = {
   source: "cli",
@@ -191,6 +191,51 @@ function packageUpgradeKnowledge(): KnowledgeProvider {
 }
 
 describe("expectedCompanionsDetector", () => {
+  it("does not suggest historical companions outside a provided contract", () => {
+    const diff =
+      parse(`diff --git a/packages/components/package.json b/packages/components/package.json
+index 57b22a0..cb3e0f1 100644
+--- a/packages/components/package.json
++++ b/packages/components/package.json
+@@ -2,3 +2,4 @@
+   "exports": {
++    "./autocomplete-field": "./dist/autocomplete-field.js"
+   }
+`);
+    const taskContract: TaskContract = {
+      source: "provided",
+      goal: "Add autocomplete exports",
+      allowedPaths: ["packages/components/package.json"],
+      forbiddenPaths: ["pnpm-lock.yaml", "packages/react/package.json", "packages/vue/**"],
+      expectedArtifacts: ["packages/components/package.json"],
+      invariants: ["no_new_dependencies"],
+      requiredChecks: []
+    };
+    const contractKnowledge: KnowledgeProvider = {
+      ...knowledge(),
+      getHistoryIndex: () => ({
+        profile: { commitCount: 50, minConfidenceCommitCount: 20, coChanges: [] },
+        coChanges: [],
+        companionRules: [
+          {
+            sourcePath: "packages/components/package.json",
+            expectedPath: "packages/react/package.json",
+            support: 8,
+            confidence: 0.9
+          }
+        ]
+      })
+    };
+
+    expect(
+      expectedCompanionsDetector.run({
+        task,
+        diff,
+        context: { knowledge: contractKnowledge, taskContract }
+      })
+    ).toEqual([]);
+  });
+
   it("emits when a historically paired test companion is missing", () => {
     const diff = parse(`diff --git a/src/signup.ts b/src/signup.ts
 index 57b22a0..cb3e0f1 100644

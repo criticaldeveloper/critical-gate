@@ -1,7 +1,37 @@
-import { classifyObservedDiffActions, summarizeIntentVerification } from "../src/index.js";
+import {
+  classifyObservedDiffActions,
+  parseUnifiedDiff,
+  summarizeIntentVerification
+} from "../src/index.js";
 import type { DiffFile, TaskIntent } from "../src/index.js";
 
 describe("classifyObservedDiffActions", () => {
+  it("recognizes package subpath exports as public API changes", () => {
+    const files =
+      parseUnifiedDiff(`diff --git a/packages/components/package.json b/packages/components/package.json
+index 57b22a0..cb3e0f1 100644
+--- a/packages/components/package.json
++++ b/packages/components/package.json
+@@ -2,3 +2,4 @@
+   "exports": {
++    "./autocomplete-field": "./dist/autocomplete-field.js"
+   }
+`);
+
+    expect(classifyObservedDiffActions(files)).toEqual(
+      expect.objectContaining({
+        classes: expect.arrayContaining(["api-surface", "dependency"]),
+        evidence: expect.arrayContaining([
+          expect.objectContaining({
+            changeClass: "api-surface",
+            path: "packages/components/package.json",
+            symbol: "./autocomplete-field"
+          })
+        ])
+      })
+    );
+  });
+
   it("maps GitHub workflow changes to ci and config", () => {
     expect(
       classifyObservedDiffActions([createFile(".github/workflows/ci.yml", "config")]).classes

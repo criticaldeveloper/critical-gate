@@ -34,6 +34,8 @@ describe("GitHub integration", () => {
     expect(action).toContain('--fail-on "$CRITICAL_GATE_FAIL_ON"');
     expect(action).toContain('--format "$CRITICAL_GATE_FORMAT"');
     expect(action).toContain('--output "$CRITICAL_GATE_OUTPUT"');
+    expect(action).toContain("CRITICAL_GATE_TASK_CONTRACT: ${{ inputs.task-contract }}");
+    expect(action).toContain('--task-contract "$CRITICAL_GATE_TASK_CONTRACT"');
   });
 
   it("defines a prebuilt action artifact package path", () => {

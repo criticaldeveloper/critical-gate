@@ -45,6 +45,16 @@ node "$GITHUB_ACTION_PATH/dist/cli.js" check ...
 The `install` and `build` inputs are ignored for npm package runs. They apply only when
 `version: local`.
 
+Pass `task-contract` when the checked-out repository contains a structured JSON contract. The
+action forwards it to the CLI, where explicit paths, artifacts, invariants, and required checks take
+precedence over free-text inference:
+
+```yaml
+with:
+  task: ${{ github.event.pull_request.title }}
+  task-contract: .critical-gate/task-contract.json
+```
+
 ## Prebuilt Action Artifact
 
 Release builds can prepare a self-contained action directory without `node_modules`:

@@ -1,0 +1,7 @@
+diff --git a/src/content/posts/article.md b/src/content/posts/article.md
+new file mode 100644
+--- /dev/null
++++ b/src/content/posts/article.md
+@@ -0,0 +1,2 @@
++# Agentic Browsing
++

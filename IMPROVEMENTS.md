@@ -191,6 +191,13 @@ Validation:
 
 ## Phase 2: Introduce `TaskContract`
 
+Status (2026-07-11): core implementation and real-project calibration complete. Structured
+contracts now flow through the CLI and GitHub Action, preserve optional changed-role/provenance
+metadata, inherit repository policy invariants, and take authority over scope, intent,
+blast-radius, and companion heuristics. Development fixtures cover the first blog and component
+dogfood regressions. Rich automatic composition from linked GitHub issues and Codex repair metadata
+remains integration work rather than a blocker for beginning Phase 3.
+
 Goal: stop treating a PR title or free-text prompt as the whole task boundary.
 
 The gate should accept or infer a structured task contract:

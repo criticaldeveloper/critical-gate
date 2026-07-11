@@ -11,7 +11,7 @@ import type { Detector } from "./types.js";
 export const intentVerificationDetector: Detector = {
   name: "intent-verification",
   maturity: "experimental",
-  run: ({ task, diff }) => {
+  run: ({ task, diff, context }) => {
     const intent = buildIntentModel(task);
     const observed = classifyObservedDiffActions(diff.files);
     const observedCategories = [...new Set(observed.classes.map(mapChangeClassToIntentCategory))];
@@ -20,7 +20,8 @@ export const intentVerificationDetector: Detector = {
       .filter(isReportableIntentMismatch);
     const missingCategories = intent.expectedCategories
       .filter((category) => !observedCategories.includes(category))
-      .filter(isReportableMissingCategory);
+      .filter(isReportableMissingCategory)
+      .filter((category) => !isExcludedByProvidedContract(category, context?.taskContract));
 
     return [
       ...unexpectedClasses.map((changeClass) =>
@@ -31,6 +32,41 @@ export const intentVerificationDetector: Detector = {
     ];
   }
 };
+
+function isExcludedByProvidedContract(
+  category: IntentCoverageCategory,
+  contract: NonNullable<Parameters<Detector["run"]>[0]["context"]>["taskContract"]
+): boolean {
+  if (contract?.source !== "provided") {
+    return false;
+  }
+
+  if (category === "dependency") {
+    return (
+      contract.invariants.includes("no_new_dependencies") ||
+      contract.forbiddenPaths.some((path) =>
+        /(?:^|\/)(?:package\.json|[^/]*lock[^/]*)$/i.test(path)
+      )
+    );
+  }
+
+  if (category === "config-tooling") {
+    return (
+      contract.invariants.includes("no_config_changes") ||
+      contract.invariants.includes("configuration_unchanged") ||
+      contract.forbiddenPaths.some((path) =>
+        /(?:config|\.github\/workflows|dockerfile)/i.test(path)
+      )
+    );
+  }
+
+  return (
+    category === "test-coverage" &&
+    contract.forbiddenPaths.some((path) =>
+      /(?:^|\/)(?:tests?|__tests__)(?:\/|\*|$)|\.(?:spec|test)\./i.test(path)
+    )
+  );
+}
 
 const implementationVerbPattern =
   /\b(?:add|create|introduce|implement|build|wire|render|display|show)\b/i;

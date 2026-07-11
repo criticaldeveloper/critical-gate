@@ -1,6 +1,7 @@
 export {
   CRITICAL_GATE_CONFIG_FILE,
   createDefaultPolicyConfig,
+  getConfiguredDefaultInvariants,
   getConfiguredExpectedSupportFiles,
   getConfiguredFailOn,
   getConfiguredPublicApiEntrypoints,

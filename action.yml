@@ -6,6 +6,10 @@ inputs:
   task:
     description: Task intent, issue summary, PR title, or prompt that explains the change.
     required: true
+  task-contract:
+    description: Path to a JSON task contract with explicit scope, artifacts, invariants, and checks.
+    required: false
+    default: ""
   base:
     description: Git baseline ref or SHA to compare against.
     required: false
@@ -78,6 +82,7 @@ runs:
       env:
         CRITICAL_GATE_VERSION: ${{ inputs.version }}
         CRITICAL_GATE_TASK: ${{ inputs.task }}
+        CRITICAL_GATE_TASK_CONTRACT: ${{ inputs.task-contract }}
         CRITICAL_GATE_BASE: ${{ inputs.base }}
         CRITICAL_GATE_FORMAT: ${{ inputs.format }}
         CRITICAL_GATE_OUTPUT: ${{ inputs.output }}
@@ -102,6 +107,10 @@ runs:
 
         if [ -n "$CRITICAL_GATE_BASE" ] && [[ ! "$CRITICAL_GATE_BASE" =~ ^0+$ ]]; then
           args+=(--base "$CRITICAL_GATE_BASE")
+        fi
+
+        if [ -n "$CRITICAL_GATE_TASK_CONTRACT" ]; then
+          args+=(--task-contract "$CRITICAL_GATE_TASK_CONTRACT")
         fi
 
         if [ -n "$CRITICAL_GATE_FAIL_ON" ]; then

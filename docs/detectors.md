@@ -89,6 +89,11 @@ or inside the forbidden set. These checks run before the small-task keyword heur
 contract paths still apply to broad or medium tasks. If both lists match the same file,
 `forbidden_paths` take precedence to avoid duplicate findings.
 
+Provided contracts also constrain experimental intent-verification, blast-radius, and
+expected-companions heuristics. Explicitly allowed changed files are not reported as disconnected
+blast-radius clusters, companions outside the declared boundary are not suggested, and negated
+dependency, configuration, or test constraints are not interpreted as requested work.
+
 ## V1 Blockers
 
 ### Unrelated File Modifications

@@ -1,0 +1,8 @@
+diff --git a/packages/components/package.json b/packages/components/package.json
+index 57b22a0..cb3e0f1 100644
+--- a/packages/components/package.json
++++ b/packages/components/package.json
+@@ -2,3 +2,4 @@
+   "exports": {
++    "./autocomplete-field": "./dist/autocomplete-field.js"
+   }

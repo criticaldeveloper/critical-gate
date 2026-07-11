@@ -2,6 +2,7 @@ import type { DiffFile, Finding, FindingSeverity } from "../schema/index.js";
 import type { FileGraph } from "../knowledge/index.js";
 import type { Detector } from "./types.js";
 import { isContentPostReciprocalMetadataChange } from "./content-metadata-change.js";
+import { isExplicitlyAllowedByContract } from "./task-contract-authority.js";
 
 interface ChangedCluster {
   paths: string[];
@@ -29,6 +30,10 @@ export const blastRadiusDetector: Detector = {
     return clusters
       .slice(1)
       .filter((cluster) => cluster !== primaryCluster)
+      .filter(
+        (cluster) =>
+          !cluster.paths.every((path) => isExplicitlyAllowedByContract(path, context?.taskContract))
+      )
       .filter((cluster) => !isAllowedFocusedUiCluster(cluster, diff.files, task.text))
       .filter((cluster) => !isAllowedContentMetadataCluster(cluster, diff.files, task.text))
       .map((cluster, index) => toFinding(cluster, index + 1));
