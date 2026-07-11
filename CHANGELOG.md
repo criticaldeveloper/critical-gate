@@ -4,6 +4,15 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## Unreleased
+
+### Changed
+
+- Preserve Unicode letters and numbers during task tokenization, including canonically equivalent
+  accented text, and filter common Spanish grammatical/task words from scope target keywords.
+- Reuse Unicode-aware tokenization in task-intent quality analysis so Spanish and mixed-language
+  task descriptions are not corrupted before quality checks.
+
 ## 2.9.1 - 2026-07-11
 
 ### Fixed

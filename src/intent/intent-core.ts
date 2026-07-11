@@ -45,7 +45,40 @@ const stopWords = new Set([
   "project",
   "repo",
   "task",
-  "issue"
+  "issue",
+  "el",
+  "la",
+  "los",
+  "las",
+  "un",
+  "una",
+  "de",
+  "del",
+  "para",
+  "con",
+  "desde",
+  "este",
+  "esta",
+  "que",
+  "y",
+  "añadir",
+  "agregar",
+  "arreglar",
+  "arregla",
+  "corregir",
+  "corrige",
+  "actualizar",
+  "actualiza",
+  "cambiar",
+  "cambia",
+  "implementar",
+  "implementa",
+  "nuevo",
+  "nueva",
+  "proyecto",
+  "repositorio",
+  "tarea",
+  "problema"
 ]);
 
 const keywordAliases: Record<string, string[]> = {
@@ -76,9 +109,17 @@ export function estimateTaskComplexity(normalizedTaskText: string): TaskComplexi
 }
 
 export function extractTaskKeywords(normalizedTaskText: string): string[] {
-  const keywords = [...new Set(normalizedTaskText.toLowerCase().match(/[a-z0-9]+/g) ?? [])]
+  const keywords = [...new Set(tokenizeTaskText(normalizedTaskText))]
     .filter((word) => word.length >= 3)
     .filter((word) => !stopWords.has(word));
 
   return [...new Set(keywords.flatMap((keyword) => [keyword, ...(keywordAliases[keyword] ?? [])]))];
+}
+
+export function normalizeTaskText(value: string): string {
+  return value.normalize("NFC").trim().toLocaleLowerCase("und");
+}
+
+export function tokenizeTaskText(value: string): string[] {
+  return normalizeTaskText(value).match(/[\p{L}\p{N}]+/gu) ?? [];
 }

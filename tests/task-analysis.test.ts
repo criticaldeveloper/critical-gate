@@ -45,6 +45,27 @@ describe("task analysis", () => {
     ]);
   });
 
+  it("preserves accented Spanish keywords and removes grammatical task wording", () => {
+    expect(extractTaskKeywords("Corrige la validación del correo electrónico")).toEqual([
+      "validación",
+      "correo",
+      "electrónico"
+    ]);
+  });
+
+  it("normalizes canonically equivalent Unicode task tokens", () => {
+    expect(extractTaskKeywords("Navegacio\u0301n móvil")).toEqual(["navegación", "móvil"]);
+  });
+
+  it("extracts mixed-language task targets without dropping Unicode words", () => {
+    expect(extractTaskKeywords("Update navegación móvil del Drawer component")).toEqual([
+      "navegación",
+      "móvil",
+      "drawer",
+      "component"
+    ]);
+  });
+
   it("analyzes task intent", () => {
     const task: TaskIntent = {
       source: "cli",

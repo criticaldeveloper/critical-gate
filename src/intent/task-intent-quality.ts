@@ -4,6 +4,7 @@ import type {
   TaskIntentQualityWarning
 } from "../schema/index.js";
 import { buildIntentModel } from "./intent-model.js";
+import { normalizeTaskText, tokenizeTaskText } from "./intent-core.js";
 
 const vaguePhrases = [
   "fix bug",
@@ -48,7 +49,7 @@ export function analyzeTaskIntentQuality(task: TaskIntent): TaskIntentQualitySum
 
 export function getTaskIntentQualityWarnings(task: TaskIntent): TaskIntentQualityWarning[] {
   const text = normalizeText(task.text);
-  const tokens = text.split(" ").filter(Boolean);
+  const tokens = tokenizeTaskText(text);
   const model = buildIntentModel(task);
   const warnings: TaskIntentQualityWarning[] = [];
 
@@ -97,10 +98,8 @@ export function getTaskIntentQualityWarnings(task: TaskIntent): TaskIntentQualit
 }
 
 function normalizeText(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, " ")
+  return normalizeTaskText(value)
+    .replace(/[^\p{L}\p{N}\s-]/gu, " ")
     .replace(/\s+/g, " ");
 }
 

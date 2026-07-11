@@ -44,4 +44,16 @@ describe("task intent quality", () => {
       warnings: []
     });
   });
+
+  it("accepts a specific Spanish task without corrupting accented targets", () => {
+    expect(
+      analyzeTaskIntentQuality({
+        source: "cli",
+        text: "Corrige la validación del correo electrónico"
+      })
+    ).toEqual({
+      score: 100,
+      warnings: []
+    });
+  });
 });
