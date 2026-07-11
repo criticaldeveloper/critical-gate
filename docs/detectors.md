@@ -83,6 +83,13 @@ path-keyword matching cannot prove the changed files are inside the intended bou
 does not fail the gate by itself, but it tells reviewers and agents to provide a structured task
 contract, ownership context, or explicit allowed and forbidden paths.
 
+For medium and large tasks, scope also compares changed monorepo package ownership with explicit
+task targets. It reports a package mismatch only when at least one other changed package aligns
+with the task; otherwise it keeps an insufficient-context status. A provided contract with allowed
+paths can fully evaluate the declared scope boundary. Forbidden paths are always enforced but do
+not define the complete allowed scope by themselves. Package alignment alone does not claim
+file-level scope certainty, and docs/tests remain eligible evidence inside package boundaries.
+
 When a provided task contract includes `allowed_paths` or `forbidden_paths`, the scope detector
 enforces those paths directly and emits blocker findings for changed files outside the allowed set
 or inside the forbidden set. These checks run before the small-task keyword heuristic, so explicit

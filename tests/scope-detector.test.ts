@@ -530,6 +530,175 @@ index 57b22a0..cb3e0f1 100644
     ]);
   });
 
+  it("passes a medium task when a provided contract fully defines its scope boundary", () => {
+    const diff = parse(`diff --git a/packages/profile/src/form.ts b/packages/profile/src/form.ts
+index 57b22a0..cb3e0f1 100644
+--- a/packages/profile/src/form.ts
++++ b/packages/profile/src/form.ts
+@@ -1 +1,2 @@
++export const validation = true;
+ export const form = true;
+`);
+    const result = runDetectorsWithStatuses(
+      { source: "cli", text: "Implement profile form component" },
+      diff,
+      {
+        taskContract: {
+          ...emptyTaskContract,
+          source: "provided",
+          goal: "Implement profile form component",
+          allowedPaths: ["packages/profile/**"]
+        }
+      },
+      [scopeDetector]
+    );
+
+    expect(result.findings).toEqual([]);
+    expect(result.detectorRuns).toEqual([
+      expect.objectContaining({ detector: "scope", status: "passed" })
+    ]);
+  });
+
+  it("reports an unaligned changed package when another package matches the task", () => {
+    const diff = parse(`diff --git a/packages/profile/src/form.ts b/packages/profile/src/form.ts
+index 57b22a0..cb3e0f1 100644
+--- a/packages/profile/src/form.ts
++++ b/packages/profile/src/form.ts
+@@ -1 +1,2 @@
++export const validation = true;
+ export const form = true;
+diff --git a/packages/auth/docs/session.md b/packages/auth/docs/session.md
+index 57b22a0..cb3e0f1 100644
+--- a/packages/auth/docs/session.md
++++ b/packages/auth/docs/session.md
+@@ -1 +1,2 @@
+ # Session
++Unrelated note.
+`);
+    const findings = scopeDetector.run({
+      task: { source: "cli", text: "Update profile package and document form behavior" },
+      diff,
+      context: {
+        monorepo: {
+          configFiles: ["pnpm-workspace.yaml"],
+          workspaceGlobs: ["packages/*"],
+          packages: [
+            { path: "packages/profile", name: "@example/profile" },
+            { path: "packages/auth", name: "@example/auth" }
+          ]
+        }
+      }
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        id: "scope:package-ownership:packages/auth",
+        severity: "medium",
+        title: "Changed package outside task-aligned ownership",
+        message:
+          "Package @example/auth (packages/auth) changed while the task aligns with changed package ownership: packages/profile."
+      })
+    ]);
+  });
+
+  it("keeps a forbidden-only provided contract insufficient for broad allowed scope", () => {
+    const diff = parse(`diff --git a/packages/profile/src/form.ts b/packages/profile/src/form.ts
+index 57b22a0..cb3e0f1 100644
+--- a/packages/profile/src/form.ts
++++ b/packages/profile/src/form.ts
+@@ -1 +1,2 @@
++export const validation = true;
+ export const form = true;
+`);
+    const result = runDetectorsWithStatuses(
+      { source: "cli", text: "Implement profile form component" },
+      diff,
+      {
+        taskContract: {
+          ...emptyTaskContract,
+          source: "provided",
+          goal: "Implement profile form component",
+          forbiddenPaths: ["packages/auth/**"]
+        }
+      },
+      [scopeDetector]
+    );
+
+    expect(result.detectorRuns).toEqual([
+      expect.objectContaining({
+        detector: "scope",
+        status: "insufficient-context"
+      })
+    ]);
+  });
+
+  it("keeps medium package-aligned scope insufficient at file level", () => {
+    const diff = parse(`diff --git a/packages/profile/src/form.ts b/packages/profile/src/form.ts
+index 57b22a0..cb3e0f1 100644
+--- a/packages/profile/src/form.ts
++++ b/packages/profile/src/form.ts
+@@ -1 +1,2 @@
++export const validation = true;
+ export const form = true;
+`);
+    const result = runDetectorsWithStatuses(
+      { source: "cli", text: "Implement profile form component" },
+      diff,
+      {
+        monorepo: {
+          configFiles: ["pnpm-workspace.yaml"],
+          workspaceGlobs: ["packages/*"],
+          typescriptPathAliases: ["@profile/*"],
+          packages: [{ path: "packages/profile", name: "@example/profile" }]
+        }
+      },
+      [scopeDetector]
+    );
+
+    expect(result.findings).toEqual([]);
+    expect(result.detectorRuns).toEqual([
+      expect.objectContaining({
+        detector: "scope",
+        status: "insufficient-context",
+        reason:
+          "Task-aligned package ownership was evaluated (packages/profile), but file-level scope still needs an explicit task contract."
+      })
+    ]);
+  });
+
+  it("reports when ownership exists but no changed package matches the task", () => {
+    const diff = parse(`diff --git a/packages/auth/src/session.ts b/packages/auth/src/session.ts
+index 57b22a0..cb3e0f1 100644
+--- a/packages/auth/src/session.ts
++++ b/packages/auth/src/session.ts
+@@ -1 +1,2 @@
++export const timeout = 30;
+ export const session = true;
+`);
+    const result = runDetectorsWithStatuses(
+      { source: "cli", text: "Implement profile form component" },
+      diff,
+      {
+        monorepo: {
+          configFiles: ["pnpm-workspace.yaml"],
+          workspaceGlobs: ["packages/*"],
+          packages: [{ path: "packages/auth", name: "@example/auth" }]
+        }
+      },
+      [scopeDetector]
+    );
+
+    expect(result.findings).toEqual([]);
+    expect(result.detectorRuns).toEqual([
+      expect.objectContaining({
+        detector: "scope",
+        status: "insufficient-context",
+        reason:
+          "Changed package ownership was available, but no package matched the task targets: packages/auth."
+      })
+    ]);
+  });
+
   it("does not emit for workflow changes when the task mentions CI", () => {
     const diff = parse(`diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
 index 57b22a0..cb3e0f1 100644

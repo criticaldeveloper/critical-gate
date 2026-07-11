@@ -8,6 +8,9 @@ This project follows the versioning policy in `docs/versioning-policy.md`.
 
 ### Changed
 
+- Evaluate medium and large task scope against provided contract boundaries and changed monorepo
+  package ownership, reporting cross-package mismatches only when another changed package aligns
+  with explicit task targets and preserving insufficient-context status otherwise.
 - Replace raw task word-count complexity with structural signals including distinct actions,
   clauses, lists, coordinated targets, explicit paths, and implementation-sized target nouns, with
   English and Spanish regression coverage.

@@ -1,5 +1,11 @@
 import { analyzeTaskIntent } from "../intent/index.js";
-import type { DiffFile, Finding, RepositoryTokenIndex } from "../schema/index.js";
+import type {
+  DiffFile,
+  Finding,
+  MonorepoContext,
+  RepositoryTokenIndex,
+  TaskContract
+} from "../schema/index.js";
 
 import type { Detector } from "./types.js";
 import { isExplicitPackageUpgradeDiff } from "./package-upgrade-intent.js";
@@ -78,7 +84,13 @@ export const scopeDetector: Detector = {
     );
 
     if (analysis.complexity !== "small" || isBroadTask(task.text)) {
-      return [...forbiddenPathFindings, ...outsideAllowedPathFindings];
+      const ownershipFindings = getPackageOwnershipFindings(
+        diff.files.filter((file) => !contractScopePaths.has(file.path)),
+        analysis.keywords,
+        context?.monorepo
+      );
+
+      return [...forbiddenPathFindings, ...outsideAllowedPathFindings, ...ownershipFindings];
     }
 
     const unexpectedScopeFindings = diff.files
@@ -96,14 +108,40 @@ export const scopeDetector: Detector = {
 
     return [...forbiddenPathFindings, ...outsideAllowedPathFindings, ...unexpectedScopeFindings];
   },
-  getStatus: ({ task }, findings) => {
+  getStatus: ({ task, diff, context }, findings) => {
     if (findings.length > 0) {
       return { status: "findings" };
     }
 
     const analysis = analyzeTaskIntent(task);
 
+    if (hasProvidedScopeBoundary(context?.taskContract)) {
+      return { status: "passed" };
+    }
+
     if (analysis.complexity !== "small") {
+      const ownership = analyzePackageOwnership(diff.files, analysis.keywords, context?.monorepo);
+
+      if (ownership.alignedPackageRoots.length > 0) {
+        return {
+          status: "insufficient-context",
+          reason:
+            "Task-aligned package ownership was evaluated (" +
+            ownership.alignedPackageRoots.join(", ") +
+            "), but file-level scope still needs an explicit task contract."
+        };
+      }
+
+      if (ownership.changedPackageRoots.length > 0) {
+        return {
+          status: "insufficient-context",
+          reason:
+            "Changed package ownership was available, but no package matched the task targets: " +
+            ownership.changedPackageRoots.join(", ") +
+            "."
+        };
+      }
+
       return {
         status: "insufficient-context",
         reason: `Task complexity is ${analysis.complexity}; scope needs an explicit task contract or ownership context.`
@@ -121,6 +159,175 @@ export const scopeDetector: Detector = {
     return { status: "passed" };
   }
 };
+
+interface PackageOwnershipAnalysis {
+  changedPackageRoots: string[];
+  alignedPackageRoots: string[];
+  unalignedPackageRoots: string[];
+}
+
+const genericOwnershipTokens = new Set([
+  "app",
+  "apps",
+  "lib",
+  "libs",
+  "package",
+  "packages",
+  "src",
+  "source",
+  "workspace",
+  "workspaces"
+]);
+
+function getPackageOwnershipFindings(
+  files: DiffFile[],
+  keywords: string[],
+  monorepo?: MonorepoContext
+): Finding[] {
+  const ownership = analyzePackageOwnership(files, keywords, monorepo);
+
+  if (ownership.alignedPackageRoots.length === 0 || ownership.unalignedPackageRoots.length === 0) {
+    return [];
+  }
+
+  return ownership.unalignedPackageRoots
+    .map((packageRoot) => {
+      const owner = monorepo?.packages.find((candidate) => candidate.path === packageRoot);
+      const ownedFiles = files.filter(
+        (file) => getOwningPackage(file.path, monorepo)?.path === packageRoot
+      );
+
+      return owner === undefined || ownedFiles.length === 0
+        ? undefined
+        : toPackageOwnershipFinding(ownedFiles, owner, ownership.alignedPackageRoots, keywords);
+    })
+    .filter((finding): finding is Finding => finding !== undefined);
+}
+
+function analyzePackageOwnership(
+  files: DiffFile[],
+  keywords: string[],
+  monorepo?: MonorepoContext
+): PackageOwnershipAnalysis {
+  const changedPackages = [
+    ...new Map(
+      files
+        .map((file) => getOwningPackage(file.path, monorepo))
+        .filter((owner): owner is NonNullable<typeof owner> => owner !== undefined)
+        .map((owner) => [owner.path, owner])
+    ).values()
+  ];
+  const alignedPackageRoots = changedPackages
+    .filter((owner) => isPackageAligned(owner, keywords, monorepo))
+    .map((owner) => owner.path);
+
+  return {
+    changedPackageRoots: changedPackages.map((owner) => owner.path),
+    alignedPackageRoots,
+    unalignedPackageRoots: changedPackages
+      .filter((owner) => !alignedPackageRoots.includes(owner.path))
+      .map((owner) => owner.path)
+  };
+}
+
+function getOwningPackage(
+  path: string,
+  monorepo?: MonorepoContext
+): MonorepoContext["packages"][number] | undefined {
+  return monorepo?.packages
+    .filter((candidate) => path === candidate.path || path.startsWith(candidate.path + "/"))
+    .sort((left, right) => right.path.length - left.path.length)[0];
+}
+
+function isPackageAligned(
+  owner: MonorepoContext["packages"][number],
+  keywords: string[],
+  monorepo?: MonorepoContext
+): boolean {
+  const ownerPathTokens = tokenizeOwnership(owner.path);
+  const ownershipTokens = new Set([
+    ...ownerPathTokens,
+    ...tokenizeOwnership(owner.name ?? ""),
+    ...(monorepo?.typescriptPathAliases ?? []).flatMap((alias) => {
+      const aliasTokens = tokenizeOwnership(alias);
+      return aliasTokens.some((token) => ownerPathTokens.includes(token)) ? aliasTokens : [];
+    })
+  ]);
+
+  return keywords.some((keyword) => ownershipTokens.has(normalizeOwnershipToken(keyword)));
+}
+
+function tokenizeOwnership(value: string): string[] {
+  return (
+    value
+      .toLocaleLowerCase("und")
+      .match(/[\p{L}\p{N}]+/gu)
+      ?.map(normalizeOwnershipToken)
+      .filter((token) => token.length >= 3 && !genericOwnershipTokens.has(token)) ?? []
+  );
+}
+
+function normalizeOwnershipToken(value: string): string {
+  const normalized = value.toLocaleLowerCase("und");
+  return normalized.endsWith("s") && normalized.length > 4 ? normalized.slice(0, -1) : normalized;
+}
+
+function hasProvidedScopeBoundary(contract?: TaskContract): boolean {
+  return contract?.source === "provided" && contract.allowedPaths.length > 0;
+}
+
+function toPackageOwnershipFinding(
+  files: DiffFile[],
+  owner: MonorepoContext["packages"][number],
+  alignedPackageRoots: string[],
+  keywords: string[]
+): Finding {
+  const ownerLabel = owner.name === undefined ? owner.path : owner.name + " (" + owner.path + ")";
+
+  return {
+    id: "scope:package-ownership:" + owner.path,
+    detector: "scope",
+    severity: "medium",
+    confidence: 0.78,
+    evidenceStrength: 0.78,
+    title: "Changed package outside task-aligned ownership",
+    message:
+      "Package " +
+      ownerLabel +
+      " changed while the task aligns with changed package ownership: " +
+      alignedPackageRoots.join(", ") +
+      ".",
+    evidence: files.map((file) => {
+      const firstChangedLine = file.hunks
+        .flatMap((hunk) => hunk.lines)
+        .find((line) => line.kind === "add" || line.kind === "delete");
+      const lineNumber = firstChangedLine?.newLineNumber ?? firstChangedLine?.oldLineNumber;
+
+      return {
+        kind: "file",
+        path: file.path,
+        startLine: lineNumber,
+        endLine: lineNumber,
+        message:
+          "Package owner " +
+          ownerLabel +
+          " does not match task targets; aligned changed package roots: " +
+          alignedPackageRoots.join(", ") +
+          ".",
+        data: {
+          packageRoot: owner.path,
+          packageName: owner.name,
+          alignedPackageRoots,
+          taskKeywords: keywords,
+          role: file.role
+        }
+      };
+    }),
+    repair:
+      "Remove or split the cross-package change, or provide a task contract that explicitly authorizes this package boundary.",
+    tags: ["scope"]
+  };
+}
 
 function getMatchingForbiddenPatterns(path: string, patterns: string[]): string[] {
   return patterns.filter((pattern) => matchesContractPath(path, pattern));

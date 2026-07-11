@@ -262,7 +262,8 @@ Validation:
 Status (2026-07-11): in progress. Unicode-aware task tokenization, Spanish/mixed-language
 regression coverage, and deterministic separation of descriptive goals from explicit constraints
 are implemented. Task complexity now uses structural signals instead of raw word count. Repository
-ownership evidence and broader explicit uncertainty remain.
+package ownership now contributes conservative medium/large-task scope evidence while preserving
+file-level insufficient-context status. Import-graph evidence and broader ownership remain.
 
 Goal: improve the core promise without pretending the tool understands broad tasks when it does not.
 
