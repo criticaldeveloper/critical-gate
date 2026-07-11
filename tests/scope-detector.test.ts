@@ -1,4 +1,10 @@
-import type { GateResult, TaskContract, TaskIntent } from "../src/index.js";
+import type {
+  FileGraph,
+  GateResult,
+  KnowledgeProvider,
+  TaskContract,
+  TaskIntent
+} from "../src/index.js";
 import {
   parseUnifiedDiff,
   runDetectors,
@@ -25,6 +31,15 @@ const emptyTaskContract: TaskContract = {
 function parse(diffText: string): GateResult["diff"] {
   return {
     files: parseUnifiedDiff(diffText)
+  };
+}
+
+function knowledge(graph: FileGraph): KnowledgeProvider {
+  return {
+    getFileGraph: () => graph,
+    getHistoryIndex: () => ({ coChanges: [], companionRules: [] }),
+    getPatternIndex: () => ({ patterns: [] }),
+    getSolutionIndex: () => ({ solutions: [] })
   };
 }
 
@@ -599,6 +614,198 @@ index 57b22a0..cb3e0f1 100644
           "Package @example/auth (packages/auth) changed while the task aligns with changed package ownership: packages/profile."
       })
     ]);
+  });
+
+  it("uses changed exported symbols to align a package with task targets", () => {
+    const diff = parse(`diff --git a/packages/forms/src/profile.ts b/packages/forms/src/profile.ts
+index 57b22a0..cb3e0f1 100644
+--- a/packages/forms/src/profile.ts
++++ b/packages/forms/src/profile.ts
+@@ -1 +1,2 @@
++export const profileValidator = true;
+ export const form = true;
+diff --git a/packages/auth/docs/session.md b/packages/auth/docs/session.md
+index 57b22a0..cb3e0f1 100644
+--- a/packages/auth/docs/session.md
++++ b/packages/auth/docs/session.md
+@@ -1 +1,2 @@
+ # Session
++Unrelated note.
+`);
+    const findings = scopeDetector.run({
+      task: {
+        source: "cli",
+        text: "Update profile validator and document validation behavior"
+      },
+      diff,
+      context: {
+        repositoryTokenIndex: buildRepositoryTokenIndex({ files: diff.files }),
+        monorepo: {
+          configFiles: ["pnpm-workspace.yaml"],
+          workspaceGlobs: ["packages/*"],
+          packages: [
+            { path: "packages/forms", name: "@example/forms" },
+            { path: "packages/auth", name: "@example/auth" }
+          ]
+        }
+      }
+    });
+
+    expect(findings).toEqual([
+      expect.objectContaining({
+        id: "scope:package-ownership:packages/auth",
+        evidence: expect.arrayContaining([
+          expect.objectContaining({
+            kind: "metric",
+            message: expect.stringContaining("packages/forms=profileValidator")
+          })
+        ])
+      })
+    ]);
+  });
+
+  it("does not align a package from one generic changed-symbol token", () => {
+    const diff = parse(`diff --git a/packages/forms/src/profile.ts b/packages/forms/src/profile.ts
+index 57b22a0..cb3e0f1 100644
+--- a/packages/forms/src/profile.ts
++++ b/packages/forms/src/profile.ts
+@@ -1 +1,2 @@
++export const profileValidator = true;
+ export const form = true;
+diff --git a/packages/auth/docs/session.md b/packages/auth/docs/session.md
+index 57b22a0..cb3e0f1 100644
+--- a/packages/auth/docs/session.md
++++ b/packages/auth/docs/session.md
+@@ -1 +1,2 @@
+ # Session
++Unrelated note.
+`);
+
+    expect(
+      scopeDetector.run({
+        task: { source: "cli", text: "Update profile and document behavior" },
+        diff,
+        context: {
+          repositoryTokenIndex: buildRepositoryTokenIndex({ files: diff.files }),
+          monorepo: {
+            configFiles: ["pnpm-workspace.yaml"],
+            workspaceGlobs: ["packages/*"],
+            packages: [
+              { path: "packages/forms", name: "@example/forms" },
+              { path: "packages/auth", name: "@example/auth" }
+            ]
+          }
+        }
+      })
+    ).toEqual([]);
+  });
+
+  it("treats an import-connected package as support but keeps scope uncertain", () => {
+    const diff = parse(`diff --git a/packages/profile/src/form.ts b/packages/profile/src/form.ts
+index 57b22a0..cb3e0f1 100644
+--- a/packages/profile/src/form.ts
++++ b/packages/profile/src/form.ts
+@@ -1 +1,2 @@
++export const validation = true;
+ export const form = true;
+diff --git a/packages/auth/src/session.ts b/packages/auth/src/session.ts
+index 57b22a0..cb3e0f1 100644
+--- a/packages/auth/src/session.ts
++++ b/packages/auth/src/session.ts
+@@ -1 +1,2 @@
++export const timeout = 30;
+ export const session = true;
+`);
+    const context = {
+      monorepo: {
+        configFiles: ["pnpm-workspace.yaml"],
+        workspaceGlobs: ["packages/*"],
+        packages: [
+          { path: "packages/profile", name: "@example/profile" },
+          { path: "packages/auth", name: "@example/auth" }
+        ]
+      },
+      knowledge: knowledge({
+        nodes: [],
+        edges: [
+          {
+            from: "packages/profile/src/form.ts",
+            to: "packages/auth/src/session.ts",
+            kind: "import",
+            weight: 1,
+            evidence: "Relative import."
+          }
+        ]
+      })
+    };
+
+    expect(
+      scopeDetector.run({
+        task: { source: "cli", text: "Update profile package and document form behavior" },
+        diff,
+        context
+      })
+    ).toEqual([]);
+
+    expect(
+      runDetectorsWithStatuses(
+        { source: "cli", text: "Update profile package and document form behavior" },
+        diff,
+        context,
+        [scopeDetector]
+      ).detectorRuns
+    ).toEqual([
+      expect.objectContaining({
+        detector: "scope",
+        status: "insufficient-context"
+      })
+    ]);
+  });
+
+  it("does not use an import edge unless both endpoints changed", () => {
+    const diff = parse(`diff --git a/packages/profile/src/form.ts b/packages/profile/src/form.ts
+index 57b22a0..cb3e0f1 100644
+--- a/packages/profile/src/form.ts
++++ b/packages/profile/src/form.ts
+@@ -1 +1,2 @@
++export const validation = true;
+ export const form = true;
+diff --git a/packages/auth/src/session.ts b/packages/auth/src/session.ts
+index 57b22a0..cb3e0f1 100644
+--- a/packages/auth/src/session.ts
++++ b/packages/auth/src/session.ts
+@@ -1 +1,2 @@
++export const timeout = 30;
+ export const session = true;
+`);
+
+    expect(
+      scopeDetector.run({
+        task: { source: "cli", text: "Update profile package and document form behavior" },
+        diff,
+        context: {
+          monorepo: {
+            configFiles: ["pnpm-workspace.yaml"],
+            workspaceGlobs: ["packages/*"],
+            packages: [
+              { path: "packages/profile", name: "@example/profile" },
+              { path: "packages/auth", name: "@example/auth" }
+            ]
+          },
+          knowledge: knowledge({
+            nodes: [],
+            edges: [
+              {
+                from: "packages/profile/src/unchanged.ts",
+                to: "packages/auth/src/session.ts",
+                kind: "import",
+                weight: 1
+              }
+            ]
+          })
+        }
+      })
+    ).toEqual([expect.objectContaining({ id: "scope:package-ownership:packages/auth" })]);
   });
 
   it("keeps a forbidden-only provided contract insufficient for broad allowed scope", () => {

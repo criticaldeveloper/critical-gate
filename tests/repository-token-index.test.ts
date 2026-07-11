@@ -56,9 +56,21 @@ index 57b22a0..cb3e0f1 100644
         expect.objectContaining({ value: "critical", source: "package-name" }),
         expect.objectContaining({ value: "gate", source: "package-name" }),
         expect.objectContaining({ value: "rule", source: "folder" }),
-        expect.objectContaining({ value: "validate", source: "symbol", raw: "validate" }),
-        expect.objectContaining({ value: "email", source: "symbol", raw: "Email" }),
-        expect.objectContaining({ value: "address", source: "symbol", raw: "Address" })
+        expect.objectContaining({
+          value: "validate",
+          source: "symbol",
+          raw: "validateEmailAddress"
+        }),
+        expect.objectContaining({
+          value: "email",
+          source: "symbol",
+          raw: "validateEmailAddress"
+        }),
+        expect.objectContaining({
+          value: "address",
+          source: "symbol",
+          raw: "validateEmailAddress"
+        })
       ])
     );
 

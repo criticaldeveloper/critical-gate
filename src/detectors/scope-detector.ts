@@ -1,4 +1,5 @@
 import { analyzeTaskIntent } from "../intent/index.js";
+import type { FileGraph } from "../knowledge/index.js";
 import type {
   DiffFile,
   Finding,
@@ -87,7 +88,9 @@ export const scopeDetector: Detector = {
       const ownershipFindings = getPackageOwnershipFindings(
         diff.files.filter((file) => !contractScopePaths.has(file.path)),
         analysis.keywords,
-        context?.monorepo
+        context?.monorepo,
+        context?.repositoryTokenIndex,
+        context?.knowledge?.getFileGraph()
       );
 
       return [...forbiddenPathFindings, ...outsideAllowedPathFindings, ...ownershipFindings];
@@ -120,7 +123,13 @@ export const scopeDetector: Detector = {
     }
 
     if (analysis.complexity !== "small") {
-      const ownership = analyzePackageOwnership(diff.files, analysis.keywords, context?.monorepo);
+      const ownership = analyzePackageOwnership(
+        diff.files,
+        analysis.keywords,
+        context?.monorepo,
+        context?.repositoryTokenIndex,
+        context?.knowledge?.getFileGraph()
+      );
 
       if (ownership.alignedPackageRoots.length > 0) {
         return {
@@ -164,6 +173,8 @@ interface PackageOwnershipAnalysis {
   changedPackageRoots: string[];
   alignedPackageRoots: string[];
   unalignedPackageRoots: string[];
+  importSupportedPackageRoots: string[];
+  symbolMatchesByPackage: Map<string, string[]>;
 }
 
 const genericOwnershipTokens = new Set([
@@ -182,15 +193,18 @@ const genericOwnershipTokens = new Set([
 function getPackageOwnershipFindings(
   files: DiffFile[],
   keywords: string[],
-  monorepo?: MonorepoContext
+  monorepo?: MonorepoContext,
+  tokenIndex?: RepositoryTokenIndex,
+  graph?: FileGraph
 ): Finding[] {
-  const ownership = analyzePackageOwnership(files, keywords, monorepo);
+  const ownership = analyzePackageOwnership(files, keywords, monorepo, tokenIndex, graph);
 
   if (ownership.alignedPackageRoots.length === 0 || ownership.unalignedPackageRoots.length === 0) {
     return [];
   }
 
   return ownership.unalignedPackageRoots
+    .filter((packageRoot) => !ownership.importSupportedPackageRoots.includes(packageRoot))
     .map((packageRoot) => {
       const owner = monorepo?.packages.find((candidate) => candidate.path === packageRoot);
       const ownedFiles = files.filter(
@@ -199,7 +213,13 @@ function getPackageOwnershipFindings(
 
       return owner === undefined || ownedFiles.length === 0
         ? undefined
-        : toPackageOwnershipFinding(ownedFiles, owner, ownership.alignedPackageRoots, keywords);
+        : toPackageOwnershipFinding(
+            ownedFiles,
+            owner,
+            ownership.alignedPackageRoots,
+            ownership.symbolMatchesByPackage,
+            keywords
+          );
     })
     .filter((finding): finding is Finding => finding !== undefined);
 }
@@ -207,7 +227,9 @@ function getPackageOwnershipFindings(
 function analyzePackageOwnership(
   files: DiffFile[],
   keywords: string[],
-  monorepo?: MonorepoContext
+  monorepo?: MonorepoContext,
+  tokenIndex?: RepositoryTokenIndex,
+  graph?: FileGraph
 ): PackageOwnershipAnalysis {
   const changedPackages = [
     ...new Map(
@@ -217,17 +239,94 @@ function analyzePackageOwnership(
         .map((owner) => [owner.path, owner])
     ).values()
   ];
+  const symbolMatchesByPackage = new Map(
+    changedPackages.map((owner) => [
+      owner.path,
+      getChangedSymbolMatches(owner, files, keywords, tokenIndex)
+    ])
+  );
   const alignedPackageRoots = changedPackages
-    .filter((owner) => isPackageAligned(owner, keywords, monorepo))
+    .filter(
+      (owner) =>
+        isPackageAligned(owner, keywords, monorepo) ||
+        (symbolMatchesByPackage.get(owner.path)?.length ?? 0) > 0
+    )
+    .map((owner) => owner.path);
+  const unalignedPackageRoots = changedPackages
+    .filter((owner) => !alignedPackageRoots.includes(owner.path))
     .map((owner) => owner.path);
 
   return {
     changedPackageRoots: changedPackages.map((owner) => owner.path),
     alignedPackageRoots,
-    unalignedPackageRoots: changedPackages
-      .filter((owner) => !alignedPackageRoots.includes(owner.path))
-      .map((owner) => owner.path)
+    unalignedPackageRoots,
+    importSupportedPackageRoots: unalignedPackageRoots.filter((packageRoot) =>
+      hasImportConnection(
+        packageRoot,
+        alignedPackageRoots,
+        new Set(files.map((file) => file.path)),
+        graph
+      )
+    ),
+    symbolMatchesByPackage
   };
+}
+
+function getChangedSymbolMatches(
+  owner: MonorepoContext["packages"][number],
+  files: DiffFile[],
+  keywords: string[],
+  tokenIndex?: RepositoryTokenIndex
+): string[] {
+  const keywordSet = new Set(keywords.map(normalizeOwnershipToken));
+  const ownedPaths = new Set(
+    files
+      .filter((file) => file.path === owner.path || file.path.startsWith(owner.path + "/"))
+      .map((file) => file.path)
+  );
+
+  const tokensBySymbol = new Map<string, Set<string>>();
+
+  for (const token of (tokenIndex?.files ?? [])
+    .filter((file) => ownedPaths.has(file.path))
+    .flatMap((file) => file.tokens)
+    .filter((token) => token.source === "symbol")) {
+    const matches = tokensBySymbol.get(token.raw) ?? new Set<string>();
+    if (keywordSet.has(normalizeOwnershipToken(token.value))) {
+      matches.add(normalizeOwnershipToken(token.value));
+    }
+    tokensBySymbol.set(token.raw, matches);
+  }
+
+  return [...tokensBySymbol.entries()]
+    .filter(
+      ([symbol, matches]) => keywordSet.has(normalizeOwnershipToken(symbol)) || matches.size >= 2
+    )
+    .map(([symbol]) => symbol)
+    .sort();
+}
+
+function hasImportConnection(
+  packageRoot: string,
+  alignedPackageRoots: string[],
+  changedPaths: Set<string>,
+  graph?: FileGraph
+): boolean {
+  return (graph?.edges ?? []).some(
+    (edge) =>
+      edge.kind === "import" &&
+      changedPaths.has(edge.from) &&
+      changedPaths.has(edge.to) &&
+      alignedPackageRoots.some(
+        (alignedRoot) =>
+          (isInsideRoot(edge.from, packageRoot) && isInsideRoot(edge.to, alignedRoot)) ||
+          (isInsideRoot(edge.to, packageRoot) && isInsideRoot(edge.from, alignedRoot))
+      )
+  );
+}
+
+function isInsideRoot(path: string, root: string): boolean {
+  return path === root || path.startsWith(root + "/");
 }
 
 function getOwningPackage(
@@ -280,6 +379,7 @@ function toPackageOwnershipFinding(
   files: DiffFile[],
   owner: MonorepoContext["packages"][number],
   alignedPackageRoots: string[],
+  symbolMatchesByPackage: Map<string, string[]>,
   keywords: string[]
 ): Finding {
   const ownerLabel = owner.name === undefined ? owner.path : owner.name + " (" + owner.path + ")";
@@ -297,32 +397,56 @@ function toPackageOwnershipFinding(
       " changed while the task aligns with changed package ownership: " +
       alignedPackageRoots.join(", ") +
       ".",
-    evidence: files.map((file) => {
-      const firstChangedLine = file.hunks
-        .flatMap((hunk) => hunk.lines)
-        .find((line) => line.kind === "add" || line.kind === "delete");
-      const lineNumber = firstChangedLine?.newLineNumber ?? firstChangedLine?.oldLineNumber;
-
-      return {
-        kind: "file",
-        path: file.path,
-        startLine: lineNumber,
-        endLine: lineNumber,
+    evidence: [
+      {
+        kind: "metric",
         message:
-          "Package owner " +
-          ownerLabel +
-          " does not match task targets; aligned changed package roots: " +
-          alignedPackageRoots.join(", ") +
-          ".",
+          "Task-aligned changed symbols by package: " +
+          alignedPackageRoots
+            .map(
+              (packageRoot) =>
+                packageRoot + "=" + (symbolMatchesByPackage.get(packageRoot)?.join(", ") || "none")
+            )
+            .join("; ") +
+          ". No import edge connects the unaligned package to those package roots.",
         data: {
-          packageRoot: owner.path,
-          packageName: owner.name,
           alignedPackageRoots,
-          taskKeywords: keywords,
-          role: file.role
+          alignedChangedSymbols: Object.fromEntries(
+            alignedPackageRoots.map((packageRoot) => [
+              packageRoot,
+              symbolMatchesByPackage.get(packageRoot) ?? []
+            ])
+          ),
+          importConnected: false
         }
-      };
-    }),
+      },
+      ...files.map((file) => {
+        const firstChangedLine = file.hunks
+          .flatMap((hunk) => hunk.lines)
+          .find((line) => line.kind === "add" || line.kind === "delete");
+        const lineNumber = firstChangedLine?.newLineNumber ?? firstChangedLine?.oldLineNumber;
+
+        return {
+          kind: "file" as const,
+          path: file.path,
+          startLine: lineNumber,
+          endLine: lineNumber,
+          message:
+            "Package owner " +
+            ownerLabel +
+            " does not match task targets; aligned changed package roots: " +
+            alignedPackageRoots.join(", ") +
+            ".",
+          data: {
+            packageRoot: owner.path,
+            packageName: owner.name,
+            alignedPackageRoots,
+            taskKeywords: keywords,
+            role: file.role
+          }
+        };
+      })
+    ],
     repair:
       "Remove or split the cross-package change, or provide a task contract that explicitly authorizes this package boundary.",
     tags: ["scope"]

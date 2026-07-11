@@ -8,6 +8,9 @@ This project follows the versioning policy in `docs/versioning-policy.md`.
 
 ### Changed
 
+- Use changed exported-symbol matches as bounded scope alignment evidence and relative import-graph
+  edges as cross-package support evidence, while keeping graph-justified scope explicitly
+  insufficient at file level.
 - Evaluate medium and large task scope against provided contract boundaries and changed monorepo
   package ownership, reporting cross-package mismatches only when another changed package aligns
   with explicit task targets and preserving insufficient-context status otherwise.

@@ -152,7 +152,13 @@ function extractContentTokens(file: DiffFile): RepositoryToken[] {
   if (sourceFileExtensions.test(file.path)) {
     for (const line of lines) {
       for (const match of line.matchAll(exportedSymbolPattern)) {
-        tokens.push(...extractRepositoryTokens(match[1] ?? "", "symbol"));
+        const exportedName = match[1] ?? "";
+        tokens.push(
+          ...extractRepositoryTokens(exportedName, "symbol").map((token) => ({
+            ...token,
+            raw: exportedName
+          }))
+        );
       }
     }
   }

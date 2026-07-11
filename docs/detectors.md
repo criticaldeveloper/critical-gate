@@ -90,6 +90,11 @@ paths can fully evaluate the declared scope boundary. Forbidden paths are always
 not define the complete allowed scope by themselves. Package alignment alone does not claim
 file-level scope certainty, and docs/tests remain eligible evidence inside package boundaries.
 
+Changed exported symbols from diff hunks can align a package when package naming alone does not
+match the task. Relative import edges can justify an otherwise unaligned changed package as support
+for an aligned package, but import connectivity does not upgrade the detector to a clean pass.
+Path, history, and generic proximity edges are not sufficient to suppress package-scope evidence.
+
 When a provided task contract includes `allowed_paths` or `forbidden_paths`, the scope detector
 enforces those paths directly and emits blocker findings for changed files outside the allowed set
 or inside the forbidden set. These checks run before the small-task keyword heuristic, so explicit
