@@ -8,7 +8,7 @@ declares a stable public contract.
 
 ## Current Release Stage
 
-The current target is `2.9.0`.
+The current target is `2.9.1`.
 
 This means:
 
@@ -123,6 +123,16 @@ product boundary:
   evidence, with focused tests and dogfood-derived evaluation fixtures.
 - The release remains scoped to TS/JS diff integrity, CLI/GitHub integration, and the existing VS
   Code analyzer surface.
+
+### 2.9.1 Checkpoint
+
+- No repo-wide LLM review, whole-repository model input, or model-first detector was added.
+- No automatic code rewrite or evidence-free repair behavior was added.
+- No generic review-comment detector was introduced or promoted.
+- The Git diff reader fix changes bounded subprocess capacity and failure diagnostics only; it does
+  not add or alter detectors, output schemas, or gate decisions.
+- The regression uses a generated manifest in an isolated temporary Git repository and preserves
+  the existing TS/JS diff-integrity product boundary.
 
 ## Tagging
 

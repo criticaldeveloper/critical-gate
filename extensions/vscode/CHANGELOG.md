@@ -2,6 +2,13 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.9.1 - 2026-07-11
+
+Patch release aligned with Critical Gate 2.9.1.
+
+- Bundle the 50 MiB bounded Git subprocess output buffer and actionable oversized-diff diagnostic.
+- Bundle regression coverage for staged diffs containing large generated manifests.
+
 ## 2.9.0 - 2026-07-11
 
 Minor release aligned with Critical Gate 2.9.0.
