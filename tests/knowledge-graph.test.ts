@@ -88,4 +88,76 @@ describe("buildFileGraph", () => {
       edges: []
     });
   });
+
+  it("resolves exact and wildcard TypeScript path aliases from JSONC config", () => {
+    const files = [
+      "src/config/index.ts",
+      "packages/profile/src/form.ts",
+      "packages/auth/src/session.ts"
+    ];
+    const graph = buildFileGraph({
+      root: "C:/repo",
+      runner: {
+        execFile: () => files.join("\n"),
+        readFile: (path) => {
+          const normalized = path.replaceAll("\\", "/");
+
+          if (normalized.endsWith("tsconfig.json")) {
+            return `{
+              // Root aliases used by workspace packages.
+              "compilerOptions": {
+                "baseUrl": ".",
+                "paths": {
+                  "@profile/*": ["packages/profile/src/*"],
+                  "@config": ["src/config/index.ts"],
+                },
+              },
+            }`;
+          }
+
+          if (normalized.endsWith("packages/auth/src/session.ts")) {
+            return [
+              'import { form } from "@profile/form";',
+              'import { config } from "@config";'
+            ].join("\n");
+          }
+
+          return "";
+        }
+      }
+    });
+
+    expect(graph.edges).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          from: "packages/auth/src/session.ts",
+          to: "packages/profile/src/form.ts",
+          kind: "import",
+          evidence: "TypeScript path alias @profile/* -> packages/profile/src/*."
+        }),
+        expect.objectContaining({
+          from: "packages/auth/src/session.ts",
+          to: "src/config/index.ts",
+          kind: "import",
+          evidence: "TypeScript path alias @config -> src/config/index.ts."
+        })
+      ])
+    );
+  });
+
+  it("ignores malformed config and unresolved aliases without failing graph construction", () => {
+    const graph = buildFileGraph({
+      root: "C:/repo",
+      runner: {
+        execFile: () => "src/main.ts",
+        readFile: (path) =>
+          path.replaceAll("\\", "/").endsWith("tsconfig.json")
+            ? "{ invalid"
+            : 'import value from "@missing/value";'
+      }
+    });
+
+    expect(graph.nodes).toEqual([{ path: "src/main.ts", role: "source" }]);
+    expect(graph.edges).toEqual([]);
+  });
 });

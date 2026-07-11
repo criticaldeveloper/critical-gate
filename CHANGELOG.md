@@ -8,6 +8,8 @@ This project follows the versioning policy in `docs/versioning-policy.md`.
 
 ### Changed
 
+- Resolve exact and wildcard TypeScript `baseUrl`/`paths` aliases from root JSONC tsconfig files
+  into existing import-graph edges, degrading safely when configuration is malformed or unresolved.
 - Use changed exported-symbol matches as bounded scope alignment evidence and relative import-graph
   edges as cross-package support evidence, while keeping graph-justified scope explicitly
   insufficient at file level.

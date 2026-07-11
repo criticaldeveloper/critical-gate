@@ -265,7 +265,8 @@ are implemented. Task complexity now uses structural signals instead of raw word
 package ownership now contributes conservative medium/large-task scope evidence while preserving
 file-level insufficient-context status. Changed exported symbols and relative import edges now
 provide bounded alignment/support evidence without creating clean-pass claims. Broader ownership
-and path-alias resolution remain.
+remains; root TypeScript path aliases now resolve into import-graph evidence without changing the
+public result schema.
 
 Goal: improve the core promise without pretending the tool understands broad tasks when it does not.
 
