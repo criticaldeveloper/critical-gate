@@ -575,6 +575,11 @@ blocker severity finding with enough evidence strength to fail the gate.
 
 ## Troubleshooting
 
+Critical Gate allows up to 50 MiB of output from each Git subprocess so generated manifests can be
+analyzed without Node's default `ENOBUFS` failure. If a Git command exceeds that bound, the CLI
+reports the command and recommends narrowing the range or normalizing generated-file churn before
+rerunning.
+
 ### The CLI reports no changed files
 
 Make sure the diff is committed or present relative to the selected base, and that `--base` points at

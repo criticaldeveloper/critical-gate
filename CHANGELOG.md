@@ -4,6 +4,15 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## Unreleased
+
+### Fixed
+
+- Raise the bounded Git subprocess output buffer to 50 MiB so large generated manifests can be
+  analyzed without `spawnSync git ENOBUFS`, and report an actionable diagnostic if that limit is
+  still exceeded.
+- Add a real staged large-manifest regression test for Git diff collection.
+
 ## 2.9.0 - 2026-07-11
 
 ### Added

@@ -9,6 +9,8 @@ import { createLazyKnowledgeProvider } from "../knowledge/index.js";
 import { classifyPath, detectLanguage } from "./path-classifier.js";
 import { parseUnifiedDiff } from "./parse-unified-diff.js";
 
+export const GIT_MAX_BUFFER_BYTES = 50 * 1024 * 1024;
+
 export interface GitCommandRunner {
   execFile: (file: string, args: string[], options?: { cwd?: string }) => string;
   readFile?: (path: string) => string;
@@ -31,15 +33,45 @@ export interface GitDiffResult {
   utilityIndex?: UtilityIndex;
 }
 
-const defaultRunner: GitCommandRunner = {
-  execFile: (file, args, options) =>
-    execFileSync(file, args, {
-      cwd: options?.cwd,
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "pipe"]
-    }),
-  readFile: (path) => readFileSync(path, "utf8")
-};
+type ExecFile = typeof execFileSync;
+
+export function createGitCommandRunner(execFile: ExecFile = execFileSync): GitCommandRunner {
+  return {
+    execFile: (file, args, options) => {
+      try {
+        return execFile(file, args, {
+          cwd: options?.cwd,
+          encoding: "utf8",
+          stdio: ["ignore", "pipe", "pipe"],
+          maxBuffer: GIT_MAX_BUFFER_BYTES
+        }) as string;
+      } catch (error) {
+        throw toGitCommandError(error, file, args);
+      }
+    },
+    readFile: (path) => readFileSync(path, "utf8")
+  };
+}
+
+const defaultRunner = createGitCommandRunner();
+
+function toGitCommandError(error: unknown, file: string, args: string[]): Error {
+  if (isNodeError(error) && error.code === "ENOBUFS") {
+    const limitMb = GIT_MAX_BUFFER_BYTES / 1024 / 1024;
+
+    return new Error(
+      `Git command exceeded Critical Gate's ${limitMb} MiB output limit: ${file} ${args.join(" ")}. ` +
+        "Large generated artifacts can produce oversized diffs; narrow the analyzed range or normalize generated-file churn before rerunning.",
+      { cause: error }
+    );
+  }
+
+  return error instanceof Error ? error : new Error(String(error));
+}
+
+function isNodeError(error: unknown): error is NodeJS.ErrnoException {
+  return error instanceof Error && "code" in error;
+}
 
 export function readGitDiff(options: ReadGitDiffOptions = {}): GitDiffResult {
   const runner = options.runner ?? defaultRunner;

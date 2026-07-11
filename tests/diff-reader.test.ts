@@ -1,8 +1,11 @@
-import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import {
   classifyPath,
+  createGitCommandRunner,
   detectLanguage,
   getKnowledgeCacheRoot,
   parseUnifiedDiff,
@@ -128,6 +131,53 @@ describe("classifyPath", () => {
 });
 
 describe("readGitDiff", () => {
+  it("reads a staged diff containing a multi-megabyte generated manifest", () => {
+    const root = mkdtempSync(join(tmpdir(), "critical-gate-large-diff-"));
+    const manifestPath = join(root, "custom-elements.json");
+    const declarations = Array.from({ length: 55_000 }, (_, index) => ({
+      name: `GeneratedElement${index}`,
+      description: "Generated metadata entry used to exercise the Git subprocess output buffer."
+    }));
+
+    try {
+      execFileSync("git", ["init"], { cwd: root, stdio: "ignore" });
+      execFileSync("git", ["config", "user.email", "critical-gate@example.test"], { cwd: root });
+      execFileSync("git", ["config", "user.name", "Critical Gate Test"], { cwd: root });
+      writeFileSync(manifestPath, '{"schemaVersion":"1.0.0","modules":[]}\n', "utf8");
+      execFileSync("git", ["add", "custom-elements.json"], { cwd: root });
+      execFileSync("git", ["commit", "-m", "baseline"], { cwd: root, stdio: "ignore" });
+      writeFileSync(
+        manifestPath,
+        `${JSON.stringify({ schemaVersion: "1.0.0", declarations }, null, 2)}\n`,
+        "utf8"
+      );
+      execFileSync("git", ["add", "custom-elements.json"], { cwd: root });
+
+      const result = readGitDiff({ cwd: root, staged: true });
+
+      expect(result.files).toHaveLength(1);
+      expect(result.files[0]).toMatchObject({
+        path: "custom-elements.json",
+        additions: expect.any(Number)
+      });
+      expect(result.files[0]?.additions).toBeGreaterThan(100_000);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  }, 30_000);
+
+  it("reports an actionable diagnostic when Git output exceeds the buffer", () => {
+    const runner = createGitCommandRunner((() => {
+      const error = new Error("spawnSync git ENOBUFS") as NodeJS.ErrnoException;
+      error.code = "ENOBUFS";
+      throw error;
+    }) as typeof execFileSync);
+
+    expect(() => runner.execFile("git", ["diff", "--cached"])).toThrow(
+      /Git command exceeded Critical Gate's 50 MiB output limit: git diff --cached.*generated artifacts/i
+    );
+  });
+
   it("collects root, branch, and parsed base diff through the git runner", () => {
     const originalDisableCache = process.env.CRITICAL_GATE_DISABLE_CACHE;
     process.env.CRITICAL_GATE_DISABLE_CACHE = "true";
