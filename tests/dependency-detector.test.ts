@@ -211,10 +211,10 @@ describe("detector runner", () => {
 
     expect(summarizeFindings(findings)).toMatchObject({
       decision: "fail",
-      findingCount: 5,
+      findingCount: 6,
       blockerCount: 1,
       highCount: 2,
-      mediumCount: 2
+      mediumCount: 3
     });
   });
 });

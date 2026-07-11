@@ -267,7 +267,8 @@ file-level insufficient-context status. Changed exported symbols and relative im
 provide bounded alignment/support evidence without creating clean-pass claims. Broader ownership
 remains; root TypeScript path aliases now resolve into import-graph evidence without changing the
 public result schema. Five manually reviewed Spanish/mixed-language cases now seed development and
-calibration evaluation; broader real multilingual evidence remains.
+calibration evaluation. Docs/tests now participate in small-task scope relevance with explicit
+support evidence or uncertainty. Broader real multilingual evidence remains.
 
 Goal: improve the core promise without pretending the tool understands broad tasks when it does not.
 

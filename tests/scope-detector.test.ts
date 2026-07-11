@@ -239,7 +239,119 @@ index 57b22a0..cb3e0f1 100644
     expect(scopeDetector.run({ task, diff })).toEqual([]);
   });
 
-  it("uses repository symbol tokens as task alignment evidence", () => {
+  it("reports an unrelated documentation file beside a task-aligned source change", () => {
+    const diff = parse(`diff --git a/src/signup.ts b/src/signup.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/signup.ts
++++ b/src/signup.ts
+@@ -1 +1,2 @@
++export const signupValidation = true;
+ export const signup = true;
+diff --git a/docs/authentication.md b/docs/authentication.md
+index 57b22a0..cb3e0f1 100644
+--- a/docs/authentication.md
++++ b/docs/authentication.md
+@@ -1 +1,2 @@
+ # Authentication
++Unrelated session guidance.
+`);
+
+    expect(scopeDetector.run({ task, diff })).toEqual([
+      expect.objectContaining({
+        id: "scope:docs/authentication.md",
+        severity: "medium",
+        title: "Unexpected support file changed for small task"
+      })
+    ]);
+  });
+
+  it("reports an unrelated test beside a task-aligned source change", () => {
+    const diff = parse(`diff --git a/src/signup.ts b/src/signup.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/signup.ts
++++ b/src/signup.ts
+@@ -1 +1,2 @@
++export const signupValidation = true;
+ export const signup = true;
+diff --git a/tests/authentication.test.ts b/tests/authentication.test.ts
+index 57b22a0..cb3e0f1 100644
+--- a/tests/authentication.test.ts
++++ b/tests/authentication.test.ts
+@@ -1 +1,2 @@
+ test("session", () => {});
++test("refreshes session", () => {});
+`);
+
+    expect(scopeDetector.run({ task, diff })).toEqual([
+      expect.objectContaining({
+        id: "scope:tests/authentication.test.ts",
+        severity: "medium",
+        title: "Unexpected support file changed for small task"
+      })
+    ]);
+  });
+
+  it("accepts a changed test connected to a task-aligned source by the file graph", () => {
+    const diff = parse(`diff --git a/src/signup.ts b/src/signup.ts
+index 57b22a0..cb3e0f1 100644
+--- a/src/signup.ts
++++ b/src/signup.ts
+@@ -1 +1,2 @@
++export const signupValidation = true;
+ export const signup = true;
+diff --git a/tests/regression.test.ts b/tests/regression.test.ts
+index 57b22a0..cb3e0f1 100644
+--- a/tests/regression.test.ts
++++ b/tests/regression.test.ts
+@@ -1 +1,2 @@
+ test("works", () => {});
++test("rejects invalid input", () => {});
+`);
+
+    expect(
+      scopeDetector.run({
+        task,
+        diff,
+        context: {
+          knowledge: knowledge({
+            nodes: [],
+            edges: [
+              {
+                from: "tests/regression.test.ts",
+                to: "src/signup.ts",
+                kind: "test",
+                weight: 0.9
+              }
+            ]
+          })
+        }
+      })
+    ).toEqual([]);
+  });
+
+  it("marks an unaligned docs-only small task diff as insufficient context", () => {
+    const diff = parse(`diff --git a/docs/authentication.md b/docs/authentication.md
+index 57b22a0..cb3e0f1 100644
+--- a/docs/authentication.md
++++ b/docs/authentication.md
+@@ -1 +1,2 @@
+ # Authentication
++Session guidance.
+`);
+    const result = runDetectorsWithStatuses(task, diff, undefined, [scopeDetector]);
+
+    expect(result.findings).toEqual([]);
+    expect(result.detectorRuns).toEqual([
+      expect.objectContaining({
+        detector: "scope",
+        status: "insufficient-context",
+        reason:
+          "Changed docs or tests could not be aligned to a task target or a changed task-aligned anchor."
+      })
+    ]);
+  });
+
+  it("uses diff-bounded symbol tokens without requiring prebuilt context", () => {
     const task: TaskIntent = {
       source: "cli",
       text: "Fix email validator"
@@ -254,12 +366,7 @@ index 57b22a0..cb3e0f1 100644
 `);
     const repositoryTokenIndex = buildRepositoryTokenIndex({ files: diff.files });
 
-    expect(scopeDetector.run({ task, diff })).toEqual([
-      expect.objectContaining({
-        detector: "scope",
-        severity: "medium"
-      })
-    ]);
+    expect(scopeDetector.run({ task, diff })).toEqual([]);
     expect(
       scopeDetector.run({
         task,

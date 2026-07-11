@@ -8,6 +8,9 @@ This project follows the versioning policy in `docs/versioning-policy.md`.
 
 ### Changed
 
+- Treat docs and tests as scope-relevant for small tasks, using task tokens and changed-file graph
+  relationships to accept support files, emit medium evidence for clearly unrelated support, and
+  return insufficient context when no aligned anchor exists.
 - Add five manually labeled Spanish and mixed-language development/calibration evaluation cases
   across the dogfood repository profiles without presenting them as external validation.
 - Recognize explicit Spanish configuration prohibitions in scope analysis so `configuración`

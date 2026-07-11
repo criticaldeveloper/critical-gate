@@ -99,6 +99,12 @@ The import graph resolves relative imports plus exact and wildcard mappings from
 extended-only, or unresolved alias configuration degrades to the remaining graph evidence instead
 of failing the detector.
 
+For small tasks, docs and tests are scope-relevant rather than automatically excluded. A support
+file is accepted when its path or indexed heading/test/symbol tokens match the task, or when an
+import, test-source, or history edge connects it to a changed task-aligned anchor. An unaligned
+support file beside an aligned change produces medium review evidence. If no task-aligned anchor is
+available, the detector reports insufficient context instead of treating the support file as clean.
+
 When a provided task contract includes `allowed_paths` or `forbidden_paths`, the scope detector
 enforces those paths directly and emits blocker findings for changed files outside the allowed set
 or inside the forbidden set. These checks run before the small-task keyword heuristic, so explicit

@@ -1,5 +1,6 @@
 import { analyzeTaskIntent } from "../intent/index.js";
 import type { FileGraph } from "../knowledge/index.js";
+import { buildRepositoryTokenIndex } from "../repository/index.js";
 import type {
   DiffFile,
   Finding,
@@ -53,6 +54,8 @@ export const scopeDetector: Detector = {
   maturity: "review",
   run: ({ task, diff, context }) => {
     const analysis = analyzeTaskIntent(task);
+    const tokenIndex =
+      context?.repositoryTokenIndex ?? buildRepositoryTokenIndex({ files: diff.files });
     const forbiddenPathFindings = diff.files
       .map((file) => {
         const matchingPatterns = getMatchingForbiddenPatterns(
@@ -89,13 +92,16 @@ export const scopeDetector: Detector = {
         diff.files.filter((file) => !contractScopePaths.has(file.path)),
         analysis.keywords,
         context?.monorepo,
-        context?.repositoryTokenIndex,
+        tokenIndex,
         context?.knowledge?.getFileGraph()
       );
 
       return [...forbiddenPathFindings, ...outsideAllowedPathFindings, ...ownershipFindings];
     }
 
+    const supportGraph = diff.files.some((file) => file.role === "docs" || file.role === "test")
+      ? context?.knowledge?.getFileGraph()
+      : undefined;
     const unexpectedScopeFindings = diff.files
       .filter((file) => !contractScopePaths.has(file.path))
       .filter((file) =>
@@ -104,7 +110,8 @@ export const scopeDetector: Detector = {
           diff.files,
           analysis.keywords,
           task.text,
-          context?.repositoryTokenIndex
+          tokenIndex,
+          supportGraph
         )
       )
       .map((file) => toFinding(file, analysis.keywords, context?.repositoryTokenIndex));
@@ -117,6 +124,8 @@ export const scopeDetector: Detector = {
     }
 
     const analysis = analyzeTaskIntent(task);
+    const tokenIndex =
+      context?.repositoryTokenIndex ?? buildRepositoryTokenIndex({ files: diff.files });
 
     if (hasProvidedScopeBoundary(context?.taskContract)) {
       return { status: "passed" };
@@ -127,7 +136,7 @@ export const scopeDetector: Detector = {
         diff.files,
         analysis.keywords,
         context?.monorepo,
-        context?.repositoryTokenIndex,
+        tokenIndex,
         context?.knowledge?.getFileGraph()
       );
 
@@ -162,6 +171,14 @@ export const scopeDetector: Detector = {
         status: "insufficient-context",
         reason:
           "Task wording is broad; path-keyword scope validation is not enough to prove changed files are in scope."
+      };
+    }
+
+    if (hasAmbiguousSupportFiles(diff.files, analysis.keywords, task.text, tokenIndex)) {
+      return {
+        status: "insufficient-context",
+        reason:
+          "Changed docs or tests could not be aligned to a task target or a changed task-aligned anchor."
       };
     }
 
@@ -508,10 +525,24 @@ function isUnexpectedForSmallTask(
   files: DiffFile[],
   keywords: string[],
   taskText: string,
-  tokenIndex?: RepositoryTokenIndex
+  tokenIndex?: RepositoryTokenIndex,
+  graph?: FileGraph
 ): boolean {
   if (file.role === "docs" || file.role === "test") {
-    return false;
+    if (hasFileKeywordAlignment(file, keywords, tokenIndex)) {
+      return false;
+    }
+
+    const anchors = getTaskAlignedAnchors(file, files, keywords, taskText, tokenIndex);
+
+    return (
+      anchors.length > 0 &&
+      !hasChangedGraphConnection(
+        file.path,
+        anchors.map((anchor) => anchor.path),
+        graph
+      )
+    );
   }
 
   if (file.role === "manifest" && isPackageVersionOnlyChange(file)) {
@@ -554,6 +585,52 @@ function isUnexpectedForSmallTask(
   }
 
   return keywords.length > 0 && !hasFileKeywordAlignment(file, keywords, tokenIndex);
+}
+
+function getTaskAlignedAnchors(
+  candidate: DiffFile,
+  files: DiffFile[],
+  keywords: string[],
+  taskText: string,
+  tokenIndex?: RepositoryTokenIndex
+): DiffFile[] {
+  return files
+    .filter((file) => file.path !== candidate.path)
+    .filter(
+      (file) =>
+        hasFileKeywordAlignment(file, keywords, tokenIndex) ||
+        isRoleAlignedConfigOrManifestChange(file, taskText, keywords)
+    );
+}
+
+function hasChangedGraphConnection(
+  candidatePath: string,
+  anchorPaths: string[],
+  graph?: FileGraph
+): boolean {
+  const anchorSet = new Set(anchorPaths);
+
+  return (graph?.edges ?? []).some(
+    (edge) =>
+      (edge.kind === "import" || edge.kind === "test" || edge.kind === "history") &&
+      ((edge.from === candidatePath && anchorSet.has(edge.to)) ||
+        (edge.to === candidatePath && anchorSet.has(edge.from)))
+  );
+}
+
+function hasAmbiguousSupportFiles(
+  files: DiffFile[],
+  keywords: string[],
+  taskText: string,
+  tokenIndex?: RepositoryTokenIndex
+): boolean {
+  return files
+    .filter((file) => file.role === "docs" || file.role === "test")
+    .some(
+      (file) =>
+        !hasFileKeywordAlignment(file, keywords, tokenIndex) &&
+        getTaskAlignedAnchors(file, files, keywords, taskText, tokenIndex).length === 0
+    );
 }
 
 function hasAlignedDependencyRemovalManifest(files: DiffFile[], taskText: string): boolean {
@@ -753,17 +830,20 @@ function toFinding(file: DiffFile, keywords: string[], tokenIndex?: RepositoryTo
     .find((line) => line.kind === "add" || line.kind === "delete");
   const lineNumber = firstChangedLine?.newLineNumber ?? firstChangedLine?.oldLineNumber;
   const tokenMatches = getTokenKeywordMatches(file.path, keywords, tokenIndex);
+  const isSupportFile = file.role === "docs" || file.role === "test";
 
   return {
     id: `scope:${file.path}`,
     detector: "scope",
-    severity: file.role === "source" && file.status !== "deleted" ? "medium" : "high",
-    confidence: file.role === "source" && file.status !== "deleted" ? 0.7 : 0.84,
-    title:
-      file.status === "deleted"
+    severity:
+      isSupportFile || (file.role === "source" && file.status !== "deleted") ? "medium" : "high",
+    confidence: isSupportFile || (file.role === "source" && file.status !== "deleted") ? 0.7 : 0.84,
+    title: isSupportFile
+      ? "Unexpected support file changed for small task"
+      : file.status === "deleted"
         ? "Unexpected file deleted for small task"
         : "Unexpected file changed for small task",
-    message: `${file.path} ${file.status === "deleted" ? "was deleted" : "changed"} during a small task but does not align with expected scope.`,
+    message: `${file.path} ${file.status === "deleted" ? "was deleted" : "changed"} during a small task but does not align with expected scope${isSupportFile ? " or a changed task-aligned support relationship" : ""}.`,
     evidence: [
       {
         kind: "file",
