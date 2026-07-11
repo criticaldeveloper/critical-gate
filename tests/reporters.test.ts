@@ -249,6 +249,8 @@ describe("reporters", () => {
     expect(report).toContain("## Policy Applied");
     expect(report).toContain("Fail threshold: high.");
     expect(report).toContain("Blocking findings after policy: test-weakening-001.");
+    expect(report).toContain("Evidence-threshold-suppressed findings: none.");
+    expect(report).not.toContain("Confidence-suppressed findings:");
     expect(report).toContain("Detector maturity: 0 blocker-certified, 1 review, 1 experimental.");
     expect(report).toContain("Accepted findings applied: scope:accepted-fixture.");
     expect(report).toContain("## Detector Runs");

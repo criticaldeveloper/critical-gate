@@ -169,7 +169,7 @@ function renderPolicyAppliedLines(result: GateResult): string[] {
     `Detector maturity: ${formatDetectorMaturity(policy.detectorMaturity ?? [])}.`,
     `Blocking findings after policy: ${formatClasses(policy.blockingFindingIds)}.`,
     `Observation findings after policy: ${formatClasses(policy.observationFindingIds)}.`,
-    `Confidence-suppressed findings: ${formatClasses(policy.confidenceSuppressedFindingIds)}.`,
+    `Evidence-threshold-suppressed findings: ${formatClasses(policy.confidenceSuppressedFindingIds)}.`,
     `Accepted findings applied: ${formatClasses(policy.acceptedFindingIds)}.`
   ];
 }

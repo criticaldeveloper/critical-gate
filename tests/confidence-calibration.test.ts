@@ -1,6 +1,8 @@
 import {
+  calibrateFindingConfidence,
   calibrateFindingEvidenceStrength,
   getEvidenceStrengthBand,
+  runDetectors,
   summarizeFindings,
   type Finding
 } from "../src/index.js";
@@ -81,8 +83,35 @@ describe("evidence strength thresholds", () => {
   it("explains per-detector minimum blocking evidence strength", () => {
     expect(calibrateFindingEvidenceStrength(highScopeFinding)).toMatchObject({
       band: "high",
+      minimumBlockingEvidenceStrength: 0.84,
       minimumBlockingConfidence: 0.84,
       blockingEligible: true
+    });
+  });
+
+  it("keeps the deprecated confidence calibration export compatible", () => {
+    expect(calibrateFindingConfidence(highScopeFinding)).toEqual(
+      calibrateFindingEvidenceStrength(highScopeFinding)
+    );
+  });
+
+  it("normalizes evidence strength while retaining legacy confidence", () => {
+    const [finding] = runDetectors(
+      { source: "cli", text: "Fix signup validation" },
+      { files: [] },
+      undefined,
+      [
+        {
+          name: "scope",
+          maturity: "review",
+          run: () => [highScopeFinding]
+        }
+      ]
+    );
+
+    expect(finding).toMatchObject({
+      confidence: 0.84,
+      evidenceStrength: 0.84
     });
   });
 });

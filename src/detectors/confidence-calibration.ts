@@ -3,14 +3,17 @@ import type { Finding } from "../schema/index.js";
 export type ConfidenceBand = "low" | "medium" | "high" | "very-high";
 export type EvidenceStrengthBand = ConfidenceBand;
 
-export interface FindingConfidenceCalibration {
-  band: ConfidenceBand;
+export interface FindingEvidenceStrengthCalibration {
+  band: EvidenceStrengthBand;
+  minimumBlockingEvidenceStrength: number;
+  /** @deprecated Use minimumBlockingEvidenceStrength. */
   minimumBlockingConfidence: number;
   blockingEligible: boolean;
   reason: string;
 }
 
-export type FindingEvidenceStrengthCalibration = FindingConfidenceCalibration;
+/** @deprecated Use FindingEvidenceStrengthCalibration. */
+export type FindingConfidenceCalibration = FindingEvidenceStrengthCalibration;
 
 const detectorBlockingThresholds: Record<string, number> = {
   "api-surface": 0.84,
@@ -21,42 +24,46 @@ const detectorBlockingThresholds: Record<string, number> = {
   "test-weakening": 0.85
 };
 
-export function calibrateFindingConfidence(finding: Finding): FindingConfidenceCalibration {
+export function calibrateFindingEvidenceStrength(
+  finding: Finding
+): FindingEvidenceStrengthCalibration {
   const band = getEvidenceStrengthBand(finding.evidenceStrength ?? finding.confidence);
-  const minimumBlockingConfidence =
+  const minimumBlockingEvidenceStrength =
     detectorBlockingThresholds[finding.detector] ?? getSeverityBlockingThreshold(finding.severity);
   const severityEligible =
     finding.severity === "blocker" || finding.severity === "high" || finding.severity === "medium";
   const blockingEligible =
     severityEligible &&
-    (finding.evidenceStrength ?? finding.confidence) >= minimumBlockingConfidence;
+    (finding.evidenceStrength ?? finding.confidence) >= minimumBlockingEvidenceStrength;
 
   return {
     band,
-    minimumBlockingConfidence,
+    minimumBlockingEvidenceStrength,
+    minimumBlockingConfidence: minimumBlockingEvidenceStrength,
     blockingEligible,
     reason: blockingEligible
       ? `${finding.detector} ${finding.severity} finding has ${band} evidence strength.`
-      : getNonBlockingReason(finding, band, minimumBlockingConfidence)
+      : getNonBlockingReason(finding, band, minimumBlockingEvidenceStrength)
   };
 }
 
-export const calibrateFindingEvidenceStrength = calibrateFindingConfidence;
+/** @deprecated Use calibrateFindingEvidenceStrength. */
+export const calibrateFindingConfidence = calibrateFindingEvidenceStrength;
 
 export function getConfidenceBand(confidence: number): ConfidenceBand {
   return getEvidenceStrengthBand(confidence);
 }
 
-export function getEvidenceStrengthBand(confidence: number): EvidenceStrengthBand {
-  if (confidence >= 0.9) {
+export function getEvidenceStrengthBand(evidenceStrength: number): EvidenceStrengthBand {
+  if (evidenceStrength >= 0.9) {
     return "very-high";
   }
 
-  if (confidence >= 0.8) {
+  if (evidenceStrength >= 0.8) {
     return "high";
   }
 
-  if (confidence >= 0.6) {
+  if (evidenceStrength >= 0.6) {
     return "medium";
   }
 
@@ -82,13 +89,13 @@ function getSeverityBlockingThreshold(severity: Finding["severity"]): number {
 function getNonBlockingReason(
   finding: Finding,
   band: ConfidenceBand,
-  minimumBlockingConfidence: number
+  minimumBlockingEvidenceStrength: number
 ): string {
   if (finding.severity !== "blocker" && finding.severity !== "high") {
     return `${finding.severity} findings are observational unless policy failOn is set to medium.`;
   }
 
   return `${finding.detector} ${finding.severity} finding has ${band} evidence strength; blocking requires ${Math.round(
-    minimumBlockingConfidence * 100
+    minimumBlockingEvidenceStrength * 100
   )}% evidence strength.`;
 }

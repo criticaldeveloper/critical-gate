@@ -302,6 +302,11 @@ Validation:
 
 ## Phase 4: Rename Or Actually Calibrate Confidence
 
+Status (2026-07-11): in progress. Runner output already normalizes optional `evidenceStrength` while
+retaining required legacy `confidence`. Evidence-strength calibration is now the canonical API,
+confidence-named exports remain deprecated aliases, and human policy summaries no longer use
+probability-like confidence wording.
+
 Goal: stop presenting manual evidence thresholds as calibrated probabilities.
 
 Short-term tasks:

@@ -37,6 +37,10 @@ The summary exposes evidence-strength decision counts:
 - `confidenceSuppressedCount`: legacy field name for high or blocker severity findings that did not
   meet the minimum evidence-strength threshold.
 
+The exported `calibrateFindingConfidence` function and `minimumBlockingConfidence` result field are
+deprecated compatibility aliases. New integrations should use `calibrateFindingEvidenceStrength`
+and `minimumBlockingEvidenceStrength`. Human reports use evidence-strength terminology only.
+
 ## Detector Maturity
 
 Detector maturity is separate from severity, evidence strength, and rollout policy. It describes how much

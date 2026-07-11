@@ -13,7 +13,7 @@ import {
 } from "../intent/index.js";
 import { apiSurfaceDetector } from "./api-surface-detector.js";
 import { blastRadiusDetector } from "./blast-radius-detector.js";
-import { calibrateFindingConfidence } from "./confidence-calibration.js";
+import { calibrateFindingEvidenceStrength } from "./confidence-calibration.js";
 import { configChangeDetector } from "./config-change-detector.js";
 import { dependencyDetector } from "./dependency-detector.js";
 import { existingSolutionDetector } from "./existing-solution-detector.js";
@@ -252,7 +252,7 @@ function summarizePolicyApplied(
       .filter((finding) => isObservationModeFinding(finding, policy))
       .map((finding) => finding.id),
     confidenceSuppressedFindingIds: findings
-      .filter(isConfidenceSuppressedFinding)
+      .filter(isEvidenceStrengthSuppressedFinding)
       .map((finding) => finding.id)
   };
 }
@@ -269,7 +269,7 @@ function summarizeConfidenceCalibration(
     blockingEligibleCount: findings.filter((finding) => isBlockingFinding(finding, policy)).length,
     observationModeCount: findings.filter((finding) => isObservationModeFinding(finding, policy))
       .length,
-    confidenceSuppressedCount: findings.filter(isConfidenceSuppressedFinding).length
+    confidenceSuppressedCount: findings.filter(isEvidenceStrengthSuppressedFinding).length
   };
 }
 
@@ -278,7 +278,7 @@ function isBlockingFinding(finding: Finding, policy: FindingDecisionPolicy): boo
     return false;
   }
 
-  const calibration = calibrateFindingConfidence(finding);
+  const calibration = calibrateFindingEvidenceStrength(finding);
 
   if (!calibration.blockingEligible) {
     return false;
@@ -298,7 +298,7 @@ function isObservationModeFinding(finding: Finding, policy: FindingDecisionPolic
     return false;
   }
 
-  if (!calibrateFindingConfidence(finding).blockingEligible) {
+  if (!calibrateFindingEvidenceStrength(finding).blockingEligible) {
     return false;
   }
 
@@ -328,10 +328,10 @@ function meetsFailSeverity(
   return finding.severity === "blocker" || finding.severity === "high";
 }
 
-function isConfidenceSuppressedFinding(finding: Finding): boolean {
+function isEvidenceStrengthSuppressedFinding(finding: Finding): boolean {
   return (
     (finding.severity === "blocker" || finding.severity === "high") &&
-    !calibrateFindingConfidence(finding).blockingEligible
+    !calibrateFindingEvidenceStrength(finding).blockingEligible
   );
 }
 

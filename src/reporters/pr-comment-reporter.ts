@@ -1,4 +1,4 @@
-import { calibrateFindingConfidence } from "../detectors/confidence-calibration.js";
+import { calibrateFindingEvidenceStrength } from "../detectors/confidence-calibration.js";
 import type { DetectorMaturitySummary, DiffFile, Finding, GateResult } from "../schema/index.js";
 import { renderReviewerChecklist } from "./reviewer-checklist.js";
 
@@ -128,8 +128,12 @@ function getPolicyFindingGroup(result: GateResult, group: "blocking" | "observat
 
   if (policy === undefined) {
     return group === "blocking"
-      ? result.findings.filter((finding) => calibrateFindingConfidence(finding).blockingEligible)
-      : result.findings.filter((finding) => !calibrateFindingConfidence(finding).blockingEligible);
+      ? result.findings.filter(
+          (finding) => calibrateFindingEvidenceStrength(finding).blockingEligible
+        )
+      : result.findings.filter(
+          (finding) => !calibrateFindingEvidenceStrength(finding).blockingEligible
+        );
   }
 
   const blockingIds = new Set(policy.blockingFindingIds);

@@ -1,4 +1,4 @@
-import { calibrateFindingConfidence } from "../detectors/confidence-calibration.js";
+import { calibrateFindingEvidenceStrength } from "../detectors/confidence-calibration.js";
 import type { DiffFile, Finding, GateResult } from "../schema/index.js";
 
 export interface ReviewerChecklistItem {
@@ -71,7 +71,7 @@ export function renderReviewerChecklist(result: GateResult, heading: string): st
 }
 
 function isBlockingFinding(finding: Finding): boolean {
-  return calibrateFindingConfidence(finding).blockingEligible;
+  return calibrateFindingEvidenceStrength(finding).blockingEligible;
 }
 
 function appendRoleChecklistItems(items: ReviewerChecklistItem[], files: DiffFile[]): void {
