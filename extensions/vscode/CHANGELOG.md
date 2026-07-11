@@ -2,6 +2,15 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.9.0 - 2026-07-11
+
+Minor release aligned with Critical Gate 2.9.0.
+
+- Bundle contract-authority calibration for intent, blast-radius, and expected-companion analysis.
+- Bundle optional changed-role/provenance metadata, repository default invariants, and package
+  subpath export recognition.
+- Bundle the new dogfood-derived task-contract evaluation regressions.
+
 ## 2.8.0 - 2026-07-10
 
 Minor release aligned with Critical Gate 2.8.0.

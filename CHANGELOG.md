@@ -4,6 +4,32 @@ All notable project-level changes are documented here.
 
 This project follows the versioning policy in `docs/versioning-policy.md`.
 
+## 2.9.0 - 2026-07-11
+
+### Added
+
+- Add `task-contract` input support to the public GitHub Action.
+- Add optional task-contract expected changed roles and source provenance to structured reports.
+- Add repository policy `defaultInvariants`, inherited by inferred and provided task contracts.
+- Add dogfood-derived evaluation fixtures for negated contract exclusions and exports-only package
+  manifest changes.
+
+### Changed
+
+- Treat explicit task-contract boundaries as authoritative in intent verification, blast-radius,
+  and expected-companion analysis.
+- Recognize package subpath export changes as observed public API work.
+- Allow the evaluation runner to load structured task contracts for development, calibration, and
+  holdout fixtures.
+
+### Fixed
+
+- Stop interpreting explicit statements such as "no package, configuration, or test changes" as
+  missing requested work.
+- Stop suggesting historical companions and lockfiles outside an explicit contract boundary.
+- Stop reporting contract-authorized evidence and support files as disconnected blast-radius
+  clusters.
+
 ## 2.8.0 - 2026-07-10
 
 ### Added

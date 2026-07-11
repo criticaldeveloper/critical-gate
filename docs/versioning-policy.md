@@ -8,7 +8,7 @@ declares a stable public contract.
 
 ## Current Release Stage
 
-The current target is `2.8.0`.
+The current target is `2.9.0`.
 
 This means:
 
@@ -113,6 +113,16 @@ product boundary:
 - Did this weaken the V1 scope in `AGENTS.md` by adding chat-first review, broad repo scanning, or
   multi-language deep semantic analysis before TS/JS precision is proven? If yes, split it from the
   release.
+
+### 2.9.0 Checkpoint
+
+- No repo-wide LLM review, whole-repository model input, or model-first detector was added.
+- No automatic code rewrite or evidence-free repair behavior was added.
+- No generic review-comment detector was introduced or promoted.
+- Contract-authority changes use explicit task-contract paths, invariants, and deterministic diff
+  evidence, with focused tests and dogfood-derived evaluation fixtures.
+- The release remains scoped to TS/JS diff integrity, CLI/GitHub integration, and the existing VS
+  Code analyzer surface.
 
 ## Tagging
 
