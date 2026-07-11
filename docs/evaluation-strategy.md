@@ -209,7 +209,7 @@ For every noisy finding, record:
 - Detector name.
 - File and line.
 - Why the finding was wrong or unhelpful.
-- Whether severity, confidence, or evidence was the issue.
+- Whether impact severity, evidence strength, or policy decision was the issue.
 - Whether repo-specific context would have prevented it.
 
 For every missed issue, record:
@@ -218,6 +218,14 @@ For every missed issue, record:
 - The missing signal.
 - Whether deterministic analysis could catch it.
 - Whether LLM interpretation is justified.
+
+## Evidence-Strength Calibration
+
+Current evidence-strength values are heuristic ranking signals, not correctness probabilities.
+Follow [evidence-strength-calibration.md](evidence-strength-calibration.md) before fitting mappings,
+publishing probability-like metrics, or using holdout results to choose policy thresholds. The
+protocol defines detector subtypes, grouped dataset splits, minimum sample gates, metrics, and
+threshold governance.
 
 ## Agent Repair Evaluation
 
@@ -236,7 +244,7 @@ Track:
 1. Run in report-only mode on historical diffs.
 2. Run in warning mode on local branches.
 3. Run in CI warning mode.
-4. Enable strict blockers for high-confidence detectors.
+4. Enable strict blockers for high-evidence detector subtypes that meet their quality bar.
 5. Add repair loop once findings are precise.
 6. Add editor diagnostics last.
 
@@ -266,6 +274,6 @@ Use `.critical-gate.json`:
 }
 ```
 
-`blockingDetectors` takes precedence over `observationDetectors`. Legacy high-confidence detectors,
+`blockingDetectors` takes precedence over `observationDetectors`. Legacy high-evidence detectors,
 such as secrets, dependency additions, test weakening, API removals, rewrite risk, and legacy scope
 findings, remain blocking unless explicitly added to `observationDetectors`.

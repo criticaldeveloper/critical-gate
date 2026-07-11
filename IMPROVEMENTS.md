@@ -309,6 +309,8 @@ probability-like confidence wording. Canonical result summaries and policy suppr
 evidence-strength terminology while legacy JSON aliases remain populated.
 SARIF results also expose impact severity, evidence strength, and policy decision as separate
 properties without removing legacy integration fields.
+The subtype-level calibration protocol now defines grouped development/calibration/holdout splits,
+minimum sample gates, reliability metrics, artifact requirements, and threshold governance.
 
 Goal: stop presenting manual evidence thresholds as calibrated probabilities.
 
@@ -324,6 +326,8 @@ Short-term tasks:
    - evidence strength;
    - policy decision.
 5. Document that current values are heuristic until calibrated on a holdout set.
+   - Completed in `docs/evidence-strength-calibration.md`; current corpus size explicitly prevents
+     probability-like claims.
 
 Long-term calibration tasks:
 

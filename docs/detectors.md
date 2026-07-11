@@ -16,6 +16,8 @@ For detector-specific quality boundaries, known blind spots, and coverage expect
 Critical Gate treats evidence strength as part of the decision contract, not just display metadata.
 The public JSON still includes the legacy `confidence` field for compatibility, but current values
 are heuristic evidence-strength scores, not empirically calibrated probabilities.
+The data and governance requirements for changing that claim are defined in
+[evidence-strength-calibration.md](evidence-strength-calibration.md).
 
 - `very-high`: `0.90` and above.
 - `high`: `0.80` to `0.89`.
