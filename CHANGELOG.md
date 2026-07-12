@@ -6,6 +6,8 @@ This project follows the versioning policy in `docs/versioning-policy.md`.
 
 ## Unreleased
 
+## 2.10.0 - 2026-07-12
+
 ### Changed
 
 - Make evidence-strength calibration the canonical API, retain confidence-named exports and JSON

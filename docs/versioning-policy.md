@@ -8,7 +8,7 @@ declares a stable public contract.
 
 ## Current Release Stage
 
-The current target is `2.9.1`.
+The current target is `2.10.0`.
 
 This means:
 
@@ -133,6 +133,20 @@ product boundary:
   not add or alter detectors, output schemas, or gate decisions.
 - The regression uses a generated manifest in an isolated temporary Git repository and preserves
   the existing TS/JS diff-integrity product boundary.
+
+### 2.10.0 Checkpoint
+
+- No repo-wide LLM review, whole-repository model input, or model-first detector was added.
+- No automatic code rewrite or evidence-free repair behavior was added.
+- No generic review-comment detector was introduced or promoted.
+- Task-intent and scope improvements use deterministic Unicode tokenization, task constraints,
+  package ownership, changed symbols, imports, and TypeScript alias evidence with focused fixtures.
+- Evidence-strength fields and SARIF policy metadata are additive; legacy confidence-named JSON and
+  TypeScript surfaces remain available for compatibility.
+- Statistical calibration remains explicitly gated on subtype-level sample and holdout requirements;
+  this release does not present heuristic scores as correctness probabilities.
+- The release remains scoped to TS/JS diff integrity, CLI/GitHub integration, and the existing VS
+  Code analyzer surface.
 
 ## Tagging
 

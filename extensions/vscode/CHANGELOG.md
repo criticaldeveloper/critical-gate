@@ -2,6 +2,16 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.10.0 - 2026-07-12
+
+Minor release aligned with Critical Gate 2.10.0.
+
+- Bundle Unicode-aware and multilingual task analysis with structural complexity and explicit
+  constraint separation.
+- Bundle package ownership, changed-symbol, import-graph, and TypeScript path-alias scope evidence.
+- Bundle canonical evidence-strength summaries and separated impact/evidence/policy SARIF metadata
+  while retaining legacy compatibility fields.
+
 ## 2.9.1 - 2026-07-11
 
 Patch release aligned with Critical Gate 2.9.1.

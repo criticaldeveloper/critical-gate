@@ -32,7 +32,7 @@ workflow needs to test a specific CLI package version:
 
 ```yaml
 with:
-  version: "2.9.1"
+  version: "2.10.0"
 ```
 
 Use `version: local` only for Critical Gate maintainer workflows, source checkouts, or smoke-tested
