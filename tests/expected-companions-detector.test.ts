@@ -554,6 +554,43 @@ index 57b22a0..cb3e0f1 100644
     expect(findings).toEqual([]);
   });
 
+  it("does not treat dogfood journals as historical implementation companions", () => {
+    const diff =
+      parse(`diff --git a/packages/components/src/index.ts b/packages/components/src/index.ts
+index 57b22a0..cb3e0f1 100644
+--- a/packages/components/src/index.ts
++++ b/packages/components/src/index.ts
+@@ -1 +1,2 @@
++export * from "./context-menu";
+ export * from "./button";
+`);
+    const findings = expectedCompanionsDetector.run({
+      task: { source: "cli", text: "Export the ContextMenu component" },
+      diff,
+      context: {
+        knowledge: {
+          getFileGraph: () => ({ nodes: [], edges: [] }),
+          getHistoryIndex: () => ({
+            profile: { commitCount: 50, minConfidenceCommitCount: 20, coChanges: [] },
+            coChanges: [],
+            companionRules: [
+              {
+                sourcePath: "packages/components/src/index.ts",
+                expectedPath: "docs/critical-gate-dogfood.md",
+                support: 8,
+                confidence: 1
+              }
+            ]
+          }),
+          getPatternIndex: () => ({ patterns: [] }),
+          getSolutionIndex: () => ({ solutions: [] })
+        }
+      }
+    });
+
+    expect(findings).toEqual([]);
+  });
+
   it("does not emit historical companions for data-only additions matching an existing record shape", () => {
     const diff = parse(`diff --git a/src/data/moments.ts b/src/data/moments.ts
 index 57b22a0..cb3e0f1 100644

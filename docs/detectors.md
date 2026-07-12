@@ -99,6 +99,8 @@ with the task; otherwise it keeps an insufficient-context status. A provided con
 paths can fully evaluate the declared scope boundary. Forbidden paths are always enforced but do
 not define the complete allowed scope by themselves. Package alignment alone does not claim
 file-level scope certainty, and docs/tests remain eligible evidence inside package boundaries.
+Paths explicitly allowed by a provided contract are excluded from package-ownership drift
+inference; deterministic ownership heuristics must not contradict authoritative allowed paths.
 
 Changed exported symbols from diff hunks can align a package when package naming alone does not
 match the task. Relative import edges can justify an otherwise unaligned changed package as support
@@ -442,6 +444,8 @@ Initial implementation:
 - Suppress low-signal generated, build, report, and evidence-output paths as historical companion
   targets. These files can co-change during dogfood or CI workflows, but they should not become
   required implementation companions for future feature work.
+- Suppress Critical Gate dogfood and journal Markdown targets. They are post-run review artifacts,
+  not implementation companions for historically paired exports or configuration.
 - Suppress history-derived companion prompts for data/content files when the diff only adds another
   record using the same existing object shape. Adding a new field, exported type, import, or schema
   still remains companion-relevant because the renderer or validation layer may need to change.

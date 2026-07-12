@@ -1,0 +1,14 @@
+diff --git a/packages/components/src/context-menu.ts b/packages/components/src/context-menu.ts
+new file mode 100644
+index 0000000..cb3e0f1
+--- /dev/null
++++ b/packages/components/src/context-menu.ts
+@@ -0,0 +1 @@
++export const contextMenu = true;
+diff --git a/packages/agents/src/component-hints/context-menu.json b/packages/agents/src/component-hints/context-menu.json
+new file mode 100644
+index 0000000..cb3e0f1
+--- /dev/null
++++ b/packages/agents/src/component-hints/context-menu.json
+@@ -0,0 +1 @@
++{"tagName":"ds-context-menu"}

@@ -109,6 +109,10 @@ required:
 }
 ```
 
+Workspace-ownership fixtures may also declare sanitized `monorepo` metadata with `configFiles`,
+`workspaceGlobs`, and package `path`/`name` pairs. Keep this context synthetic and minimal so
+cross-package behavior is reproducible without copying a dogfood repository.
+
 The harness reports:
 
 - True positives.

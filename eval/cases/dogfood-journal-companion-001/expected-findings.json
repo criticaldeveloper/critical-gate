@@ -1,0 +1,32 @@
+{
+  "evaluationSet": "development",
+  "sourceRepository": "critical-components",
+  "caseType": "false-positive-regression",
+  "labelSource": "docs/critical-gate-evidence/2026-07-12/122822-i-want-to-develop-a-new-component-called-contextmenu-base-its-functionality-and-.labels.json",
+  "shouldBlock": false,
+  "expectedFindingCount": 2,
+  "expectedFindings": [
+    {
+      "detector": "intent-verification"
+    },
+    {
+      "detector": "intent-verification"
+    }
+  ],
+  "repositoryProfile": {
+    "commitCount": 50,
+    "minConfidenceCommitCount": 20,
+    "coChanges": [
+      {
+        "path": "packages/components/src/index.ts",
+        "count": 8,
+        "relatedPaths": [
+          {
+            "path": "docs/critical-gate-dogfood.md",
+            "count": 8
+          }
+        ]
+      }
+    ]
+  }
+}

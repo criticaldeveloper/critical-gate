@@ -11,6 +11,7 @@ import type {
 
 import type { Detector } from "./types.js";
 import { isExplicitPackageUpgradeDiff } from "./package-upgrade-intent.js";
+import { isExplicitlyAllowedByContract } from "./task-contract-authority.js";
 
 const broadTaskTerms = ["repo", "all", "setup", "scaffold", "architecture", "refactor"];
 const configTaskTerms = [
@@ -89,7 +90,11 @@ export const scopeDetector: Detector = {
 
     if (analysis.complexity !== "small" || isBroadTask(task.text)) {
       const ownershipFindings = getPackageOwnershipFindings(
-        diff.files.filter((file) => !contractScopePaths.has(file.path)),
+        diff.files.filter(
+          (file) =>
+            !contractScopePaths.has(file.path) &&
+            !isExplicitlyAllowedByContract(file.path, context?.taskContract)
+        ),
         analysis.keywords,
         context?.monorepo,
         tokenIndex,

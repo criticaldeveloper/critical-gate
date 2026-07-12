@@ -1,0 +1,11 @@
+{
+  "goal": "Develop a ContextMenu component and its required agent metadata.",
+  "allowed_paths": [
+    "packages/components/src/context-menu.ts",
+    "packages/agents/src/component-hints/context-menu.json"
+  ],
+  "forbidden_paths": [],
+  "expected_artifacts": [],
+  "invariants": [],
+  "required_checks": []
+}

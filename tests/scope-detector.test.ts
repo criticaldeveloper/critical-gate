@@ -723,6 +723,53 @@ index 57b22a0..cb3e0f1 100644
     ]);
   });
 
+  it("does not report package ownership drift for explicitly allowed contract paths", () => {
+    const diff =
+      parse(`diff --git a/packages/components/src/context-menu.ts b/packages/components/src/context-menu.ts
+new file mode 100644
+index 0000000..cb3e0f1
+--- /dev/null
++++ b/packages/components/src/context-menu.ts
+@@ -0,0 +1 @@
++export const contextMenu = true;
+diff --git a/packages/agents/src/component-hints/context-menu.json b/packages/agents/src/component-hints/context-menu.json
+new file mode 100644
+index 0000000..cb3e0f1
+--- /dev/null
++++ b/packages/agents/src/component-hints/context-menu.json
+@@ -0,0 +1 @@
++{"tagName":"ds-context-menu"}
+`);
+    const findings = scopeDetector.run({
+      task: { source: "cli", text: "Develop a ContextMenu component and its agent metadata" },
+      diff,
+      context: {
+        taskContract: {
+          source: "provided",
+          goal: "Develop ContextMenu and its agent metadata",
+          allowedPaths: [
+            "packages/components/src/context-menu.ts",
+            "packages/agents/src/component-hints/context-menu.json"
+          ],
+          forbiddenPaths: [],
+          expectedArtifacts: [],
+          invariants: [],
+          requiredChecks: []
+        },
+        monorepo: {
+          configFiles: ["pnpm-workspace.yaml"],
+          workspaceGlobs: ["packages/*"],
+          packages: [
+            { path: "packages/components", name: "@example/components" },
+            { path: "packages/agents", name: "@example/agents" }
+          ]
+        }
+      }
+    });
+
+    expect(findings).toEqual([]);
+  });
+
   it("uses changed exported symbols to align a package with task targets", () => {
     const diff = parse(`diff --git a/packages/forms/src/profile.ts b/packages/forms/src/profile.ts
 index 57b22a0..cb3e0f1 100644

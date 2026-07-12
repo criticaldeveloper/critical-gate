@@ -128,11 +128,40 @@ function validateExpected(id, value) {
     expectedFindingCount: validateOptionalExpectedFindingCount(id, value.expectedFindingCount),
     expectedFindings: value.expectedFindings,
     frameworkPacks: validateOptionalStringArray(id, value.frameworkPacks, "frameworkPacks"),
+    monorepo: validateMonorepo(id, value.monorepo),
     repositoryProfile: validateRepositoryProfile(id, value.repositoryProfile),
     allowedExtraDetectors: Array.isArray(value.allowedExtraDetectors)
       ? value.allowedExtraDetectors.filter((entry) => typeof entry === "string")
       : []
   };
+}
+
+function validateMonorepo(id, value) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    Array.isArray(value) ||
+    !Array.isArray(value.configFiles) ||
+    !Array.isArray(value.workspaceGlobs) ||
+    !Array.isArray(value.packages) ||
+    !value.packages.every(
+      (entry) =>
+        typeof entry === "object" &&
+        entry !== null &&
+        typeof entry.path === "string" &&
+        typeof entry.name === "string"
+    )
+  ) {
+    throw new Error(
+      `${id}: monorepo requires configFiles, workspaceGlobs, and packages with path/name strings.`
+    );
+  }
+
+  return value;
 }
 
 function validateEvaluationSet(id, value) {
@@ -208,11 +237,13 @@ function evaluateCase(evaluationCase) {
   const detectorContext =
     evaluationCase.expected.repositoryProfile === undefined &&
     evaluationCase.expected.frameworkPacks === undefined &&
+    evaluationCase.expected.monorepo === undefined &&
     evaluationCase.taskContract === undefined
       ? undefined
       : {
           repositoryProfile: evaluationCase.expected.repositoryProfile,
           frameworkPacks: evaluationCase.expected.frameworkPacks,
+          monorepo: evaluationCase.expected.monorepo,
           taskContract: evaluationCase.taskContract
         };
   const findings = runDetectors(task, diff, detectorContext);

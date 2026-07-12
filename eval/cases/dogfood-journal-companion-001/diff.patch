@@ -1,0 +1,7 @@
+diff --git a/packages/components/src/index.ts b/packages/components/src/index.ts
+index 57b22a0..cb3e0f1 100644
+--- a/packages/components/src/index.ts
++++ b/packages/components/src/index.ts
+@@ -1 +1,2 @@
++export * from "./context-menu";
+ export * from "./button";

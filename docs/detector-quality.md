@@ -278,6 +278,8 @@ Will flag:
 
 Will not flag:
 
+- Files explicitly allowed by a provided task contract, even when changed package ownership aligns
+  more strongly with another task target.
 - Expected source/test/doc companions when task intent supports them.
 - Version-only manifest changes during release tasks.
 - Tiny legitimate stylesheet/token changes when task intent is explicitly stylistic.
@@ -445,6 +447,8 @@ Quality boundary:
   stylesheet fixes unless markup, routing, imports, exports, or data hooks changed.
 - Should not require generated evidence/report files as historical companions for implementation
   changes.
+- Should not require Critical Gate dogfood journals as implementation companions; journals are
+  post-run review artifacts even when repository history strongly pairs them with exports or config.
 - Should not require renderer companions for data/content additions that reuse the existing record
   shape; new fields or schema/type changes remain companion-relevant.
 - Regression fixture: `eval/cases/data-record-addition-existing-shape-001`.
@@ -453,6 +457,8 @@ Coverage:
 
 - Unit tests: `tests/expected-companions-detector.test.ts`,
   `tests/normal-change-model.test.ts`.
+- Evaluation cases: `eval/cases/dogfood-journal-companion-001` and
+  `eval/cases/contract-authorized-cross-package-001` (scope contract authority).
 
 ### Existing Solution And Utility Reinvention
 

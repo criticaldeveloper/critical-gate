@@ -136,6 +136,7 @@ function isLowRelevanceCompanionChange(
 function isLowSignalHistoricalCompanionPath(path: string): boolean {
   return (
     /(?:^|\/)(?:docs\/)?critical-gate-evidence(?:\/|$)/i.test(path) ||
+    /(?:^|\/)(?:docs\/)?critical-gate-(?:dogfood|journal)\.md$/i.test(path) ||
     /(?:^|\/)(?:artifacts|coverage|dist|build|out|reports?|snapshots?)(?:\/|$)/i.test(path) ||
     /\.(?:sarif|log|tmp)$/i.test(path)
   );

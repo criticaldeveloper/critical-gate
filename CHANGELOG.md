@@ -6,6 +6,13 @@ This project follows the versioning policy in `docs/versioning-policy.md`.
 
 ## Unreleased
 
+### Changed
+
+- Respect explicitly allowed task-contract paths before package-ownership scope inference, and stop
+  treating Critical Gate dogfood journals as historical implementation companions.
+- Add two critical-components 2.10.0 false-positive regression fixtures and monorepo context support
+  to the evaluation runner.
+
 ## 2.10.0 - 2026-07-12
 
 ### Changed

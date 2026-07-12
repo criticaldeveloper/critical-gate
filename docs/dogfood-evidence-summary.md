@@ -1,20 +1,20 @@
 # Dogfood Evidence Summary
 
-Generated: 2026-07-11T17:41:34.535Z
+Generated: 2026-07-12T12:28:30.215Z
 
 ## Overview
 
 - Repositories: 5
-- Labeled reports: 117
-- Useful findings: 249
-- False-positive finding instances: 600
+- Labeled reports: 119
+- Useful findings: 253
+- False-positive finding instances: 606
 - Missed findings: 3
-- Fixture-needed reports: 36
-- Fixture-created reports: 19
+- Fixture-needed reports: 37
+- Fixture-created reports: 20
 - Repair attempts captured: 4
 - Repair reruns captured: 4
 - Repairs passing rerun: 4
-- Missed-finding reviews captured: 85
+- Missed-finding reviews captured: 87
 
 ## Run Labels
 
@@ -26,8 +26,8 @@ Generated: 2026-07-11T17:41:34.535Z
 - clean-reviewed: 6
 - accepted: 4
 - accepted_with_notes: 4
+- mixed: 4
 - reviewed-findings: 4
-- mixed: 2
 - repair-required: 2
 - repair-rerun: 2
 - false-positive-reviewed: 1
@@ -41,24 +41,24 @@ Generated: 2026-07-11T17:41:34.535Z
 
 ## Detector Frequency
 
-- expected-companions: 81
+- expected-companions: 82
 - blast-radius: 75
-- scope: 62
+- scope: 64
 - secret-path: 54
 - test-weakening: 53
 - config-change: 51
 - dependency: 48
 - repository-intelligence: 20
-- intent-verification: 15
-- dependency-addition: 10
+- intent-verification: 16
+- dependency-addition: 11
+- expected-artifacts: 6
 - api-surface: 5
 - rewrite: 5
-- expected-artifacts: 4
+- invariant-coverage: 3
 - existing-solution: 2
 - pattern-violation: 2
 - utility-reinvention: 2
 - framework: 1
-- invariant-coverage: 1
 
 ## Repair Loop Evidence
 
@@ -68,12 +68,12 @@ Generated: 2026-07-11T17:41:34.535Z
 - Repairs passing rerun: 4
 - Repairs scoped to task: 48
 - Repairs scoped to repair contract: 48
-- Missed-finding reviews captured: 85
+- Missed-finding reviews captured: 87
 - Reports still missing missed-finding review: 32
 
 ## Repositories
 
-- critical-components: 17 reports; useful findings 85; false-positive findings 12; missed findings 2; fixture-needed reports 4; repair attempts 0; missed-finding reviews 5.
+- critical-components: 19 reports; useful findings 89; false-positive findings 18; missed findings 2; fixture-needed reports 5; repair attempts 0; missed-finding reviews 7.
 - criticaldeveloper-blog: 21 reports; useful findings 12; false-positive findings 103; missed findings 1; fixture-needed reports 16; repair attempts 0; missed-finding reviews 7.
 - criticaldeveloper-ft: 23 reports; useful findings 16; false-positive findings 38; missed findings 0; fixture-needed reports 2; repair attempts 0; missed-finding reviews 17.
 - diegolopes-ft: 48 reports; useful findings 40; false-positive findings 152; missed findings 0; fixture-needed reports 10; repair attempts 4; missed-finding reviews 48.
@@ -100,6 +100,8 @@ Generated: 2026-07-11T17:41:34.535Z
 - `124556-upgrade-critical-gate-to-2-7-2-and-verify-shortened-package-hunk-upgrade-calibra`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed yes.
 - `123009-implement-ds-autocomplete-field-with-debounced-static-and-remote-filtering-dropd`: mixed; findings 9; false positives 8; fixture needed yes; repair attempted not recorded; missed reviewed yes.
 - `174126-implement-production-ready-ds-drawer-with-directional-velocity-snap-settling-nes`: mixed; findings 3; false positives 1; fixture needed yes; repair attempted not recorded; missed reviewed yes.
+- `113652-i-want-to-implement-a-new-component-called-qrcode-with-all-the-needed-options-fo`: mixed; findings 3; false positives 1; fixture needed no; repair attempted not recorded; missed reviewed yes.
+- `122822-i-want-to-develop-a-new-component-called-contextmenu-base-its-functionality-and-`: mixed; findings 7; false positives 5; fixture needed yes; repair attempted not recorded; missed reviewed yes.
 
 ### criticaldeveloper-blog
 

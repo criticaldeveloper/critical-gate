@@ -1,0 +1,22 @@
+{
+  "evaluationSet": "development",
+  "sourceRepository": "critical-components",
+  "caseType": "false-positive-regression",
+  "labelSource": "docs/critical-gate-evidence/2026-07-12/122822-i-want-to-develop-a-new-component-called-contextmenu-base-its-functionality-and-.labels.json",
+  "shouldBlock": false,
+  "expectedFindingCount": 1,
+  "expectedFindings": [
+    {
+      "detector": "api-surface",
+      "file": "packages/components/src/context-menu.ts"
+    }
+  ],
+  "monorepo": {
+    "configFiles": ["pnpm-workspace.yaml"],
+    "workspaceGlobs": ["packages/*"],
+    "packages": [
+      { "path": "packages/components", "name": "@example/components" },
+      { "path": "packages/agents", "name": "@example/agents" }
+    ]
+  }
+}
