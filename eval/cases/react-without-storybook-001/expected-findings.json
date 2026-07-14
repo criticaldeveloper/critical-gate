@@ -1,0 +1,10 @@
+{
+  "evaluationSet": "development",
+  "sourceRepository": "tamagotchi",
+  "caseType": "false-positive-regression",
+  "labelSource": "docs/critical-gate-evidence/2026-07-13",
+  "frameworkPacks": ["react", "vite"],
+  "shouldBlock": false,
+  "expectedFindingCount": 0,
+  "expectedFindings": []
+}

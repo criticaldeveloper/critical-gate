@@ -1,0 +1,16 @@
+diff --git a/src/ui/StatusPanel.tsx b/src/ui/StatusPanel.tsx
+index 57b22a0..cb3e0f1 100644
+--- a/src/ui/StatusPanel.tsx
++++ b/src/ui/StatusPanel.tsx
+@@ -1,3 +1,3 @@
+ export function StatusPanel({ value }: { value: number }) {
+-  return <output>{value}</output>;
++  return <output aria-live="polite">{value}</output>;
+ }
+diff --git a/src/ui/StatusPanel.test.tsx b/src/ui/StatusPanel.test.tsx
+index 57b22a0..cb3e0f1 100644
+--- a/src/ui/StatusPanel.test.tsx
++++ b/src/ui/StatusPanel.test.tsx
+@@ -1 +1,2 @@
+ expect(renderStatus(1)).toContain("1");
++expect(renderStatus(1)).toContain('aria-live="polite"');

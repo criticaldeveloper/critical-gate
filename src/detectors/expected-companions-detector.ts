@@ -41,6 +41,8 @@ export const expectedCompanionsDetector: Detector = {
                 changedPaths.has(rule.sourcePath) &&
                 !changedPaths.has(rule.expectedPath) &&
                 isStrongCompanionRule(rule) &&
+                hasTypedNormalPattern(rule, history.normalPatterns) &&
+                !isLowSignalHistoricalCompanionPath(rule.sourcePath) &&
                 !isLowSignalHistoricalCompanionPath(rule.expectedPath) &&
                 !isOutsideProvidedContract(rule.expectedPath, context?.taskContract) &&
                 !isLowRelevanceCompanionChange(
@@ -118,6 +120,13 @@ function isStrongCompanionRule(rule: CompanionRule): boolean {
   return rule.support >= minimumCompanionSupport;
 }
 
+function hasTypedNormalPattern(
+  rule: CompanionRule,
+  normalPatterns: NormalChangePattern[] | undefined
+): boolean {
+  return normalPatterns === undefined || findNormalPattern(rule, normalPatterns) !== undefined;
+}
+
 function isLowRelevanceCompanionChange(
   path: string,
   files: DiffFile[],
@@ -137,6 +146,7 @@ function isLowSignalHistoricalCompanionPath(path: string): boolean {
   return (
     /(?:^|\/)(?:docs\/)?critical-gate-evidence(?:\/|$)/i.test(path) ||
     /(?:^|\/)(?:docs\/)?critical-gate-(?:dogfood|journal)\.md$/i.test(path) ||
+    /(?:^|\/)(?:roadmap|plans?|backlog)\.md$/i.test(path) ||
     /(?:^|\/)(?:artifacts|coverage|dist|build|out|reports?|snapshots?)(?:\/|$)/i.test(path) ||
     /\.(?:sarif|log|tmp)$/i.test(path)
   );

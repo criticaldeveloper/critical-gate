@@ -444,6 +444,14 @@ Initial implementation:
 - Suppress low-signal generated, build, report, and evidence-output paths as historical companion
   targets. These files can co-change during dogfood or CI workflows, but they should not become
   required implementation companions for future feature work.
+- Require a typed normal relationship before promoting historical co-change into a companion
+  finding. Raw co-change remains repository evidence, but arbitrary file pairs are not repair
+  requirements.
+- Treat roadmap, plan, and backlog files as workflow metadata rather than historical companion
+  sources or targets.
+- Keep React framework companions limited to source/test coverage. Require the Storybook framework
+  pack before suggesting stories, and use repository evidence rather than React itself to infer
+  styling conventions.
 - Suppress Critical Gate dogfood and journal Markdown targets. They are post-run review artifacts,
   not implementation companions for historically paired exports or configuration.
 - Suppress history-derived companion prompts for data/content files when the diff only adds another

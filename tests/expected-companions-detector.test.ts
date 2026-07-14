@@ -1158,6 +1158,77 @@ index 57b22a0..cb3e0f1 100644
     ).toEqual([]);
   });
 
+  it("does not promote untyped historical co-change into a companion requirement", () => {
+    const diff = parse(`diff --git a/src/components/HeroVideo.astro b/src/components/HeroVideo.astro
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/HeroVideo.astro
++++ b/src/components/HeroVideo.astro
+@@ -1 +1 @@
+-<canvas data-frame-sequence-id="hero"></canvas>
++<canvas data-frame-sequence-id="hero" data-frame-max-scale="1.02"></canvas>
+`);
+    const provider = knowledgeWithHistory({ commitCount: 50, support: 9, confidence: 1 });
+    const history = provider.getHistoryIndex();
+
+    expect(
+      expectedCompanionsDetector.run({
+        task,
+        diff,
+        context: {
+          knowledge: {
+            ...provider,
+            getHistoryIndex: () => ({ ...history, normalPatterns: [] })
+          }
+        }
+      })
+    ).toEqual([]);
+  });
+
+  it("does not use planning files as historical companion sources or targets", () => {
+    const diff = parse(`diff --git a/ROADMAP.md b/ROADMAP.md
+index 57b22a0..cb3e0f1 100644
+--- a/ROADMAP.md
++++ b/ROADMAP.md
+@@ -1 +1 @@
+-Task pending
++Task complete
+`);
+    const provider = knowledgeWithHistory({ commitCount: 50, support: 9, confidence: 1 });
+    const history = provider.getHistoryIndex();
+
+    expect(
+      expectedCompanionsDetector.run({
+        task,
+        diff,
+        context: {
+          knowledge: {
+            ...provider,
+            getHistoryIndex: () => ({
+              ...history,
+              companionRules: [
+                {
+                  sourcePath: "ROADMAP.md",
+                  expectedPath: "src/components/HeroVideo.astro",
+                  support: 9,
+                  confidence: 1
+                }
+              ],
+              normalPatterns: [
+                {
+                  kind: "source-docs",
+                  sourcePath: "ROADMAP.md",
+                  relatedPath: "src/components/HeroVideo.astro",
+                  support: 9,
+                  confidence: 1
+                }
+              ]
+            })
+          }
+        }
+      })
+    ).toEqual([]);
+  });
+
   it("does not emit companions for tiny self-contained component copy edits", () => {
     const diff = parse(`diff --git a/src/components/HeroVideo.astro b/src/components/HeroVideo.astro
 index 57b22a0..cb3e0f1 100644

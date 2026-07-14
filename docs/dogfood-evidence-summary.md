@@ -1,36 +1,37 @@
 # Dogfood Evidence Summary
 
-Generated: 2026-07-12T12:28:30.215Z
+Generated: 2026-07-14T10:57:56.437Z
 
 ## Overview
 
 - Repositories: 5
-- Labeled reports: 119
-- Useful findings: 253
-- False-positive finding instances: 606
-- Missed findings: 3
-- Fixture-needed reports: 37
-- Fixture-created reports: 20
-- Repair attempts captured: 4
-- Repair reruns captured: 4
-- Repairs passing rerun: 4
-- Missed-finding reviews captured: 87
+- Labeled reports: 172
+- Useful findings: 386
+- False-positive finding instances: 955
+- Missed findings: 68
+- Fixture-needed reports: 81
+- Fixture-created reports: 51
+- Repair attempts captured: 6
+- Repair reruns captured: 6
+- Repairs passing rerun: 6
+- Missed-finding reviews captured: 140
 
 ## Run Labels
 
-- clean: 31
+- mixed: 44
+- clean: 34
 - useful: 31
+- false-positive: 11
 - pass-with-reviewed-observations: 9
-- false-positive: 7
 - reviewed-observations: 7
 - clean-reviewed: 6
+- missed: 5
 - accepted: 4
 - accepted_with_notes: 4
-- mixed: 4
 - reviewed-findings: 4
+- false-positive-reviewed: 2
 - repair-required: 2
 - repair-rerun: 2
-- false-positive-reviewed: 1
 - pass-with-false-positive-intent-verification: 1
 - pass-with-reviewed-observation: 1
 - pass-with-scope-noise: 1
@@ -41,43 +42,43 @@ Generated: 2026-07-12T12:28:30.215Z
 
 ## Detector Frequency
 
-- expected-companions: 82
-- blast-radius: 75
-- scope: 64
-- secret-path: 54
-- test-weakening: 53
-- config-change: 51
-- dependency: 48
-- repository-intelligence: 20
-- intent-verification: 16
-- dependency-addition: 11
+- expected-companions: 127
+- blast-radius: 101
+- scope: 68
+- test-weakening: 59
+- secret-path: 55
+- config-change: 52
+- dependency: 50
+- repository-intelligence: 28
+- intent-verification: 26
+- api-surface: 23
+- dependency-addition: 14
 - expected-artifacts: 6
-- api-surface: 5
-- rewrite: 5
+- rewrite: 6
 - invariant-coverage: 3
+- pattern-violation: 3
+- utility-reinvention: 3
 - existing-solution: 2
-- pattern-violation: 2
-- utility-reinvention: 2
 - framework: 1
 
 ## Repair Loop Evidence
 
-- Repair attempts captured: 4
+- Repair attempts captured: 6
 - Repair prompts captured: 3
-- Repair reruns captured: 4
-- Repairs passing rerun: 4
-- Repairs scoped to task: 48
-- Repairs scoped to repair contract: 48
-- Missed-finding reviews captured: 87
+- Repair reruns captured: 6
+- Repairs passing rerun: 6
+- Repairs scoped to task: 51
+- Repairs scoped to repair contract: 49
+- Missed-finding reviews captured: 140
 - Reports still missing missed-finding review: 32
 
 ## Repositories
 
 - critical-components: 19 reports; useful findings 89; false-positive findings 18; missed findings 2; fixture-needed reports 5; repair attempts 0; missed-finding reviews 7.
 - criticaldeveloper-blog: 21 reports; useful findings 12; false-positive findings 103; missed findings 1; fixture-needed reports 16; repair attempts 0; missed-finding reviews 7.
-- criticaldeveloper-ft: 23 reports; useful findings 16; false-positive findings 38; missed findings 0; fixture-needed reports 2; repair attempts 0; missed-finding reviews 17.
-- diegolopes-ft: 48 reports; useful findings 40; false-positive findings 152; missed findings 0; fixture-needed reports 10; repair attempts 4; missed-finding reviews 48.
-- tamagotchi: 8 reports; useful findings 96; false-positive findings 295; missed findings 0; fixture-needed reports 4; repair attempts 0; missed-finding reviews 8.
+- criticaldeveloper-ft: 26 reports; useful findings 16; false-positive findings 38; missed findings 0; fixture-needed reports 2; repair attempts 0; missed-finding reviews 20.
+- diegolopes-ft: 49 reports; useful findings 40; false-positive findings 157; missed findings 0; fixture-needed reports 11; repair attempts 4; missed-finding reviews 49.
+- tamagotchi: 57 reports; useful findings 229; false-positive findings 639; missed findings 65; fixture-needed reports 47; repair attempts 2; missed-finding reviews 57.
 
 ## Reports
 
@@ -152,6 +153,9 @@ Generated: 2026-07-12T12:28:30.215Z
 - `124858-upgrade-critical-gate-to-2-7-2-and-verify-shortened-package-hunk-upgrade-calibra`: clean; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed yes.
 - `130052-add-wall-clock-synchronized-countdown-to-now-playing-track-duration`: clean; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
 - `121658-improve-pagespeed-agentic-navigation-score-by-fixing-consent-banner-accessibilit`: useful; findings 2; false positives 2; fixture needed no; repair attempted not recorded; missed reviewed yes.
+- `194927-i-want-to-add-new-information-in-the-about-section-with-internationalized-text-c`: clean; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `200637-in-the-about-hobbyproject-elements-remove-the-blue-icon-and-change-it-for-a-simp`: clean; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `201144-fix-the-problem-type-text-discovered-html-css-starting-the-real-coding-journey-m`: clean; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
 
 ### diegolopes-ft
 
@@ -203,6 +207,7 @@ Generated: 2026-07-12T12:28:30.215Z
 - `195656-polish-social-profile-link-active-states`: clean-reviewed; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
 - `195722-update-homepage-seo-title-description-and-social-preview-alt-text`: clean-reviewed; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
 - `195751-add-second-youtube-fight-moment-existing-data-model`: false-positive-reviewed; findings 3; false positives 3; fixture needed yes; repair attempted no; missed reviewed yes.
+- `192704-i-want-to-include-a-loader-for-all-the-content-of-the-site-to-prevent-sloopy-loa`: false-positive-reviewed; findings 5; false positives 5; fixture needed yes; repair attempted no; missed reviewed yes.
 
 ### tamagotchi
 
@@ -214,3 +219,52 @@ Generated: 2026-07-12T12:28:30.215Z
 - `153739-update-og-tamagotchi-roadmap-with-p1-guide-mechanics`: accepted; findings 0; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed yes.
 - `154356-task-1-1-define-canonical-og-tamagotchi-stats-and-units`: accepted; findings 19; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed yes.
 - `154814-task-1-1-define-canonical-og-tamagotchi-stats-and-units-with-branch-workflow-ins`: accepted; findings 5; false positives 0; fixture needed no; repair attempted not recorded; missed reviewed yes.
+- `171241-go-ahead-with-the-next-phase-task-then`: mixed; findings 15; false positives 13; fixture needed yes; repair attempted no; missed reviewed yes.
+- `174111-go-ahead-with-next-one`: mixed; findings 3; false positives 2; fixture needed yes; repair attempted no; missed reviewed yes.
+- `135539-go-ahead-with-next`: mixed; findings 5; false positives 3; fixture needed yes; repair attempted no; missed reviewed yes.
+- `141529-go-ahead-with-next`: mixed; findings 2; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `142354-go-ahead`: mixed; findings 6; false positives 2; fixture needed yes; repair attempted no; missed reviewed yes.
+- `143310-go-ahead`: mixed; findings 8; false positives 1; fixture needed yes; repair attempted no; missed reviewed yes.
+- `145004-go-ahead`: mixed; findings 10; false positives 3; fixture needed yes; repair attempted no; missed reviewed yes.
+- `145833-go-ahead`: mixed; findings 4; false positives 1; fixture needed yes; repair attempted no; missed reviewed yes.
+- `150535-go-ahead`: mixed; findings 8; false positives 2; fixture needed yes; repair attempted no; missed reviewed yes.
+- `151324-go-ahead`: missed; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `152825-go-ahead-with-next`: mixed; findings 14; false positives 6; fixture needed yes; repair attempted no; missed reviewed yes.
+- `153827-go-ahead`: mixed; findings 15; false positives 3; fixture needed yes; repair attempted no; missed reviewed yes.
+- `154838-before-continuing-with-the-roadmap-i-d-want-to-work-a-little-bit-on-the-ui-ux`: mixed; findings 23; false positives 16; fixture needed yes; repair attempted no; missed reviewed yes.
+- `160842-small-fixes-before-continuing-with-the-roadmap-fix-bad-off-center-overlapping-lc`: mixed; findings 20; false positives 17; fixture needed yes; repair attempted no; missed reviewed yes.
+- `161831-small-fixes-make-the-stats-menu-the-last-lcd-option-and-show-stats-automatically`: mixed; findings 11; false positives 10; fixture needed yes; repair attempted no; missed reviewed yes.
+- `162757-small-fixes-explain-how-care-increases-and-fix-the-stats-lcd-layout-where-stat-r`: missed; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `163700-last-fix-before-continuing-with-the-roadmap-in-stats-view-distinguish-values-fro`: missed; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `165706-implement-roadmap-task-4-2-og-inspired-evolution-tree-with-egg-to-baby-to-child-`: mixed; findings 23; false positives 21; fixture needed yes; repair attempted no; missed reviewed yes.
+- `171114-small-fix-before-continuing-with-the-roadmap-fix-the-lights-off-effect-so-it-cov`: mixed; findings 13; false positives 11; fixture needed yes; repair attempted no; missed reviewed yes.
+- `172850-implement-roadmap-task-4-3-finite-lifespan-and-death-so-every-run-eventually-end`: mixed; findings 30; false positives 25; fixture needed yes; repair attempted no; missed reviewed yes.
+- `174537-implement-roadmap-task-5-2-og-status-screens-with-status-pages-navigable-through`: mixed; findings 12; false positives 10; fixture needed yes; repair attempted no; missed reviewed yes.
+- `175507-implement-roadmap-task-5-3-device-shell-polish-with-a-stable-fixed-size-shell-no`: mixed; findings 6; false positives 5; fixture needed yes; repair attempted no; missed reviewed yes.
+- `180025-fix-browser-web-drag-and-drop-fallback-so-the-tamagotchi-shell-can-be-dragged-in`: mixed; findings 5; false positives 4; fixture needed yes; repair attempted no; missed reviewed yes.
+- `181443-implement-roadmap-task-6-1-og-style-guessing-game-with-five-a-b-guesses-3-of-5-r`: mixed; findings 23; false positives 21; fixture needed yes; repair attempted no; missed reviewed yes.
+- `182731-implement-roadmap-task-6-2-game-animation-and-feedback-so-the-pet-reacts-to-win-`: mixed; findings 25; false positives 19; fixture needed yes; repair attempted no; missed reviewed yes.
+- `183601-implement-roadmap-task-7-1-sprite-state-machine-so-renderer-state-is-derived-fro`: mixed; findings 22; false positives 13; fixture needed yes; repair attempted no; missed reviewed yes.
+- `185327-fix-tamagotchi-header-status-layout-and-replace-the-flickering-evolution-square-`: mixed; findings 16; false positives 14; fixture needed yes; repair attempted no; missed reviewed yes.
+- `191406-implement-roadmap-task-7-2-original-pixel-art-set-with-original-non-copied-sprit`: mixed; findings 13; false positives 10; fixture needed yes; repair attempted no; missed reviewed yes.
+- `192412-implement-roadmap-task-7-3-animation-timing-so-animations-run-independently-from`: mixed; findings 10; false positives 7; fixture needed yes; repair attempted no; missed reviewed yes.
+- `194056-implement-roadmap-task-8-1-save-schema-v2-so-the-save-schema-includes-all-og-fie`: mixed; findings 21; false positives 18; fixture needed yes; repair attempted no; missed reviewed yes.
+- `195600-implement-roadmap-task-8-2-dev-debug-panel-with-a-hidden-dev-only-panel-to-inspe`: mixed; findings 24; false positives 14; fixture needed yes; repair attempted no; missed reviewed yes.
+- `201612-implement-roadmap-task-9-1-domain-golden-tests-covering-every-care-action-app-cl`: mixed; findings 5; false positives 4; fixture needed yes; repair attempted no; missed reviewed yes.
+- `202744-implement-roadmap-task-9-2-save-and-migration-tests-covering-missing-save-corrup`: mixed; findings 10; false positives 10; fixture needed yes; repair attempted no; missed reviewed yes.
+- `203209-add-a-tamagotchi-shaped-favicon-for-the-web-version`: false-positive; findings 3; false positives 3; fixture needed yes; repair attempted no; missed reviewed yes.
+- `204440-implement-roadmap-task-9-3-ui-smoke-tests-covering-main-shell-render-a-b-c-navig`: mixed; findings 4; false positives 3; fixture needed yes; repair attempted no; missed reviewed yes.
+- `205257-implement-roadmap-task-10-1-packaging-so-pnpm-run-tauri-build-succeeds-on-window`: mixed; findings 7; false positives 5; fixture needed yes; repair attempted no; missed reviewed yes.
+- `210020-implement-roadmap-task-10-2-desktop-companion-behavior-so-tray-behavior-is-stabl`: mixed; findings 11; false positives 9; fixture needed yes; repair attempted no; missed reviewed yes.
+- `210911-implement-roadmap-task-10-3-documentation-so-readme-explains-how-to-run-and-pack`: mixed; findings 8; false positives 7; fixture needed yes; repair attempted no; missed reviewed yes.
+- `212111-fix-windows-desktop-shell-ux-so-the-packaged-tamagotchi-does-not-open-a-console-`: mixed; findings 9; false positives 5; fixture needed yes; repair attempted no; missed reviewed yes.
+- `213039-clarify-fresh-egg-clock-setup-so-users-understand-that-hatching-starts-only-afte`: mixed; findings 8; false positives 6; fixture needed yes; repair attempted no; missed reviewed yes.
+- `213947-fix-tamagotchi-dragging-so-the-windows-app-can-move-freely-instead-of-staying-ce`: mixed; findings 7; false positives 6; fixture needed yes; repair attempted no; missed reviewed yes.
+- `215133-remove-the-remaining-gray-visual-background-behind-the-tamagotchi-and-make-the-e`: mixed; findings 6; false positives 6; fixture needed yes; repair attempted no; missed reviewed yes.
+- `220808-use-the-existing-web-favicon-as-the-windows-desktop-application-icon-for-the-tau`: missed; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `221654-polish-the-tamagotchi-shell-ui-by-making-the-body-more-og-egg-oval-shaped-improv`: missed; findings 0; false positives 0; fixture needed no; repair attempted no; missed reviewed yes.
+- `230235-add-native-windows-notifications-for-attention-calls-improve-the-poop-sprite-mak`: mixed; findings 26; false positives 2; fixture needed yes; repair attempted yes; missed reviewed yes.
+- `230837-add-native-windows-notifications-for-attention-calls-improve-the-poop-sprite-mak`: mixed; findings 18; false positives 1; fixture needed yes; repair attempted yes; missed reviewed yes.
+- `104533-add-offline-sleep-grace-so-a-clean-pet-with-lights-off-can-survive-a-normal-over`: false-positive; findings 8; false positives 2; fixture needed yes; repair attempted no; missed reviewed yes.
+- `105153-document-overnight-care-behavior-so-users-know-a-clean-sleeping-pet-with-lights-`: false-positive; findings 1; false positives 1; fixture needed yes; repair attempted no; missed reviewed yes.
+- `105752-fix-the-shell-context-menu-so-it-opens-at-the-exact-right-click-position-and-rem`: false-positive; findings 3; false positives 3; fixture needed yes; repair attempted no; missed reviewed yes.

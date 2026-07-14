@@ -36,17 +36,18 @@ docs, and fixtures so package-level claims are auditable without copying every r
 
 ## Core Evidence Documents
 
-| Document                                              | Purpose                                                                    |
-| ----------------------------------------------------- | -------------------------------------------------------------------------- |
-| `docs/dogfood-evidence-summary.md`                    | Generated aggregate metrics across all labeled project reports             |
-| `docs/dogfood-ft-2.6.0-evidence-analysis.md`          | Focused before/after analysis for the FT 2.6.0 calibration replay          |
-| `docs/dogfood-diegolopes-ft-2026-06-30-analysis.md`   | Fresh static Astro site evidence and expected-companion calibration target |
-| `docs/dogfood-critical-components-2.10.0-analysis.md` | QR Code and Context Menu 2.10.0 evidence, decisions, and regressions       |
-| `docs/dogfood-evidence-plan.md`                       | Evidence strategy, labeling protocol, and repair-loop rubric               |
-| `docs/dogfood-mv-ft-2026-06-19.md`                    | Historical manual dogfood report                                           |
-| `docs/dogfood-ky-2026-06-18.md`                       | Historical public-repo dogfood report                                      |
-| `docs/evaluation-strategy.md`                         | Fixture evaluation strategy and precision/recall reporting                 |
-| `docs/detector-quality.md`                            | Detector boundaries, known blind spots, and fixture coverage expectations  |
+| Document                                                | Purpose                                                                    |
+| ------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `docs/dogfood-evidence-summary.md`                      | Generated aggregate metrics across all labeled project reports             |
+| `docs/dogfood-ft-2.6.0-evidence-analysis.md`            | Focused before/after analysis for the FT 2.6.0 calibration replay          |
+| `docs/dogfood-diegolopes-ft-2026-06-30-analysis.md`     | Fresh static Astro site evidence and expected-companion calibration target |
+| `docs/dogfood-critical-components-2.10.0-analysis.md`   | QR Code and Context Menu 2.10.0 evidence, decisions, and regressions       |
+| `docs/dogfood-multi-repo-2.10.0-2026-07-14-analysis.md` | 53-run FT, Diego Lopes, and Tamagotchi companion calibration batch         |
+| `docs/dogfood-evidence-plan.md`                         | Evidence strategy, labeling protocol, and repair-loop rubric               |
+| `docs/dogfood-mv-ft-2026-06-19.md`                      | Historical manual dogfood report                                           |
+| `docs/dogfood-ky-2026-06-18.md`                         | Historical public-repo dogfood report                                      |
+| `docs/evaluation-strategy.md`                           | Fixture evaluation strategy and precision/recall reporting                 |
+| `docs/detector-quality.md`                              | Detector boundaries, known blind spots, and fixture coverage expectations  |
 
 ## Regression Fixtures
 

@@ -12,18 +12,6 @@ export const frameworkPacks: FrameworkPack[] = [
         whenChanged: "src/**/*.tsx",
         expectAny: ["src/**/*.test.tsx", "src/**/*.spec.tsx"],
         reason: "React component changes often need matching component tests."
-      },
-      {
-        id: "react-component-story",
-        whenChanged: "src/**/*.tsx",
-        expectAny: ["src/**/*.stories.tsx"],
-        reason: "React component changes may need Storybook coverage."
-      },
-      {
-        id: "react-component-style",
-        whenChanged: "src/**/*.tsx",
-        expectAny: ["src/**/*.module.css", "src/**/*.module.scss"],
-        reason: "React component changes often have colocated module styles."
       }
     ]
   },

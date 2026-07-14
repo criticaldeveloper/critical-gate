@@ -83,10 +83,28 @@ index 57b22a0..cb3e0f1 100644
         id: "expected-companions:framework:react-component-test:src/components/Button.tsx",
         title: "Expected framework companion missing",
         message: "src/components/Button.tsx changed without an expected React support file."
-      }),
-      expect.objectContaining({
-        id: "expected-companions:framework:react-component-story:src/components/Button.tsx"
       })
+    ]);
+  });
+
+  it("requires stories only when the Storybook pack is active", () => {
+    const diff = parse(`diff --git a/src/components/Button.tsx b/src/components/Button.tsx
+index 57b22a0..cb3e0f1 100644
+--- a/src/components/Button.tsx
++++ b/src/components/Button.tsx
+@@ -1 +1,2 @@
++export function Button() { return <button />; }
+`);
+
+    const findings = expectedCompanionsDetector.run({
+      task: { source: "cli", text: "Update Button component" },
+      diff,
+      context: { frameworkPacks: ["react", "storybook"] }
+    });
+
+    expect(findings.map((finding) => finding.id)).toEqual([
+      "expected-companions:framework:react-component-test:src/components/Button.tsx",
+      "expected-companions:framework:storybook-component-story:src/components/Button.tsx"
     ]);
   });
 
