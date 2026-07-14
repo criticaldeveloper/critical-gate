@@ -8,7 +8,7 @@ declares a stable public contract.
 
 ## Current Release Stage
 
-The current target is `2.10.0`.
+The current target is `2.10.1`.
 
 This means:
 
@@ -147,6 +147,17 @@ product boundary:
   this release does not present heuristic scores as correctness probabilities.
 - The release remains scoped to TS/JS diff integrity, CLI/GitHub integration, and the existing VS
   Code analyzer surface.
+
+### 2.10.1 Checkpoint
+
+- No repo-wide LLM review, whole-repository model input, or model-first detector was added.
+- No automatic code rewrite or evidence-free repair behavior was added.
+- No generic review-comment detector was introduced or promoted.
+- Companion calibration removes evidence-backed false-positive classes while retaining typed
+  source/test and repository-convention evidence.
+- Task-contract package authority and companion filtering remain deterministic, diff-aware, and
+  covered by focused tests and dogfood-derived fixtures.
+- No public CLI, JSON, SARIF, configuration, or extension contract was removed or changed.
 
 ## Tagging
 

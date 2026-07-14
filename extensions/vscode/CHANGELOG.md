@@ -2,6 +2,14 @@
 
 This extension follows the project release policy in `../../docs/versioning-policy.md`.
 
+## 2.10.1 - 2026-07-14
+
+Patch release aligned with Critical Gate 2.10.1.
+
+- Bundle task-contract package-ownership authority and historical companion precision fixes.
+- Require typed historical companion relationships and exclude workflow planning/evidence paths.
+- Keep React companion inference limited to source/test coverage unless Storybook is active.
+
 ## 2.10.0 - 2026-07-12
 
 Minor release aligned with Critical Gate 2.10.0.

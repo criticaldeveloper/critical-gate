@@ -6,12 +6,22 @@ This project follows the versioning policy in `docs/versioning-policy.md`.
 
 ## Unreleased
 
+## 2.10.1 - 2026-07-14
+
+### Fixed
+
+- Respect explicitly allowed task-contract paths before package-ownership scope inference.
+- Stop treating Critical Gate dogfood journals, roadmap files, plans, and backlogs as historical
+  implementation companions.
+- Require typed normal relationships before promoting Git co-change history into companion
+  findings, preventing arbitrary file correlations from becoming repair requirements.
+- Require the Storybook framework pack before suggesting story companions, and stop inferring CSS
+  Modules from React alone while retaining useful React source/test checks.
+
 ### Changed
 
-- Respect explicitly allowed task-contract paths before package-ownership scope inference, and stop
-  treating Critical Gate dogfood journals as historical implementation companions.
-- Add two critical-components 2.10.0 false-positive regression fixtures and monorepo context support
-  to the evaluation runner.
+- Add three dogfood-derived false-positive regression fixtures, focused multi-repository evidence
+  analysis, and monorepo context support to the evaluation runner.
 
 ## 2.10.0 - 2026-07-12
 
